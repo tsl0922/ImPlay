@@ -77,12 +77,15 @@ void Window::redraw() {
   render();
 }
 
-void Window::show() {
-  glfwShowWindow(window);
-}
+void Window::show() { glfwShowWindow(window); }
 
 void Window::contextMenu() {
-  if (ImGui::BeginPopupContextVoid("Context Menu")) {
+  if (ImGui::IsMouseReleased(ImGuiMouseButton_Right) &&
+      !ImGui::IsWindowHovered(ImGuiHoveredFlags_AnyWindow) &&
+      ImGui::GetTopMostPopupModal() == nullptr)
+    ImGui::OpenPopup("Context Menu");
+
+  if (ImGui::BeginPopup("Context Menu", ImGuiWindowFlags_NoMove)) {
     if (ImGui::MenuItem(paused ? ICON_FA_PLAY " Play" : ICON_FA_PAUSE " Pause",
                         "Space", nullptr, loaded))
       player->command("cycle pause");
