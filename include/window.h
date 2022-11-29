@@ -27,8 +27,10 @@ class Window {
 
   void openFile();
   void loadSub();
-  void contextMenu();
   void show();
+
+  void draw();
+  void drawContextMenu();
 
   void initPlayer();
   void initGLFW();

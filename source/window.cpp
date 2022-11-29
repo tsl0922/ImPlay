@@ -47,9 +47,7 @@ void Window::render() {
   ImGui_ImplGlfw_NewFrame();
   ImGui::NewFrame();
 
-  contextMenu();
-
-  if (demo) ImGui::ShowDemoWindow(&demo);
+  draw();
 
   ImGui::Render();
 
@@ -79,7 +77,13 @@ void Window::redraw() {
 
 void Window::show() { glfwShowWindow(window); }
 
-void Window::contextMenu() {
+void Window::draw() {
+  if (demo) ImGui::ShowDemoWindow(&demo);
+
+  drawContextMenu();
+}
+
+void Window::drawContextMenu() {
   if (ImGui::IsMouseReleased(ImGuiMouseButton_Right) &&
       !ImGui::IsWindowHovered(ImGuiHoveredFlags_AnyWindow) &&
       ImGui::GetTopMostPopupModal() == nullptr)
