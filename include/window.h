@@ -1,5 +1,6 @@
 #pragma once
 #include <GLFW/glfw3.h>
+#include <imgui_lua.h>
 #include <string>
 #include <vector>
 #include <array>
@@ -42,5 +43,7 @@ class Window {
   double lastRenderAt = 0;
   double lastMousePressAt = 0;
   bool wantRender = true;
+
+  lua_State *L;
 };
 }  // namespace ImPlay

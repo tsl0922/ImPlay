@@ -98,6 +98,9 @@ void Window::render() {
   ImGui::NewFrame();
 
   player->draw();
+
+  luaL_dostring(L, "imgui.Text('Hello, world!')");
+  
   ImGui::Render();
 
   glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
@@ -261,6 +264,13 @@ void Window::initImGui() {
   ImGui_ImplOpenGL3_Init("#version 130");
 #endif
   glfwMakeContextCurrent(nullptr);
+
+  if (!(L = luaL_newstate())) {
+    std::cout << "Failed to create Lua state!" << std::endl;
+    std::abort();
+  }
+  luaL_openlibs(L);
+  LoadImguiBindings(L);
 }
 
 void Window::exitGLFW() {
@@ -269,6 +279,7 @@ void Window::exitGLFW() {
 }
 
 void Window::exitImGui() {
+  lua_close(L);
   glfwMakeContextCurrent(window);
   ImGui_ImplOpenGL3_Shutdown();
   ImGui_ImplGlfw_Shutdown();
