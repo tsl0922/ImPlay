@@ -184,13 +184,13 @@ void Window::drawContextMenu() {
         player->command("screenshot");
       if (ImGui::MenuItem(ICON_FA_BORDER_NONE " Window Border"))
         player->command("cycle border");
-      if (ImGui::MenuItem(ICON_FA_INFO " Media Info", "i"))
+      if (ImGui::MenuItem(ICON_FA_INFO_CIRCLE " Media Info", "i"))
         player->command("script-binding stats/display-stats");
       if (ImGui::MenuItem(ICON_FA_LINK " Show Keybindings"))
         player->command("script-binding stats/display-page-4");
-      if (ImGui::MenuItem(ICON_FA_INFO_CIRCLE " OSC visibility", "DEL"))
+      if (ImGui::MenuItem("  OSC visibility", "DEL"))
         player->command("script-binding osc/visibility");
-      if (ImGui::MenuItem(ICON_FA_TERMINAL " Script Console", "`"))
+      if (ImGui::MenuItem("  Script Console", "`"))
         player->command("script-binding console/enable");
       if (ImGui::BeginMenu("  ImGui Theme")) {
         if (ImGui::MenuItem("  Dark", nullptr, theme == Theme::DARK))
