@@ -31,7 +31,8 @@ Window::~Window() {
 
 void Window::loop() {
   while (!glfwWindowShouldClose(window)) {
-    if (!glfwGetWindowAttrib(window, GLFW_VISIBLE))
+    if (!glfwGetWindowAttrib(window, GLFW_VISIBLE) ||
+        glfwGetWindowAttrib(window, GLFW_ICONIFIED))
       glfwWaitEvents();
     else
       glfwPollEvents();
