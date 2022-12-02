@@ -51,8 +51,6 @@ void Player::initMpv() {
   mpv_set_option_string(mpv, "force-window", "yes");
   mpv_set_option_string(mpv, "input-default-bindings", "yes");
   mpv_set_option_string(mpv, "input-vo-keyboard", "yes");
-  mpv_set_option_string(mpv, "terminal", "yes");
-  mpv_set_option_string(mpv, "msg-level", "all=v");
 
   if (mpv_initialize(mpv) < 0)
     throw std::runtime_error("could not initialize mpv context");
