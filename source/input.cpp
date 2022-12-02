@@ -12,8 +12,7 @@
 
 // https://www.glfw.org/docs/latest/input_guide.html
 // https://mpv.io/manual/stable/#input-conf-syntax
-namespace mpv {
-namespace input {
+namespace mpv::input {
 static const std::map<int, std::string> key_names = {
     {GLFW_KEY_SPACE, "SPACE"},
     {GLFW_KEY_APOSTROPHE, "'"},
@@ -172,6 +171,8 @@ static void translate_mod(std::vector<std::string>& keys, int mods) {
   if (mods & GLFW_MOD_SUPER) keys.push_back("Meta");
 }
 
+void fb_size_cb(GLFWwindow* window, int w, int h) { glViewport(0, 0, w, h); }
+
 void win_pos_cb(GLFWwindow* window, int x, int y) {
   auto win = static_cast<Window*>(glfwGetWindowUserPointer(window));
   win->redraw();
@@ -266,5 +267,4 @@ void drop_cb(GLFWwindow* window, int count, const char* paths[]) {
     win->player->command(cmd);
   }
 }
-}  // namespace input
-}  // namespace mpv
+}  // namespace mpv::input

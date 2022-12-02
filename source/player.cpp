@@ -13,19 +13,21 @@ void Player::command(std::string cmd) { mpv_command_string(mpv, cmd.c_str()); }
 void Player::command(const char **args) { mpv_command(mpv, args); }
 
 void Player::pollEvent() {
-  mpv_event *event = mpv_wait_event(mpv, 0);
-  if (event->event_id == MPV_EVENT_NONE) return;
-  switch (event->event_id) {
-    case MPV_EVENT_PROPERTY_CHANGE: {
-      mpv_event_property *prop = (mpv_event_property *)event->data;
-      for (const auto &[name, format, handler] : propertyEvents)
-        if (name == prop->name && format == prop->format) handler(prop->data);
-      break;
+  while (mpv) {
+    mpv_event *event = mpv_wait_event(mpv, 0);
+    if (event->event_id == MPV_EVENT_NONE) break;
+    switch (event->event_id) {
+      case MPV_EVENT_PROPERTY_CHANGE: {
+        mpv_event_property *prop = (mpv_event_property *)event->data;
+        for (const auto &[name, format, handler] : propertyEvents)
+          if (name == prop->name && format == prop->format) handler(prop->data);
+        break;
+      }
+      default:
+        for (const auto &[event_id, handler] : events)
+          if (event_id == event->event_id) handler(event->data);
+        break;
     }
-    default:
-      for (const auto &[event_id, handler] : events)
-        if (event_id == event->event_id) handler(event->data);
-      break;
   }
 }
 

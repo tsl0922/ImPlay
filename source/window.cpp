@@ -51,13 +51,11 @@ void Window::render() {
 
   ImGui::Render();
 
-  int w, h;
-  glfwGetFramebufferSize(window, &w, &h);
-  glViewport(0, 0, w, h);
   glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
   glClear(GL_COLOR_BUFFER_BIT);
 
-  player->render(w, h);
+  ImGuiViewport* viewport = ImGui::GetMainViewport();
+  player->render(viewport->WorkSize.x, viewport->WorkSize.y);
   ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
   if (ImGui::GetIO().ConfigFlags & ImGuiConfigFlags_ViewportsEnable) {
@@ -361,6 +359,7 @@ void Window::initGLFW() {
   glfwSetWindowPos(window, (mode->width - width) / 2,
                    (mode->height - height) / 2);
 
+  glfwSetFramebufferSizeCallback(window, input::fb_size_cb);
   glfwSetWindowPosCallback(window, input::win_pos_cb);
   glfwSetWindowSizeCallback(window, input::win_size_cb);
   glfwSetCursorPosCallback(window, input::cursor_pos_cb);
