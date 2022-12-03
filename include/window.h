@@ -10,41 +10,25 @@
 #define WIDTH 1280
 #define HEIGHT 720
 
-namespace mpv {
+namespace ImPlay {
 class Window {
  public:
   Window();
   ~Window();
 
   void loop();
-  void render();
-  void redraw();
-
-  Player *player;
 
  private:
-  enum class Theme { DARK, LIGHT, CLASSIC };
-
-  void openFile();
-  void loadSub();
+  void render();
+  void redraw();
   void show();
 
-  void draw();
-  void drawContextMenu();
-
-  void initPlayer();
   void initGLFW();
   void initImGui();
-
   void exitGLFW();
   void exitImGui();
 
-  void setTheme(Theme theme);
-
-  GLFWwindow *window = nullptr;
-  Theme theme = Theme::DARK;
-  bool paused = true;
-  bool loaded = false;
-  bool demo = false;
+  GLFWwindow *window;
+  Player *player;
 };
-}  // namespace mpv
+}  // namespace ImPlay
