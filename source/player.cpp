@@ -164,10 +164,30 @@ void Player::drawContextMenu() {
     }
     if (ImGui::BeginMenuEx("Video", ICON_FA_VIDEO)) {
       drawTracklistMenu("video", "vid");
-      if (ImGui::MenuItemEx("Rotate", ICON_FA_SPINNER)) mpv->command("cycle-values video-rotate 0 90 180 270");
-      if (ImGui::MenuItemEx("Zoom In", ICON_FA_MINUS_CIRCLE, "Alt +")) mpv->command("add video-zoom  -0.1");
-      if (ImGui::MenuItemEx("Zoom Out", ICON_FA_PLUS_CIRCLE, "Alt -")) mpv->command("add video-zoom  0.1");
-      if (ImGui::MenuItem("HW Decoding", "Ctrl h")) mpv->command("cycle-values hwdec auto no");
+      if (ImGui::BeginMenuEx("Rotate", ICON_FA_SPINNER)) {
+        if (ImGui::MenuItem("0")) mpv->command("set video-rotate 0");
+        if (ImGui::MenuItem("90")) mpv->command("set video-rotate 90");
+        if (ImGui::MenuItem("180")) mpv->command("set video-rotate 180");
+        if (ImGui::MenuItem("270")) mpv->command("set video-rotate 270");
+        ImGui::EndMenu();
+      }
+      if (ImGui::BeginMenuEx("Zoom", ICON_FA_GLASSES)) {
+        if (ImGui::MenuItemEx("Zoom In", ICON_FA_MINUS_CIRCLE, "Alt +")) mpv->command("add video-zoom  -0.1");
+        if (ImGui::MenuItemEx("Zoom Out", ICON_FA_PLUS_CIRCLE, "Alt -")) mpv->command("add video-zoom  0.1");
+        ImGui::Separator();
+        if (ImGui::MenuItem("1:4 Quarter")) mpv->command("set video-zoom -2");
+        if (ImGui::MenuItem("1:2 Half")) mpv->command("set video-zoom -1");
+        if (ImGui::MenuItem("1:1 Original")) mpv->command("set video-zoom 0");
+        if (ImGui::MenuItem("2:1 Double")) mpv->command("set video-zoom 1");
+        ImGui::EndMenu();
+      }
+      if (ImGui::BeginMenu("Aspect")) {
+        if (ImGui::MenuItem("16:9")) mpv->command("set video-aspect 16:9");
+        if (ImGui::MenuItem("4:3")) mpv->command("set video-aspect 4:3");
+        if (ImGui::MenuItem("1:1")) mpv->command("set video-aspect 1:1");
+        if (ImGui::MenuItem("Disable")) mpv->command("set video-aspect no");
+        ImGui::EndMenu();
+      }
       if (ImGui::BeginMenu("Effect")) {
         if (ImGui::MenuItem("Increase Contrast", "2")) mpv->command("add contrast 1");
         if (ImGui::MenuItem("Decrease Contrast", "1")) mpv->command("add contrast -1");
@@ -181,6 +201,7 @@ void Player::drawContextMenu() {
         if (ImGui::MenuItem("Decrease Hue")) mpv->command("add hue -1");
         ImGui::EndMenu();
       }
+      if (ImGui::MenuItem("HW Decoding", "Ctrl h")) mpv->command("cycle-values hwdec auto no");
       ImGui::EndMenu();
     }
     if (ImGui::BeginMenuEx("Subtitle", ICON_FA_FONT)) {
