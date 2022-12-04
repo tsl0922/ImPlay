@@ -2,6 +2,7 @@
 #include <imgui_internal.h>
 #include <nfd.hpp>
 #include <algorithm>
+#include <iostream>
 #include <cstring>
 #include "player.h"
 #include "fontawesome.h"
@@ -373,6 +374,16 @@ void Player::drawContextMenu() {
       if (ImGui::MenuItem("Script Console", "`")) mpv->command("script-binding console/enable");
       ImGui::EndMenu();
     }
+    if (ImGui::BeginMenuEx("Profiles", ICON_FA_USER)) {
+      for (auto& profile : profilelist) {
+        const char* name = profile.c_str();
+        if (ImGui::MenuItem(name)) {
+          std::string cmd = "show-text " + profile + "; apply-profile " + profile;
+          mpv->command(cmd.c_str());
+        }
+      }
+      ImGui::EndMenu();
+    }
     if (ImGui::BeginMenuEx("Theme", ICON_FA_PALETTE)) {
       if (ImGui::MenuItem("Dark", nullptr, theme == Theme::DARK)) setTheme(Theme::DARK);
       if (ImGui::MenuItem("Light", nullptr, theme == Theme::LIGHT)) setTheme(Theme::LIGHT);
@@ -519,6 +530,11 @@ void Player::initMpv() {
   mpv->observeProperty("chapter", MPV_FORMAT_INT64, [=, this](void* data) {
     int64_t ImDrawIdx = static_cast<int64_t>(*(int64_t*)data);
     for (auto& chapter : chapterlist) chapter.selected = chapter.id == ImDrawIdx;
+  });
+
+  mpv->observeProperty("profile-list", MPV_FORMAT_STRING, [=, this](void* data) {
+    char* payload = static_cast<char*>(*(char**)data);
+    profilelist = mpv->toProfilelist(payload);
   });
 
   mpv->command("keybind MBTN_RIGHT ignore");

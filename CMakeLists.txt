@@ -7,6 +7,7 @@ find_package(PkgConfig REQUIRED)
 pkg_search_module(MPV REQUIRED mpv)
 
 add_subdirectory(third_party/imgui)
+add_subdirectory(third_party/json)
 add_subdirectory(third_party/nativefiledialog)
 
 add_executable(ImPlay
@@ -17,7 +18,7 @@ add_executable(ImPlay
 )
 target_include_directories(ImPlay PRIVATE include ${MPV_INCLUDE_DIRS})
 target_link_directories(ImPlay PRIVATE ${MPV_LIBRARY_DIRS})
-target_link_libraries(ImPlay PRIVATE imgui nfd ${MPV_LIBRARIES})
+target_link_libraries(ImPlay PRIVATE imgui json nfd ${MPV_LIBRARIES})
 if(MINGW AND CMAKE_BUILD_TYPE STREQUAL "Release")
     target_link_options(ImPlay PRIVATE -mwindows)
 endif()

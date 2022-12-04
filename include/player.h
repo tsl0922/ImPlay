@@ -41,7 +41,7 @@ class Player {
   void showAbout();
   void showCommandPalette();
   std::vector<CommandMatch> getCommandMatches(const std::string &command);
-  
+
   void drawTracklistMenu(const char *type, const char *prop);
   void drawChapterlistMenu();
   void drawPlaylistMenu();
@@ -56,9 +56,12 @@ class Player {
   const char *title;
   Theme theme;
   Mpv *mpv;
+
   std::vector<Mpv::TrackItem> tracklist;
   std::vector<Mpv::PlayItem> playlist;
   std::vector<Mpv::ChapterItem> chapterlist;
+  std::vector<std::string> profilelist;
+  
   CommandPalette commandPalette;
   bool paused = true;
   bool loaded = false;

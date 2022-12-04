@@ -42,6 +42,7 @@ class Mpv {
   std::vector<TrackItem> toTracklist(mpv_node *node);
   std::vector<PlayItem> toPlaylist(mpv_node *node);
   std::vector<ChapterItem> toChapterlist(mpv_node *node);
+  std::vector<std::string> toProfilelist(const char *payload);
 
   int command(const char *args) { return mpv_command_string(mpv, args); }
   int command(const char *args[]) { return mpv_command(mpv, args); }

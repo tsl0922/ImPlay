@@ -1,5 +1,6 @@
 #include "mpv.h"
 #include <GLFW/glfw3.h>
+#include <nlohmann/json.hpp>
 #include <cassert>
 #include <stdexcept>
 #include <string>
@@ -82,6 +83,18 @@ std::vector<Mpv::ChapterItem> Mpv::toChapterlist(mpv_node *node) {
     if (t.time != 0) chapters.push_back(t);
   }
   return chapters;
+}
+
+std::vector<std::string> Mpv::toProfilelist(const char *payload) {
+  using json = nlohmann::json;
+  std::vector<std::string> profiles;
+  auto j = json::parse(payload);
+  for (auto &elm : j) {
+    auto name = elm["name"].get_ref<const std::string &>();
+    if (name != "builtin-pseudo-gui" && name != "encoding" && name != "libmpv" && name != "pseudo-gui")
+      profiles.push_back(name);
+  }
+  return profiles;
 }
 
 void Mpv::pollEvent() {
