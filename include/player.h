@@ -24,6 +24,7 @@ class Player {
  private:
   enum class Theme { DARK, LIGHT, CLASSIC };
 
+  void showAboutModal();
   void drawTracklistMenu(const char *type, const char *prop);
   void drawPlaylistMenu();
   void drawContextMenu();
@@ -39,6 +40,7 @@ class Player {
   std::vector<Mpv::PlayItem> playlist;
   bool paused = true;
   bool loaded = false;
+  bool about = false;
   bool demo = false;
 
   template <typename Range, typename Value = typename Range::value_type>

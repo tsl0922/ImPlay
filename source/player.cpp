@@ -23,6 +23,7 @@ Player::~Player() {
 
 void Player::draw() {
   if (demo) ImGui::ShowDemoWindow(&demo);
+  if (about) showAboutModal();
   drawContextMenu();
 }
 
@@ -99,6 +100,17 @@ void Player::setDrop(int count, const char** paths) {
   }
 }
 
+void Player::showAboutModal() {
+  if (about) ImGui::OpenPopup("About");
+  ImGui::SetNextWindowSize(ImVec2(600, 200), ImGuiCond_Always);
+  if (ImGui::BeginPopupModal("About", &about, ImGuiWindowFlags_NoResize)) {
+    ImGui::Text("ImPlay");
+    ImGui::Separator();
+    ImGui::TextWrapped("\nImPlay is a cross-platform desktop media player.");
+    ImGui::EndPopup();
+  }
+}
+
 void Player::drawTracklistMenu(const char* type, const char* prop) {
   if (tracklist.empty()) return;
   if (ImGui::BeginMenuEx("Tracks", ICON_FA_LIST)) {
@@ -157,7 +169,9 @@ void Player::drawContextMenu() {
       drawTracklistMenu("audio", "aid");
       if (ImGui::MenuItemEx("Increase Volume", ICON_FA_VOLUME_UP, "0")) mpv->command("add volume 2");
       if (ImGui::MenuItemEx("Decrease Volume", ICON_FA_VOLUME_DOWN, "9")) mpv->command("add volume -2");
+      ImGui::Separator();
       if (ImGui::MenuItemEx("Mute", ICON_FA_VOLUME_MUTE, "m")) mpv->command("cycle mute");
+      ImGui::Separator();
       if (ImGui::MenuItem("Increase Delay", "Ctrl +")) mpv->command("add audio-delay 0.1");
       if (ImGui::MenuItem("Decrease Delay", "Ctrl -")) mpv->command("add audio-delay -0.1");
       ImGui::EndMenu();
@@ -191,22 +205,28 @@ void Player::drawContextMenu() {
       if (ImGui::BeginMenu("Effect")) {
         if (ImGui::MenuItem("Increase Contrast", "2")) mpv->command("add contrast 1");
         if (ImGui::MenuItem("Decrease Contrast", "1")) mpv->command("add contrast -1");
+        ImGui::Separator();
         if (ImGui::MenuItem("Increase Brightness", "4")) mpv->command("add brightness 1");
         if (ImGui::MenuItem("Decrease Brightness", "3")) mpv->command("add brightness -1");
+        ImGui::Separator();
         if (ImGui::MenuItem("Increase Gamma", "6")) mpv->command("add gamma 1");
         if (ImGui::MenuItem("Decrease Gamma", "5")) mpv->command("add gamma -1");
+        ImGui::Separator();
         if (ImGui::MenuItem("Increase Saturation", "8")) mpv->command("add saturation 1");
         if (ImGui::MenuItem("Decrease Saturation", "7")) mpv->command("add saturation -1");
+        ImGui::Separator();
         if (ImGui::MenuItem("Increase Hue")) mpv->command("add hue 1");
         if (ImGui::MenuItem("Decrease Hue")) mpv->command("add hue -1");
         ImGui::EndMenu();
       }
+      ImGui::Separator();
       if (ImGui::MenuItem("HW Decoding", "Ctrl h")) mpv->command("cycle-values hwdec auto no");
       ImGui::EndMenu();
     }
     if (ImGui::BeginMenuEx("Subtitle", ICON_FA_FONT)) {
       drawTracklistMenu("sub", "sid");
       if (ImGui::MenuItemEx("Load..", ICON_FA_FOLDER_OPEN)) loadSub();
+      ImGui::Separator();
       if (ImGui::MenuItem("Increase Delay", "z")) mpv->command("add sub-delay 0.1");
       if (ImGui::MenuItem("Decrease Delay", "Z")) mpv->command("add sub-delay -0.1");
       ImGui::EndMenu();
@@ -221,16 +241,20 @@ void Player::drawContextMenu() {
       if (ImGui::MenuItemEx("Screenshot", ICON_FA_FILE_IMAGE, "s")) mpv->command("screenshot");
       if (ImGui::MenuItemEx("Window Border", ICON_FA_BORDER_NONE)) mpv->command("cycle border");
       if (ImGui::MenuItemEx("Media Info", ICON_FA_INFO_CIRCLE, "i")) mpv->command("script-binding stats/display-stats");
-      if (ImGui::MenuItemEx("Show Keybindings", ICON_FA_LINK)) mpv->command("script-binding stats/display-page-4");
       if (ImGui::MenuItem("OSC visibility", "DEL")) mpv->command("script-binding osc/visibility");
       if (ImGui::MenuItem("Script Console", "`")) mpv->command("script-binding console/enable");
-      ImGui::MenuItem("ImGui Demo", nullptr, &demo);
       ImGui::EndMenu();
     }
     if (ImGui::BeginMenuEx("Theme", ICON_FA_PALETTE)) {
       if (ImGui::MenuItem("Dark", nullptr, theme == Theme::DARK)) setTheme(Theme::DARK);
       if (ImGui::MenuItem("Light", nullptr, theme == Theme::LIGHT)) setTheme(Theme::LIGHT);
       if (ImGui::MenuItem("Classic", nullptr, theme == Theme::CLASSIC)) setTheme(Theme::CLASSIC);
+      ImGui::EndMenu();
+    }
+    if (ImGui::BeginMenuEx("Help", ICON_FA_QUESTION_CIRCLE)) {
+      if (ImGui::MenuItemEx("About", ICON_FA_INFO_CIRCLE)) about = true;
+      if (ImGui::MenuItem("Keybindings")) mpv->command("script-binding stats/display-page-4");
+      ImGui::MenuItem("ImGui Demo", nullptr, &demo);
       ImGui::EndMenu();
     }
     ImGui::Separator();
