@@ -1,6 +1,8 @@
 #include <imgui.h>
 #include <imgui_internal.h>
 #include <nfd.hpp>
+#include <algorithm>
+#include <cstring>
 #include "player.h"
 #include "fontawesome.h"
 
@@ -147,8 +149,8 @@ void Player::drawContextMenu() {
     if (ImGui::MenuItemEx("Jump Forward", ICON_FA_FORWARD, "UP", false, loaded)) mpv->command("seek 10");
     if (ImGui::MenuItemEx("Jump Backward", ICON_FA_BACKWARD, "DOWN", false, loaded)) mpv->command("seek -10");
     ImGui::Separator();
-    if (ImGui::MenuItemEx("Previous", ICON_FA_ARROW_LEFT, "<")) mpv->command("playlist-prev");
-    if (ImGui::MenuItemEx("Next", ICON_FA_ARROW_RIGHT, ">")) mpv->command("playlist-next");
+    if (ImGui::MenuItemEx("Previous", ICON_FA_ARROW_LEFT, "<", false, !playlist.empty())) mpv->command("playlist-prev");
+    if (ImGui::MenuItemEx("Next", ICON_FA_ARROW_RIGHT, ">", false, !playlist.empty())) mpv->command("playlist-next");
     ImGui::Separator();
     if (ImGui::BeginMenuEx("Audio", ICON_FA_FILE_AUDIO)) {
       drawTracklistMenu("audio", "aid");
@@ -307,6 +309,8 @@ void Player::initMpv() {
   mpv->observeProperty("playlist", MPV_FORMAT_NODE, [=, this](void* data) {
     mpv_node* node = static_cast<mpv_node*>(data);
     playlist = mpv->toPlaylist(node);
+    std::sort(playlist.begin(), playlist.end(),
+              [](const auto& a, const auto& b) { return strcmp(a.filename, b.filename) < 0; });
   });
 
   mpv->command("keybind MBTN_RIGHT ignore");
