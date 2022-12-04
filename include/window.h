@@ -6,14 +6,10 @@
 
 #include "player.h"
 
-#define TITLE "ImPlay"
-#define WIDTH 1280
-#define HEIGHT 720
-
 namespace ImPlay {
 class Window {
  public:
-  Window();
+  Window(const char *title, int width, int height);
   ~Window();
 
   void loop();
@@ -30,5 +26,7 @@ class Window {
 
   GLFWwindow *window;
   Player *player;
+  const char *title;
+  int width, height;
 };
 }  // namespace ImPlay

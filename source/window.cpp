@@ -12,7 +12,11 @@
 #include "fontawesome.h"
 
 namespace ImPlay {
-Window::Window() {
+Window::Window(const char* title, int width, int height) {
+  this->title = title;
+  this->width = width;
+  this->height = height;
+
   initGLFW();
   initImGui();
 
@@ -89,7 +93,7 @@ void Window::initGLFW() {
   glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
   glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
 
-  window = glfwCreateWindow(WIDTH, HEIGHT, TITLE, NULL, NULL);
+  window = glfwCreateWindow(width, height, title, NULL, NULL);
   if (window == nullptr) {
     std::cout << "Failed to create window!" << std::endl;
     std::abort();
@@ -99,8 +103,6 @@ void Window::initGLFW() {
   glfwMakeContextCurrent(window);
   glfwSwapInterval(1);
 
-  int width, height;
-  glfwGetWindowSize(window, &width, &height);
   GLFWmonitor* monitor = glfwGetPrimaryMonitor();
   const GLFWvidmode* mode = glfwGetVideoMode(monitor);
   glfwSetWindowPos(window, (mode->width - width) / 2, (mode->height - height) / 2);
