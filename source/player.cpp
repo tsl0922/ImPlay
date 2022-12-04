@@ -328,7 +328,8 @@ void Player::drawContextMenu() {
     if (ImGui::BeginMenuEx("Tools", ICON_FA_HAMMER)) {
       if (ImGui::MenuItemEx("Screenshot", ICON_FA_FILE_IMAGE, "s")) mpv->command("screenshot");
       if (ImGui::MenuItemEx("Window Border", ICON_FA_BORDER_NONE)) mpv->command("cycle border");
-      if (ImGui::MenuItemEx("Media Info", ICON_FA_INFO_CIRCLE, "i")) mpv->command("script-binding stats/display-stats");
+      if (ImGui::MenuItemEx("Media Info", ICON_FA_INFO_CIRCLE, "i"))
+        mpv->command("script-binding stats/display-page-1");
       if (ImGui::MenuItem("OSC visibility", "DEL")) mpv->command("script-binding osc/visibility");
       if (ImGui::MenuItem("Script Console", "`")) mpv->command("script-binding console/enable");
       ImGui::EndMenu();
