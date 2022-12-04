@@ -17,8 +17,17 @@ class Mpv {
   void pollEvent();
 
   int command(const char *args) { return mpv_command_string(mpv, args); }
-  int command(const char **args) { return mpv_command(mpv, args); }
-  int property(const char *name, mpv_format format, void *data) { return mpv_get_property(mpv, name, format, data); }
+  int command(const char *args[]) { return mpv_command(mpv, args); }
+  template <typename T>
+  T property(const char *name, mpv_format format) {
+    T data;
+    mpv_get_property(mpv, name, format, &data);
+    return data;
+  }
+  template <typename T>
+  void property(const char *name, mpv_format format, T &data) {
+    mpv_set_property(mpv, name, format, &data);
+  }
 
   void observeEvent(mpv_event_id event, const EventHandler &handler) { events.emplace_back(event, handler); }
   void observeProperty(const std::string &name, mpv_format format, const EventHandler &handler) {

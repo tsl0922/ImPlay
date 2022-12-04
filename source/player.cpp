@@ -203,8 +203,8 @@ void Player::initMpv() {
   mpv->observeEvent(MPV_EVENT_SHUTDOWN, [=, this](void* data) { glfwSetWindowShouldClose(window, true); });
 
   mpv->observeEvent(MPV_EVENT_VIDEO_RECONFIG, [=, this](void* data) {
-    int64_t w{0}, h{0};
-    if (mpv->property("dwidth", MPV_FORMAT_INT64, &w) || mpv->property("dheight", MPV_FORMAT_INT64, &h)) return;
+    auto w = mpv->property<int64_t>("dwidth", MPV_FORMAT_INT64);
+    auto h = mpv->property<int64_t>("dheight", MPV_FORMAT_INT64);
     if (w > 0 && h > 0) {
       glfwSetWindowSize(window, w, h);
       glfwSetWindowAspectRatio(window, w, h);
