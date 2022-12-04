@@ -24,6 +24,8 @@ class Player {
  private:
   enum class Theme { DARK, LIGHT, CLASSIC };
 
+  void drawTracklistMenu(const char *type, const char *prop);
+  void drawPlaylistMenu();
   void drawContextMenu();
   void openFile();
   void loadSub();
@@ -33,6 +35,8 @@ class Player {
   GLFWwindow *window;
   Theme theme;
   Mpv *mpv;
+  std::vector<Mpv::TrackItem> tracklist;
+  std::vector<Mpv::PlayItem> playlist;
   bool paused = true;
   bool loaded = false;
   bool demo = false;

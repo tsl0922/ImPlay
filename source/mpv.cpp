@@ -1,12 +1,67 @@
 #include "mpv.h"
 #include <GLFW/glfw3.h>
+#include <cassert>
 #include <stdexcept>
 #include <string>
+#include <cstring>
 
 namespace ImPlay {
 Mpv::Mpv() { init(); }
 
 Mpv::~Mpv() { exit(); }
+
+std::vector<Mpv::TrackItem> Mpv::toTracklist(mpv_node *node) {
+  std::vector<Mpv::TrackItem> tracks;
+  assert(node->format == MPV_FORMAT_NODE_ARRAY);
+  for (int i = 0; i < node->u.list->num; i++) {
+    auto track = node->u.list->values[i];
+    assert(track.format == MPV_FORMAT_NODE_MAP);
+    Mpv::TrackItem t{0};
+    for (int j = 0; j < track.u.list->num; j++) {
+      auto key = track.u.list->keys[j];
+      auto value = track.u.list->values[j];
+      if (strcmp(key, "id") == 0) {
+        t.id = value.u.int64;
+      } else if (strcmp(key, "type") == 0) {
+        t.type = value.u.string;
+      } else if (strcmp(key, "title") == 0) {
+        t.title = value.u.string;
+      } else if (strcmp(key, "lang") == 0) {
+        t.lang = value.u.string;
+      } else if (strcmp(key, "selected") == 0) {
+        t.selected = value.u.flag;
+      }
+    }
+    if (t.id != 0) tracks.push_back(t);
+  }
+  return tracks;
+}
+
+std::vector<Mpv::PlayItem> Mpv::toPlaylist(mpv_node *node) {
+  std::vector<Mpv::PlayItem> playlist;
+  for (int i = 0; i < node->u.list->num; i++) {
+    auto item = node->u.list->values[i];
+    assert(item.format == MPV_FORMAT_NODE_MAP);
+    Mpv::PlayItem t{0};
+    for (int j = 0; j < item.u.list->num; j++) {
+      auto key = item.u.list->keys[j];
+      auto value = item.u.list->values[j];
+      if (strcmp(key, "id") == 0) {
+        t.id = value.u.int64;
+      } else if (strcmp(key, "title") == 0) {
+        t.title = value.u.string;
+      } else if (strcmp(key, "filename") == 0) {
+        t.filename = value.u.string;
+      } else if (strcmp(key, "current") == 0) {
+        t.current = value.u.flag;
+      } else if (strcmp(key, "playing") == 0) {
+        t.playing = value.u.flag;
+      }
+    }
+    if (t.id != 0) playlist.push_back(t);
+  }
+  return playlist;
+}
 
 void Mpv::pollEvent() {
   while (mpv) {

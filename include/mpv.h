@@ -13,9 +13,27 @@ class Mpv {
   Mpv();
   ~Mpv();
 
+  struct TrackItem {
+    int64_t id;
+    char *type;
+    char *title;
+    char *lang;
+    bool selected;
+  };
+
+  struct PlayItem {
+    int64_t id;
+    char *title;
+    char *filename;
+    bool current;
+    bool playing;
+  };
+
   void render(int w, int h);
   void pollEvent();
 
+  std::vector<TrackItem> toTracklist(mpv_node *node);
+  std::vector<PlayItem> toPlaylist(mpv_node *node);
   int command(const char *args) { return mpv_command_string(mpv, args); }
   int command(const char *args[]) { return mpv_command(mpv, args); }
   template <typename T>

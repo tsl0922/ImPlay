@@ -97,6 +97,43 @@ void Player::setDrop(int count, const char** paths) {
   }
 }
 
+void Player::drawTracklistMenu(const char* type, const char* prop) {
+  if (tracklist.empty()) return;
+  if (ImGui::BeginMenuEx("Tracks", ICON_FA_LIST)) {
+    for (auto& track : tracklist) {
+      if (strcmp(track.type, type) == 0) {
+        std::string title;
+        if (track.title == nullptr)
+          title = "Track " + std::to_string(track.id);
+        else
+          title = track.title;
+        if (ImGui::MenuItemEx(title.c_str(), nullptr, nullptr, track.selected))
+          mpv->property(prop, MPV_FORMAT_INT64, track.id);
+      }
+    }
+    ImGui::EndMenu();
+  }
+}
+
+void Player::drawPlaylistMenu() {
+  if (playlist.empty()) return;
+  ImGui::Separator();
+  if (ImGui::BeginMenuEx("Playlist", ICON_FA_LIST)) {
+    for (auto& item : playlist) {
+      std::string title;
+      if (item.title != nullptr)
+        title = item.title;
+      else if (item.filename != nullptr)
+        title = item.filename;
+      else
+        title = "Item " + std::to_string(item.id);
+      if (ImGui::MenuItemEx(title.c_str(), nullptr, nullptr, item.current || item.playing))
+        mpv->property("playlist-pos-1", MPV_FORMAT_INT64, item.id);
+    }
+    ImGui::EndMenu();
+  }
+}
+
 void Player::drawContextMenu() {
   if (ImGui::IsMouseReleased(ImGuiMouseButton_Right) && !ImGui::IsWindowHovered(ImGuiHoveredFlags_AnyWindow) &&
       ImGui::GetTopMostPopupModal() == nullptr)
@@ -114,7 +151,7 @@ void Player::drawContextMenu() {
     if (ImGui::MenuItemEx("Next", ICON_FA_ARROW_RIGHT, ">")) mpv->command("playlist-next");
     ImGui::Separator();
     if (ImGui::BeginMenuEx("Audio", ICON_FA_FILE_AUDIO)) {
-      if (ImGui::MenuItemEx("Tracks", ICON_FA_LIST, "#", false, loaded)) mpv->command("cycle audio");
+      drawTracklistMenu("audio", "aid");
       if (ImGui::MenuItemEx("Increase Volume", ICON_FA_VOLUME_UP, "0")) mpv->command("add volume 2");
       if (ImGui::MenuItemEx("Decrease Volume", ICON_FA_VOLUME_DOWN, "9")) mpv->command("add volume -2");
       if (ImGui::MenuItemEx("Mute", ICON_FA_VOLUME_MUTE, "m")) mpv->command("cycle mute");
@@ -123,7 +160,7 @@ void Player::drawContextMenu() {
       ImGui::EndMenu();
     }
     if (ImGui::BeginMenuEx("Video", ICON_FA_VIDEO)) {
-      if (ImGui::MenuItemEx("Tracks", ICON_FA_LIST, "_", false, loaded)) mpv->command("cycle video");
+      drawTracklistMenu("video", "vid");
       if (ImGui::MenuItemEx("Rotate", ICON_FA_SPINNER)) mpv->command("cycle-values video-rotate 0 90 180 270");
       if (ImGui::MenuItemEx("Zoom In", ICON_FA_MINUS_CIRCLE, "Alt +")) mpv->command("add video-zoom  -0.1");
       if (ImGui::MenuItemEx("Zoom Out", ICON_FA_PLUS_CIRCLE, "Alt -")) mpv->command("add video-zoom  0.1");
@@ -144,15 +181,13 @@ void Player::drawContextMenu() {
       ImGui::EndMenu();
     }
     if (ImGui::BeginMenuEx("Subtitle", ICON_FA_FONT)) {
-      if (ImGui::MenuItemEx("Tracks", ICON_FA_LIST, "j", false, loaded)) mpv->command("cycle sub");
+      drawTracklistMenu("sub", "sid");
       if (ImGui::MenuItemEx("Load..", ICON_FA_FOLDER_OPEN)) loadSub();
       if (ImGui::MenuItem("Increase Delay", "z")) mpv->command("add sub-delay 0.1");
       if (ImGui::MenuItem("Decrease Delay", "Z")) mpv->command("add sub-delay -0.1");
       ImGui::EndMenu();
     }
-    ImGui::Separator();
-    if (ImGui::MenuItemEx("Playlist", ICON_FA_LIST, "F8")) mpv->command("show-text ${playlist}");
-    if (ImGui::MenuItemEx("Tracklist", ICON_FA_LIST, "F9")) mpv->command("show-text ${track-list}");
+    drawPlaylistMenu();
     ImGui::Separator();
     if (ImGui::MenuItemEx("Fullscreen", ICON_FA_EXPAND, "f")) mpv->command("cycle fullscreen");
     if (ImGui::MenuItemEx("Always Ontop", ICON_FA_ARROW_UP, "T")) mpv->command("cycle ontop");
@@ -263,6 +298,16 @@ void Player::initMpv() {
   });
 
   mpv->observeProperty("pause", MPV_FORMAT_FLAG, [=, this](void* data) { paused = static_cast<bool>(*(int*)data); });
+
+  mpv->observeProperty("track-list", MPV_FORMAT_NODE, [=, this](void* data) {
+    mpv_node* node = static_cast<mpv_node*>(data);
+    tracklist = mpv->toTracklist(node);
+  });
+
+  mpv->observeProperty("playlist", MPV_FORMAT_NODE, [=, this](void* data) {
+    mpv_node* node = static_cast<mpv_node*>(data);
+    playlist = mpv->toPlaylist(node);
+  });
 
   mpv->command("keybind MBTN_RIGHT ignore");
 }
