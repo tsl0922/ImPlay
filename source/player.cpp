@@ -7,7 +7,8 @@
 #include "fontawesome.h"
 
 namespace ImPlay {
-Player::Player() {
+Player::Player(const char* title) {
+  this->title = title;
   window = glfwGetCurrentContext();
   mpv = new Mpv();
 
@@ -395,6 +396,7 @@ void Player::initMpv() {
   mpv->observeEvent(MPV_EVENT_SHUTDOWN, [=, this](void* data) { glfwSetWindowShouldClose(window, true); });
 
   mpv->observeEvent(MPV_EVENT_VIDEO_RECONFIG, [=, this](void* data) {
+    if (!loaded) return;
     auto w = mpv->property<int64_t>("dwidth", MPV_FORMAT_INT64);
     auto h = mpv->property<int64_t>("dheight", MPV_FORMAT_INT64);
     if (w > 0 && h > 0) {
@@ -405,7 +407,10 @@ void Player::initMpv() {
 
   mpv->observeEvent(MPV_EVENT_START_FILE, [=, this](void* data) { loaded = true; });
 
-  mpv->observeEvent(MPV_EVENT_END_FILE, [=, this](void* data) { loaded = false; });
+  mpv->observeEvent(MPV_EVENT_END_FILE, [=, this](void* data) {
+    loaded = false;
+    glfwSetWindowTitle(window, title);
+  });
 
   mpv->observeProperty("media-title", MPV_FORMAT_STRING, [=, this](void* data) {
     char* title = static_cast<char*>(*(char**)data);

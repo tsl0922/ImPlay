@@ -20,7 +20,7 @@ Window::Window(const char* title, int width, int height) {
   initGLFW();
   initImGui();
 
-  player = new Player();
+  player = new Player(title);
   show();
 }
 

@@ -9,7 +9,7 @@
 namespace ImPlay {
 class Player {
  public:
-  Player();
+  Player(const char *title);
   ~Player();
 
   void draw();
@@ -53,6 +53,7 @@ class Player {
   void setTheme(Theme theme);
 
   GLFWwindow *window;
+  const char *title;
   Theme theme;
   Mpv *mpv;
   std::vector<Mpv::TrackItem> tracklist;
