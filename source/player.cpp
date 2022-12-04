@@ -109,6 +109,7 @@ void Player::drawTracklistMenu(const char* type, const char* prop) {
           title = "Track " + std::to_string(track.id);
         else
           title = track.title;
+        if (track.lang != nullptr) title += " [" + std::string(track.lang) + "]";
         if (ImGui::MenuItemEx(title.c_str(), nullptr, nullptr, track.selected))
           mpv->property(prop, MPV_FORMAT_INT64, track.id);
       }
