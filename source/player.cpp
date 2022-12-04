@@ -220,20 +220,42 @@ void Player::drawContextMenu() {
 }
 
 void Player::openFile() {
-  nfdchar_t* outPath;
-  if (NFD::OpenDialog(outPath) == NFD_OKAY) {
-    const char* cmd[] = {"loadfile", outPath, "replace", NULL};
-    mpv->command(cmd);
-    free(outPath);
+  const nfdpathset_t* outPaths;
+  nfdfilteritem_t filterItem[] = {
+      {"Videos Files", "mkv,mp4,avi,mov,flv,mpg,webm,wmv,ts,vob,264,265,asf,avc,avs,dav,h264,h265,hevc,m2t,m2ts"},
+      {"Audio Files", "mp3,flac,m4a,mka,mp2,ogg,opus,aac,ac3,dts,dtshd,dtshr,dtsma,eac3,mpa,mpc,thd,w64"},
+      {"Image Files", "jpg,bmp,png,gif,webp"},
+  };
+  if (NFD::OpenDialogMultiple(outPaths, filterItem, 3) == NFD_OKAY) {
+    nfdpathsetsize_t numPaths;
+    NFD::PathSet::Count(outPaths, numPaths);
+    for (auto i = 0; i < numPaths; i++) {
+      nfdchar_t* path;
+      NFD::PathSet::GetPath(outPaths, i, path);
+      const char* cmd[] = {"loadfile", path, i > 0 ? "append-play" : "replace", NULL};
+      mpv->command(cmd);
+      NFD::PathSet::FreePath(path);
+    }
+    NFD::PathSet::Free(outPaths);
   }
 }
 
 void Player::loadSub() {
-  nfdchar_t* outPath;
-  if (NFD::OpenDialog(outPath) == NFD_OKAY) {
-    const char* cmd[] = {"sub-add", outPath, "select", NULL};
-    mpv->command(cmd);
-    free(outPath);
+  const nfdpathset_t* outPaths;
+  nfdfilteritem_t filterItem[] = {
+      {"Subtitle Files", "srt,ass,idx,sub,sup,ttxt,txt,ssa,smi,mks"},
+  };
+  if (NFD::OpenDialogMultiple(outPaths, filterItem, 1) == NFD_OKAY) {
+    nfdpathsetsize_t numPaths;
+    NFD::PathSet::Count(outPaths, numPaths);
+    for (auto i = 0; i < numPaths; i++) {
+      nfdchar_t* path;
+      NFD::PathSet::GetPath(outPaths, i, path);
+      const char* cmd[] = {"sub-add", path, i > 0 ? "auto" : "select", NULL};
+      mpv->command(cmd);
+      NFD::PathSet::FreePath(path);
+    }
+    NFD::PathSet::Free(outPaths);
   }
 }
 
