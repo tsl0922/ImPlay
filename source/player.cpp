@@ -101,6 +101,7 @@ void Player::setKey(int key, int scancode, int action, int mods) {
 }
 
 void Player::setDrop(int count, const char** paths) {
+  std::sort(paths, paths + count, [](const auto& a, const auto& b) { return strcmp(a, b) < 0; });
   for (int i = 0; i < count; i++) {
     const char* cmd[] = {"loadfile", paths[i], i > 0 ? "append-play" : "replace", NULL};
     mpv->command(cmd);
@@ -223,6 +224,10 @@ void Player::drawPlaylistMenu() {
       mpv->command("playlist-prev");
     if (ImGui::MenuItemEx("Next", ICON_FA_ARROW_RIGHT, ">", false, playlist.size() > 1)) mpv->command("playlist-next");
     ImGui::Separator();
+    if (ImGui::MenuItem("Clear")) mpv->command("playlist-clear");
+    if (ImGui::MenuItem("Shuffle")) mpv->command("playlist-shuffle");
+    if (ImGui::MenuItem("Infinite Loop", "L")) mpv->command("cycle-values loop-file inf no");
+    ImGui::Separator();
     for (auto& item : playlist) {
       std::string title;
       if (item.title != nullptr)
@@ -268,15 +273,16 @@ void Player::drawContextMenu() {
     if (ImGui::BeginMenuEx("Video", ICON_FA_VIDEO)) {
       drawTracklistMenu("video", "vid");
       if (ImGui::BeginMenuEx("Rotate", ICON_FA_SPINNER)) {
-        if (ImGui::MenuItem("0")) mpv->command("set video-rotate 0");
-        if (ImGui::MenuItem("90")) mpv->command("set video-rotate 90");
-        if (ImGui::MenuItem("180")) mpv->command("set video-rotate 180");
-        if (ImGui::MenuItem("270")) mpv->command("set video-rotate 270");
+        if (ImGui::MenuItem("90°")) mpv->command("set video-rotate 90");
+        if (ImGui::MenuItem("180°")) mpv->command("set video-rotate 180");
+        if (ImGui::MenuItem("270°")) mpv->command("set video-rotate 270");
+        if (ImGui::MenuItem("Original")) mpv->command("set video-rotate 0");
         ImGui::EndMenu();
       }
       if (ImGui::BeginMenuEx("Zoom", ICON_FA_GLASSES)) {
         if (ImGui::MenuItemEx("Zoom In", ICON_FA_MINUS_CIRCLE, "Alt +")) mpv->command("add video-zoom  -0.1");
         if (ImGui::MenuItemEx("Zoom Out", ICON_FA_PLUS_CIRCLE, "Alt -")) mpv->command("add video-zoom  0.1");
+        if (ImGui::MenuItem("Rest", "Alt+BS")) mpv->command("set video-zoom 0");
         ImGui::Separator();
         if (ImGui::MenuItem("1:4 Quarter")) mpv->command("set video-zoom -2");
         if (ImGui::MenuItem("1:2 Half")) mpv->command("set video-zoom -1");
@@ -284,11 +290,35 @@ void Player::drawContextMenu() {
         if (ImGui::MenuItem("2:1 Double")) mpv->command("set video-zoom 1");
         ImGui::EndMenu();
       }
+      if (ImGui::BeginMenu("Move")) {
+        if (ImGui::MenuItem("Right", "Alt+left")) mpv->command("add video-pan-x 0.1");
+        if (ImGui::MenuItem("Left", "Alt+right")) mpv->command("add video-pan-x -0.1");
+        if (ImGui::MenuItem("Down", "Alt+up")) mpv->command("add video-pan-y 0.1");
+        if (ImGui::MenuItem("Up", "Alt+down")) mpv->command("add video-pan-y -0.1");
+        if (ImGui::MenuItem("Rest", "Alt+BS")) mpv->command("set video-pan-x 0 ; set video-pan-y 0");
+        ImGui::EndMenu();
+      }
+      if (ImGui::BeginMenu("Panscan")) {
+        if (ImGui::MenuItem("Increase", "W")) mpv->command("add panscan 0.1");
+        if (ImGui::MenuItem("Descrease", "w")) mpv->command("add panscan -0.1");
+        if (ImGui::MenuItem("Reset")) mpv->command("set panscan 0");
+        ImGui::EndMenu();
+      }
+      if (ImGui::BeginMenu("Speed")) {
+        if (ImGui::MenuItem("2x")) mpv->command("multiply speed 2.0");
+        if (ImGui::MenuItem("1.5x")) mpv->command("multiply speed 1.5");
+        if (ImGui::MenuItem("1.25x")) mpv->command("multiply speed 1.25");
+        if (ImGui::MenuItem("1.0x")) mpv->command("set speed 1");
+        if (ImGui::MenuItem("0.75x")) mpv->command("multiply speed 0.75");
+        if (ImGui::MenuItem("0.5x")) mpv->command("multiply speed 0.5");
+        ImGui::EndMenu();
+      }
       if (ImGui::BeginMenu("Aspect")) {
         if (ImGui::MenuItem("16:9")) mpv->command("set video-aspect 16:9");
         if (ImGui::MenuItem("4:3")) mpv->command("set video-aspect 4:3");
+        if (ImGui::MenuItem("2.35:1")) mpv->command("set video-aspect 2.35:1");
         if (ImGui::MenuItem("1:1")) mpv->command("set video-aspect 1:1");
-        if (ImGui::MenuItem("Disable")) mpv->command("set video-aspect no");
+        if (ImGui::MenuItem("Original")) mpv->command("set video-aspect -1");
         ImGui::EndMenu();
       }
       if (ImGui::BeginMenu("Effect")) {
@@ -310,14 +340,23 @@ void Player::drawContextMenu() {
       }
       ImGui::Separator();
       if (ImGui::MenuItem("HW Decoding", "Ctrl h")) mpv->command("cycle-values hwdec auto no");
+      if (ImGui::MenuItem("Toggle A-B Loop", "l")) mpv->command("ab-loop");
+      if (ImGui::MenuItem("Toggle Deinterlace", "d")) mpv->command("cycle deinterlace");
       ImGui::EndMenu();
     }
     if (ImGui::BeginMenuEx("Subtitle", ICON_FA_FONT)) {
       drawTracklistMenu("sub", "sid");
       if (ImGui::MenuItemEx("Load..", ICON_FA_FOLDER_OPEN)) loadSub();
+      if (ImGui::MenuItem("Show/Hide", "v")) mpv->command("cycle sub-visibility");
       ImGui::Separator();
       if (ImGui::MenuItem("Increase Delay", "z")) mpv->command("add sub-delay 0.1");
       if (ImGui::MenuItem("Decrease Delay", "Z")) mpv->command("add sub-delay -0.1");
+      ImGui::Separator();
+      if (ImGui::MenuItem("Move Up", "r")) mpv->command("add sub-pos -1");
+      if (ImGui::MenuItem("Move Down", "R")) mpv->command("add sub-pos +1");
+      ImGui::Separator();
+      if (ImGui::MenuItem("Larger Font", "F")) mpv->command("add sub-scale 0.1");
+      if (ImGui::MenuItem("Smaller Font", "G")) mpv->command("add sub-scale -0.1");
       ImGui::EndMenu();
     }
     ImGui::Separator();
@@ -326,11 +365,11 @@ void Player::drawContextMenu() {
     if (ImGui::MenuItemEx("Show Progress", ICON_FA_SPINNER, "o")) mpv->command("show-progress");
     ImGui::Separator();
     if (ImGui::BeginMenuEx("Tools", ICON_FA_HAMMER)) {
-      if (ImGui::MenuItemEx("Screenshot", ICON_FA_FILE_IMAGE, "s")) mpv->command("screenshot");
+      if (ImGui::MenuItemEx("Screenshot", ICON_FA_FILE_IMAGE, "s")) mpv->command("async screenshot");
       if (ImGui::MenuItemEx("Window Border", ICON_FA_BORDER_NONE)) mpv->command("cycle border");
       if (ImGui::MenuItemEx("Media Info", ICON_FA_INFO_CIRCLE, "i"))
         mpv->command("script-binding stats/display-page-1");
-      if (ImGui::MenuItem("OSC visibility", "DEL")) mpv->command("script-binding osc/visibility");
+      if (ImGui::MenuItem("Show/Hide OSC", "DEL")) mpv->command("script-binding osc/visibility");
       if (ImGui::MenuItem("Script Console", "`")) mpv->command("script-binding console/enable");
       ImGui::EndMenu();
     }
@@ -470,8 +509,6 @@ void Player::initMpv() {
   mpv->observeProperty("playlist", MPV_FORMAT_NODE, [=, this](void* data) {
     mpv_node* node = static_cast<mpv_node*>(data);
     playlist = mpv->toPlaylist(node);
-    std::sort(playlist.begin(), playlist.end(),
-              [](const auto& a, const auto& b) { return strcmp(a.filename, b.filename) < 0; });
   });
 
   mpv->observeProperty("chapter-list", MPV_FORMAT_NODE, [=, this](void* data) {
