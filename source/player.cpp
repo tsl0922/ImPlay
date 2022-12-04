@@ -23,7 +23,13 @@ Player::~Player() {
 
 void Player::draw() {
   if (demo) ImGui::ShowDemoWindow(&demo);
-  if (about) showAboutModal();
+  if (about) showAbout();
+  if (ImGui::IsKeyDown(ImGuiKey_P) && ImGui::IsKeyDown(ImGuiKey_LeftCtrl) && ImGui::IsKeyDown(ImGuiKey_LeftShift)) {
+    commandPalette.open = true;
+    commandPalette.justOpened = true;
+    ImGui::OpenPopup("Command Palette");
+  }
+  if (commandPalette.open) showCommandPalette();
   drawContextMenu();
 }
 
@@ -100,7 +106,7 @@ void Player::setDrop(int count, const char** paths) {
   }
 }
 
-void Player::showAboutModal() {
+void Player::showAbout() {
   if (about) ImGui::OpenPopup("About");
   ImGui::SetNextWindowSize(ImVec2(600, 200), ImGuiCond_Always);
   if (ImGui::BeginPopupModal("About", &about, ImGuiWindowFlags_NoResize)) {
@@ -109,6 +115,70 @@ void Player::showAboutModal() {
     ImGui::TextWrapped("\nImPlay is a cross-platform desktop media player.");
     ImGui::EndPopup();
   }
+}
+
+void Player::showCommandPalette() {
+  auto viewport = ImGui::GetMainViewport();
+  auto pos = viewport->Pos;
+  auto size = viewport->Size;
+  ImGui::SetNextWindowSize(ImVec2(650, 0.0f), ImGuiCond_Always);
+  ImGui::SetNextWindowPos(ImVec2(pos.x + size.x * 0.5F, pos.y), ImGuiCond_Always, ImVec2(0.5F, 0.0F));
+  if (ImGui::BeginPopup("Command Palette")) {
+    if (ImGui::IsKeyDown(ImGuiKey_Escape)) ImGui::CloseCurrentPopup();
+
+    if (commandPalette.justOpened) {
+      auto textState = ImGui::GetInputTextState(ImGui::GetID("##command_input"));
+      if (textState != nullptr) {
+        textState->Stb.cursor = strlen(commandPalette.buffer.data());
+      }
+      ImGui::SetKeyboardFocusHere(0);
+      commandPalette.focusInput = false;
+    }
+
+    ImGui::PushItemWidth(-1);
+    if (ImGui::InputTextWithHint(
+            "##command_input", "TIP: Press Space to select result", commandPalette.buffer.data(),
+            commandPalette.buffer.size(), ImGuiInputTextFlags_CallbackEdit | ImGuiInputTextFlags_EnterReturnsTrue,
+            [](ImGuiInputTextCallbackData* data) -> int {
+              auto p = static_cast<Player*>(data->UserData);
+              p->commandPalette.matches = p->getCommandMatches(data->Buf);
+              return 0;
+            },
+            this)) {
+      if (!commandPalette.matches.empty()) {
+        auto& [title, command] = commandPalette.matches.front();
+        mpv->command(command.c_str());
+      }
+      ImGui::CloseCurrentPopup();
+    }
+    ImGui::PopItemWidth();
+
+    if (commandPalette.justOpened) {
+      commandPalette.focusInput = true;
+      commandPalette.matches = getCommandMatches("");
+      std::memset(commandPalette.buffer.data(), 0x00, commandPalette.buffer.size());
+      commandPalette.justOpened = false;
+    }
+
+    ImGui::Separator();
+
+    for (const auto& [title, command] : commandPalette.matches) {
+      if (ImGui::Selectable(title.c_str(), false, ImGuiSelectableFlags_DontClosePopups)) mpv->command(command.c_str());
+    }
+    ImGui::EndPopup();
+  } else {
+    commandPalette.open = false;
+  }
+}
+
+std::vector<Player::CommandMatch> Player::getCommandMatches(const std::string& command) {
+  std::vector<Player::CommandMatch> matches;
+  matches.push_back({"Pause", "cycle pause"});
+  if (command.empty()) {
+    matches.push_back({"Stop", "stop"});
+    matches.push_back({"Quit", "quit"});
+  }
+  return matches;
 }
 
 void Player::drawTracklistMenu(const char* type, const char* prop) {

@@ -2,6 +2,7 @@
 #include <GLFW/glfw3.h>
 #include "mpv.h"
 #include <map>
+#include <vector>
 #include <sstream>
 #include <iterator>
 
@@ -24,7 +25,22 @@ class Player {
  private:
   enum class Theme { DARK, LIGHT, CLASSIC };
 
-  void showAboutModal();
+  struct CommandMatch {
+    std::string title;
+    std::string command;
+  };
+
+  struct CommandPalette {
+    bool open = false;
+    bool focusInput = false;
+    bool justOpened = false;
+    std::vector<char> buffer = std::vector<char>(1024, 0x00);
+    std::vector<CommandMatch> matches;
+  };
+
+  void showAbout();
+  void showCommandPalette();
+  std::vector<CommandMatch> getCommandMatches(const std::string &command);
   void drawTracklistMenu(const char *type, const char *prop);
   void drawPlaylistMenu();
   void drawContextMenu();
@@ -38,6 +54,7 @@ class Player {
   Mpv *mpv;
   std::vector<Mpv::TrackItem> tracklist;
   std::vector<Mpv::PlayItem> playlist;
+  CommandPalette commandPalette;
   bool paused = true;
   bool loaded = false;
   bool about = false;
