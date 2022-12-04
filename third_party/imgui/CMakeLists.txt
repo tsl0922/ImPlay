@@ -3,10 +3,8 @@ project(imgui)
 
 set(CMAKE_CXX_STANDARD 17)
 
-find_package(PkgConfig REQUIRED)
 find_package(Freetype REQUIRED)
 find_package(OpenGL REQUIRED)
-pkg_search_module(GLFW REQUIRED glfw3)
 
 add_library(imgui OBJECT
         source/imgui.cpp
@@ -22,5 +20,4 @@ add_library(imgui OBJECT
 )
 
 target_include_directories(imgui PUBLIC include ${FREETYPE_INCLUDE_DIRS} ${GLFW_INCLUDE_DIRS})
-target_link_directories(imgui PUBLIC ${GLFW_LIBRARY_DIRS})
-target_link_libraries(imgui PUBLIC ${FREETYPE_LIBRARIES} ${GLFW_LIBRARIES} ${OPENGL_LIBRARIES})
+target_link_libraries(imgui PUBLIC glfw ${FREETYPE_LIBRARIES} ${OPENGL_LIBRARIES})

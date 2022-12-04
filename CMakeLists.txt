@@ -18,6 +18,7 @@ else()
 endif()
 
 add_subdirectory(third_party/fmt)
+add_subdirectory(third_party/glfw)
 add_subdirectory(third_party/json)
 add_subdirectory(third_party/imgui)
 add_subdirectory(third_party/nativefiledialog)
