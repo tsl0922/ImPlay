@@ -182,8 +182,7 @@ std::vector<Player::CommandMatch> Player::getCommandMatches(const std::string& c
 }
 
 void Player::drawTracklistMenu(const char* type, const char* prop) {
-  if (tracklist.empty()) return;
-  if (ImGui::BeginMenuEx("Tracks", ICON_FA_LIST)) {
+  if (ImGui::BeginMenuEx("Tracks", ICON_FA_LIST, !tracklist.empty())) {
     for (auto& track : tracklist) {
       if (strcmp(track.type, type) == 0) {
         std::string title;
@@ -200,10 +199,29 @@ void Player::drawTracklistMenu(const char* type, const char* prop) {
   }
 }
 
+void Player::drawChapterlistMenu() {
+  if (ImGui::BeginMenuEx("Chapters", ICON_FA_LIST, !chapterlist.empty())) {
+    if (ImGui::MenuItemEx("Previous", ICON_FA_ARROW_LEFT)) mpv->command("add chapter -1");
+    if (ImGui::MenuItemEx("Next", ICON_FA_ARROW_RIGHT)) mpv->command("add chapter 1");
+    ImGui::Separator();
+    for (auto& chapter : chapterlist) {
+      std::string title = chapter.title;
+      title += " [" + std::to_string(chapter.time) + "]";
+      if (ImGui::MenuItemEx(title.c_str(), nullptr, nullptr, chapter.selected)) {
+        const char* args[] = {"seek", std::to_string(chapter.time).c_str(), "absolute", NULL};
+        mpv->command(args);
+      }
+    }
+    ImGui::EndMenu();
+  }
+}
+
 void Player::drawPlaylistMenu() {
-  if (playlist.empty()) return;
-  ImGui::Separator();
-  if (ImGui::BeginMenuEx("Playlist", ICON_FA_LIST)) {
+  if (ImGui::BeginMenuEx("Playlist", ICON_FA_LIST, !playlist.empty())) {
+    if (ImGui::MenuItemEx("Previous", ICON_FA_ARROW_LEFT, "<", false, playlist.size() > 1))
+      mpv->command("playlist-prev");
+    if (ImGui::MenuItemEx("Next", ICON_FA_ARROW_RIGHT, ">", false, playlist.size() > 1)) mpv->command("playlist-next");
+    ImGui::Separator();
     for (auto& item : playlist) {
       std::string title;
       if (item.title != nullptr)
@@ -232,8 +250,8 @@ void Player::drawContextMenu() {
     if (ImGui::MenuItemEx("Jump Forward", ICON_FA_FORWARD, "UP", false, loaded)) mpv->command("seek 10");
     if (ImGui::MenuItemEx("Jump Backward", ICON_FA_BACKWARD, "DOWN", false, loaded)) mpv->command("seek -10");
     ImGui::Separator();
-    if (ImGui::MenuItemEx("Previous", ICON_FA_ARROW_LEFT, "<", false, !playlist.empty())) mpv->command("playlist-prev");
-    if (ImGui::MenuItemEx("Next", ICON_FA_ARROW_RIGHT, ">", false, !playlist.empty())) mpv->command("playlist-next");
+    drawChapterlistMenu();
+    drawPlaylistMenu();
     ImGui::Separator();
     if (ImGui::BeginMenuEx("Audio", ICON_FA_FILE_AUDIO)) {
       drawTracklistMenu("audio", "aid");
@@ -301,7 +319,6 @@ void Player::drawContextMenu() {
       if (ImGui::MenuItem("Decrease Delay", "Z")) mpv->command("add sub-delay -0.1");
       ImGui::EndMenu();
     }
-    drawPlaylistMenu();
     ImGui::Separator();
     if (ImGui::MenuItemEx("Fullscreen", ICON_FA_EXPAND, "f")) mpv->command("cycle fullscreen");
     if (ImGui::MenuItemEx("Always Ontop", ICON_FA_ARROW_UP, "T")) mpv->command("cycle ontop");
@@ -449,6 +466,16 @@ void Player::initMpv() {
     playlist = mpv->toPlaylist(node);
     std::sort(playlist.begin(), playlist.end(),
               [](const auto& a, const auto& b) { return strcmp(a.filename, b.filename) < 0; });
+  });
+
+  mpv->observeProperty("chapter-list", MPV_FORMAT_NODE, [=, this](void* data) {
+    mpv_node* node = static_cast<mpv_node*>(data);
+    chapterlist = mpv->toChapterlist(node);
+  });
+
+  mpv->observeProperty("chapter", MPV_FORMAT_INT64, [=, this](void* data) {
+    int64_t ImDrawIdx = static_cast<int64_t>(*(int64_t*)data);
+    for (auto& chapter : chapterlist) chapter.selected = chapter.id == ImDrawIdx;
   });
 
   mpv->command("keybind MBTN_RIGHT ignore");

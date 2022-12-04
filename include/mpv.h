@@ -29,11 +29,20 @@ class Mpv {
     bool playing;
   };
 
+  struct ChapterItem {
+    int64_t id;
+    char *title;
+    double time;
+    bool selected;
+  };
+
   void render(int w, int h);
   void pollEvent();
 
   std::vector<TrackItem> toTracklist(mpv_node *node);
   std::vector<PlayItem> toPlaylist(mpv_node *node);
+  std::vector<ChapterItem> toChapterlist(mpv_node *node);
+
   int command(const char *args) { return mpv_command_string(mpv, args); }
   int command(const char *args[]) { return mpv_command(mpv, args); }
   template <typename T>

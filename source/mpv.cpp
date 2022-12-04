@@ -63,6 +63,27 @@ std::vector<Mpv::PlayItem> Mpv::toPlaylist(mpv_node *node) {
   return playlist;
 }
 
+std::vector<Mpv::ChapterItem> Mpv::toChapterlist(mpv_node *node) {
+  std::vector<Mpv::ChapterItem> chapters;
+  for (int i = 0; i < node->u.list->num; i++) {
+    auto item = node->u.list->values[i];
+    assert(item.format == MPV_FORMAT_NODE_MAP);
+    Mpv::ChapterItem t{0};
+    t.id = i;
+    for (int j = 0; j < item.u.list->num; j++) {
+      auto key = item.u.list->keys[j];
+      auto value = item.u.list->values[j];
+      if (strcmp(key, "title") == 0) {
+        t.title = value.u.string;
+      } else if (strcmp(key, "time") == 0) {
+        t.time = value.u.double_;
+      }
+    }
+    if (t.time != 0) chapters.push_back(t);
+  }
+  return chapters;
+}
+
 void Mpv::pollEvent() {
   while (mpv) {
     mpv_event *event = mpv_wait_event(mpv, 0);
