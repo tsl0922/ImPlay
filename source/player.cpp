@@ -103,80 +103,80 @@ void Player::drawContextMenu() {
     ImGui::OpenPopup("Context Menu");
 
   if (ImGui::BeginPopup("Context Menu", ImGuiWindowFlags_NoMove)) {
-    if (ImGui::MenuItem(paused ? ICON_FA_PLAY " Play" : ICON_FA_PAUSE " Pause", "Space", nullptr, loaded))
+    if (ImGui::MenuItemEx(paused ? "Play" : "Pause", paused ? ICON_FA_PLAY : ICON_FA_PAUSE, "Space", false, loaded))
       mpv->command("cycle pause");
-    if (ImGui::MenuItem(ICON_FA_STOP " Stop", nullptr, nullptr, loaded)) mpv->command("stop");
+    if (ImGui::MenuItemEx("Stop", ICON_FA_STOP, nullptr, false, loaded)) mpv->command("stop");
     ImGui::Separator();
-    if (ImGui::MenuItem(ICON_FA_FORWARD " Jump Forward", "UP", nullptr, loaded)) mpv->command("seek 10");
-    if (ImGui::MenuItem(ICON_FA_BACKWARD " Jump Backward", "DOWN", nullptr, loaded)) mpv->command("seek -10");
+    if (ImGui::MenuItemEx("Jump Forward", ICON_FA_FORWARD, "UP", false, loaded)) mpv->command("seek 10");
+    if (ImGui::MenuItemEx("Jump Backward", ICON_FA_BACKWARD, "DOWN", false, loaded)) mpv->command("seek -10");
     ImGui::Separator();
-    if (ImGui::MenuItem(ICON_FA_ARROW_LEFT " Previous", "<")) mpv->command("playlist-prev");
-    if (ImGui::MenuItem(ICON_FA_ARROW_RIGHT " Next", ">")) mpv->command("playlist-next");
+    if (ImGui::MenuItemEx("Previous", ICON_FA_ARROW_LEFT, "<")) mpv->command("playlist-prev");
+    if (ImGui::MenuItemEx("Next", ICON_FA_ARROW_RIGHT, ">")) mpv->command("playlist-next");
     ImGui::Separator();
-    if (ImGui::BeginMenu(ICON_FA_FILE_AUDIO " Audio")) {
-      if (ImGui::MenuItem(ICON_FA_LIST " Tracks", "#", nullptr, loaded)) mpv->command("cycle audio");
-      if (ImGui::MenuItem(ICON_FA_VOLUME_UP " Increase Volume", "0")) mpv->command("add volume 2");
-      if (ImGui::MenuItem(ICON_FA_VOLUME_DOWN " Decrease Volume", "9")) mpv->command("add volume -2");
-      if (ImGui::MenuItem(ICON_FA_VOLUME_MUTE " Mute", "m")) mpv->command("cycle mute");
-      if (ImGui::MenuItem("  Increase Delay", "Ctrl +")) mpv->command("add audio-delay 0.1");
-      if (ImGui::MenuItem("  Decrease Delay", "Ctrl -")) mpv->command("add audio-delay -0.1");
+    if (ImGui::BeginMenuEx("Audio", ICON_FA_FILE_AUDIO)) {
+      if (ImGui::MenuItemEx("Tracks", ICON_FA_LIST, "#", false, loaded)) mpv->command("cycle audio");
+      if (ImGui::MenuItemEx("Increase Volume", ICON_FA_VOLUME_UP, "0")) mpv->command("add volume 2");
+      if (ImGui::MenuItemEx("Decrease Volume", ICON_FA_VOLUME_DOWN, "9")) mpv->command("add volume -2");
+      if (ImGui::MenuItemEx("Mute", ICON_FA_VOLUME_MUTE, "m")) mpv->command("cycle mute");
+      if (ImGui::MenuItem("Increase Delay", "Ctrl +")) mpv->command("add audio-delay 0.1");
+      if (ImGui::MenuItem("Decrease Delay", "Ctrl -")) mpv->command("add audio-delay -0.1");
       ImGui::EndMenu();
     }
-    if (ImGui::BeginMenu(ICON_FA_VIDEO " Video")) {
-      if (ImGui::MenuItem(ICON_FA_LIST " Tracks", "_", nullptr, loaded)) mpv->command("cycle video");
-      if (ImGui::MenuItem(ICON_FA_SPINNER " Rotate")) mpv->command("cycle-values video-rotate 0 90 180 270");
-      if (ImGui::MenuItem(ICON_FA_MINUS_CIRCLE " Zoom In", "Alt +")) mpv->command("add video-zoom  -0.1");
-      if (ImGui::MenuItem(ICON_FA_PLUS_CIRCLE " Zoom Out", "Alt -")) mpv->command("add video-zoom  0.1");
-      if (ImGui::MenuItem("  HW Decoding", "Ctrl h")) mpv->command("cycle-values hwdec auto no");
-      if (ImGui::BeginMenu("  Effect")) {
-        if (ImGui::MenuItem("  Increase Contrast", "2")) mpv->command("add contrast 1");
-        if (ImGui::MenuItem("  Decrease Contrast", "1")) mpv->command("add contrast -1");
-        if (ImGui::MenuItem("  Increase Brightness", "4")) mpv->command("add brightness 1");
-        if (ImGui::MenuItem("  Decrease Brightness", "3")) mpv->command("add brightness -1");
-        if (ImGui::MenuItem("  Increase Gamma", "6")) mpv->command("add gamma 1");
-        if (ImGui::MenuItem("  Decrease Gamma", "5")) mpv->command("add gamma -1");
-        if (ImGui::MenuItem("  Increase Saturation", "8")) mpv->command("add saturation 1");
-        if (ImGui::MenuItem("  Decrease Saturation", "7")) mpv->command("add saturation -1");
-        if (ImGui::MenuItem("  Increase Hue")) mpv->command("add hue 1");
-        if (ImGui::MenuItem("  Decrease Hue")) mpv->command("add hue -1");
+    if (ImGui::BeginMenuEx("Video", ICON_FA_VIDEO)) {
+      if (ImGui::MenuItemEx("Tracks", ICON_FA_LIST, "_", false, loaded)) mpv->command("cycle video");
+      if (ImGui::MenuItemEx("Rotate", ICON_FA_SPINNER)) mpv->command("cycle-values video-rotate 0 90 180 270");
+      if (ImGui::MenuItemEx("Zoom In", ICON_FA_MINUS_CIRCLE, "Alt +")) mpv->command("add video-zoom  -0.1");
+      if (ImGui::MenuItemEx("Zoom Out", ICON_FA_PLUS_CIRCLE, "Alt -")) mpv->command("add video-zoom  0.1");
+      if (ImGui::MenuItem("HW Decoding", "Ctrl h")) mpv->command("cycle-values hwdec auto no");
+      if (ImGui::BeginMenu("Effect")) {
+        if (ImGui::MenuItem("Increase Contrast", "2")) mpv->command("add contrast 1");
+        if (ImGui::MenuItem("Decrease Contrast", "1")) mpv->command("add contrast -1");
+        if (ImGui::MenuItem("Increase Brightness", "4")) mpv->command("add brightness 1");
+        if (ImGui::MenuItem("Decrease Brightness", "3")) mpv->command("add brightness -1");
+        if (ImGui::MenuItem("Increase Gamma", "6")) mpv->command("add gamma 1");
+        if (ImGui::MenuItem("Decrease Gamma", "5")) mpv->command("add gamma -1");
+        if (ImGui::MenuItem("Increase Saturation", "8")) mpv->command("add saturation 1");
+        if (ImGui::MenuItem("Decrease Saturation", "7")) mpv->command("add saturation -1");
+        if (ImGui::MenuItem("Increase Hue")) mpv->command("add hue 1");
+        if (ImGui::MenuItem("Decrease Hue")) mpv->command("add hue -1");
         ImGui::EndMenu();
       }
       ImGui::EndMenu();
     }
-    if (ImGui::BeginMenu(ICON_FA_FONT " Subtitle")) {
-      if (ImGui::MenuItem(ICON_FA_LIST " Tracks", "j", nullptr, loaded)) mpv->command("cycle sub");
-      if (ImGui::MenuItem(ICON_FA_FOLDER_OPEN " Load..")) loadSub();
-      if (ImGui::MenuItem("  Increase Delay", "z")) mpv->command("add sub-delay 0.1");
-      if (ImGui::MenuItem("  Decrease Delay", "Z")) mpv->command("add sub-delay -0.1");
+    if (ImGui::BeginMenuEx("Subtitle", ICON_FA_FONT)) {
+      if (ImGui::MenuItemEx("Tracks", ICON_FA_LIST, "j", false, loaded)) mpv->command("cycle sub");
+      if (ImGui::MenuItemEx("Load..", ICON_FA_FOLDER_OPEN)) loadSub();
+      if (ImGui::MenuItem("Increase Delay", "z")) mpv->command("add sub-delay 0.1");
+      if (ImGui::MenuItem("Decrease Delay", "Z")) mpv->command("add sub-delay -0.1");
       ImGui::EndMenu();
     }
     ImGui::Separator();
-    if (ImGui::MenuItem(ICON_FA_LIST " Playlist", "F8")) mpv->command("show-text ${playlist}");
-    if (ImGui::MenuItem(ICON_FA_LIST " Tracklist", "F9")) mpv->command("show-text ${track-list}");
+    if (ImGui::MenuItemEx("Playlist", ICON_FA_LIST, "F8")) mpv->command("show-text ${playlist}");
+    if (ImGui::MenuItemEx("Tracklist", ICON_FA_LIST, "F9")) mpv->command("show-text ${track-list}");
     ImGui::Separator();
-    if (ImGui::MenuItem(ICON_FA_EXPAND " Fullscreen", "f")) mpv->command("cycle fullscreen");
-    if (ImGui::MenuItem(ICON_FA_ARROW_UP " Always Ontop", "T")) mpv->command("cycle ontop");
-    if (ImGui::MenuItem(ICON_FA_SPINNER " Show Progress", "o")) mpv->command("show-progress");
+    if (ImGui::MenuItemEx("Fullscreen", ICON_FA_EXPAND, "f")) mpv->command("cycle fullscreen");
+    if (ImGui::MenuItemEx("Always Ontop", ICON_FA_ARROW_UP, "T")) mpv->command("cycle ontop");
+    if (ImGui::MenuItemEx("Show Progress", ICON_FA_SPINNER, "o")) mpv->command("show-progress");
     ImGui::Separator();
-    if (ImGui::BeginMenu(ICON_FA_SCREWDRIVER " Tools")) {
-      if (ImGui::MenuItem(ICON_FA_FILE_IMAGE " Screenshot", "s")) mpv->command("screenshot");
-      if (ImGui::MenuItem(ICON_FA_BORDER_NONE " Window Border")) mpv->command("cycle border");
-      if (ImGui::MenuItem(ICON_FA_INFO_CIRCLE " Media Info", "i")) mpv->command("script-binding stats/display-stats");
-      if (ImGui::MenuItem(ICON_FA_LINK " Show Keybindings")) mpv->command("script-binding stats/display-page-4");
-      if (ImGui::MenuItem("  OSC visibility", "DEL")) mpv->command("script-binding osc/visibility");
-      if (ImGui::MenuItem("  Script Console", "`")) mpv->command("script-binding console/enable");
-      ImGui::MenuItem("  ImGui Demo", nullptr, &demo);
+    if (ImGui::BeginMenuEx("Tools", ICON_FA_HAMMER)) {
+      if (ImGui::MenuItemEx("Screenshot", ICON_FA_FILE_IMAGE, "s")) mpv->command("screenshot");
+      if (ImGui::MenuItemEx("Window Border", ICON_FA_BORDER_NONE)) mpv->command("cycle border");
+      if (ImGui::MenuItemEx("Media Info", ICON_FA_INFO_CIRCLE, "i")) mpv->command("script-binding stats/display-stats");
+      if (ImGui::MenuItemEx("Show Keybindings", ICON_FA_LINK)) mpv->command("script-binding stats/display-page-4");
+      if (ImGui::MenuItem("OSC visibility", "DEL")) mpv->command("script-binding osc/visibility");
+      if (ImGui::MenuItem("Script Console", "`")) mpv->command("script-binding console/enable");
+      ImGui::MenuItem("ImGui Demo", nullptr, &demo);
       ImGui::EndMenu();
     }
-    if (ImGui::BeginMenu(ICON_FA_PALETTE " Theme")) {
-      if (ImGui::MenuItem("  Dark", nullptr, theme == Theme::DARK)) setTheme(Theme::DARK);
-      if (ImGui::MenuItem("  Light", nullptr, theme == Theme::LIGHT)) setTheme(Theme::LIGHT);
-      if (ImGui::MenuItem("  Classic", nullptr, theme == Theme::CLASSIC)) setTheme(Theme::CLASSIC);
+    if (ImGui::BeginMenuEx("Theme", ICON_FA_PALETTE)) {
+      if (ImGui::MenuItem("Dark", nullptr, theme == Theme::DARK)) setTheme(Theme::DARK);
+      if (ImGui::MenuItem("Light", nullptr, theme == Theme::LIGHT)) setTheme(Theme::LIGHT);
+      if (ImGui::MenuItem("Classic", nullptr, theme == Theme::CLASSIC)) setTheme(Theme::CLASSIC);
       ImGui::EndMenu();
     }
     ImGui::Separator();
-    if (ImGui::MenuItem(ICON_FA_FOLDER_OPEN " Open..")) openFile();
-    if (ImGui::MenuItem(ICON_FA_WINDOW_CLOSE " Quit", "q")) mpv->command("quit");
+    if (ImGui::MenuItemEx("Open..", ICON_FA_FOLDER_OPEN)) openFile();
+    if (ImGui::MenuItemEx("Quit", ICON_FA_WINDOW_CLOSE, "q")) mpv->command("quit");
     ImGui::EndPopup();
   }
 }
