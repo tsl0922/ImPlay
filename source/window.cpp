@@ -171,11 +171,16 @@ void Window::initGLFW() {
   glfwSetCursorPosCallback(window, [](GLFWwindow* window, double x, double y) {
     auto win = static_cast<Window*>(glfwGetWindowUserPointer(window));
     win->requestRender();
-    if (!ImGui::GetIO().WantCaptureMouse) win->player->setCursor(x, y);
+    if (ImGui::GetIO().WantCaptureMouse) return;
+    win->player->setCursor(x, y);
+    if (win->player->allowDrag() && glfwGetTime() - win->lastMousePressAt > 0.05) {
+      if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS) glfwDragWindow(window);
+    }
   });
   glfwSetMouseButtonCallback(window, [](GLFWwindow* window, int button, int action, int mods) {
     auto win = static_cast<Window*>(glfwGetWindowUserPointer(window));
     win->requestRender();
+    if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS) win->lastMousePressAt = glfwGetTime();
     if (!ImGui::GetIO().WantCaptureMouse) win->player->setMouse(button, action, mods);
   });
   glfwSetScrollCallback(window, [](GLFWwindow* window, double x, double y) {

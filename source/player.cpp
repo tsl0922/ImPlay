@@ -160,6 +160,8 @@ bool Player::playing() { return mpv->playing() && !mpv->paused(); }
 
 void Player::shutdown() { mpv->command("quit"); }
 
+bool Player::allowDrag() { return (bool)mpv->property<int, MPV_FORMAT_FLAG>("window-dragging"); }
+
 void Player::setCursor(double x, double y) {
   std::string xs = std::to_string((int)x);
   std::string ys = std::to_string((int)y);

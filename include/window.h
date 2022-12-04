@@ -37,6 +37,7 @@ class Window {
   std::condition_variable renderCond;
   std::atomic_int waitTimeout = defaultWaitTimeout;
   double lastRenderAt = 0;
+  double lastMousePressAt = 0;
   bool wantRender = true;
 };
 }  // namespace ImPlay

@@ -22,6 +22,7 @@ class Player {
   void waitEvent();
   bool playing();
   void shutdown();
+  bool allowDrag();
 
   void setCursor(double x, double y);
   void setMouse(int button, int action, int mods);
