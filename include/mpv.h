@@ -39,10 +39,6 @@ class Mpv {
   struct BindingItem {
     char *key;
     char *cmd;
-    bool weak;
-    char *owner;
-    char *section;
-    int64_t priority;
     char *comment;
   };
 

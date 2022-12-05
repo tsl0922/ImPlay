@@ -101,14 +101,6 @@ std::vector<Mpv::BindingItem> Mpv::toBindinglist(mpv_node *node) {
         t.key = value.u.string;
       } else if (strcmp(key, "cmd") == 0) {
         t.cmd = value.u.string;
-      } else if (strcmp(key, "is_weak") == 0) {
-        t.weak = value.u.flag;
-      } else if (strcmp(key, "owner") == 0) {
-        t.owner = value.u.string;
-      } else if (strcmp(key, "section") == 0) {
-        t.section = value.u.string;
-      } else if (strcmp(key, "priority") == 0) {
-        t.priority = value.u.int64;
       } else if (strcmp(key, "comment") == 0) {
         t.comment = value.u.string;
       }
