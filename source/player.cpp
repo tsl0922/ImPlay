@@ -132,10 +132,10 @@ void Player::drawCommandPalette() {
   auto viewport = ImGui::GetMainViewport();
   auto pos = viewport->Pos;
   auto size = viewport->Size;
-  auto width = size.x * 0.5;
-  auto height = size.y * 0.45;
+  auto width = size.x * 0.5f;
+  auto height = size.y * 0.45f;
   ImGui::SetNextWindowSize(ImVec2(width, height), ImGuiCond_Always);
-  ImGui::SetNextWindowPos(ImVec2(pos.x + size.x * 0.5F, pos.y), ImGuiCond_Always, ImVec2(0.5F, 0.0F));
+  ImGui::SetNextWindowPos(ImVec2(pos.x + size.x * 0.5f, pos.y + 50.0f), ImGuiCond_Always, ImVec2(0.5f, 0.0f));
   if (ImGui::BeginPopup("##command_palette")) {
     if (ImGui::IsKeyDown(ImGuiKey_Escape)) ImGui::CloseCurrentPopup();
     if (commandPalette.focusInput) {
@@ -169,9 +169,9 @@ void Player::drawCommandPalette() {
     ImGui::Separator();
 
     ImGui::BeginChild("##command_matches");
-    auto leftWidth = width * 0.75;
-    auto rightWidth = width * 0.25;
-    if (rightWidth < 200) rightWidth = 200;
+    auto leftWidth = width * 0.75f;
+    auto rightWidth = width * 0.25f;
+    if (rightWidth < 200.0f) rightWidth = 200.0f;
     for (const auto& match : commandPalette.matches) {
       std::string title = match.comment;
       if (title.empty()) title = match.command;

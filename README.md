@@ -8,6 +8,9 @@ ImPlay is built on top of [mpv](https://mpv.io) and [ImGui](https://github.com/o
 
 ImPlay aims to be mpv compatible, which means almost all mpv features from the [manual](https://mpv.io/manual) are (or will be) available.
 
+# Features
+
+
 # License
 
 [GPLv2](LICENSE).
