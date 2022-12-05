@@ -26,8 +26,10 @@ class Player {
   enum class Theme { DARK, LIGHT, CLASSIC };
 
   struct CommandMatch {
-    std::string title;
+    std::string key;
     std::string command;
+    std::string comment;
+    int score;
   };
 
   struct CommandPalette {
@@ -40,7 +42,8 @@ class Player {
 
   void showAbout();
   void showCommandPalette();
-  std::vector<CommandMatch> getCommandMatches(const std::string &command);
+  void drawCommandPalette();
+  std::vector<CommandMatch> getCommandMatches(const std::string &input);
 
   void drawTracklistMenu(const char *type, const char *prop);
   void drawChapterlistMenu();
@@ -60,8 +63,9 @@ class Player {
   std::vector<Mpv::TrackItem> tracklist;
   std::vector<Mpv::PlayItem> playlist;
   std::vector<Mpv::ChapterItem> chapterlist;
+  std::vector<Mpv::BindingItem> bindinglist;
   std::vector<std::string> profilelist;
-  
+
   CommandPalette commandPalette;
   bool paused = true;
   bool loaded = false;

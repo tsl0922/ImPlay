@@ -40,6 +40,7 @@ std::vector<Mpv::TrackItem> Mpv::toTracklist(mpv_node *node) {
 
 std::vector<Mpv::PlayItem> Mpv::toPlaylist(mpv_node *node) {
   std::vector<Mpv::PlayItem> playlist;
+  assert(node->format == MPV_FORMAT_NODE_ARRAY);
   for (int i = 0; i < node->u.list->num; i++) {
     auto item = node->u.list->values[i];
     assert(item.format == MPV_FORMAT_NODE_MAP);
@@ -66,6 +67,7 @@ std::vector<Mpv::PlayItem> Mpv::toPlaylist(mpv_node *node) {
 
 std::vector<Mpv::ChapterItem> Mpv::toChapterlist(mpv_node *node) {
   std::vector<Mpv::ChapterItem> chapters;
+  assert(node->format == MPV_FORMAT_NODE_ARRAY);
   for (int i = 0; i < node->u.list->num; i++) {
     auto item = node->u.list->values[i];
     assert(item.format == MPV_FORMAT_NODE_MAP);
@@ -83,6 +85,37 @@ std::vector<Mpv::ChapterItem> Mpv::toChapterlist(mpv_node *node) {
     if (t.time != 0) chapters.push_back(t);
   }
   return chapters;
+}
+
+std::vector<Mpv::BindingItem> Mpv::toBindinglist(mpv_node *node) {
+  std::vector<Mpv::BindingItem> bindings;
+  assert(node->format == MPV_FORMAT_NODE_ARRAY);
+  for (int i = 0; i < node->u.list->num; i++) {
+    auto item = node->u.list->values[i];
+    assert(item.format == MPV_FORMAT_NODE_MAP);
+    Mpv::BindingItem t{0};
+    for (int j = 0; j < item.u.list->num; j++) {
+      auto key = item.u.list->keys[j];
+      auto value = item.u.list->values[j];
+      if (strcmp(key, "key") == 0) {
+        t.key = value.u.string;
+      } else if (strcmp(key, "cmd") == 0) {
+        t.cmd = value.u.string;
+      } else if (strcmp(key, "is_weak") == 0) {
+        t.weak = value.u.flag;
+      } else if (strcmp(key, "owner") == 0) {
+        t.owner = value.u.string;
+      } else if (strcmp(key, "section") == 0) {
+        t.section = value.u.string;
+      } else if (strcmp(key, "priority") == 0) {
+        t.priority = value.u.int64;
+      } else if (strcmp(key, "comment") == 0) {
+        t.comment = value.u.string;
+      }
+    }
+    if (t.cmd != nullptr) bindings.push_back(t);
+  }
+  return bindings;
 }
 
 std::vector<std::string> Mpv::toProfilelist(const char *payload) {

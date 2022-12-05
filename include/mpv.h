@@ -36,12 +36,23 @@ class Mpv {
     bool selected;
   };
 
+  struct BindingItem {
+    char *key;
+    char *cmd;
+    bool weak;
+    char *owner;
+    char *section;
+    int64_t priority;
+    char *comment;
+  };
+
   void render(int w, int h);
   void pollEvent();
 
   std::vector<TrackItem> toTracklist(mpv_node *node);
   std::vector<PlayItem> toPlaylist(mpv_node *node);
   std::vector<ChapterItem> toChapterlist(mpv_node *node);
+  std::vector<BindingItem> toBindinglist(mpv_node *node);
   std::vector<std::string> toProfilelist(const char *payload);
 
   int command(const char *args) { return mpv_command_string(mpv, args); }

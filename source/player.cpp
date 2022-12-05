@@ -26,12 +26,11 @@ Player::~Player() {
 void Player::draw() {
   if (demo) ImGui::ShowDemoWindow(&demo);
   if (about) showAbout();
-  if (ImGui::IsKeyDown(ImGuiKey_P) && ImGui::IsKeyDown(ImGuiKey_LeftCtrl) && ImGui::IsKeyDown(ImGuiKey_LeftShift)) {
-    commandPalette.open = true;
-    commandPalette.justOpened = true;
-    ImGui::OpenPopup("Command Palette");
-  }
-  if (commandPalette.open) showCommandPalette();
+
+  ImGuiIO& io = ImGui::GetIO();
+  if (io.KeyCtrl && io.KeyShift && ImGui::IsKeyDown(ImGuiKey_P)) showCommandPalette();
+  drawCommandPalette();
+
   drawContextMenu();
 }
 
@@ -115,21 +114,31 @@ void Player::showAbout() {
   if (ImGui::BeginPopupModal("About", &about, ImGuiWindowFlags_NoResize)) {
     ImGui::Text("ImPlay");
     ImGui::Separator();
-    ImGui::TextWrapped("\nImPlay is a cross-platform desktop media player.");
+    ImGui::NewLine();
+    ImGui::TextWrapped("ImPlay is a cross-platform desktop media player.");
     ImGui::EndPopup();
   }
 }
 
-void Player::showCommandPalette() {
+void Player::showCommandPalette() { commandPalette.open = true; }
+
+void Player::drawCommandPalette() {
+  if (commandPalette.open) {
+    ImGui::OpenPopup("##command_palette");
+    commandPalette.open = false;
+    commandPalette.justOpened = true;
+  }
+
   auto viewport = ImGui::GetMainViewport();
   auto pos = viewport->Pos;
   auto size = viewport->Size;
-  ImGui::SetNextWindowSize(ImVec2(650, 0.0f), ImGuiCond_Always);
+  auto width = size.x * 0.5;
+  auto height = size.y * 0.45;
+  ImGui::SetNextWindowSize(ImVec2(width, height), ImGuiCond_Always);
   ImGui::SetNextWindowPos(ImVec2(pos.x + size.x * 0.5F, pos.y), ImGuiCond_Always, ImVec2(0.5F, 0.0F));
-  if (ImGui::BeginPopup("Command Palette")) {
+  if (ImGui::BeginPopup("##command_palette")) {
     if (ImGui::IsKeyDown(ImGuiKey_Escape)) ImGui::CloseCurrentPopup();
-
-    if (commandPalette.justOpened) {
+    if (commandPalette.focusInput) {
       auto textState = ImGui::GetInputTextState(ImGui::GetID("##command_input"));
       if (textState != nullptr) {
         textState->Stb.cursor = strlen(commandPalette.buffer.data());
@@ -139,21 +148,15 @@ void Player::showCommandPalette() {
     }
 
     ImGui::PushItemWidth(-1);
-    if (ImGui::InputTextWithHint(
-            "##command_input", "TIP: Press Space to select result", commandPalette.buffer.data(),
-            commandPalette.buffer.size(), ImGuiInputTextFlags_CallbackEdit | ImGuiInputTextFlags_EnterReturnsTrue,
-            [](ImGuiInputTextCallbackData* data) -> int {
-              auto p = static_cast<Player*>(data->UserData);
-              p->commandPalette.matches = p->getCommandMatches(data->Buf);
-              return 0;
-            },
-            this)) {
-      if (!commandPalette.matches.empty()) {
-        auto& [title, command] = commandPalette.matches.front();
-        mpv->command(command.c_str());
-      }
-      ImGui::CloseCurrentPopup();
-    }
+    ImGui::InputTextWithHint(
+        "##command_input", "TIP: Press Space to select result", commandPalette.buffer.data(),
+        commandPalette.buffer.size(), ImGuiInputTextFlags_CallbackEdit | ImGuiInputTextFlags_EnterReturnsTrue,
+        [](ImGuiInputTextCallbackData* data) -> int {
+          auto p = static_cast<Player*>(data->UserData);
+          p->commandPalette.matches = p->getCommandMatches(data->Buf);
+          return 0;
+        },
+        this);
     ImGui::PopItemWidth();
 
     if (commandPalette.justOpened) {
@@ -165,22 +168,57 @@ void Player::showCommandPalette() {
 
     ImGui::Separator();
 
-    for (const auto& [title, command] : commandPalette.matches) {
-      if (ImGui::Selectable(title.c_str(), false, ImGuiSelectableFlags_DontClosePopups)) mpv->command(command.c_str());
+    ImGui::BeginChild("##command_matches");
+    auto leftWidth = width * 0.75;
+    auto rightWidth = width * 0.25;
+    if (rightWidth < 200) rightWidth = 200;
+    for (const auto& match : commandPalette.matches) {
+      std::string title = match.comment;
+      if (title.empty()) title = match.command;
+      ImGui::SetNextItemWidth(leftWidth);
+      int charLimit = leftWidth / ImGui::GetFontSize();
+      title = title.substr(0, charLimit);
+      if (title.size() == charLimit) title += "...";
+
+      ImGui::PushID(&match);
+      if (ImGui::Selectable("")) mpv->command(match.command.c_str());
+      ImGui::SameLine();
+      ImGui::Text("%s", title.c_str());
+      ImGui::SameLine(ImGui::GetWindowWidth() - rightWidth);
+      ImGui::TextDisabled("%s", match.key.c_str());
+      ImGui::PopID();
     }
+    ImGui::EndChild();
+
     ImGui::EndPopup();
-  } else {
-    commandPalette.open = false;
   }
 }
 
-std::vector<Player::CommandMatch> Player::getCommandMatches(const std::string& command) {
+std::vector<Player::CommandMatch> Player::getCommandMatches(const std::string& input) {
+  constexpr static auto MatchCommand = [](const std::string& input, const std::string& text) -> int {
+    if (input.empty()) return 1;
+    if (text.starts_with(input)) return 3;
+    if (text.find(input) != std::string::npos) return 2;
+    return 0;
+  };
+
   std::vector<Player::CommandMatch> matches;
-  matches.push_back({"Pause", "cycle pause"});
-  if (command.empty()) {
-    matches.push_back({"Stop", "stop"});
-    matches.push_back({"Quit", "quit"});
+  for (auto& binding : bindinglist) {
+    std::string key = binding.key ? binding.key : "";
+    std::string command = binding.cmd ? binding.cmd : "";
+    std::string comment = binding.comment ? binding.comment : "";
+    if (command.empty() || command == "ignore") continue;
+    int score = MatchCommand(input, comment) * 2;
+    if (score == 0) score = MatchCommand(input, command);
+    if (score > 0) matches.push_back({key, command, comment, score});
   }
+  if (input.empty()) return matches;
+
+  std::sort(matches.begin(), matches.end(), [](const auto& a, const auto& b) {
+    if (a.score != b.score) return a.score > b.score;
+    if (a.command != b.command) return a.command < b.command;
+    return a.comment < b.comment;
+  });
   return matches;
 }
 
@@ -256,6 +294,7 @@ void Player::drawContextMenu() {
     ImGui::Separator();
     if (ImGui::MenuItemEx("Jump Forward", ICON_FA_FORWARD, "UP", false, loaded)) mpv->command("seek 10");
     if (ImGui::MenuItemEx("Jump Backward", ICON_FA_BACKWARD, "DOWN", false, loaded)) mpv->command("seek -10");
+    if (ImGui::MenuItemEx("Show Progress", ICON_FA_SPINNER, "o")) mpv->command("show-progress");
     ImGui::Separator();
     drawChapterlistMenu();
     drawPlaylistMenu();
@@ -363,7 +402,7 @@ void Player::drawContextMenu() {
     ImGui::Separator();
     if (ImGui::MenuItemEx("Fullscreen", ICON_FA_EXPAND, "f")) mpv->command("cycle fullscreen");
     if (ImGui::MenuItemEx("Always Ontop", ICON_FA_ARROW_UP, "T")) mpv->command("cycle ontop");
-    if (ImGui::MenuItemEx("Show Progress", ICON_FA_SPINNER, "o")) mpv->command("show-progress");
+    if (ImGui::MenuItemEx("Command Palette", ICON_FA_SEARCH, "Ctrl+Shift+p")) showCommandPalette();
     ImGui::Separator();
     if (ImGui::BeginMenuEx("Tools", ICON_FA_HAMMER)) {
       if (ImGui::MenuItemEx("Screenshot", ICON_FA_FILE_IMAGE, "s")) mpv->command("async screenshot");
@@ -530,6 +569,11 @@ void Player::initMpv() {
   mpv->observeProperty("chapter", MPV_FORMAT_INT64, [=, this](void* data) {
     int64_t ImDrawIdx = static_cast<int64_t>(*(int64_t*)data);
     for (auto& chapter : chapterlist) chapter.selected = chapter.id == ImDrawIdx;
+  });
+
+  mpv->observeProperty("input-bindings", MPV_FORMAT_NODE, [=, this](void* data) {
+    mpv_node* node = static_cast<mpv_node*>(data);
+    bindinglist = mpv->toBindinglist(node);
   });
 
   mpv->observeProperty("profile-list", MPV_FORMAT_STRING, [=, this](void* data) {
