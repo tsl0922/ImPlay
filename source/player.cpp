@@ -500,6 +500,7 @@ void Player::initMpv() {
   mpv->observeEvent(MPV_EVENT_END_FILE, [=, this](void* data) {
     loaded = false;
     glfwSetWindowTitle(window, title);
+    glfwSetWindowAspectRatio(window, GLFW_DONT_CARE, GLFW_DONT_CARE);
   });
 
   mpv->observeProperty("media-title", MPV_FORMAT_STRING, [=, this](void* data) {
