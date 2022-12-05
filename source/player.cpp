@@ -216,8 +216,8 @@ std::vector<Player::CommandMatch> Player::getCommandMatches(const std::string& i
 
   std::sort(matches.begin(), matches.end(), [](const auto& a, const auto& b) {
     if (a.score != b.score) return a.score > b.score;
-    if (a.command != b.command) return a.command < b.command;
-    return a.comment < b.comment;
+    if (a.comment != b.comment) return a.comment < b.comment;
+    return a.command < b.command;
   });
   return matches;
 }
