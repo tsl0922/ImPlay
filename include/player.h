@@ -12,6 +12,7 @@ class Player {
   Player(const char *title);
   ~Player();
 
+  bool init(int argc, char *argv[]);
   void draw();
   void render(int w, int h);
   void pollEvent();
@@ -55,22 +56,22 @@ class Player {
   void initMpv();
   void setTheme(Theme theme);
 
-  GLFWwindow *window;
+  GLFWwindow *window = nullptr;
+  Mpv *mpv = nullptr;
+  Mpv::OptionParser optionParser;
+  CommandPalette commandPalette;
   const char *title;
   Theme theme;
-  Mpv *mpv;
+  bool about = false;
+  bool demo = false;
 
   std::vector<Mpv::TrackItem> tracklist;
   std::vector<Mpv::PlayItem> playlist;
   std::vector<Mpv::ChapterItem> chapterlist;
   std::vector<Mpv::BindingItem> bindinglist;
   std::vector<std::string> profilelist;
-
-  CommandPalette commandPalette;
   bool paused = true;
   bool loaded = false;
-  bool about = false;
-  bool demo = false;
 
   template <typename Range, typename Value = typename Range::value_type>
   std::string join(Range const &elements, const char *const delimiter) {

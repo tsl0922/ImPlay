@@ -21,16 +21,20 @@ Window::Window(const char* title, int width, int height) {
   initImGui();
 
   player = new Player(title);
-  show();
 }
 
 Window::~Window() {
   delete player;
+
   exitImGui();
   exitGLFW();
 }
 
-void Window::loop() {
+bool Window::run(int argc, char* argv[]) {
+  if (!player->init(argc, argv)) return false;
+
+  glfwShowWindow(window);
+
   while (!glfwWindowShouldClose(window)) {
     if (!glfwGetWindowAttrib(window, GLFW_VISIBLE) || glfwGetWindowAttrib(window, GLFW_ICONIFIED))
       glfwWaitEvents();
@@ -41,6 +45,8 @@ void Window::loop() {
 
     render();
   }
+
+  return true;
 }
 
 void Window::render() {
@@ -72,8 +78,6 @@ void Window::redraw() {
   if (auto g = ImGui::GetCurrentContext(); g == nullptr || g->WithinFrameScope) return;
   render();
 }
-
-void Window::show() { glfwShowWindow(window); }
 
 void Window::initGLFW() {
   if (!glfwInit()) {

@@ -13,6 +13,13 @@ class Mpv {
   Mpv();
   ~Mpv();
 
+  struct OptionParser {
+    std::vector<std::pair<std::string, std::string>> options;
+    std::vector<std::string> paths;
+
+    void parse(int argc, char **argv);
+  };
+
   struct TrackItem {
     int64_t id;
     char *type;
@@ -42,6 +49,7 @@ class Mpv {
     char *comment;
   };
 
+  void init();
   void render(int w, int h);
   void pollEvent();
 
@@ -53,15 +61,25 @@ class Mpv {
 
   int command(const char *args) { return mpv_command_string(mpv, args); }
   int command(const char *args[]) { return mpv_command(mpv, args); }
-  template <typename T>
-  T property(const char *name, mpv_format format) {
+  int commandv(const char *arg, ...);
+
+  char *property(const char *name) { return mpv_get_property_string(mpv, name); }
+  int property(const char *name, const char *data) { return mpv_set_property_string(mpv, name, data); }
+  template <typename T, mpv_format format>
+  T property(const char *name) {
     T data;
     mpv_get_property(mpv, name, format, &data);
     return data;
   }
-  template <typename T>
-  void property(const char *name, mpv_format format, T &data) {
-    mpv_set_property(mpv, name, format, &data);
+  template <typename T, mpv_format format>
+  int property(const char *name, T &data) {
+    return mpv_set_property(mpv, name, format, static_cast<void *>(&data));
+  }
+
+  int option(const char *name, const char *data) { return mpv_set_option_string(mpv, name, data); }
+  template <typename T, mpv_format format>
+  int option(const char *name, T &data) {
+    return mpv_set_option(mpv, name, format, static_cast<void *>(&data));
   }
 
   void observeEvent(mpv_event_id event, const EventHandler &handler) { events.emplace_back(event, handler); }
@@ -71,9 +89,6 @@ class Mpv {
   }
 
  private:
-  void init();
-  void exit();
-
   mpv_handle *mpv = nullptr;
   mpv_render_context *renderCtx = nullptr;
 

@@ -19,6 +19,6 @@ add_executable(ImPlay
 target_include_directories(ImPlay PRIVATE include ${MPV_INCLUDE_DIRS})
 target_link_directories(ImPlay PRIVATE ${MPV_LIBRARY_DIRS})
 target_link_libraries(ImPlay PRIVATE imgui json nfd ${MPV_LIBRARIES})
-if(MINGW AND CMAKE_BUILD_TYPE STREQUAL "Release")
+if(MINGW)
     target_link_options(ImPlay PRIVATE -mwindows)
 endif()

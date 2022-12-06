@@ -2,7 +2,7 @@
 #include <imgui_internal.h>
 #include <nfd.hpp>
 #include <algorithm>
-#include <iostream>
+#include <cstdio>
 #include <cstring>
 #include "player.h"
 #include "fontawesome.h"
@@ -13,14 +13,40 @@ Player::Player(const char* title) {
   window = glfwGetCurrentContext();
   mpv = new Mpv();
 
-  initMpv();
   NFD::Init();
   setTheme(Theme::DARK);
 }
 
 Player::~Player() {
   NFD::Quit();
-  delete this->mpv;
+  delete mpv;
+}
+
+bool Player::init(int argc, char* argv[]) {
+  mpv->option("config", "yes");
+  mpv->option("osc", "yes");
+  mpv->option("idle", "yes");
+  mpv->option("force-window", "yes");
+  mpv->option("input-default-bindings", "yes");
+  mpv->option("input-vo-keyboard", "yes");
+
+  optionParser.parse(argc, argv);
+  for (auto& [key, value] : optionParser.options) {
+    if (int err = mpv->option(key.c_str(), value.c_str()); err < 0) {
+      fprintf(stderr, "mpv: %s [%s=%s]\n", mpv_error_string(err), key.c_str(), value.c_str());
+      return false;
+    }
+  }
+
+  mpv->init();
+
+  initMpv();
+
+  for (auto& path : optionParser.paths) mpv->commandv("loadfile", path.c_str(), "append-play", nullptr);
+
+  mpv->command("keybind MBTN_RIGHT ignore");
+
+  return true;
 }
 
 void Player::draw() {
@@ -41,8 +67,7 @@ void Player::pollEvent() { mpv->pollEvent(); }
 void Player::setCursor(double x, double y) {
   std::string xs = std::to_string((int)x);
   std::string ys = std::to_string((int)y);
-  const char* args[] = {"mouse", xs.c_str(), ys.c_str(), NULL};
-  mpv->command(args);
+  mpv->commandv("mouse", xs.c_str(), ys.c_str(), nullptr);
 }
 
 void Player::setMouse(int button, int action, int mods) {
@@ -56,9 +81,7 @@ void Player::setMouse(int button, int action, int mods) {
   if (s == actionMappings.end()) return;
   keys.push_back(s->second);
   const std::string arg = join(keys, "+");
-
-  const char* args[] = {cmd.c_str(), arg.c_str(), NULL};
-  mpv->command(args);
+  mpv->commandv(cmd.c_str(), arg.c_str(), nullptr);
 }
 
 void Player::setScroll(double x, double y) {
@@ -95,16 +118,13 @@ void Player::setKey(int key, int scancode, int action, int mods) {
   translateMod(keys, mods);
   keys.push_back(name);
   const std::string arg = join(keys, "+");
-
-  const char* args[] = {cmd.c_str(), arg.c_str(), NULL};
-  mpv->command(args);
+  mpv->commandv(cmd.c_str(), arg.c_str(), nullptr);
 }
 
 void Player::setDrop(int count, const char** paths) {
   std::sort(paths, paths + count, [](const auto& a, const auto& b) { return strcmp(a, b) < 0; });
   for (int i = 0; i < count; i++) {
-    const char* cmd[] = {"loadfile", paths[i], i > 0 ? "append-play" : "replace", NULL};
-    mpv->command(cmd);
+    mpv->commandv("loadfile", paths[i], i > 0 ? "append-play" : "replace", nullptr);
   }
 }
 
@@ -233,7 +253,7 @@ void Player::drawTracklistMenu(const char* type, const char* prop) {
           title = track.title;
         if (track.lang != nullptr) title += " [" + std::string(track.lang) + "]";
         if (ImGui::MenuItemEx(title.c_str(), nullptr, nullptr, track.selected))
-          mpv->property(prop, MPV_FORMAT_INT64, track.id);
+          mpv->property<int64_t, MPV_FORMAT_INT64>(prop, track.id);
       }
     }
     ImGui::EndMenu();
@@ -249,8 +269,7 @@ void Player::drawChapterlistMenu() {
       std::string title = chapter.title;
       title += " [" + std::to_string(chapter.time) + "]";
       if (ImGui::MenuItemEx(title.c_str(), nullptr, nullptr, chapter.selected)) {
-        const char* args[] = {"seek", std::to_string(chapter.time).c_str(), "absolute", NULL};
-        mpv->command(args);
+        mpv->commandv("seek", std::to_string(chapter.time).c_str(), "absolute", nullptr);
       }
     }
     ImGui::EndMenu();
@@ -276,7 +295,7 @@ void Player::drawPlaylistMenu() {
       else
         title = "Item " + std::to_string(item.id);
       if (ImGui::MenuItemEx(title.c_str(), nullptr, nullptr, item.current || item.playing))
-        mpv->property("playlist-pos-1", MPV_FORMAT_INT64, item.id);
+        mpv->property<int64_t, MPV_FORMAT_INT64>("playlist-pos-1", item.id);
     }
     ImGui::EndMenu();
   }
@@ -455,9 +474,7 @@ void Player::openFile() {
     for (auto i = 0; i < numPaths; i++) {
       nfdchar_t* path;
       NFD::PathSet::GetPath(outPaths, i, path);
-      const char* cmd[] = {"loadfile", path, i > 0 ? "append-play" : "replace", NULL};
-      mpv->command(cmd);
-      NFD::PathSet::FreePath(path);
+      mpv->commandv("loadfile", path, i > 0 ? "append-play" : "replace", nullptr);
     }
     NFD::PathSet::Free(outPaths);
   }
@@ -474,8 +491,7 @@ void Player::loadSub() {
     for (auto i = 0; i < numPaths; i++) {
       nfdchar_t* path;
       NFD::PathSet::GetPath(outPaths, i, path);
-      const char* cmd[] = {"sub-add", path, i > 0 ? "auto" : "select", NULL};
-      mpv->command(cmd);
+      mpv->commandv("sub-add", path, i > 0 ? "auto" : "select", nullptr);
       NFD::PathSet::FreePath(path);
     }
     NFD::PathSet::Free(outPaths);
@@ -487,8 +503,8 @@ void Player::initMpv() {
 
   mpv->observeEvent(MPV_EVENT_VIDEO_RECONFIG, [=, this](void* data) {
     if (!loaded) return;
-    auto w = mpv->property<int64_t>("dwidth", MPV_FORMAT_INT64);
-    auto h = mpv->property<int64_t>("dheight", MPV_FORMAT_INT64);
+    auto w = mpv->property<int64_t, MPV_FORMAT_INT64>("dwidth");
+    auto h = mpv->property<int64_t, MPV_FORMAT_INT64>("dheight");
     if (w > 0 && h > 0) {
       glfwSetWindowSize(window, w, h);
       glfwSetWindowAspectRatio(window, w, h);
@@ -581,8 +597,6 @@ void Player::initMpv() {
     char* payload = static_cast<char*>(*(char**)data);
     profilelist = mpv->toProfilelist(payload);
   });
-
-  mpv->command("keybind MBTN_RIGHT ignore");
 }
 
 void Player::setTheme(Theme theme) {

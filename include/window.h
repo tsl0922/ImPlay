@@ -12,20 +12,19 @@ class Window {
   Window(const char *title, int width, int height);
   ~Window();
 
-  void loop();
+  bool run(int argc, char *argv[]);
 
  private:
   void render();
   void redraw();
-  void show();
 
   void initGLFW();
   void initImGui();
   void exitGLFW();
   void exitImGui();
 
-  GLFWwindow *window;
-  Player *player;
+  GLFWwindow *window = nullptr;
+  Player *player = nullptr;
   const char *title;
   int width, height;
 };

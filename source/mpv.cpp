@@ -3,13 +3,63 @@
 #include <nlohmann/json.hpp>
 #include <cassert>
 #include <stdexcept>
+#include <codecvt>
+#include <locale>
 #include <string>
 #include <cstring>
+#include <cstdarg>
+#ifdef _WIN32
+#include <windows.h>
+#include <wchar.h>
+#endif
 
 namespace ImPlay {
-Mpv::Mpv() { init(); }
+Mpv::Mpv() {
+  mpv = mpv_create();
+  if (!mpv) throw std::runtime_error("could not create mpv context");
+}
 
-Mpv::~Mpv() { exit(); }
+Mpv::~Mpv() {
+  if (renderCtx != nullptr) mpv_render_context_free(renderCtx);
+  if (mpv != nullptr) mpv_terminate_destroy(mpv);
+}
+
+void Mpv::OptionParser::parse(int argc, char **argv) {
+  bool optEnd = false;
+#ifdef _WIN32
+  int wideArgc;
+  wchar_t **wideArgv = CommandLineToArgvW(GetCommandLineW(), &wideArgc);
+  for (int i = 1; i < wideArgc; i++) {
+    std::string arg = std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>, wchar_t>().to_bytes(wideArgv[i]);
+#else
+  for (int i = 1; i < argc; i++) {
+    std::string arg = argv[i];
+#endif
+    if (arg[0] == '-' && !optEnd) {
+      if (arg[1] == '\0') continue;
+      if (arg[1] == '-') {
+        if (arg[2] == '\0') {
+          optEnd = true;
+          continue;
+        } else {
+          arg = arg.substr(2);
+        }
+      } else {
+        arg = arg.substr(1);
+      }
+      if (arg.starts_with("no-")) {
+        if (arg[3] == '\0') continue;
+        options.emplace_back(arg.substr(3), "no");
+      } else if (auto n = arg.find_first_of('='); n != std::string::npos) {
+        options.emplace_back(arg.substr(0, n), arg.substr(n + 1));
+      } else {
+        options.emplace_back(arg, "yes");
+      }
+    } else {
+      paths.emplace_back(arg);
+    }
+  }
+}
 
 std::vector<Mpv::TrackItem> Mpv::toTracklist(mpv_node *node) {
   std::vector<Mpv::TrackItem> tracks;
@@ -122,6 +172,16 @@ std::vector<std::string> Mpv::toProfilelist(const char *payload) {
   return profiles;
 }
 
+int Mpv::commandv(const char *arg, ...) {
+  std::vector<const char *> args;
+  va_list ap;
+  va_start(ap, arg);
+  for (const char *s = arg; s != nullptr; s = va_arg(ap, const char *)) args.push_back(s);
+  va_end(ap);
+  args.push_back(nullptr);
+  return mpv_command(mpv, args.data());
+}
+
 void Mpv::pollEvent() {
   while (mpv) {
     mpv_event *event = mpv_wait_event(mpv, 0);
@@ -154,16 +214,6 @@ void Mpv::render(int w, int h) {
 }
 
 void Mpv::init() {
-  mpv = mpv_create();
-  if (!mpv) throw std::runtime_error("could not create mpv context");
-
-  mpv_set_option_string(mpv, "config", "yes");
-  mpv_set_option_string(mpv, "osc", "yes");
-  mpv_set_option_string(mpv, "idle", "yes");
-  mpv_set_option_string(mpv, "force-window", "yes");
-  mpv_set_option_string(mpv, "input-default-bindings", "yes");
-  mpv_set_option_string(mpv, "input-vo-keyboard", "yes");
-
   if (mpv_initialize(mpv) < 0) throw std::runtime_error("could not initialize mpv context");
 
   mpv_opengl_init_params gl_init_params{
@@ -178,10 +228,5 @@ void Mpv::init() {
 
   if (mpv_render_context_create(&renderCtx, mpv, params) < 0)
     throw std::runtime_error("failed to initialize mpv GL context");
-}
-
-void Mpv::exit() {
-  mpv_render_context_free(renderCtx);
-  mpv_terminate_destroy(mpv);
 }
 }  // namespace ImPlay
