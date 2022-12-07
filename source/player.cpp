@@ -330,13 +330,13 @@ void Player::drawContextMenu() {
     ImGui::Separator();
     if (ImGui::BeginMenuEx("Audio", ICON_FA_FILE_AUDIO)) {
       drawTracklistMenu("audio", "aid");
-      if (ImGui::MenuItemEx("Increase Volume", ICON_FA_VOLUME_UP, "0")) mpv->command("add volume 2");
-      if (ImGui::MenuItemEx("Decrease Volume", ICON_FA_VOLUME_DOWN, "9")) mpv->command("add volume -2");
+      if (ImGui::MenuItemEx("Volume +2", ICON_FA_VOLUME_UP, "0")) mpv->command("add volume 2");
+      if (ImGui::MenuItemEx("Volume -2", ICON_FA_VOLUME_DOWN, "9")) mpv->command("add volume -2");
       ImGui::Separator();
       if (ImGui::MenuItemEx("Mute", ICON_FA_VOLUME_MUTE, "m")) mpv->command("cycle mute");
       ImGui::Separator();
-      if (ImGui::MenuItem("Increase Delay", "Ctrl +")) mpv->command("add audio-delay 0.1");
-      if (ImGui::MenuItem("Decrease Delay", "Ctrl -")) mpv->command("add audio-delay -0.1");
+      if (ImGui::MenuItem("Delay +0.1", "Ctrl +")) mpv->command("add audio-delay 0.1");
+      if (ImGui::MenuItem("Delay -0.1", "Ctrl -")) mpv->command("add audio-delay -0.1");
       ImGui::EndMenu();
     }
     if (ImGui::BeginMenuEx("Video", ICON_FA_VIDEO)) {
@@ -368,8 +368,8 @@ void Player::drawContextMenu() {
         ImGui::EndMenu();
       }
       if (ImGui::BeginMenu("Panscan")) {
-        if (ImGui::MenuItem("Increase", "W")) mpv->command("add panscan 0.1");
-        if (ImGui::MenuItem("Descrease", "w")) mpv->command("add panscan -0.1");
+        if (ImGui::MenuItem("+0.1", "W")) mpv->command("add panscan 0.1");
+        if (ImGui::MenuItem("-0.1", "w")) mpv->command("add panscan -0.1");
         if (ImGui::MenuItem("Reset")) mpv->command("set panscan 0");
         ImGui::EndMenu();
       }
@@ -391,20 +391,20 @@ void Player::drawContextMenu() {
         ImGui::EndMenu();
       }
       if (ImGui::BeginMenu("Effect")) {
-        if (ImGui::MenuItem("Increase Contrast", "2")) mpv->command("add contrast 1");
-        if (ImGui::MenuItem("Decrease Contrast", "1")) mpv->command("add contrast -1");
+        if (ImGui::MenuItem("Contrast +1", "2")) mpv->command("add contrast 1");
+        if (ImGui::MenuItem("Contrast -1", "1")) mpv->command("add contrast -1");
         ImGui::Separator();
-        if (ImGui::MenuItem("Increase Brightness", "4")) mpv->command("add brightness 1");
-        if (ImGui::MenuItem("Decrease Brightness", "3")) mpv->command("add brightness -1");
+        if (ImGui::MenuItem("Brightness +1", "4")) mpv->command("add brightness 1");
+        if (ImGui::MenuItem("Brightness -1", "3")) mpv->command("add brightness -1");
         ImGui::Separator();
-        if (ImGui::MenuItem("Increase Gamma", "6")) mpv->command("add gamma 1");
-        if (ImGui::MenuItem("Decrease Gamma", "5")) mpv->command("add gamma -1");
+        if (ImGui::MenuItem("Gamma +1", "6")) mpv->command("add gamma 1");
+        if (ImGui::MenuItem("Gamma -1", "5")) mpv->command("add gamma -1");
         ImGui::Separator();
-        if (ImGui::MenuItem("Increase Saturation", "8")) mpv->command("add saturation 1");
-        if (ImGui::MenuItem("Decrease Saturation", "7")) mpv->command("add saturation -1");
+        if (ImGui::MenuItem("Saturation +1", "8")) mpv->command("add saturation 1");
+        if (ImGui::MenuItem("Saturation -1", "7")) mpv->command("add saturation -1");
         ImGui::Separator();
-        if (ImGui::MenuItem("Increase Hue")) mpv->command("add hue 1");
-        if (ImGui::MenuItem("Decrease Hue")) mpv->command("add hue -1");
+        if (ImGui::MenuItem("Hue +1")) mpv->command("add hue 1");
+        if (ImGui::MenuItem("Hue -1")) mpv->command("add hue -1");
         ImGui::EndMenu();
       }
       ImGui::Separator();
@@ -418,14 +418,14 @@ void Player::drawContextMenu() {
       if (ImGui::MenuItemEx("Load..", ICON_FA_FOLDER_OPEN)) loadSub();
       if (ImGui::MenuItem("Show/Hide", "v")) mpv->command("cycle sub-visibility");
       ImGui::Separator();
-      if (ImGui::MenuItem("Increase Delay", "z")) mpv->command("add sub-delay 0.1");
-      if (ImGui::MenuItem("Decrease Delay", "Z")) mpv->command("add sub-delay -0.1");
-      ImGui::Separator();
       if (ImGui::MenuItem("Move Up", "r")) mpv->command("add sub-pos -1");
       if (ImGui::MenuItem("Move Down", "R")) mpv->command("add sub-pos +1");
       ImGui::Separator();
-      if (ImGui::MenuItem("Larger Font", "F")) mpv->command("add sub-scale 0.1");
-      if (ImGui::MenuItem("Smaller Font", "G")) mpv->command("add sub-scale -0.1");
+      if (ImGui::MenuItem("Delay +0.1", "z")) mpv->command("add sub-delay 0.1");
+      if (ImGui::MenuItem("Delay -0.1", "Z")) mpv->command("add sub-delay -0.1");
+      ImGui::Separator();
+      if (ImGui::MenuItem("Scale +0.1", "F")) mpv->command("add sub-scale 0.1");
+      if (ImGui::MenuItem("Scale -0.1", "G")) mpv->command("add sub-scale -0.1");
       ImGui::EndMenu();
     }
     ImGui::Separator();
