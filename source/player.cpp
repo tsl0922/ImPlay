@@ -2,8 +2,11 @@
 #include <imgui_internal.h>
 #include <nfd.hpp>
 #include <algorithm>
-#include <cstdio>
+#include <iostream>
 #include <cstring>
+#include <fmt/core.h>
+#include <fmt/format.h>
+#include <fmt/chrono.h>
 #include "player.h"
 #include "fontawesome.h"
 
@@ -33,7 +36,7 @@ bool Player::init(int argc, char* argv[]) {
   optionParser.parse(argc, argv);
   for (auto& [key, value] : optionParser.options) {
     if (int err = mpv->option(key.c_str(), value.c_str()); err < 0) {
-      fprintf(stderr, "mpv: %s [%s=%s]\n", mpv_error_string(err), key.c_str(), value.c_str());
+      std::cerr << fmt::format("mpv: {} [{}={}]", mpv_error_string(err), key, value) << std::endl;
       return false;
     }
   }
@@ -80,7 +83,7 @@ void Player::setMouse(int button, int action, int mods) {
   s = mbtnMappings.find(button);
   if (s == actionMappings.end()) return;
   keys.push_back(s->second);
-  const std::string arg = join(keys, "+");
+  const std::string arg = fmt::format("{}", fmt::join(keys, "+"));
   mpv->commandv(cmd.c_str(), arg.c_str(), nullptr);
 }
 
@@ -117,7 +120,7 @@ void Player::setKey(int key, int scancode, int action, int mods) {
   std::vector<std::string> keys;
   translateMod(keys, mods);
   keys.push_back(name);
-  const std::string arg = join(keys, "+");
+  const std::string arg = fmt::format("{}", fmt::join(keys, "+"));
   mpv->commandv(cmd.c_str(), arg.c_str(), nullptr);
 }
 
@@ -256,10 +259,10 @@ void Player::drawTracklistMenu(const char* type, const char* prop) {
       if (strcmp(track.type, type) == 0) {
         std::string title;
         if (track.title == nullptr)
-          title = "Track " + std::to_string(track.id);
+          title = fmt::format("Track {}", track.id);
         else
           title = track.title;
-        if (track.lang != nullptr) title += " [" + std::string(track.lang) + "]";
+        if (track.lang != nullptr) title += fmt::format(" [{}]", track.lang);
         if (ImGui::MenuItemEx(title.c_str(), nullptr, nullptr, track.selected))
           mpv->property<int64_t, MPV_FORMAT_INT64>(prop, track.id);
       }
@@ -274,8 +277,7 @@ void Player::drawChapterlistMenu() {
     if (ImGui::MenuItemEx("Next", ICON_FA_ARROW_RIGHT)) mpv->command("add chapter 1");
     ImGui::Separator();
     for (auto& chapter : chapterlist) {
-      std::string title = chapter.title;
-      title += " [" + std::to_string(chapter.time) + "]";
+      std::string title = fmt::format("{} [{:%H:%M:%S}]", chapter.title, std::chrono::duration<int>((int)chapter.time));
       if (ImGui::MenuItemEx(title.c_str(), nullptr, nullptr, chapter.selected)) {
         mpv->commandv("seek", std::to_string(chapter.time).c_str(), "absolute", nullptr);
       }
@@ -301,7 +303,7 @@ void Player::drawPlaylistMenu() {
       else if (item.filename != nullptr)
         title = item.filename;
       else
-        title = "Item " + std::to_string(item.id);
+        title = fmt::format("Item {}", item.id);
       if (ImGui::MenuItemEx(title.c_str(), nullptr, nullptr, item.current || item.playing))
         mpv->property<int64_t, MPV_FORMAT_INT64>("playlist-pos-1", item.id);
     }
@@ -442,11 +444,8 @@ void Player::drawContextMenu() {
     }
     if (ImGui::BeginMenuEx("Profiles", ICON_FA_USER)) {
       for (auto& profile : profilelist) {
-        const char* name = profile.c_str();
-        if (ImGui::MenuItem(name)) {
-          std::string cmd = "show-text " + profile + "; apply-profile " + profile;
-          mpv->command(cmd.c_str());
-        }
+        if (ImGui::MenuItem(profile.c_str()))
+          mpv->command(fmt::format("show-text {}; apply-profile {}", profile, profile).c_str());
       }
       ImGui::EndMenu();
     }

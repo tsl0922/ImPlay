@@ -79,18 +79,6 @@ class Player {
   bool paused = false;
   bool loaded = false;
 
-  template <typename Range, typename Value = typename Range::value_type>
-  std::string join(Range const &elements, const char *const delimiter) {
-    std::ostringstream os;
-    auto b = begin(elements), e = end(elements);
-    if (b != e) {
-      std::copy(b, prev(e), std::ostream_iterator<Value>(os, delimiter));
-      b = prev(e);
-    }
-    if (b != e) os << *b;
-    return os.str();
-  }
-
   void translateMod(std::vector<std::string> &keys, int mods) {
     if (mods & GLFW_MOD_CONTROL) keys.push_back("Ctrl");
     if (mods & GLFW_MOD_ALT) keys.push_back("Alt");
