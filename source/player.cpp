@@ -7,6 +7,8 @@
 #include <fmt/core.h>
 #include <fmt/format.h>
 #include <fmt/chrono.h>
+#include <fmt/printf.h>
+#include <fmt/color.h>
 #include "player.h"
 #include "fontawesome.h"
 
@@ -36,7 +38,7 @@ bool Player::init(int argc, char* argv[]) {
   optionParser.parse(argc, argv);
   for (auto& [key, value] : optionParser.options) {
     if (int err = mpv->option(key.c_str(), value.c_str()); err < 0) {
-      std::cerr << fmt::format("mpv: {} [{}={}]", mpv_error_string(err), key, value) << std::endl;
+      fmt::print(fg(fmt::color::red), "mpv: {} [{}={}]\n", mpv_error_string(err), key, value);
       return false;
     }
   }
