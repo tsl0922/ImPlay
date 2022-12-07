@@ -55,7 +55,7 @@ void Player::draw() {
 
   ImGuiIO& io = ImGui::GetIO();
   if (io.KeyCtrl && io.KeyShift && ImGui::IsKeyDown(ImGuiKey_P)) showCommandPalette();
-  drawCommandPalette();
+  commandPalette.draw();
 
   drawContextMenu();
 }
@@ -140,13 +140,21 @@ void Player::showAbout() {
   }
 }
 
-void Player::showCommandPalette() { commandPalette.open = true; }
+void Player::showCommandPalette() {
+  commandPalette.show(bindinglist, [=, this](std::string cmd) { mpv->command(cmd.c_str()); });
+}
 
-void Player::drawCommandPalette() {
-  if (commandPalette.open) {
+void Player::CommandPalette::show(std::vector<Mpv::BindingItem>& bindinglist, Player::CommandHandler callback) {
+  this->bindinglist = bindinglist;
+  this->callback = callback;
+  open = true;
+}
+
+void Player::CommandPalette::draw() {
+  if (open) {
     ImGui::OpenPopup("##command_palette");
-    commandPalette.open = false;
-    commandPalette.justOpened = true;
+    open = false;
+    justOpened = true;
   }
 
   auto viewport = ImGui::GetMainViewport();
@@ -158,32 +166,30 @@ void Player::drawCommandPalette() {
   ImGui::SetNextWindowPos(ImVec2(pos.x + size.x * 0.5f, pos.y + 50.0f), ImGuiCond_Always, ImVec2(0.5f, 0.0f));
   if (ImGui::BeginPopup("##command_palette")) {
     if (ImGui::IsKeyDown(ImGuiKey_Escape)) ImGui::CloseCurrentPopup();
-    if (commandPalette.focusInput) {
+    if (focusInput) {
       auto textState = ImGui::GetInputTextState(ImGui::GetID("##command_input"));
-      if (textState != nullptr) {
-        textState->Stb.cursor = strlen(commandPalette.buffer.data());
-      }
+      if (textState != nullptr) textState->Stb.cursor = strlen(buffer.data());
       ImGui::SetKeyboardFocusHere(0);
-      commandPalette.focusInput = false;
+      focusInput = false;
     }
 
     ImGui::PushItemWidth(-1);
     ImGui::InputTextWithHint(
-        "##command_input", "TIP: Press Space to select result", commandPalette.buffer.data(),
-        commandPalette.buffer.size(), ImGuiInputTextFlags_CallbackEdit | ImGuiInputTextFlags_EnterReturnsTrue,
+        "##command_input", "TIP: Press Space to select result", buffer.data(), buffer.size(),
+        ImGuiInputTextFlags_CallbackEdit | ImGuiInputTextFlags_EnterReturnsTrue,
         [](ImGuiInputTextCallbackData* data) -> int {
-          auto p = static_cast<Player*>(data->UserData);
-          p->commandPalette.match(data->Buf, p->bindinglist);
+          auto cp = static_cast<Player::CommandPalette*>(data->UserData);
+          cp->match(data->Buf);
           return 0;
         },
         this);
     ImGui::PopItemWidth();
 
-    if (commandPalette.justOpened) {
-      commandPalette.focusInput = true;
-      commandPalette.match("", bindinglist);
-      std::memset(commandPalette.buffer.data(), 0x00, commandPalette.buffer.size());
-      commandPalette.justOpened = false;
+    if (justOpened) {
+      focusInput = true;
+      match("");
+      std::memset(buffer.data(), 0x00, buffer.size());
+      justOpened = false;
     }
 
     ImGui::Separator();
@@ -192,7 +198,7 @@ void Player::drawCommandPalette() {
     auto leftWidth = width * 0.75f;
     auto rightWidth = width * 0.25f;
     if (rightWidth < 200.0f) rightWidth = 200.0f;
-    for (const auto& match : commandPalette.matches) {
+    for (const auto& match : matches) {
       std::string title = match.comment;
       if (title.empty()) title = match.command;
       ImGui::SetNextItemWidth(leftWidth);
@@ -201,7 +207,7 @@ void Player::drawCommandPalette() {
       if (title.size() == charLimit) title += "...";
 
       ImGui::PushID(&match);
-      if (ImGui::Selectable("")) mpv->command(match.command.c_str());
+      if (ImGui::Selectable("")) callback(match.command);
       ImGui::SameLine();
       ImGui::Text("%s", title.c_str());
       if (ImGui::IsItemHovered(ImGuiHoveredFlags_DelayNormal)) ImGui::SetTooltip("%s", match.command.c_str());
@@ -217,7 +223,7 @@ void Player::drawCommandPalette() {
   }
 }
 
-void Player::CommandPalette::match(const std::string& input, std::vector<Mpv::BindingItem>& bindinglist) {
+void Player::CommandPalette::match(const std::string& input) {
   constexpr static auto MatchCommand = [](const std::string& input, const std::string& text) -> int {
     if (input.empty()) return 1;
     if (text.starts_with(input)) return 3;

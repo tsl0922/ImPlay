@@ -5,6 +5,7 @@
 #include <vector>
 #include <sstream>
 #include <iterator>
+#include <functional>
 
 namespace ImPlay {
 class Player {
@@ -25,6 +26,7 @@ class Player {
 
  private:
   enum class Theme { DARK, LIGHT, CLASSIC };
+  using CommandHandler = std::function<void(std::string)>;
 
   struct CommandMatch {
     std::string key;
@@ -38,14 +40,17 @@ class Player {
     bool focusInput = false;
     bool justOpened = false;
     std::vector<char> buffer = std::vector<char>(1024, 0x00);
+    std::vector<Mpv::BindingItem> bindinglist;
     std::vector<CommandMatch> matches;
+    CommandHandler callback;
 
-    void match(const std::string &input, std::vector<Mpv::BindingItem> &bindinglist);
+    void draw();
+    void show(std::vector<Mpv::BindingItem> &bindinglist, CommandHandler callback);
+    void match(const std::string &input);
   };
 
   void showAbout();
   void showCommandPalette();
-  void drawCommandPalette();
 
   void drawTracklistMenu(const char *type, const char *prop);
   void drawChapterlistMenu();
