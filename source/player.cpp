@@ -173,7 +173,7 @@ void Player::drawCommandPalette() {
         commandPalette.buffer.size(), ImGuiInputTextFlags_CallbackEdit | ImGuiInputTextFlags_EnterReturnsTrue,
         [](ImGuiInputTextCallbackData* data) -> int {
           auto p = static_cast<Player*>(data->UserData);
-          p->commandPalette.matches = p->getCommandMatches(data->Buf);
+          p->commandPalette.match(data->Buf, p->bindinglist);
           return 0;
         },
         this);
@@ -181,7 +181,7 @@ void Player::drawCommandPalette() {
 
     if (commandPalette.justOpened) {
       commandPalette.focusInput = true;
-      commandPalette.matches = getCommandMatches("");
+      commandPalette.match("", bindinglist);
       std::memset(commandPalette.buffer.data(), 0x00, commandPalette.buffer.size());
       commandPalette.justOpened = false;
     }
@@ -205,7 +205,9 @@ void Player::drawCommandPalette() {
       ImGui::SameLine();
       ImGui::Text("%s", title.c_str());
       ImGui::SameLine(ImGui::GetWindowWidth() - rightWidth);
-      ImGui::TextDisabled("%s", match.key.c_str());
+      ImGui::BeginDisabled();
+      ImGui::Button(match.key.c_str());
+      ImGui::EndDisabled();
       ImGui::PopID();
     }
     ImGui::EndChild();
@@ -214,7 +216,7 @@ void Player::drawCommandPalette() {
   }
 }
 
-std::vector<Player::CommandMatch> Player::getCommandMatches(const std::string& input) {
+void Player::CommandPalette::match(const std::string& input, std::vector<Mpv::BindingItem>& bindinglist) {
   constexpr static auto MatchCommand = [](const std::string& input, const std::string& text) -> int {
     if (input.empty()) return 1;
     if (text.starts_with(input)) return 3;
@@ -222,7 +224,7 @@ std::vector<Player::CommandMatch> Player::getCommandMatches(const std::string& i
     return 0;
   };
 
-  std::vector<Player::CommandMatch> matches;
+  matches.clear();
   for (auto& binding : bindinglist) {
     std::string key = binding.key ? binding.key : "";
     std::string command = binding.cmd ? binding.cmd : "";
@@ -232,14 +234,13 @@ std::vector<Player::CommandMatch> Player::getCommandMatches(const std::string& i
     if (score == 0) score = MatchCommand(input, command);
     if (score > 0) matches.push_back({key, command, comment, score});
   }
-  if (input.empty()) return matches;
+  if (input.empty()) return;
 
   std::sort(matches.begin(), matches.end(), [](const auto& a, const auto& b) {
     if (a.score != b.score) return a.score > b.score;
     if (a.comment != b.comment) return a.comment < b.comment;
     return a.command < b.command;
   });
-  return matches;
 }
 
 void Player::drawTracklistMenu(const char* type, const char* prop) {

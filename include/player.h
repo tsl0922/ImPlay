@@ -39,12 +39,13 @@ class Player {
     bool justOpened = false;
     std::vector<char> buffer = std::vector<char>(1024, 0x00);
     std::vector<CommandMatch> matches;
+
+    void match(const std::string &input, std::vector<Mpv::BindingItem> &bindinglist);
   };
 
   void showAbout();
   void showCommandPalette();
   void drawCommandPalette();
-  std::vector<CommandMatch> getCommandMatches(const std::string &input);
 
   void drawTracklistMenu(const char *type, const char *prop);
   void drawChapterlistMenu();
@@ -70,7 +71,7 @@ class Player {
   std::vector<Mpv::ChapterItem> chapterlist;
   std::vector<Mpv::BindingItem> bindinglist;
   std::vector<std::string> profilelist;
-  bool paused = true;
+  bool paused = false;
   bool loaded = false;
 
   template <typename Range, typename Value = typename Range::value_type>
