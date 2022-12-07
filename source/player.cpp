@@ -189,6 +189,7 @@ void Player::CommandPalette::draw() {
         },
         this);
     ImGui::PopItemWidth();
+    if (ImGui::IsItemFocused() && ImGui::IsKeyReleased(ImGuiKey_UpArrow)) focusInput = true;
 
     if (justOpened) {
       focusInput = true;
@@ -199,7 +200,7 @@ void Player::CommandPalette::draw() {
 
     ImGui::Separator();
 
-    ImGui::BeginChild("##command_matches");
+    ImGui::BeginChild("##command_matches", ImVec2(0, 0), false, ImGuiWindowFlags_NavFlattened);
     auto leftWidth = width * 0.75f;
     auto rightWidth = width * 0.25f;
     if (rightWidth < 200.0f) rightWidth = 200.0f;
@@ -316,9 +317,9 @@ void Player::drawPlaylistMenu() {
 void Player::drawContextMenu() {
   if (ImGui::IsMouseReleased(ImGuiMouseButton_Right) && !ImGui::IsWindowHovered(ImGuiHoveredFlags_AnyWindow) &&
       ImGui::GetTopMostPopupModal() == nullptr)
-    ImGui::OpenPopup("Context Menu");
+    ImGui::OpenPopup("##context_menu");
 
-  if (ImGui::BeginPopup("Context Menu", ImGuiWindowFlags_NoMove)) {
+  if (ImGui::BeginPopup("##context_menu", ImGuiWindowFlags_NoMove)) {
     if (ImGui::MenuItemEx(paused ? "Play" : "Pause", paused ? ICON_FA_PLAY : ICON_FA_PAUSE, "Space", false, loaded))
       mpv->command("cycle pause");
     if (ImGui::MenuItemEx("Stop", ICON_FA_STOP, nullptr, false, loaded)) mpv->command("stop");
