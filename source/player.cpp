@@ -204,6 +204,7 @@ void Player::drawCommandPalette() {
       if (ImGui::Selectable("")) mpv->command(match.command.c_str());
       ImGui::SameLine();
       ImGui::Text("%s", title.c_str());
+      if (ImGui::IsItemHovered(ImGuiHoveredFlags_DelayNormal)) ImGui::SetTooltip("%s", match.command.c_str());
       ImGui::SameLine(ImGui::GetWindowWidth() - rightWidth);
       ImGui::BeginDisabled();
       ImGui::Button(match.key.c_str());
