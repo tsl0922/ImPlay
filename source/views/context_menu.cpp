@@ -9,7 +9,7 @@
 namespace ImPlay::Views {
 ContextMenu::ContextMenu(Mpv *mpv) : View() {
   this->mpv = mpv;
-  setTheme(Theme::DARK);
+  setTheme(Theme::LIGHT);
 }
 
 void ContextMenu::draw() {
@@ -301,5 +301,11 @@ void ContextMenu::setTheme(Theme theme) {
       break;
   }
   this->theme = theme;
+
+  ImGuiStyle& style = ImGui::GetStyle();
+  style.PopupRounding = 5.0f;
+  style.WindowRounding = 5.0f;
+  style.WindowShadowSize = 50.0f;
+  style.Colors[ImGuiCol_WindowShadow] = ImVec4(0, 0, 0, 1.0f);
 }
 }  // namespace ImPlay::Views

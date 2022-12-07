@@ -1,7 +1,6 @@
 #include <queue>
 #include <mutex>
 #include <condition_variable>
-#include <functional>
 #include <GLFW/glfw3.h>
 #include "dispatch.h"
 
