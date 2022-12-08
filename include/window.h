@@ -16,7 +16,6 @@ class Window {
 
  private:
   void render();
-  void redraw();
 
   void initGLFW();
   void initImGui();

@@ -62,8 +62,7 @@ void Window::render() {
   glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
   glClear(GL_COLOR_BUFFER_BIT);
 
-  ImGuiViewport* viewport = ImGui::GetMainViewport();
-  player->render(viewport->WorkSize.x, viewport->WorkSize.y);
+  player->render(width, height);
   ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
   if (ImGui::GetIO().ConfigFlags & ImGuiConfigFlags_ViewportsEnable) {
@@ -72,12 +71,8 @@ void Window::render() {
     ImGui::RenderPlatformWindowsDefault();
     glfwMakeContextCurrent(backup_current_context);
   }
-  glfwSwapBuffers(window);
-}
 
-void Window::redraw() {
-  if (auto g = ImGui::GetCurrentContext(); g == nullptr || g->WithinFrameScope) return;
-  render();
+  glfwSwapBuffers(window);
 }
 
 void Window::initGLFW() {
@@ -112,14 +107,21 @@ void Window::initGLFW() {
   const GLFWvidmode* mode = glfwGetVideoMode(monitor);
   glfwSetWindowPos(window, (mode->width - width) / 2, (mode->height - height) / 2);
 
-  glfwSetFramebufferSizeCallback(window, [](GLFWwindow* window, int w, int h) { glViewport(0, 0, w, h); });
-  glfwSetWindowPosCallback(window, [](GLFWwindow* window, int x, int y) {
+  glfwSetFramebufferSizeCallback(window, [](GLFWwindow* window, int w, int h) {
     auto win = static_cast<Window*>(glfwGetWindowUserPointer(window));
-    win->redraw();
+    win->width = w;
+    win->height = h;
+    glViewport(0, 0, w, h);
+  });
+  glfwSetWindowPosCallback(window, [](GLFWwindow* window, int x, int y) {
+    if (auto g = ImGui::GetCurrentContext(); g == nullptr || g->WithinFrameScope) return;
+    auto win = static_cast<Window*>(glfwGetWindowUserPointer(window));
+    win->render();
   });
   glfwSetWindowSizeCallback(window, [](GLFWwindow* window, int w, int h) {
+    if (auto g = ImGui::GetCurrentContext(); g == nullptr || g->WithinFrameScope) return;
     auto win = static_cast<Window*>(glfwGetWindowUserPointer(window));
-    win->redraw();
+    win->render();
   });
   glfwSetCursorPosCallback(window, [](GLFWwindow* window, double x, double y) {
     if (ImGui::GetIO().WantCaptureMouse) return;
