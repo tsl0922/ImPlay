@@ -2,6 +2,8 @@
 #include <imgui_internal.h>
 #include <imgui_impl_glfw.h>
 #include <imgui_impl_opengl3.h>
+#include <fonts/fontawesome.h>
+#include <fonts/unifont.h>
 #define GL_SILENCE_DEPRECATION
 #if defined(IMGUI_IMPL_OPENGL_ES2)
 #include <GLES2/gl2.h>
@@ -9,7 +11,6 @@
 #include <GLFW/glfw3.h>
 #include <iostream>
 #include "window.h"
-#include "fontawesome.h"
 
 namespace ImPlay {
 Window::Window(const char* title, int width, int height) {
@@ -178,8 +179,10 @@ void Window::initImGui() {
   io.Fonts->AddFontDefault(&cfg);
   cfg.MergeMode = true;
   ImWchar fontAwesomeRange[] = {ICON_MIN_FA, ICON_MAX_FA, 0};
+  ImWchar unifontRange[] = {0x0100, 0xFFF0, 0};
   io.Fonts->AddFontFromMemoryCompressedTTF(font_awesome_compressed_data, font_awesome_compressed_size, iconSize, &cfg,
                                            fontAwesomeRange);
+  io.Fonts->AddFontFromMemoryCompressedTTF(unifont_compressed_data, unifont_compressed_size, 0, &cfg, unifontRange);
   io.Fonts->Build();
 
   ImGui_ImplGlfw_InitForOpenGL(window, true);

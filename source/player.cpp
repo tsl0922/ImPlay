@@ -1,5 +1,6 @@
 #include <imgui.h>
 #include <imgui_internal.h>
+#include <fonts/fontawesome.h>
 #include <nfd.hpp>
 #include <algorithm>
 #include <iostream>
@@ -10,7 +11,6 @@
 #include <fmt/printf.h>
 #include <fmt/color.h>
 #include "player.h"
-#include "fontawesome.h"
 
 namespace ImPlay {
 Player::Player(const char* title) {

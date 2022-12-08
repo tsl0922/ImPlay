@@ -17,7 +17,8 @@ add_library(imgui OBJECT
         source/imgui_impl_opengl3.cpp
         source/imgui_tables.cpp
         source/imgui_widgets.cpp
-        source/fontawesome.c
+        source/fonts/fontawesome.c
+        source/fonts/unifont.c
 )
 
 target_include_directories(imgui PUBLIC include ${FREETYPE_INCLUDE_DIRS} ${GLFW_INCLUDE_DIRS})
