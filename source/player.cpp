@@ -273,8 +273,11 @@ void Player::CommandPalette::match(const std::string& input) {
 }
 
 void Player::drawTracklistMenu(const char* type, const char* prop) {
-  if (ImGui::BeginMenuEx("Tracks", ICON_FA_LIST, !tracklist.empty())) {
-    for (auto& track : tracklist) {
+  std::vector<Mpv::TrackItem> list;
+  std::copy_if(tracklist.begin(), tracklist.end(), std::back_inserter(list),
+               [type](const auto& track) { return strcmp(track.type, type) == 0; });
+  if (ImGui::BeginMenuEx("Tracks", ICON_FA_LIST, !list.empty())) {
+    for (auto& track : list) {
       if (strcmp(track.type, type) == 0) {
         std::string title;
         if (track.title == nullptr)
