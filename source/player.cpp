@@ -214,13 +214,29 @@ void Player::CommandPalette::draw() {
 
       ImGui::PushID(&match);
       if (ImGui::Selectable("")) callback(match.command);
+      if (ImGui::IsItemHovered(ImGuiHoveredFlags_DelayNormal)) ImGui::SetTooltip("%s", match.command.c_str());
+      ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(0, 6.0f));
+
+      if (!match.input.empty()) {
+        size_t pos = 0;
+        size_t len = match.input.length();
+        while ((pos = title.find(match.input)) != std::string::npos) {
+          ImGui::SameLine();
+          ImGui::Text("%s", title.substr(0, pos).c_str());
+          ImGui::SameLine();
+          ImGui::TextColored(ImVec4(0.2f, 0.6f, 1.0f, 1.0f), "%s", match.input.c_str());
+          title.erase(0, pos + len);
+        }
+      }
       ImGui::SameLine();
       ImGui::Text("%s", title.c_str());
-      if (ImGui::IsItemHovered(ImGuiHoveredFlags_DelayNormal)) ImGui::SetTooltip("%s", match.command.c_str());
+
       ImGui::SameLine(ImGui::GetWindowWidth() - rightWidth);
       ImGui::BeginDisabled();
       ImGui::Button(match.key.c_str());
       ImGui::EndDisabled();
+
+      ImGui::PopStyleVar();
       ImGui::PopID();
     }
     ImGui::EndChild();
@@ -245,7 +261,7 @@ void Player::CommandPalette::match(const std::string& input) {
     if (command.empty() || command == "ignore") continue;
     int score = MatchCommand(input, comment) * 2;
     if (score == 0) score = MatchCommand(input, command);
-    if (score > 0) matches.push_back({key, command, comment, score});
+    if (score > 0) matches.push_back({key, command, comment, input, score});
   }
   if (input.empty()) return;
 

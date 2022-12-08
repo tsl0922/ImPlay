@@ -32,6 +32,7 @@ class Player {
     std::string key;
     std::string command;
     std::string comment;
+    std::string input;
     int score;
   };
 
