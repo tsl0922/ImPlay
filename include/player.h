@@ -1,11 +1,11 @@
 #pragma once
 #include <GLFW/glfw3.h>
-#include "mpv.h"
 #include <map>
 #include <vector>
-#include <sstream>
-#include <iterator>
-#include <functional>
+#include "mpv.h"
+#include "views/about.h"
+#include "views/command_palette.h"
+#include "views/context_menu.h"
 
 namespace ImPlay {
 class Player {
@@ -25,60 +25,19 @@ class Player {
   void setDrop(int count, const char **paths);
 
  private:
-  enum class Theme { DARK, LIGHT, CLASSIC };
-  using CommandHandler = std::function<void(std::string)>;
-
-  struct CommandMatch {
-    std::string key;
-    std::string command;
-    std::string comment;
-    std::string input;
-    int score;
-  };
-
-  struct CommandPalette {
-    bool open = false;
-    bool focusInput = false;
-    bool justOpened = false;
-    std::vector<char> buffer = std::vector<char>(1024, 0x00);
-    std::vector<Mpv::BindingItem> bindinglist;
-    std::vector<CommandMatch> matches;
-    CommandHandler callback;
-
-    void draw();
-    void show(std::vector<Mpv::BindingItem> &bindinglist, CommandHandler callback);
-    void match(const std::string &input);
-  };
-
-  void showAbout();
-  void showCommandPalette();
-
-  void drawTracklistMenu(const char *type, const char *prop);
-  void drawChapterlistMenu();
-  void drawPlaylistMenu();
-  void drawContextMenu();
-
+  void initMpv();
   void openFile();
   void loadSub();
-  void initMpv();
-  void setTheme(Theme theme);
 
   GLFWwindow *window = nullptr;
+  const char *title;
+
   Mpv *mpv = nullptr;
   Mpv::OptionParser optionParser;
-  CommandPalette commandPalette;
-  const char *title;
-  Theme theme;
-  bool about = false;
-  bool demo = false;
 
-  std::vector<Mpv::TrackItem> tracklist;
-  std::vector<Mpv::PlayItem> playlist;
-  std::vector<Mpv::ChapterItem> chapterlist;
-  std::vector<Mpv::BindingItem> bindinglist;
-  std::vector<std::string> profilelist;
-  bool paused = false;
-  bool loaded = false;
+  Views::About *about;
+  Views::CommandPalette *commandPalette;
+  Views::ContextMenu *contextMenu;
 
   void translateMod(std::vector<std::string> &keys, int mods) {
     if (mods & GLFW_MOD_CONTROL) keys.push_back("Ctrl");

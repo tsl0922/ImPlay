@@ -61,12 +61,11 @@ void Mpv::OptionParser::parse(int argc, char **argv) {
   }
 }
 
-std::vector<Mpv::TrackItem> Mpv::toTracklist(mpv_node *node) {
+std::vector<Mpv::TrackItem> Mpv::tracklist(const char *type) {
+  mpv_node node = property<mpv_node, MPV_FORMAT_NODE>("track-list");
   std::vector<Mpv::TrackItem> tracks;
-  assert(node->format == MPV_FORMAT_NODE_ARRAY);
-  for (int i = 0; i < node->u.list->num; i++) {
-    auto track = node->u.list->values[i];
-    assert(track.format == MPV_FORMAT_NODE_MAP);
+  for (int i = 0; i < node.u.list->num; i++) {
+    auto track = node.u.list->values[i];
     Mpv::TrackItem t{0};
     for (int j = 0; j < track.u.list->num; j++) {
       auto key = track.u.list->keys[j];
@@ -83,44 +82,37 @@ std::vector<Mpv::TrackItem> Mpv::toTracklist(mpv_node *node) {
         t.selected = value.u.flag;
       }
     }
-    if (t.id != 0) tracks.push_back(t);
+    if (t.type != nullptr && strcmp(t.type, type) == 0) tracks.push_back(t);
   }
   return tracks;
 }
 
-std::vector<Mpv::PlayItem> Mpv::toPlaylist(mpv_node *node) {
+std::vector<Mpv::PlayItem> Mpv::playlist() {
+  mpv_node node = property<mpv_node, MPV_FORMAT_NODE>("playlist");
   std::vector<Mpv::PlayItem> playlist;
-  assert(node->format == MPV_FORMAT_NODE_ARRAY);
-  for (int i = 0; i < node->u.list->num; i++) {
-    auto item = node->u.list->values[i];
-    assert(item.format == MPV_FORMAT_NODE_MAP);
+  for (int i = 0; i < node.u.list->num; i++) {
+    auto item = node.u.list->values[i];
     Mpv::PlayItem t{0};
+    t.id = i;
     for (int j = 0; j < item.u.list->num; j++) {
       auto key = item.u.list->keys[j];
       auto value = item.u.list->values[j];
-      if (strcmp(key, "id") == 0) {
-        t.id = value.u.int64;
-      } else if (strcmp(key, "title") == 0) {
+      if (strcmp(key, "title") == 0) {
         t.title = value.u.string;
       } else if (strcmp(key, "filename") == 0) {
         t.filename = value.u.string;
-      } else if (strcmp(key, "current") == 0) {
-        t.current = value.u.flag;
-      } else if (strcmp(key, "playing") == 0) {
-        t.playing = value.u.flag;
       }
     }
-    if (t.id != 0) playlist.push_back(t);
+    playlist.push_back(t);
   }
   return playlist;
 }
 
-std::vector<Mpv::ChapterItem> Mpv::toChapterlist(mpv_node *node) {
+std::vector<Mpv::ChapterItem> Mpv::chapterlist() {
+  mpv_node node = property<mpv_node, MPV_FORMAT_NODE>("chapter-list");
   std::vector<Mpv::ChapterItem> chapters;
-  assert(node->format == MPV_FORMAT_NODE_ARRAY);
-  for (int i = 0; i < node->u.list->num; i++) {
-    auto item = node->u.list->values[i];
-    assert(item.format == MPV_FORMAT_NODE_MAP);
+  for (int i = 0; i < node.u.list->num; i++) {
+    auto item = node.u.list->values[i];
     Mpv::ChapterItem t{0};
     t.id = i;
     for (int j = 0; j < item.u.list->num; j++) {
@@ -132,17 +124,16 @@ std::vector<Mpv::ChapterItem> Mpv::toChapterlist(mpv_node *node) {
         t.time = value.u.double_;
       }
     }
-    if (t.time != 0) chapters.push_back(t);
+    chapters.push_back(t);
   }
   return chapters;
 }
 
-std::vector<Mpv::BindingItem> Mpv::toBindinglist(mpv_node *node) {
+std::vector<Mpv::BindingItem> Mpv::bindinglist() {
+  mpv_node node = property<mpv_node, MPV_FORMAT_NODE>("input-bindings");
   std::vector<Mpv::BindingItem> bindings;
-  assert(node->format == MPV_FORMAT_NODE_ARRAY);
-  for (int i = 0; i < node->u.list->num; i++) {
-    auto item = node->u.list->values[i];
-    assert(item.format == MPV_FORMAT_NODE_MAP);
+  for (int i = 0; i < node.u.list->num; i++) {
+    auto item = node.u.list->values[i];
     Mpv::BindingItem t{0};
     for (int j = 0; j < item.u.list->num; j++) {
       auto key = item.u.list->keys[j];
@@ -155,15 +146,15 @@ std::vector<Mpv::BindingItem> Mpv::toBindinglist(mpv_node *node) {
         t.comment = value.u.string;
       }
     }
-    if (t.cmd != nullptr) bindings.push_back(t);
+    bindings.push_back(t);
   }
   return bindings;
 }
 
-std::vector<std::string> Mpv::toProfilelist(const char *payload) {
-  using json = nlohmann::json;
+std::vector<std::string> Mpv::profilelist() {
+  const char *payload = property<const char *, MPV_FORMAT_STRING>("profile-list");
   std::vector<std::string> profiles;
-  auto j = json::parse(payload);
+  auto j = nlohmann::json::parse(payload);
   for (auto &elm : j) {
     auto name = elm["name"].get_ref<const std::string &>();
     if (name != "builtin-pseudo-gui" && name != "encoding" && name != "libmpv" && name != "pseudo-gui")

@@ -32,15 +32,12 @@ class Mpv {
     int64_t id;
     char *title;
     char *filename;
-    bool current;
-    bool playing;
   };
 
   struct ChapterItem {
     int64_t id;
     char *title;
     double time;
-    bool selected;
   };
 
   struct BindingItem {
@@ -53,11 +50,11 @@ class Mpv {
   void render(int w, int h);
   void pollEvent();
 
-  std::vector<TrackItem> toTracklist(mpv_node *node);
-  std::vector<PlayItem> toPlaylist(mpv_node *node);
-  std::vector<ChapterItem> toChapterlist(mpv_node *node);
-  std::vector<BindingItem> toBindinglist(mpv_node *node);
-  std::vector<std::string> toProfilelist(const char *payload);
+  std::vector<TrackItem> tracklist(const char *type);
+  std::vector<PlayItem> playlist();
+  std::vector<ChapterItem> chapterlist();
+  std::vector<BindingItem> bindinglist();
+  std::vector<std::string> profilelist();
 
   int command(const char *args) { return mpv_command_string(mpv, args); }
   int command(const char *args[]) { return mpv_command(mpv, args); }

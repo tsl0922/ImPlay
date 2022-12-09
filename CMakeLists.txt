@@ -12,6 +12,9 @@ add_subdirectory(third_party/imgui)
 add_subdirectory(third_party/nativefiledialog)
 
 add_executable(ImPlay
+    source/views/command_palette.cpp
+    source/views/context_menu.cpp
+    source/views/about.cpp
     source/mpv.cpp
     source/player.cpp
     source/window.cpp
