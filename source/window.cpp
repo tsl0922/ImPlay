@@ -113,6 +113,10 @@ void Window::initGLFW() {
     win->height = h;
     glViewport(0, 0, w, h);
   });
+  glfwSetWindowCloseCallback(window, [](GLFWwindow* window) {
+    auto win = static_cast<Window*>(glfwGetWindowUserPointer(window));
+    win->player->shutdown();
+  });
   glfwSetWindowPosCallback(window, [](GLFWwindow* window, int x, int y) {
     if (auto g = ImGui::GetCurrentContext(); g == nullptr || g->WithinFrameScope) return;
     auto win = static_cast<Window*>(glfwGetWindowUserPointer(window));

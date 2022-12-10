@@ -21,7 +21,7 @@ Mpv::Mpv() {
 
 Mpv::~Mpv() {
   if (renderCtx != nullptr) mpv_render_context_free(renderCtx);
-  if (mpv != nullptr) mpv_terminate_destroy(mpv);
+  mpv_terminate_destroy(mpv);
 }
 
 void Mpv::OptionParser::parse(int argc, char **argv) {

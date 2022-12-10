@@ -71,6 +71,8 @@ void Player::render(int w, int h) { mpv->render(w, h); }
 
 void Player::pollEvent() { mpv->pollEvent(); }
 
+void Player::shutdown() { mpv->command("quit"); }
+
 void Player::setCursor(double x, double y) {
   std::string xs = std::to_string((int)x);
   std::string ys = std::to_string((int)y);

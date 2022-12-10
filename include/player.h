@@ -17,6 +17,7 @@ class Player {
   void draw();
   void render(int w, int h);
   void pollEvent();
+  void shutdown();
 
   void setCursor(double x, double y);
   void setMouse(int button, int action, int mods);
