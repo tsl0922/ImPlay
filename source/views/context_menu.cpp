@@ -4,6 +4,7 @@
 #include <fmt/core.h>
 #include <fmt/format.h>
 #include <fmt/chrono.h>
+#include <filesystem>
 #include "views/context_menu.h"
 
 namespace ImPlay::Views {
@@ -227,10 +228,10 @@ void ContextMenu::drawPlaylist() {
       if (item.title != nullptr)
         title = item.title;
       else if (item.filename != nullptr)
-        title = item.filename;
+        title = std::filesystem::path(item.filename).filename().string();
       else
         title = fmt::format("Item {}", item.id);
-      if (ImGui::MenuItemEx(fmt::format("{}: {}", item.id, title).c_str(), nullptr, nullptr, item.id == pos))
+      if (ImGui::MenuItemEx(title.c_str(), nullptr, nullptr, item.id == pos))
         mpv->property<int64_t, MPV_FORMAT_INT64>("playlist-pos", item.id);
     }
     ImGui::EndMenu();
