@@ -93,7 +93,7 @@ void Window::initGLFW() {
   glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
   glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
 
-  window = glfwCreateWindow(width, height, title, NULL, NULL);
+  window = glfwCreateWindow(width, height, title, nullptr, nullptr);
   if (window == nullptr) {
     std::cout << "Failed to create window!" << std::endl;
     std::abort();

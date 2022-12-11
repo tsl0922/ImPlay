@@ -1,11 +1,10 @@
 #include <imgui.h>
-#include <imgui_internal.h>
 #include "views/about.h"
 
 namespace ImPlay::Views {
-About::About() {}
+About::About() = default;
 
-About::~About() {}
+About::~About() = default;
 
 void About::draw() {
   if (open) ImGui::OpenPopup("About");

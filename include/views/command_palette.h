@@ -6,7 +6,7 @@
 namespace ImPlay::Views {
 class CommandPalette {
  public:
-  CommandPalette(Mpv *mpv);
+  explicit CommandPalette(Mpv *mpv);
   ~CommandPalette();
 
   void draw();

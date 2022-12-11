@@ -170,7 +170,7 @@ void ContextMenu::draw() {
 }
 
 void ContextMenu::drawTracklist(const char *type, const char *prop) {
-  auto tracklist = mpv->tracklist(type);
+  auto tracklist = mpv->trackList(type);
 
   std::vector<Mpv::TrackItem> list;
   std::copy_if(tracklist.begin(), tracklist.end(), std::back_inserter(list),
@@ -193,7 +193,7 @@ void ContextMenu::drawTracklist(const char *type, const char *prop) {
 }
 
 void ContextMenu::drawChapterlist() {
-  auto chapterlist = mpv->chapterlist();
+  auto chapterlist = mpv->chapterList();
   auto pos = mpv->property<int64_t, MPV_FORMAT_INT64>("chapter");
 
   if (ImGui::BeginMenuEx("Chapters", ICON_FA_LIST, !chapterlist.empty())) {
@@ -239,7 +239,7 @@ void ContextMenu::drawPlaylist() {
 }
 
 void ContextMenu::drawProfilelist() {
-  auto profilelist = mpv->profilelist();
+  auto profilelist = mpv->profileList();
 
   if (ImGui::BeginMenuEx("Profiles", ICON_FA_USER)) {
     for (auto &profile : profilelist) {

@@ -50,11 +50,11 @@ class Mpv {
   void render(int w, int h);
   void pollEvent();
 
-  std::vector<TrackItem> tracklist(const char *type);
+  std::vector<TrackItem> trackList(const char *type);
   std::vector<PlayItem> playlist();
-  std::vector<ChapterItem> chapterlist();
-  std::vector<BindingItem> bindinglist();
-  std::vector<std::string> profilelist();
+  std::vector<ChapterItem> chapterList();
+  std::vector<BindingItem> bindingList();
+  std::vector<std::string> profileList();
 
   int command(const char *args) { return mpv_command_string(mpv, args); }
   int command(const char *args[]) { return mpv_command(mpv, args); }

@@ -1,7 +1,6 @@
 #include "mpv.h"
 #include <GLFW/glfw3.h>
 #include <nlohmann/json.hpp>
-#include <cassert>
 #include <stdexcept>
 #include <codecvt>
 #include <locale>
@@ -61,8 +60,8 @@ void Mpv::OptionParser::parse(int argc, char **argv) {
   }
 }
 
-std::vector<Mpv::TrackItem> Mpv::tracklist(const char *type) {
-  mpv_node node = property<mpv_node, MPV_FORMAT_NODE>("track-list");
+std::vector<Mpv::TrackItem> Mpv::trackList(const char *type) {
+  auto node = property<mpv_node, MPV_FORMAT_NODE>("track-list");
   std::vector<Mpv::TrackItem> tracks;
   for (int i = 0; i < node.u.list->num; i++) {
     auto track = node.u.list->values[i];
@@ -88,7 +87,7 @@ std::vector<Mpv::TrackItem> Mpv::tracklist(const char *type) {
 }
 
 std::vector<Mpv::PlayItem> Mpv::playlist() {
-  mpv_node node = property<mpv_node, MPV_FORMAT_NODE>("playlist");
+  auto node = property<mpv_node, MPV_FORMAT_NODE>("playlist");
   std::vector<Mpv::PlayItem> playlist;
   for (int i = 0; i < node.u.list->num; i++) {
     auto item = node.u.list->values[i];
@@ -108,8 +107,8 @@ std::vector<Mpv::PlayItem> Mpv::playlist() {
   return playlist;
 }
 
-std::vector<Mpv::ChapterItem> Mpv::chapterlist() {
-  mpv_node node = property<mpv_node, MPV_FORMAT_NODE>("chapter-list");
+std::vector<Mpv::ChapterItem> Mpv::chapterList() {
+  auto node = property<mpv_node, MPV_FORMAT_NODE>("chapter-list");
   std::vector<Mpv::ChapterItem> chapters;
   for (int i = 0; i < node.u.list->num; i++) {
     auto item = node.u.list->values[i];
@@ -129,12 +128,12 @@ std::vector<Mpv::ChapterItem> Mpv::chapterlist() {
   return chapters;
 }
 
-std::vector<Mpv::BindingItem> Mpv::bindinglist() {
-  mpv_node node = property<mpv_node, MPV_FORMAT_NODE>("input-bindings");
+std::vector<Mpv::BindingItem> Mpv::bindingList() {
+  auto node = property<mpv_node, MPV_FORMAT_NODE>("input-bindings");
   std::vector<Mpv::BindingItem> bindings;
   for (int i = 0; i < node.u.list->num; i++) {
     auto item = node.u.list->values[i];
-    Mpv::BindingItem t{0};
+    Mpv::BindingItem t{nullptr};
     for (int j = 0; j < item.u.list->num; j++) {
       auto key = item.u.list->keys[j];
       auto value = item.u.list->values[j];
@@ -151,7 +150,7 @@ std::vector<Mpv::BindingItem> Mpv::bindinglist() {
   return bindings;
 }
 
-std::vector<std::string> Mpv::profilelist() {
+std::vector<std::string> Mpv::profileList() {
   const char *payload = property<const char *, MPV_FORMAT_STRING>("profile-list");
   std::vector<std::string> profiles;
   auto j = nlohmann::json::parse(payload);
@@ -179,7 +178,7 @@ void Mpv::pollEvent() {
     if (event->event_id == MPV_EVENT_NONE) break;
     switch (event->event_id) {
       case MPV_EVENT_PROPERTY_CHANGE: {
-        mpv_event_property *prop = (mpv_event_property *)event->data;
+        auto *prop = (mpv_event_property *)event->data;
         for (const auto &[name, format, handler] : propertyEvents)
           if (name == prop->name && format == prop->format) handler(prop->data);
         break;

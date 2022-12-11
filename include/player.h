@@ -10,7 +10,7 @@
 namespace ImPlay {
 class Player {
  public:
-  Player(const char *title);
+  explicit Player(const char *title);
   ~Player();
 
   bool init(int argc, char *argv[]);
@@ -40,11 +40,11 @@ class Player {
   Views::CommandPalette *commandPalette;
   Views::ContextMenu *contextMenu;
 
-  void translateMod(std::vector<std::string> &keys, int mods) {
-    if (mods & GLFW_MOD_CONTROL) keys.push_back("Ctrl");
-    if (mods & GLFW_MOD_ALT) keys.push_back("Alt");
-    if (mods & GLFW_MOD_SHIFT) keys.push_back("Shift");
-    if (mods & GLFW_MOD_SUPER) keys.push_back("Meta");
+  static void translateMod(std::vector<std::string> &keys, int mods) {
+    if (mods & GLFW_MOD_CONTROL) keys.emplace_back("Ctrl");
+    if (mods & GLFW_MOD_ALT) keys.emplace_back("Alt");
+    if (mods & GLFW_MOD_SHIFT) keys.emplace_back("Shift");
+    if (mods & GLFW_MOD_SUPER) keys.emplace_back("Meta");
   }
 
   const std::map<int, std::string> keyMappings = {

@@ -7,7 +7,7 @@
 namespace ImPlay::Views {
 CommandPalette::CommandPalette(Mpv* mpv) { this->mpv = mpv; }
 
-CommandPalette::~CommandPalette() {}
+CommandPalette::~CommandPalette() = default;
 
 void CommandPalette::show() { open = true; }
 
@@ -48,7 +48,7 @@ void CommandPalette::draw() {
 void CommandPalette::drawInput() {
   if (focusInput) {
     auto textState = ImGui::GetInputTextState(ImGui::GetID("##command_input"));
-    if (textState != nullptr) textState->Stb.cursor = strlen(buffer.data());
+    if (textState != nullptr) textState->Stb.cursor = (int)strlen(buffer.data());
     ImGui::SetKeyboardFocusHere(0);
     focusInput = false;
   }
@@ -79,7 +79,7 @@ void CommandPalette::drawList(float width) {
     std::string title = match.comment;
     if (title.empty()) title = match.command;
     ImGui::SetNextItemWidth(lWidth);
-    int charLimit = lWidth / ImGui::GetFontSize();
+    int charLimit = (int)(lWidth / ImGui::GetFontSize());
     title = title.substr(0, charLimit);
     if (title.size() == charLimit) title += "...";
 
@@ -126,9 +126,9 @@ void CommandPalette::match(const std::string& input) {
   };
 
   matches.clear();
-  auto bindinglist = mpv->bindinglist();
+  auto bindingList = mpv->bindingList();
 
-  for (auto& binding : bindinglist) {
+  for (auto& binding : bindingList) {
     std::string key = binding.key ? binding.key : "";
     std::string command = binding.cmd ? binding.cmd : "";
     std::string comment = binding.comment ? binding.comment : "";

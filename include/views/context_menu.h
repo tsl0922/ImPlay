@@ -1,5 +1,6 @@
 #pragma once
 #include <map>
+#include <utility>
 #include "../mpv.h"
 #include "about.h"
 #include "command_palette.h"
@@ -14,11 +15,11 @@ class ContextMenu {
     OPEN_SUB,
   };
 
-  ContextMenu(Mpv *mpv);
+  explicit ContextMenu(Mpv *mpv);
   ~ContextMenu();
 
   void draw();
-  void setAction(Action action, std::function<void()> callback) { actionHandlers[action] = callback; }
+  void setAction(Action action, std::function<void()> callback) { actionHandlers[action] = std::move(callback); }
 
  private:
   enum class Theme { DARK, LIGHT, CLASSIC };
