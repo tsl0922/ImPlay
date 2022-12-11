@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.13)
-project(ImPlay)
+project(ImPlay VERSION 1.0.0)
 
 set(CMAKE_CXX_STANDARD 20)
 
@@ -11,7 +11,7 @@ add_subdirectory(third_party/json)
 add_subdirectory(third_party/imgui)
 add_subdirectory(third_party/nativefiledialog)
 
-add_executable(ImPlay
+set(SOURCE_FILES
     source/views/command_palette.cpp
     source/views/context_menu.cpp
     source/views/about.cpp
@@ -20,9 +20,18 @@ add_executable(ImPlay
     source/window.cpp
     source/main.cpp
 )
-target_include_directories(ImPlay PRIVATE include ${MPV_INCLUDE_DIRS})
+set(INCLUDE_DIRS include ${MPV_INCLUDE_DIRS})
+set(LINK_LIBS fmt json nfd imgui ${MPV_LIBRARIES})
+
+if(WIN32)
+    configure_file(${CMAKE_CURRENT_SOURCE_DIR}/resources/win32/app.rc.in ${CMAKE_CURRENT_BINARY_DIR}/app.rc @ONLY)
+    list(APPEND SOURCE_FILES ${CMAKE_CURRENT_BINARY_DIR}/app.rc)
+endif()
+
+add_executable(ImPlay ${SOURCE_FILES})
+target_include_directories(ImPlay PRIVATE ${INCLUDE_DIRS})
 target_link_directories(ImPlay PRIVATE ${MPV_LIBRARY_DIRS})
-target_link_libraries(ImPlay PRIVATE fmt json nfd imgui ${MPV_LIBRARIES})
+target_link_libraries(ImPlay PRIVATE ${LINK_LIBS})
 if(MINGW)
     target_link_options(ImPlay PRIVATE -mwindows)
 endif()
