@@ -21,7 +21,7 @@ Window::Window(const char* title, int width, int height) {
   initGLFW();
   initImGui();
 
-  player = new Player(title);
+  player = new Player(window, title);
 }
 
 Window::~Window() {
@@ -44,7 +44,13 @@ bool Window::run(int argc, char* argv[]) {
 
     player->pollEvent();
 
+    glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+    glClear(GL_COLOR_BUFFER_BIT);
+
+    player->render(width, height);
     render();
+
+    glfwSwapBuffers(window);
   }
 
   return true;
@@ -56,13 +62,8 @@ void Window::render() {
   ImGui::NewFrame();
 
   player->draw();
-
   ImGui::Render();
 
-  glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-  glClear(GL_COLOR_BUFFER_BIT);
-
-  player->render(width, height);
   ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
   if (ImGui::GetIO().ConfigFlags & ImGuiConfigFlags_ViewportsEnable) {
@@ -71,8 +72,6 @@ void Window::render() {
     ImGui::RenderPlatformWindowsDefault();
     glfwMakeContextCurrent(backup_current_context);
   }
-
-  glfwSwapBuffers(window);
 }
 
 void Window::initGLFW() {

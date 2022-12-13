@@ -10,7 +10,7 @@
 namespace ImPlay {
 class Player {
  public:
-  explicit Player(const char *title);
+  Player(GLFWwindow *window, const char *title);
   ~Player();
 
   bool init(int argc, char *argv[]);

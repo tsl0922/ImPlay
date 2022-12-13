@@ -6,9 +6,9 @@
 #include "player.h"
 
 namespace ImPlay {
-Player::Player(const char* title) {
+Player::Player(GLFWwindow* window, const char* title) {
+  this->window = window;
   this->title = title;
-  window = glfwGetCurrentContext();
   mpv = new Mpv();
   about = new Views::About();
   commandPalette = new Views::CommandPalette(mpv);

@@ -203,6 +203,8 @@ void Mpv::render(int w, int h) {
   mpv_render_context_render(renderCtx, params);
 }
 
+bool Mpv::wantRender() { return mpv_render_context_update(renderCtx) & MPV_RENDER_UPDATE_FRAME; }
+
 void Mpv::init() {
   if (mpv_initialize(mpv) < 0) throw std::runtime_error("could not initialize mpv context");
 

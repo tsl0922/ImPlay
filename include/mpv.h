@@ -48,6 +48,7 @@ class Mpv {
 
   void init();
   void render(int w, int h);
+  bool wantRender();
   void pollEvent();
 
   std::vector<TrackItem> trackList(const char *type);
