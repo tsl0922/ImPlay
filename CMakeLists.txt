@@ -3,8 +3,19 @@ project(ImPlay VERSION 1.0.0)
 
 set(CMAKE_CXX_STANDARD 20)
 
-find_package(PkgConfig REQUIRED)
-pkg_search_module(MPV REQUIRED mpv)
+if(WIN32)
+    add_library(mpv SHARED IMPORTED)
+    set_target_properties(mpv PROPERTIES
+        IMPORTED_LOCATION ${CMAKE_CURRENT_SOURCE_DIR}/third_party/mpv/lib/libmpv-2.dll
+        IMPORTED_IMPLIB ${CMAKE_CURRENT_SOURCE_DIR}/third_party/mpv/lib/libmpv.dll.a
+    )
+    set(MPV_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/third_party/mpv/include)
+    set(MPV_LIBRARY_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/third_party/mpv/lib)
+    set(MPV_LIBRARIES mpv)
+else()
+    find_package(PkgConfig REQUIRED)
+    pkg_search_module(MPV REQUIRED mpv)
+endif()
 
 add_subdirectory(third_party/fmt)
 add_subdirectory(third_party/json)
@@ -32,6 +43,11 @@ add_executable(ImPlay ${SOURCE_FILES})
 target_include_directories(ImPlay PRIVATE ${INCLUDE_DIRS})
 target_link_directories(ImPlay PRIVATE ${MPV_LIBRARY_DIRS})
 target_link_libraries(ImPlay PRIVATE ${LINK_LIBS})
-if(MINGW)
+if(WIN32)
     target_link_options(ImPlay PRIVATE -mwindows)
+    add_custom_command(TARGET ImPlay POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+            $<TARGET_FILE:mpv>
+            $<TARGET_FILE_DIR:ImPlay>
+    )
 endif()
