@@ -66,7 +66,7 @@ class Mpv {
   int property(const char *name, const char *data) { return mpv_set_property_string(mpv, name, data); }
   template <typename T, mpv_format format>
   T property(const char *name) {
-    T data;
+    T data{0};
     mpv_get_property(mpv, name, format, &data);
     return data;
   }

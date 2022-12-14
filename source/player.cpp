@@ -143,8 +143,7 @@ void Player::initMpv() {
   mpv->observeEvent(MPV_EVENT_VIDEO_RECONFIG, [this](void* data) {
     int width = (int)mpv->property<int64_t, MPV_FORMAT_INT64>("dwidth");
     int height = (int)mpv->property<int64_t, MPV_FORMAT_INT64>("dheight");
-    bool playing = mpv->property<int64_t, MPV_FORMAT_INT64>("playlist-playing-pos") != -1;
-    if (playing && width > 0 && height > 0) {
+    if (width > 0 && height > 0) {
       glfwSetWindowSize(window, width, height);
       glfwSetWindowAspectRatio(window, width, height);
     }
