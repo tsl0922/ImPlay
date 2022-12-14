@@ -9,10 +9,15 @@
 #include <cstdarg>
 #ifdef _WIN32
 #include <windows.h>
-#include <wchar.h>
+#include <cwchar>
 #endif
 
 namespace ImPlay {
+Mpv::Mpv(int64_t wid) : Mpv() {
+  this->wid = wid;
+  if (mpv_set_property(mpv, "wid", MPV_FORMAT_INT64, &wid) < 0) throw std::runtime_error("could not set mpv wid");
+}
+
 Mpv::Mpv() {
   mpv = mpv_create();
   if (!mpv) throw std::runtime_error("could not create mpv context");
@@ -192,9 +197,10 @@ void Mpv::pollEvent() {
 }
 
 void Mpv::render(int w, int h) {
+  if (renderCtx == nullptr) return;
+
   int flip_y{1};
   mpv_opengl_fbo mpfbo{0, w, h};
-
   mpv_render_param params[]{
       {MPV_RENDER_PARAM_OPENGL_FBO, &mpfbo},
       {MPV_RENDER_PARAM_FLIP_Y, &flip_y},
@@ -203,11 +209,16 @@ void Mpv::render(int w, int h) {
   mpv_render_context_render(renderCtx, params);
 }
 
-bool Mpv::wantRender() { return mpv_render_context_update(renderCtx) & MPV_RENDER_UPDATE_FRAME; }
+bool Mpv::wantRender() {
+  return renderCtx != nullptr && (mpv_render_context_update(renderCtx) & MPV_RENDER_UPDATE_FRAME);
+}
 
 void Mpv::init() {
   if (mpv_initialize(mpv) < 0) throw std::runtime_error("could not initialize mpv context");
+  if (wid == 0) initRender();
+}
 
+void Mpv::initRender() {
   mpv_opengl_init_params gl_init_params{
       [](void *ctx, const char *name) { return (void *)glfwGetProcAddress(name); },
       nullptr,

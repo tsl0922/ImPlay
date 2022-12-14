@@ -10,6 +10,7 @@ using EventHandler = std::function<void(void *)>;
 namespace ImPlay {
 class Mpv {
  public:
+  explicit Mpv(int64_t wid);
   Mpv();
   ~Mpv();
 
@@ -87,6 +88,9 @@ class Mpv {
   }
 
  private:
+  void initRender();
+
+  int64_t wid = 0;
   mpv_handle *mpv = nullptr;
   mpv_render_context *renderCtx = nullptr;
 
