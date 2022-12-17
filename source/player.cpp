@@ -18,13 +18,9 @@ Player::Player(GLFWwindow* window, const char* title) {
   contextMenu->setAction(Views::ContextMenu::Action::PALETTE, [this]() { commandPalette->show(); });
   contextMenu->setAction(Views::ContextMenu::Action::OPEN_FILE, [this]() { openFile(); });
   contextMenu->setAction(Views::ContextMenu::Action::OPEN_SUB, [this]() { loadSub(); });
-
-  NFD::Init();
 }
 
 Player::~Player() {
-  NFD::Quit();
-
   delete about;
   delete commandPalette;
   delete contextMenu;
@@ -68,6 +64,8 @@ void Player::draw() {
 }
 
 void Player::render(int w, int h) { mpv->render(w, h); }
+
+bool Player::wantRender() { return mpv->wantRender(); }
 
 void Player::pollEvent() { mpv->pollEvent(); }
 
@@ -203,6 +201,7 @@ void Player::initMpv() {
 }
 
 void Player::openFile() {
+  NFD::Init();
   const nfdpathset_t* outPaths;
   nfdfilteritem_t filterItem[] = {
       {"Videos Files", "mkv,mp4,avi,mov,flv,mpg,webm,wmv,ts,vob,264,265,asf,avc,avs,dav,h264,h265,hevc,m2t,m2ts"},
@@ -219,9 +218,11 @@ void Player::openFile() {
     }
     NFD::PathSet::Free(outPaths);
   }
+  NFD::Quit();
 }
 
 void Player::loadSub() {
+  NFD::Init();
   const nfdpathset_t* outPaths;
   nfdfilteritem_t filterItem[] = {
       {"Subtitle Files", "srt,ass,idx,sub,sup,ttxt,txt,ssa,smi,mks"},
@@ -237,5 +238,6 @@ void Player::loadSub() {
     }
     NFD::PathSet::Free(outPaths);
   }
+  NFD::Quit();
 }
 }  // namespace ImPlay

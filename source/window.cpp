@@ -10,6 +10,7 @@
 #endif
 #include <GLFW/glfw3.h>
 #include <iostream>
+#include <thread>
 #include "window.h"
 
 namespace ImPlay {
@@ -32,31 +33,42 @@ Window::~Window() {
 }
 
 bool Window::run(int argc, char* argv[]) {
+  glfwMakeContextCurrent(window);
   if (!player->init(argc, argv)) return false;
-
   glfwShowWindow(window);
+  glfwMakeContextCurrent(nullptr);
 
+  std::thread renderThread([&]() {
+    while (!glfwWindowShouldClose(window)) {
+      {
+        std::unique_lock<std::mutex> lk(renderMutex);
+        renderCv.wait(lk, [&]() { return wantRender; });
+        wantRender = false;
+      }
+      render();
+    }
+  });
+  renderThread.detach();
+
+  double time = glfwGetTime();
   while (!glfwWindowShouldClose(window)) {
-    if (!glfwGetWindowAttrib(window, GLFW_VISIBLE) || glfwGetWindowAttrib(window, GLFW_ICONIFIED))
-      glfwWaitEvents();
-    else
-      glfwPollEvents();
-
+    glfwWaitEvents();
     player->pollEvent();
 
-    glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
-    glClear(GL_COLOR_BUFFER_BIT);
-
-    player->render(width, height);
-    render();
-
-    glfwSwapBuffers(window);
+    if (glfwGetWindowAttrib(window, GLFW_VISIBLE) && !glfwGetWindowAttrib(window, GLFW_ICONIFIED)) {
+      if (player->wantRender()) requestRender();
+      if (glfwGetTime() - time > 0.02) {
+        requestRender();
+        time = glfwGetTime();
+      }
+    }
   }
 
   return true;
 }
 
 void Window::render() {
+  glfwMakeContextCurrent(window);
   ImGui_ImplOpenGL3_NewFrame();
   ImGui_ImplGlfw_NewFrame();
   ImGui::NewFrame();
@@ -64,14 +76,20 @@ void Window::render() {
   player->draw();
   ImGui::Render();
 
+  glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+  glClear(GL_COLOR_BUFFER_BIT);
+
+  player->render(width, height);
   ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
-  if (ImGui::GetIO().ConfigFlags & ImGuiConfigFlags_ViewportsEnable) {
-    GLFWwindow* backup_current_context = glfwGetCurrentContext();
-    ImGui::UpdatePlatformWindows();
-    ImGui::RenderPlatformWindowsDefault();
-    glfwMakeContextCurrent(backup_current_context);
-  }
+  glfwSwapBuffers(window);
+  glfwMakeContextCurrent(nullptr);
+}
+
+void Window::requestRender() {
+  std::unique_lock<std::mutex> lk(renderMutex);
+  wantRender = true;
+  renderCv.notify_one();
 }
 
 void Window::initGLFW() {
@@ -101,6 +119,7 @@ void Window::initGLFW() {
   glfwSetWindowUserPointer(window, this);
   glfwMakeContextCurrent(window);
   glfwSwapInterval(1);
+  glfwMakeContextCurrent(nullptr);
 
   GLFWmonitor* monitor = glfwGetPrimaryMonitor();
   const GLFWvidmode* mode = glfwGetVideoMode(monitor);
@@ -116,15 +135,13 @@ void Window::initGLFW() {
     auto win = static_cast<Window*>(glfwGetWindowUserPointer(window));
     win->player->shutdown();
   });
-  glfwSetWindowPosCallback(window, [](GLFWwindow* window, int x, int y) {
-    if (auto g = ImGui::GetCurrentContext(); g == nullptr || g->WithinFrameScope) return;
+  glfwSetWindowRefreshCallback(window, [](GLFWwindow* window) {
     auto win = static_cast<Window*>(glfwGetWindowUserPointer(window));
-    win->render();
+    win->requestRender();
   });
-  glfwSetWindowSizeCallback(window, [](GLFWwindow* window, int w, int h) {
-    if (auto g = ImGui::GetCurrentContext(); g == nullptr || g->WithinFrameScope) return;
+  glfwSetWindowPosCallback(window, [](GLFWwindow* window, int x, int y) {
     auto win = static_cast<Window*>(glfwGetWindowUserPointer(window));
-    win->render();
+    win->requestRender();
   });
   glfwSetCursorPosCallback(window, [](GLFWwindow* window, double x, double y) {
     if (ImGui::GetIO().WantCaptureMouse) return;
@@ -168,16 +185,10 @@ void Window::initImGui() {
   ImGuiIO& io = ImGui::GetIO();
   io.IniFilename = nullptr;
   io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
-  io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
-  io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
   io.DisplayFramebufferScale = ImVec2(scale, scale);
 
   ImGuiStyle& style = ImGui::GetStyle();
   style.ScaleAllSizes(scale);
-  if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable) {
-    style.WindowRounding = 0.0f;
-    style.Colors[ImGuiCol_WindowBg].w = 1.0f;
-  }
 
   ImFontConfig cfg;
   cfg.SizePixels = fontSize;
@@ -190,22 +201,28 @@ void Window::initImGui() {
   io.Fonts->AddFontFromMemoryCompressedTTF(unifont_compressed_data, unifont_compressed_size, 0, &cfg, unifontRange);
   io.Fonts->Build();
 
+  glfwMakeContextCurrent(window);
   ImGui_ImplGlfw_InitForOpenGL(window, true);
 #if defined(__APPLE__)
   ImGui_ImplOpenGL3_Init("#version 150");
 #else
   ImGui_ImplOpenGL3_Init("#version 130");
 #endif
+  glfwMakeContextCurrent(nullptr);
 }
 
 void Window::exitGLFW() {
+  glfwMakeContextCurrent(window);
   glfwDestroyWindow(window);
   glfwTerminate();
+  glfwMakeContextCurrent(nullptr);
 }
 
 void Window::exitImGui() {
+  glfwMakeContextCurrent(window);
   ImGui_ImplOpenGL3_Shutdown();
   ImGui_ImplGlfw_Shutdown();
   ImGui::DestroyContext();
+  glfwMakeContextCurrent(nullptr);
 }
 }  // namespace ImPlay

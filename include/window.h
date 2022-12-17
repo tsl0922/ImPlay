@@ -3,7 +3,8 @@
 #include <string>
 #include <vector>
 #include <array>
-
+#include <mutex>
+#include <condition_variable>
 #include "player.h"
 
 namespace ImPlay {
@@ -16,6 +17,7 @@ class Window {
 
  private:
   void render();
+  void requestRender();
 
   void initGLFW();
   void initImGui();
@@ -26,5 +28,9 @@ class Window {
   Player *player = nullptr;
   const char *title;
   int width, height;
+
+  std::mutex renderMutex;
+  std::condition_variable renderCv;
+  bool wantRender = true;
 };
 }  // namespace ImPlay

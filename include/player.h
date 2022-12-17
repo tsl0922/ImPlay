@@ -16,6 +16,7 @@ class Player {
   bool init(int argc, char *argv[]);
   void draw();
   void render(int w, int h);
+  bool wantRender();
   void pollEvent();
   void shutdown();
 

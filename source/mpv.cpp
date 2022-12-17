@@ -231,5 +231,10 @@ void Mpv::initRender() {
 
   if (mpv_render_context_create(&renderCtx, mpv, params) < 0)
     throw std::runtime_error("failed to initialize mpv GL context");
+
+  mpv_set_wakeup_callback(
+      mpv, [](void *ctx) { glfwPostEmptyEvent(); }, this);
+  mpv_render_context_set_update_callback(
+      renderCtx, [](void *ctx) { glfwPostEmptyEvent(); }, this);
 }
 }  // namespace ImPlay
