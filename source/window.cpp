@@ -235,10 +235,8 @@ void Window::initImGui() {
 }
 
 void Window::exitGLFW() {
-  glfwMakeContextCurrent(window);
   glfwDestroyWindow(window);
   glfwTerminate();
-  glfwMakeContextCurrent(nullptr);
 }
 
 void Window::exitImGui() {
