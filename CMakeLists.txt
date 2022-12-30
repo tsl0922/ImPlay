@@ -26,6 +26,7 @@ set(SOURCE_FILES
     source/views/command_palette.cpp
     source/views/context_menu.cpp
     source/views/about.cpp
+    source/dispatch.cpp
     source/mpv.cpp
     source/player.cpp
     source/window.cpp

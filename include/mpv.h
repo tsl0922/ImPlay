@@ -5,14 +5,14 @@
 #include <vector>
 #include <functional>
 
-using EventHandler = std::function<void(void *)>;
-
 namespace ImPlay {
 class Mpv {
  public:
   explicit Mpv(int64_t wid);
   Mpv();
   ~Mpv();
+
+  using EventHandler = std::function<void(void *)>;
 
   struct OptionParser {
     std::vector<std::pair<std::string, std::string>> options;

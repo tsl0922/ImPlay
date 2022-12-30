@@ -6,18 +6,17 @@
 #include "player.h"
 
 namespace ImPlay {
-Player::Player(GLFWwindow* window, const char* title) {
+Player::Player(GLFWwindow* window, const char* title, Dispatch* dispatch) {
   this->window = window;
+  this->dispatch = dispatch;
   this->title = title;
+
   mpv = new Mpv();
   about = new Views::About();
   commandPalette = new Views::CommandPalette(mpv);
   contextMenu = new Views::ContextMenu(mpv);
 
-  contextMenu->setAction(Views::ContextMenu::Action::ABOUT, [this]() { about->show(); });
-  contextMenu->setAction(Views::ContextMenu::Action::PALETTE, [this]() { commandPalette->show(); });
-  contextMenu->setAction(Views::ContextMenu::Action::OPEN_FILE, [this]() { openFile(); });
-  contextMenu->setAction(Views::ContextMenu::Action::OPEN_SUB, [this]() { loadSub(); });
+  initMenu();
 }
 
 Player::~Player() {
@@ -25,6 +24,15 @@ Player::~Player() {
   delete commandPalette;
   delete contextMenu;
   delete mpv;
+}
+
+void Player::initMenu() {
+  contextMenu->setAction(Views::ContextMenu::Action::ABOUT, [this]() { about->show(); });
+  contextMenu->setAction(Views::ContextMenu::Action::PALETTE, [this]() { commandPalette->show(); });
+  contextMenu->setAction(Views::ContextMenu::Action::OPEN_FILE,
+                         [this]() { dispatch->push([](void* data) { ((Player*)data)->openFile(); }, this); });
+  contextMenu->setAction(Views::ContextMenu::Action::OPEN_SUB,
+                         [this]() { dispatch->push([](void* data) { ((Player*)data)->loadSub(); }, this); });
 }
 
 bool Player::init(int argc, char* argv[]) {
@@ -136,7 +144,7 @@ void Player::setDrop(int count, const char** paths) {
 }
 
 void Player::initMpv() {
-  mpv->observeEvent(MPV_EVENT_SHUTDOWN, [this](void* data) { glfwSetWindowShouldClose(window, true); });
+  mpv->observeEvent(MPV_EVENT_SHUTDOWN, [this](void* data) { glfwSetWindowShouldClose(window, GLFW_TRUE); });
 
   mpv->observeEvent(MPV_EVENT_VIDEO_RECONFIG, [this](void* data) {
     int width = (int)mpv->property<int64_t, MPV_FORMAT_INT64>("dwidth");

@@ -5,6 +5,7 @@
 #include <array>
 #include <mutex>
 #include <condition_variable>
+#include "dispatch.h"
 #include "player.h"
 
 namespace ImPlay {
@@ -26,6 +27,7 @@ class Window {
 
   GLFWwindow *window = nullptr;
   Player *player = nullptr;
+  Dispatch *dispatch = nullptr;
   const char *title;
   int width, height;
 

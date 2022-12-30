@@ -22,10 +22,12 @@ Window::Window(const char* title, int width, int height) {
   initGLFW();
   initImGui();
 
-  player = new Player(window, title);
+  dispatch = new Dispatch();
+  player = new Player(window, title, dispatch);
 }
 
 Window::~Window() {
+  delete dispatch;
   delete player;
 
   exitImGui();
@@ -38,6 +40,7 @@ bool Window::run(int argc, char* argv[]) {
   glfwShowWindow(window);
   glfwMakeContextCurrent(nullptr);
 
+  volatile bool rendering = true;
   std::thread renderThread([&]() {
     while (!glfwWindowShouldClose(window)) {
       {
@@ -45,24 +48,31 @@ bool Window::run(int argc, char* argv[]) {
         renderCv.wait(lk, [&]() { return wantRender; });
         wantRender = false;
       }
+
       render();
     }
+
+    rendering = false;
   });
-  renderThread.detach();
 
   double time = glfwGetTime();
   while (!glfwWindowShouldClose(window)) {
     glfwWaitEvents();
     player->pollEvent();
 
+    if (player->wantRender()) requestRender();
     if (glfwGetWindowAttrib(window, GLFW_VISIBLE) && !glfwGetWindowAttrib(window, GLFW_ICONIFIED)) {
-      if (player->wantRender()) requestRender();
       if (glfwGetTime() - time > 0.02) {
         requestRender();
         time = glfwGetTime();
       }
     }
+
+    dispatch->process();
   }
+
+  while (rendering) dispatch->process();
+  renderThread.join();
 
   return true;
 }
@@ -81,14 +91,23 @@ void Window::render() {
 
   player->render(width, height);
   ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-
   glfwSwapBuffers(window);
   glfwMakeContextCurrent(nullptr);
+
+  if (ImGui::GetIO().ConfigFlags & ImGuiConfigFlags_ViewportsEnable) {
+    dispatch->run(
+        [&](void* data) {
+          ImGui::UpdatePlatformWindows();
+          ImGui::RenderPlatformWindowsDefault();
+        },
+        nullptr);
+  }
 }
 
 void Window::requestRender() {
   std::unique_lock<std::mutex> lk(renderMutex);
   wantRender = true;
+  lk.unlock();
   renderCv.notify_one();
 }
 
@@ -138,10 +157,12 @@ void Window::initGLFW() {
   glfwSetWindowRefreshCallback(window, [](GLFWwindow* window) {
     auto win = static_cast<Window*>(glfwGetWindowUserPointer(window));
     win->requestRender();
+    win->dispatch->process();
   });
   glfwSetWindowPosCallback(window, [](GLFWwindow* window, int x, int y) {
     auto win = static_cast<Window*>(glfwGetWindowUserPointer(window));
     win->requestRender();
+    win->dispatch->process();
   });
   glfwSetCursorPosCallback(window, [](GLFWwindow* window, double x, double y) {
     if (ImGui::GetIO().WantCaptureMouse) return;
@@ -185,6 +206,8 @@ void Window::initImGui() {
   ImGuiIO& io = ImGui::GetIO();
   io.IniFilename = nullptr;
   io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
+  io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
+  io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
   io.DisplayFramebufferScale = ImVec2(scale, scale);
 
   ImGuiStyle& style = ImGui::GetStyle();
