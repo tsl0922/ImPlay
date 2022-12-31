@@ -39,41 +39,42 @@ bool Window::run(int argc, char* argv[]) {
   glfwShowWindow(window);
   glfwMakeContextCurrent(nullptr);
 
-  volatile bool rendering = true;
+  std::atomic_bool shutdown = false;
+
   std::thread renderThread([&]() {
     while (!glfwWindowShouldClose(window)) {
       {
         std::unique_lock<std::mutex> lk(renderMutex);
-        renderCv.wait(lk, [&]() { return wantRender; });
+        auto timeout = std::chrono::milliseconds(waitTimeout);
+        renderCond.wait_for(lk, timeout, [&]() { return wantRender; });
         wantRender = false;
       }
-
       render();
     }
-
-    rendering = false;
+    shutdown = true;
   });
 
-  double time = glfwGetTime();
-  while (!glfwWindowShouldClose(window)) {
+  while (!shutdown) {
     glfwWaitEvents();
     player->waitEvent();
 
     if (player->wantRender()) requestRender();
-    if (glfwGetWindowAttrib(window, GLFW_VISIBLE) && !glfwGetWindowAttrib(window, GLFW_ICONIFIED)) {
-      if (glfwGetTime() - time > 0.02) {
-        requestRender();
-        time = glfwGetTime();
-      }
-    }
+
+    updateWaitTimeout();
 
     dispatch_process();
   }
 
-  while (rendering) dispatch_process();
   renderThread.join();
 
   return true;
+}
+
+void Window::updateWaitTimeout() {
+  bool glfwWantRender = glfwGetWindowAttrib(window, GLFW_VISIBLE) && !glfwGetWindowAttrib(window, GLFW_ICONIFIED);
+  bool imguiWantRender =
+      ImGui::IsPopupOpen(ImGuiID(0), ImGuiPopupFlags_AnyPopupId) || ImGui::GetCurrentContext()->WindowsActiveCount > 1;
+  waitTimeout = (glfwWantRender || imguiWantRender) ? defaultWaitTimeout : std::numeric_limits<int>::max();
 }
 
 void Window::render() {
@@ -107,7 +108,7 @@ void Window::requestRender() {
   std::unique_lock<std::mutex> lk(renderMutex);
   wantRender = true;
   lk.unlock();
-  renderCv.notify_one();
+  renderCond.notify_one();
 }
 
 void Window::initGLFW() {
