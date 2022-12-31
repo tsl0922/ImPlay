@@ -1,4 +1,3 @@
-#include "mpv.h"
 #include <GLFW/glfw3.h>
 #include <nlohmann/json.hpp>
 #include <stdexcept>
@@ -11,6 +10,8 @@
 #include <windows.h>
 #include <cwchar>
 #endif
+#include "mpv.h"
+#include "dispatch.h"
 
 namespace ImPlay {
 Mpv::Mpv(int64_t wid) : Mpv() {
@@ -177,9 +178,9 @@ int Mpv::commandv(const char *arg, ...) {
   return mpv_command(mpv, args.data());
 }
 
-void Mpv::pollEvent() {
+void Mpv::waitEvent(double timeout) {
   while (mpv) {
-    mpv_event *event = mpv_wait_event(mpv, 0);
+    mpv_event *event = mpv_wait_event(mpv, timeout);
     if (event->event_id == MPV_EVENT_NONE) break;
     switch (event->event_id) {
       case MPV_EVENT_PROPERTY_CHANGE: {
@@ -216,6 +217,8 @@ bool Mpv::wantRender() {
 void Mpv::init() {
   if (mpv_initialize(mpv) < 0) throw std::runtime_error("could not initialize mpv context");
   if (wid == 0) initRender();
+  mpv_set_wakeup_callback(
+      mpv, [](void *ctx) { dispatch_wakeup(); }, nullptr);
 }
 
 void Mpv::initRender() {
@@ -232,9 +235,7 @@ void Mpv::initRender() {
   if (mpv_render_context_create(&renderCtx, mpv, params) < 0)
     throw std::runtime_error("failed to initialize mpv GL context");
 
-  mpv_set_wakeup_callback(
-      mpv, [](void *ctx) { glfwPostEmptyEvent(); }, this);
   mpv_render_context_set_update_callback(
-      renderCtx, [](void *ctx) { glfwPostEmptyEvent(); }, this);
+      renderCtx, [](void *ctx) { dispatch_wakeup(); }, nullptr);
 }
 }  // namespace ImPlay

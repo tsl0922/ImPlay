@@ -1,38 +1,50 @@
+#include <queue>
+#include <mutex>
+#include <condition_variable>
+#include <functional>
 #include <GLFW/glfw3.h>
 #include "dispatch.h"
 
 namespace ImPlay {
-Dispatch::Dispatch() {}
+struct dispatch_item {
+  dispatch_fn func;
+  void *data;
+  bool completed;
+  bool asynchronous;
+};
 
-Dispatch::~Dispatch() {}
+std::queue<dispatch_item *> dispatch_queue;
+std::mutex dispatch_mutex;
+std::condition_variable dispatch_cond;
 
-void Dispatch::run(Fn func, void *data) {
-  auto item = new Dispatch::Item{func, data, false, false};
-  push(item);
+void dispatch_push(dispatch_item *item) {
+  std::unique_lock<std::mutex> lk(dispatch_mutex);
+  dispatch_queue.push(item);
+
+  dispatch_wakeup();
+}
+
+void dispatch_async(dispatch_fn func, void *data) {
+  auto item = new dispatch_item{func, data, false, true};
+  dispatch_push(item);
+}
+
+void dispatch_sync(dispatch_fn func, void *data) {
+  auto item = new dispatch_item{func, data, false, false};
+  dispatch_push(item);
 
   {
-    std::unique_lock<std::mutex> lk(mutex);
-    cv.wait(lk, [&]() { return item->completed; });
+    std::unique_lock<std::mutex> lk(dispatch_mutex);
+    dispatch_cond.wait(lk, [&]() { return item->completed; });
     delete item;
   }
 }
 
-void Dispatch::push(Fn func, void *data) {
-  auto item = new Dispatch::Item{func, data, false, true};
-  push(item);
-}
-
-void Dispatch::push(Item *item) {
-  std::unique_lock<std::mutex> lk(mutex);
-  queue.push(item);
-  glfwPostEmptyEvent();
-}
-
-void Dispatch::process() {
-  std::unique_lock<std::mutex> lk(mutex);
-  while (!queue.empty()) {
-    auto item = queue.front();
-    queue.pop();
+void dispatch_process() {
+  std::unique_lock<std::mutex> lk(dispatch_mutex);
+  while (!dispatch_queue.empty()) {
+    auto item = dispatch_queue.front();
+    dispatch_queue.pop();
 
     item->func(item->data);
 
@@ -42,8 +54,10 @@ void Dispatch::process() {
       item->completed = true;
 
     lk.unlock();
-    cv.notify_one();
+    dispatch_cond.notify_one();
     lk.lock();
   }
 }
+
+void dispatch_wakeup() { glfwPostEmptyEvent(); }
 }  // namespace ImPlay

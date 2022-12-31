@@ -12,6 +12,7 @@
 #include <iostream>
 #include <thread>
 #include "window.h"
+#include "dispatch.h"
 
 namespace ImPlay {
 Window::Window(const char* title, int width, int height) {
@@ -22,12 +23,10 @@ Window::Window(const char* title, int width, int height) {
   initGLFW();
   initImGui();
 
-  dispatch = new Dispatch();
-  player = new Player(window, title, dispatch);
+  player = new Player(window, title);
 }
 
 Window::~Window() {
-  delete dispatch;
   delete player;
 
   exitImGui();
@@ -58,7 +57,7 @@ bool Window::run(int argc, char* argv[]) {
   double time = glfwGetTime();
   while (!glfwWindowShouldClose(window)) {
     glfwWaitEvents();
-    player->pollEvent();
+    player->waitEvent();
 
     if (player->wantRender()) requestRender();
     if (glfwGetWindowAttrib(window, GLFW_VISIBLE) && !glfwGetWindowAttrib(window, GLFW_ICONIFIED)) {
@@ -68,10 +67,10 @@ bool Window::run(int argc, char* argv[]) {
       }
     }
 
-    dispatch->process();
+    dispatch_process();
   }
 
-  while (rendering) dispatch->process();
+  while (rendering) dispatch_process();
   renderThread.join();
 
   return true;
@@ -95,7 +94,7 @@ void Window::render() {
   glfwMakeContextCurrent(nullptr);
 
   if (ImGui::GetIO().ConfigFlags & ImGuiConfigFlags_ViewportsEnable) {
-    dispatch->run(
+    dispatch_sync(
         [&](void* data) {
           ImGui::UpdatePlatformWindows();
           ImGui::RenderPlatformWindowsDefault();
@@ -157,12 +156,12 @@ void Window::initGLFW() {
   glfwSetWindowRefreshCallback(window, [](GLFWwindow* window) {
     auto win = static_cast<Window*>(glfwGetWindowUserPointer(window));
     win->requestRender();
-    win->dispatch->process();
+    dispatch_process();
   });
   glfwSetWindowPosCallback(window, [](GLFWwindow* window, int x, int y) {
     auto win = static_cast<Window*>(glfwGetWindowUserPointer(window));
     win->requestRender();
-    win->dispatch->process();
+    dispatch_process();
   });
   glfwSetCursorPosCallback(window, [](GLFWwindow* window, double x, double y) {
     if (ImGui::GetIO().WantCaptureMouse) return;

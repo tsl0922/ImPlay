@@ -50,7 +50,7 @@ class Mpv {
   void init();
   void render(int w, int h);
   bool wantRender();
-  void pollEvent();
+  void waitEvent(double timeout = 0);
 
   std::vector<TrackItem> trackList(const char *type);
   std::vector<PlayItem> playlist();

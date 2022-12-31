@@ -2,7 +2,6 @@
 #include <GLFW/glfw3.h>
 #include <map>
 #include <vector>
-#include "dispatch.h"
 #include "mpv.h"
 #include "views/about.h"
 #include "views/command_palette.h"
@@ -11,14 +10,14 @@
 namespace ImPlay {
 class Player {
  public:
-  Player(GLFWwindow *window, const char *title, Dispatch *dispatch);
+  Player(GLFWwindow *window, const char *title);
   ~Player();
 
   bool init(int argc, char *argv[]);
   void draw();
   void render(int w, int h);
   bool wantRender();
-  void pollEvent();
+  void waitEvent();
   void shutdown();
 
   void setCursor(double x, double y);
@@ -34,11 +33,8 @@ class Player {
   void loadSub();
 
   GLFWwindow *window = nullptr;
-  Dispatch *dispatch = nullptr;
-  const char *title;
-
   Mpv *mpv = nullptr;
-  Mpv::OptionParser optionParser;
+  const char *title;
 
   Views::About *about;
   Views::CommandPalette *commandPalette;

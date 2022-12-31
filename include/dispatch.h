@@ -1,33 +1,18 @@
 #pragma once
-#include <queue>
-#include <mutex>
-#include <condition_variable>
 #include <functional>
 
 namespace ImPlay {
-class Dispatch {
- public:
-  Dispatch();
-  ~Dispatch();
+using dispatch_fn = std::function<void(void *)>;
 
-  using Fn = std::function<void(void *)>;
+// Submits a block object for execution and returns after that block finishes executing
+void dispatch_sync(dispatch_fn func, void *data);
 
-  void run(Fn func, void *data);
-  void push(Fn func, void *data);
-  void process();
+// Submits a block object for execution (on the next event loop) and returns immediately
+void dispatch_async(dispatch_fn func, void *data);
 
- private:
-  struct Item {
-    Fn func;
-    void *data;
-    bool completed;
-    bool asynchronous;
-  };
+// process all the tasks in the queue, should be called in the main thread only
+void dispatch_process();
 
-  void push(Item *item);
-
-  std::queue<Item*> queue;
-  std::mutex mutex;
-  std::condition_variable cv;
-};
+// wake up the processing thread (main thread)
+void dispatch_wakeup();
 }  // namespace ImPlay

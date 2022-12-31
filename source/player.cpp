@@ -4,11 +4,11 @@
 #include <fmt/color.h>
 #include <nfd.hpp>
 #include "player.h"
+#include "dispatch.h"
 
 namespace ImPlay {
-Player::Player(GLFWwindow* window, const char* title, Dispatch* dispatch) {
+Player::Player(GLFWwindow* window, const char* title) {
   this->window = window;
-  this->dispatch = dispatch;
   this->title = title;
 
   mpv = new Mpv();
@@ -30,9 +30,9 @@ void Player::initMenu() {
   contextMenu->setAction(Views::ContextMenu::Action::ABOUT, [this]() { about->show(); });
   contextMenu->setAction(Views::ContextMenu::Action::PALETTE, [this]() { commandPalette->show(); });
   contextMenu->setAction(Views::ContextMenu::Action::OPEN_FILE,
-                         [this]() { dispatch->push([](void* data) { ((Player*)data)->openFile(); }, this); });
+                         [this]() { dispatch_async([](void* data) { ((Player*)data)->openFile(); }, this); });
   contextMenu->setAction(Views::ContextMenu::Action::OPEN_SUB,
-                         [this]() { dispatch->push([](void* data) { ((Player*)data)->loadSub(); }, this); });
+                         [this]() { dispatch_async([](void* data) { ((Player*)data)->loadSub(); }, this); });
 }
 
 bool Player::init(int argc, char* argv[]) {
@@ -43,6 +43,7 @@ bool Player::init(int argc, char* argv[]) {
   mpv->option("input-default-bindings", "yes");
   mpv->option("input-vo-keyboard", "yes");
 
+  Mpv::OptionParser optionParser;
   optionParser.parse(argc, argv);
   for (auto& [key, value] : optionParser.options) {
     if (int err = mpv->option(key.c_str(), value.c_str()); err < 0) {
@@ -75,7 +76,7 @@ void Player::render(int w, int h) { mpv->render(w, h); }
 
 bool Player::wantRender() { return mpv->wantRender(); }
 
-void Player::pollEvent() { mpv->pollEvent(); }
+void Player::waitEvent() { mpv->waitEvent(); }
 
 void Player::shutdown() { mpv->command("quit"); }
 
