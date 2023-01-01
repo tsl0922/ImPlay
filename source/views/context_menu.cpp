@@ -184,7 +184,7 @@ void ContextMenu::drawTracklist(const char *type, const char *prop) {
     for (auto &track : list) {
       if (strcmp(track.type, type) == 0) {
         std::string title;
-        if (track.title == nullptr)
+        if (track.title == nullptr || track.title[0] == '\0')
           title = fmt::format("Track {}", track.id);
         else
           title = track.title;
@@ -235,12 +235,11 @@ void ContextMenu::drawPlaylist() {
     ImGui::Separator();
     for (auto &item : playlist) {
       std::string title;
-      if (item.title != nullptr)
+      if (item.title != nullptr && item.title[0] != '\0')
         title = item.title;
       else if (item.filename != nullptr)
         title = std::filesystem::path(item.filename).filename().string();
-      else
-        title = fmt::format("Item {}", item.id);
+      if (title.empty()) title = fmt::format("Item {}", item.id);
       if (ImGui::MenuItemEx(title.c_str(), nullptr, nullptr, item.id == pos))
         mpv->property<int64_t, MPV_FORMAT_INT64>("playlist-pos", item.id);
     }
