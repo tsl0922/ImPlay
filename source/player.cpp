@@ -2,7 +2,6 @@
 #include <imgui_internal.h>
 #include <fmt/printf.h>
 #include <fmt/color.h>
-#include <nfd.hpp>
 #include <filesystem>
 #include "player.h"
 #include "dispatch.h"
@@ -30,14 +29,77 @@ Player::~Player() {
 void Player::initMenu() {
   contextMenu->setAction(Views::ContextMenu::Action::ABOUT, [this]() { about->show(); });
   contextMenu->setAction(Views::ContextMenu::Action::PALETTE, [this]() { commandPalette->show(); });
-  contextMenu->setAction(Views::ContextMenu::Action::OPEN_FILE,
-                         [this]() { dispatch_async([](void* data) { ((Player*)data)->openFile(); }, this); });
-  contextMenu->setAction(Views::ContextMenu::Action::OPEN_DISK,
-                         [this]() { dispatch_async([](void* data) { ((Player*)data)->openDisk(); }, this); });
-  contextMenu->setAction(Views::ContextMenu::Action::OPEN_CLIPBOARD,
-                         [this]() { dispatch_async([](void* data) { ((Player*)data)->openClipboard(); }, this); });
-  contextMenu->setAction(Views::ContextMenu::Action::OPEN_SUB,
-                         [this]() { dispatch_async([](void* data) { ((Player*)data)->loadSub(); }, this); });
+  contextMenu->setAction(Views::ContextMenu::Action::OPEN_CLIPBOARD, [this]() {
+    dispatch_async(
+        [](void* data) {
+          auto player = static_cast<Player*>(data);
+          player->openClipboard([&](const char* path) {
+            if (path != nullptr && path[0] != '\0') {
+              player->mpv->commandv("loadfile", path, nullptr);
+              player->mpv->commandv("show-text", path, nullptr);
+            }
+          });
+        },
+        this);
+  });
+  contextMenu->setAction(Views::ContextMenu::Action::OPEN_FILE, [this]() {
+    dispatch_async(
+        [](void* data) {
+          auto player = static_cast<Player*>(data);
+          player->openMediaFiles([&](nfdu8char_t* path, int i) {
+            player->mpv->commandv("loadfile", path, i > 0 ? "append-play" : "replace", nullptr);
+          });
+        },
+        this);
+  });
+  contextMenu->setAction(Views::ContextMenu::Action::OPEN_DISK, [this]() {
+    dispatch_async(
+        [](void* data) {
+          auto player = static_cast<Player*>(data);
+          player->openFolder([&](nfdu8char_t* path) {
+            if (std::filesystem::exists(std::filesystem::u8path(path) / "BDMV")) {
+              player->mpv->property("bluray-device", path);
+              player->mpv->commandv("loadfile", "bd://", nullptr);
+            } else {
+              player->mpv->property("dvd-device", path);
+              player->mpv->commandv("loadfile", "dvd://", nullptr);
+            }
+          });
+        },
+        this);
+  });
+  contextMenu->setAction(Views::ContextMenu::Action::OPEN_SUB, [this]() {
+    dispatch_async(
+        [](void* data) {
+          auto player = static_cast<Player*>(data);
+          player->openSubtitleFiles([&](nfdu8char_t* path, int i) {
+            player->mpv->commandv("sub-add", path, i > 0 ? "auto" : "select", nullptr);
+          });
+        },
+        this);
+  });
+  contextMenu->setAction(Views::ContextMenu::Action::PLAYLIST_ADD_FILE, [this]() {
+    dispatch_async(
+        [](void* data) {
+          auto player = static_cast<Player*>(data);
+          player->openMediaFiles(
+              [&](nfdu8char_t* path, int i) { player->mpv->commandv("loadfile", path, "append", nullptr); });
+        },
+        this);
+  });
+  contextMenu->setAction(Views::ContextMenu::Action::PLAYLIST_ADD_FOLDER, [this]() {
+    dispatch_async(
+        [](void* data) {
+          auto player = static_cast<Player*>(data);
+          player->openFolder([&](nfdu8char_t* path) {
+            for (const auto& entry : std::filesystem::recursive_directory_iterator(std::filesystem::u8path(path))) {
+              if (player->isMediaType(entry.path().extension().string()))
+                player->mpv->commandv("loadfile", entry.path().u8string().c_str(), "append", nullptr);
+            }
+          });
+        },
+        this);
+  });
 }
 
 bool Player::init(int argc, char* argv[]) {
@@ -216,69 +278,56 @@ void Player::initMpv() {
   });
 }
 
-void Player::openFile() {
+void Player::openFiles(std::vector<nfdu8filteritem_t> filters, std::function<void(nfdu8char_t*, int)> callback) {
   NFD::Init();
   const nfdpathset_t* outPaths;
-  nfdfilteritem_t filterItem[] = {
-      {"Videos Files", "mkv,mp4,avi,mov,flv,mpg,webm,wmv,ts,vob,264,265,asf,avc,avs,dav,h264,h265,hevc,m2t,m2ts"},
-      {"Audio Files", "mp3,flac,m4a,mka,mp2,ogg,opus,aac,ac3,dts,dtshd,dtshr,dtsma,eac3,mpa,mpc,thd,w64"},
-      {"Image Files", "jpg,bmp,png,gif,webp"},
-  };
-  if (NFD::OpenDialogMultiple(outPaths, filterItem, 3) == NFD_OKAY) {
+  if (NFD::OpenDialogMultiple(outPaths, filters.data(), filters.size()) == NFD_OKAY) {
     nfdpathsetsize_t numPaths;
     NFD::PathSet::Count(outPaths, numPaths);
     for (auto i = 0; i < numPaths; i++) {
       nfdchar_t* path;
       NFD::PathSet::GetPath(outPaths, i, path);
-      mpv->commandv("loadfile", path, i > 0 ? "append-play" : "replace", nullptr);
+      callback(path, i);
     }
     NFD::PathSet::Free(outPaths);
   }
   NFD::Quit();
 }
 
-void Player::openDisk() {
+void Player::openFolder(std::function<void(nfdu8char_t*)> callback) {
   NFD::Init();
   nfdchar_t* outPath;
   if (NFD::PickFolder(outPath) == NFD_OKAY) {
-    std::filesystem::path path(outPath);
-    if (std::filesystem::exists(path / "BDMV")) {
-      mpv->property("bluray-device", outPath);
-      mpv->commandv("loadfile", "bd://", nullptr);
-    } else {
-      mpv->property("dvd-device", outPath);
-      mpv->commandv("loadfile", "dvd://", nullptr);
-    }
+    callback(outPath);
     NFD::FreePath(outPath);
   }
   NFD::Quit();
 }
 
-void Player::openClipboard() {
-  const char* text = glfwGetClipboardString(window);
-  if (text) {
-    mpv->commandv("loadfile", text, nullptr);
-    mpv->commandv("show-text", text, nullptr);
-  }
+void Player::openClipboard(std::function<void(const char*)> callback) { callback(glfwGetClipboardString(window)); }
+
+void Player::openMediaFiles(std::function<void(nfdu8char_t*, int)> callback) {
+  return openFiles(
+      {
+          {"Videos Files", fmt::format("{}", fmt::join(videoTypes, ",")).c_str()},
+          {"Audio Files", fmt::format("{}", fmt::join(audioTypes, ",")).c_str()},
+      },
+      callback);
 }
 
-void Player::loadSub() {
-  NFD::Init();
-  const nfdpathset_t* outPaths;
-  nfdfilteritem_t filterItem[] = {
-      {"Subtitle Files", "srt,ass,idx,sub,sup,ttxt,txt,ssa,smi,mks"},
-  };
-  if (NFD::OpenDialogMultiple(outPaths, filterItem, 1) == NFD_OKAY) {
-    nfdpathsetsize_t numPaths;
-    NFD::PathSet::Count(outPaths, numPaths);
-    for (auto i = 0; i < numPaths; i++) {
-      nfdchar_t* path;
-      NFD::PathSet::GetPath(outPaths, i, path);
-      mpv->commandv("sub-add", path, i > 0 ? "auto" : "select", nullptr);
-      NFD::PathSet::FreePath(path);
-    }
-    NFD::PathSet::Free(outPaths);
-  }
-  NFD::Quit();
+void Player::openSubtitleFiles(std::function<void(nfdu8char_t*, int)> callback) {
+  return openFiles(
+      {
+          {"Subtitle Files", fmt::format("{}", fmt::join(subtitleTypes, ",")).c_str()},
+      },
+      callback);
+}
+
+bool Player::isMediaType(std::string ext) {
+  if (ext.empty()) return false;
+  if (ext[0] == '.') ext = ext.substr(1);
+  if (std::find(videoTypes.begin(), videoTypes.end(), ext) != videoTypes.end()) return true;
+  if (std::find(audioTypes.begin(), audioTypes.end(), ext) != audioTypes.end()) return true;
+  return false;
 }
 }  // namespace ImPlay

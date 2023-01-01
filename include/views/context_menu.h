@@ -15,6 +15,8 @@ class ContextMenu {
     OPEN_DISK,
     OPEN_CLIPBOARD,
     OPEN_SUB,
+    PLAYLIST_ADD_FILE,
+    PLAYLIST_ADD_FOLDER,
   };
 
   explicit ContextMenu(Mpv *mpv);

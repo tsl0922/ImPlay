@@ -165,7 +165,7 @@ void ContextMenu::draw() {
     }
     ImGui::Separator();
     if (ImGui::BeginMenuEx("Open", ICON_FA_FOLDER_OPEN)) {
-      if (ImGui::MenuItemEx("Open Files..", ICON_FA_FOLDER_OPEN)) action(Action::OPEN_FILE);
+      if (ImGui::MenuItemEx("Open Files..", ICON_FA_FILE)) action(Action::OPEN_FILE);
       if (ImGui::MenuItemEx("Open DVD/Blu-ray folder", ICON_FA_COMPACT_DISC)) action(Action::OPEN_DISK);
       if (ImGui::MenuItemEx("Open from clipboard", ICON_FA_CLIPBOARD)) action(Action::OPEN_CLIPBOARD);
       ImGui::EndMenu();
@@ -238,10 +238,13 @@ void ContextMenu::drawPlaylist() {
   auto playlist = mpv->playlist();
   auto pos = mpv->property<int64_t, MPV_FORMAT_INT64>("playlist-pos");
 
-  if (ImGui::BeginMenuEx("Playlist", ICON_FA_LIST, !playlist.empty())) {
+  if (ImGui::BeginMenuEx("Playlist", ICON_FA_LIST)) {
     if (ImGui::MenuItemEx("Previous", ICON_FA_ARROW_LEFT, "<", false, playlist.size() > 1))
       mpv->command("playlist-prev");
     if (ImGui::MenuItemEx("Next", ICON_FA_ARROW_RIGHT, ">", false, playlist.size() > 1)) mpv->command("playlist-next");
+    ImGui::Separator();
+    if (ImGui::MenuItemEx("Add Files..", ICON_FA_FILE)) action(Action::PLAYLIST_ADD_FILE);
+    if (ImGui::MenuItemEx("Add Folder", ICON_FA_FOLDER_PLUS)) action(Action::PLAYLIST_ADD_FOLDER);
     ImGui::Separator();
     if (ImGui::MenuItem("Clear")) mpv->command("playlist-clear");
     if (ImGui::MenuItem("Shuffle")) mpv->command("playlist-shuffle");
@@ -252,7 +255,7 @@ void ContextMenu::drawPlaylist() {
       if (item.title != nullptr && item.title[0] != '\0')
         title = item.title;
       else if (item.filename != nullptr)
-        title = std::filesystem::path(item.filename).filename().string();
+        title = std::filesystem::u8path(item.filename).filename().string();
       if (title.empty()) title = fmt::format("Item {}", item.id + 1);
       if (ImGui::MenuItemEx(title.c_str(), nullptr, nullptr, item.id == pos))
         mpv->property<int64_t, MPV_FORMAT_INT64>("playlist-pos", item.id);
