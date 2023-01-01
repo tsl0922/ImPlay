@@ -206,7 +206,12 @@ void ContextMenu::drawChapterlist() {
     if (ImGui::MenuItemEx("Next", ICON_FA_ARROW_RIGHT)) mpv->command("add chapter 1");
     ImGui::Separator();
     for (auto &chapter : chapterlist) {
-      std::string title = fmt::format("{} [{:%H:%M:%S}]", chapter.title, std::chrono::duration<int>((int)chapter.time));
+      std::string title;
+      if (chapter.title == nullptr || chapter.title[0] == '\0')
+        title = fmt::format("Chapter {}", chapter.id);
+      else
+        title = chapter.title;
+      title = fmt::format("{} [{:%H:%M:%S}]", title, std::chrono::duration<int>((int)chapter.time));
       if (ImGui::MenuItemEx(title.c_str(), nullptr, nullptr, chapter.id == pos)) {
         mpv->commandv("seek", std::to_string(chapter.time).c_str(), "absolute", nullptr);
       }
