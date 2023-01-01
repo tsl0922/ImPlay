@@ -87,7 +87,7 @@ std::vector<Mpv::TrackItem> Mpv::trackList(const char *type) {
         t.selected = value.u.flag;
       }
     }
-    if (t.type != nullptr && strcmp(t.type, type) == 0) tracks.push_back(t);
+    if (t.type != nullptr && strcmp(t.type, type) == 0) tracks.emplace_back(t);
   }
   return tracks;
 }
@@ -108,7 +108,7 @@ std::vector<Mpv::PlayItem> Mpv::playlist() {
         t.filename = value.u.string;
       }
     }
-    playlist.push_back(t);
+    playlist.emplace_back(t);
   }
   return playlist;
 }
@@ -129,7 +129,7 @@ std::vector<Mpv::ChapterItem> Mpv::chapterList() {
         t.time = value.u.double_;
       }
     }
-    chapters.push_back(t);
+    chapters.emplace_back(t);
   }
   return chapters;
 }
@@ -151,7 +151,7 @@ std::vector<Mpv::BindingItem> Mpv::bindingList() {
         t.comment = value.u.string;
       }
     }
-    bindings.push_back(t);
+    bindings.emplace_back(t);
   }
   return bindings;
 }
@@ -163,9 +163,29 @@ std::vector<std::string> Mpv::profileList() {
   for (auto &elm : j) {
     auto name = elm["name"].get_ref<const std::string &>();
     if (name != "builtin-pseudo-gui" && name != "encoding" && name != "libmpv" && name != "pseudo-gui")
-      profiles.push_back(name);
+      profiles.emplace_back(name);
   }
   return profiles;
+}
+
+std::vector<Mpv::AudioDevice> Mpv::audioDeviceList() {
+  auto node = property<mpv_node, MPV_FORMAT_NODE>("audio-device-list");
+  std::vector<Mpv::AudioDevice> devices;
+  for (int i = 0; i < node.u.list->num; i++) {
+    auto item = node.u.list->values[i];
+    AudioDevice t{0};
+    for (int j = 0; j < item.u.list->num; j++) {
+      auto key = item.u.list->keys[j];
+      auto value = item.u.list->values[j];
+      if (strcmp(key, "name") == 0) {
+        t.name = value.u.string;
+      } else if (strcmp(key, "description") == 0) {
+        t.description = value.u.string;
+      }
+    }
+    devices.emplace_back(t);
+  }
+  return devices;
 }
 
 int Mpv::commandv(const char *arg, ...) {

@@ -26,6 +26,7 @@ class ContextMenu {
  private:
   enum class Theme { DARK, LIGHT, CLASSIC };
 
+  void drawAudioDeviceList();
   void drawTracklist(const char *type, const char *prop);
   void drawChapterlist();
   void drawPlaylist();

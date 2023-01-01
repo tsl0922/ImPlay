@@ -34,8 +34,10 @@ void ContextMenu::draw() {
     drawChapterlist();
     drawPlaylist();
     ImGui::Separator();
-    if (ImGui::BeginMenuEx("Audio", ICON_FA_FILE_AUDIO)) {
+    if (ImGui::BeginMenuEx("Audio", ICON_FA_VOLUME_UP)) {
       drawTracklist("audio", "aid");
+      drawAudioDeviceList();
+      ImGui::Separator();
       if (ImGui::MenuItemEx("Volume +2", ICON_FA_VOLUME_UP, "0")) mpv->command("add volume 2");
       if (ImGui::MenuItemEx("Volume -2", ICON_FA_VOLUME_DOWN, "9")) mpv->command("add volume -2");
       ImGui::Separator();
@@ -172,6 +174,18 @@ void ContextMenu::draw() {
     ImGui::EndPopup();
   }
   if (demo) ImGui::ShowDemoWindow(&demo);
+}
+
+void ContextMenu::drawAudioDeviceList() {
+  auto devices = mpv->audioDeviceList();
+  const char *name = mpv->property("audio-device");
+  if (ImGui::BeginMenuEx("Devices", ICON_FA_AUDIO_DESCRIPTION, !devices.empty())) {
+    for (auto &device : devices) {
+      if (ImGui::MenuItem(device.description, nullptr, strcmp(device.name, name) == 0))
+        mpv->property("audio-device", device.name);
+    }
+    ImGui::EndMenu();
+  }
 }
 
 void ContextMenu::drawTracklist(const char *type, const char *prop) {

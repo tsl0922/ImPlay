@@ -47,6 +47,11 @@ class Mpv {
     char *comment;
   };
 
+  struct AudioDevice {
+    char *name;
+    char *description;
+  };
+
   void init();
   void render(int w, int h);
   bool wantRender();
@@ -57,6 +62,7 @@ class Mpv {
   std::vector<ChapterItem> chapterList();
   std::vector<BindingItem> bindingList();
   std::vector<std::string> profileList();
+  std::vector<AudioDevice> audioDeviceList();
 
   int command(const char *args) { return mpv_command_string(mpv, args); }
   int command(const char *args[]) { return mpv_command(mpv, args); }
