@@ -56,6 +56,8 @@ class Mpv {
   void render(int w, int h);
   bool wantRender();
   void waitEvent(double timeout = 0);
+  bool paused();
+  bool playing();
 
   std::vector<TrackItem> trackList(const char *type);
   std::vector<PlayItem> playlist();

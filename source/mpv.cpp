@@ -234,6 +234,10 @@ bool Mpv::wantRender() {
   return renderCtx != nullptr && (mpv_render_context_update(renderCtx) & MPV_RENDER_UPDATE_FRAME);
 }
 
+bool Mpv::paused() { return (bool)property<int, MPV_FORMAT_FLAG>("pause"); }
+
+bool Mpv::playing() { return property<int64_t, MPV_FORMAT_INT64>("playlist-playing-pos") != -1; }
+
 void Mpv::init() {
   if (mpv_initialize(mpv) < 0) throw std::runtime_error("could not initialize mpv context");
   if (wid == 0) initRender();

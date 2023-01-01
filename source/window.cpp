@@ -73,7 +73,7 @@ bool Window::run(int argc, char* argv[]) {
 void Window::updateWaitTimeout() {
   bool shouldRender = (glfwGetWindowAttrib(window, GLFW_VISIBLE) && !glfwGetWindowAttrib(window, GLFW_ICONIFIED)) ||
                       (ImGui::GetIO().MetricsActiveWindows > 1);
-  int delta = ImGui::GetCurrentContext()->Viewports.size() > 1 ? 0 : (glfwGetTime() - lastUserInput) * 1000;
+  int delta = ImGui::GetCurrentContext()->Viewports.size() > 1 ? 0 : (glfwGetTime() - lastRenderAt) * 1000;
   waitTimeout = shouldRender ? std::max(defaultWaitTimeout, delta) : std::numeric_limits<int>::max();
 }
 
@@ -105,16 +105,14 @@ void Window::render() {
 }
 
 void Window::requestRender() {
+  if (!player->playing() && (glfwGetTime() - lastRenderAt < (double)defaultWaitTimeout / 1000)) return;
+
   std::unique_lock<std::mutex> lk(renderMutex);
   wantRender = true;
   lk.unlock();
   renderCond.notify_one();
-}
 
-void Window::wakeupRender() {
-  if (glfwGetTime() - lastUserInput < (double)defaultWaitTimeout / 1000) return;
-  lastUserInput = glfwGetTime();
-  requestRender();
+  lastRenderAt = glfwGetTime();
 }
 
 void Window::initGLFW() {
@@ -172,22 +170,22 @@ void Window::initGLFW() {
   });
   glfwSetCursorPosCallback(window, [](GLFWwindow* window, double x, double y) {
     auto win = static_cast<Window*>(glfwGetWindowUserPointer(window));
-    win->wakeupRender();
+    win->requestRender();
     if (!ImGui::GetIO().WantCaptureMouse) win->player->setCursor(x, y);
   });
   glfwSetMouseButtonCallback(window, [](GLFWwindow* window, int button, int action, int mods) {
     auto win = static_cast<Window*>(glfwGetWindowUserPointer(window));
-    win->wakeupRender();
+    win->requestRender();
     if (!ImGui::GetIO().WantCaptureMouse) win->player->setMouse(button, action, mods);
   });
   glfwSetScrollCallback(window, [](GLFWwindow* window, double x, double y) {
     auto win = static_cast<Window*>(glfwGetWindowUserPointer(window));
-    win->wakeupRender();
+    win->requestRender();
     if (!ImGui::GetIO().WantCaptureMouse) win->player->setScroll(x, y);
   });
   glfwSetKeyCallback(window, [](GLFWwindow* window, int key, int scancode, int action, int mods) {
     auto win = static_cast<Window*>(glfwGetWindowUserPointer(window));
-    win->wakeupRender();
+    win->requestRender();
     if (!ImGui::GetIO().WantCaptureKeyboard) win->player->setKey(key, scancode, action, mods);
   });
   glfwSetDropCallback(window, [](GLFWwindow* window, int count, const char* paths[]) {

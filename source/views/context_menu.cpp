@@ -20,8 +20,8 @@ void ContextMenu::draw() {
       ImGui::GetTopMostPopupModal() == nullptr)
     ImGui::OpenPopup("##context_menu");
 
-  bool paused = (bool)mpv->property<int, MPV_FORMAT_FLAG>("pause");
-  bool playing = mpv->property<int64_t, MPV_FORMAT_INT64>("playlist-playing-pos") != -1;
+  bool paused = mpv->paused();
+  bool playing = mpv->playing();
   if (ImGui::BeginPopup("##context_menu", ImGuiWindowFlags_NoMove)) {
     if (ImGui::MenuItemEx(paused ? "Play" : "Pause", paused ? ICON_FA_PLAY : ICON_FA_PAUSE, "Space", false, playing))
       mpv->command("cycle pause");

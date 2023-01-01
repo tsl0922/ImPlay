@@ -18,6 +18,7 @@ class Player {
   void render(int w, int h);
   bool wantRender();
   void waitEvent();
+  bool playing();
   void shutdown();
 
   void setCursor(double x, double y);

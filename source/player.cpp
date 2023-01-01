@@ -83,6 +83,8 @@ bool Player::wantRender() { return mpv->wantRender(); }
 
 void Player::waitEvent() { mpv->waitEvent(); }
 
+bool Player::playing() { return mpv->playing() && !mpv->paused(); }
+
 void Player::shutdown() { mpv->command("quit"); }
 
 void Player::setCursor(double x, double y) {

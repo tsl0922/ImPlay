@@ -19,7 +19,6 @@ class Window {
  private:
   void render();
   void requestRender();
-  void wakeupRender();
   void updateWaitTimeout();
 
   void initGLFW();
@@ -37,7 +36,7 @@ class Window {
   std::mutex renderMutex;
   std::condition_variable renderCond;
   std::atomic_int waitTimeout = defaultWaitTimeout;
-  double lastUserInput = 0;
+  double lastRenderAt = 0;
   bool wantRender = true;
 };
 }  // namespace ImPlay
