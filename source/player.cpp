@@ -3,6 +3,7 @@
 #include <fmt/printf.h>
 #include <fmt/color.h>
 #include <nfd.hpp>
+#include <filesystem>
 #include "player.h"
 #include "dispatch.h"
 
@@ -31,6 +32,10 @@ void Player::initMenu() {
   contextMenu->setAction(Views::ContextMenu::Action::PALETTE, [this]() { commandPalette->show(); });
   contextMenu->setAction(Views::ContextMenu::Action::OPEN_FILE,
                          [this]() { dispatch_async([](void* data) { ((Player*)data)->openFile(); }, this); });
+  contextMenu->setAction(Views::ContextMenu::Action::OPEN_DISK,
+                         [this]() { dispatch_async([](void* data) { ((Player*)data)->openDisk(); }, this); });
+  contextMenu->setAction(Views::ContextMenu::Action::OPEN_CLIPBOARD,
+                         [this]() { dispatch_async([](void* data) { ((Player*)data)->openClipboard(); }, this); });
   contextMenu->setAction(Views::ContextMenu::Action::OPEN_SUB,
                          [this]() { dispatch_async([](void* data) { ((Player*)data)->loadSub(); }, this); });
 }
@@ -228,6 +233,31 @@ void Player::openFile() {
     NFD::PathSet::Free(outPaths);
   }
   NFD::Quit();
+}
+
+void Player::openDisk() {
+  NFD::Init();
+  nfdchar_t* outPath;
+  if (NFD::PickFolder(outPath) == NFD_OKAY) {
+    std::filesystem::path path(outPath);
+    if (std::filesystem::exists(path / "BDMV")) {
+      mpv->property("bluray-device", outPath);
+      mpv->commandv("loadfile", "bd://", nullptr);
+    } else {
+      mpv->property("dvd-device", outPath);
+      mpv->commandv("loadfile", "dvd://", nullptr);
+    }
+    NFD::FreePath(outPath);
+  }
+  NFD::Quit();
+}
+
+void Player::openClipboard() {
+  const char* text = glfwGetClipboardString(window);
+  if (text) {
+    mpv->commandv("loadfile", text, nullptr);
+    mpv->commandv("show-text", text, nullptr);
+  }
 }
 
 void Player::loadSub() {

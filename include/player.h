@@ -30,6 +30,8 @@ class Player {
   void initMpv();
   void initMenu();
   void openFile();
+  void openDisk();
+  void openClipboard();
   void loadSub();
 
   GLFWwindow *window = nullptr;

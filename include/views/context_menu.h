@@ -12,6 +12,8 @@ class ContextMenu {
     ABOUT,
     PALETTE,
     OPEN_FILE,
+    OPEN_DISK,
+    OPEN_CLIPBOARD,
     OPEN_SUB,
   };
 
