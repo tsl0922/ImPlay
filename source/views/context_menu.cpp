@@ -208,7 +208,7 @@ void ContextMenu::drawChapterlist() {
     for (auto &chapter : chapterlist) {
       std::string title;
       if (chapter.title == nullptr || chapter.title[0] == '\0')
-        title = fmt::format("Chapter {}", chapter.id);
+        title = fmt::format("Chapter {}", chapter.id + 1);
       else
         title = chapter.title;
       title = fmt::format("{} [{:%H:%M:%S}]", title, std::chrono::duration<int>((int)chapter.time));
@@ -239,7 +239,7 @@ void ContextMenu::drawPlaylist() {
         title = item.title;
       else if (item.filename != nullptr)
         title = std::filesystem::path(item.filename).filename().string();
-      if (title.empty()) title = fmt::format("Item {}", item.id);
+      if (title.empty()) title = fmt::format("Item {}", item.id + 1);
       if (ImGui::MenuItemEx(title.c_str(), nullptr, nullptr, item.id == pos))
         mpv->property<int64_t, MPV_FORMAT_INT64>("playlist-pos", item.id);
     }
