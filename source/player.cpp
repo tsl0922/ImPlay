@@ -57,13 +57,24 @@ void Player::initMenu() {
         [](void* data) {
           auto player = static_cast<Player*>(data);
           player->openFolder([&](nfdu8char_t* path) {
-            if (std::filesystem::exists(std::filesystem::u8path(path) / "BDMV")) {
-              player->mpv->property("bluray-device", path);
-              player->mpv->commandv("loadfile", "bd://", nullptr);
-            } else {
-              player->mpv->property("dvd-device", path);
-              player->mpv->commandv("loadfile", "dvd://", nullptr);
-            }
+            if (std::filesystem::exists(std::filesystem::u8path(path) / u8"BDMV"))
+              player->openBluray(path);
+            else
+              player->openDvd(path);
+          });
+        },
+        this);
+  });
+  contextMenu->setAction(Views::ContextMenu::Action::OPEN_ISO, [this]() {
+    dispatch_async(
+        [](void* data) {
+          auto player = static_cast<Player*>(data);
+          player->openFile({{"ISO Image Files", "iso"}}, [&](nfdu8char_t* path) {
+            auto size = std::filesystem::file_size(std::filesystem::u8path(path));
+            if ((double)size / 1000 / 1000 / 1000 > 4.7)
+              player->openBluray(path);
+            else
+              player->openDvd(path);
           });
         },
         this);
@@ -278,6 +289,16 @@ void Player::initMpv() {
   });
 }
 
+void Player::openFile(std::vector<nfdu8filteritem_t> filters, std::function<void(nfdu8char_t*)> callback) {
+  NFD::Init();
+  nfdchar_t* outPath;
+  if (NFD::OpenDialog(outPath, filters.data(), filters.size()) == NFD_OKAY) {
+    callback(outPath);
+    NFD::FreePath(outPath);
+  }
+  NFD::Quit();
+}
+
 void Player::openFiles(std::vector<nfdu8filteritem_t> filters, std::function<void(nfdu8char_t*, int)> callback) {
   NFD::Init();
   const nfdpathset_t* outPaths;
@@ -316,11 +337,17 @@ void Player::openMediaFiles(std::function<void(nfdu8char_t*, int)> callback) {
 }
 
 void Player::openSubtitleFiles(std::function<void(nfdu8char_t*, int)> callback) {
-  return openFiles(
-      {
-          {"Subtitle Files", fmt::format("{}", fmt::join(subtitleTypes, ",")).c_str()},
-      },
-      callback);
+  return openFiles({{"Subtitle Files", fmt::format("{}", fmt::join(subtitleTypes, ",")).c_str()}}, callback);
+}
+
+void Player::openDvd(const char* path) {
+  mpv->property("dvd-device", path);
+  mpv->commandv("loadfile", "dvd://", nullptr);
+}
+
+void Player::openBluray(const char* path) {
+  mpv->property("bluray-device", path);
+  mpv->commandv("loadfile", "bd://", nullptr);
 }
 
 bool Player::isMediaType(std::string ext) {

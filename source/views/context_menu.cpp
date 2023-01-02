@@ -166,8 +166,10 @@ void ContextMenu::draw() {
     ImGui::Separator();
     if (ImGui::BeginMenuEx("Open", ICON_FA_FOLDER_OPEN)) {
       if (ImGui::MenuItemEx("Open Files..", ICON_FA_FILE)) action(Action::OPEN_FILE);
-      if (ImGui::MenuItemEx("Open DVD/Blu-ray folder", ICON_FA_COMPACT_DISC)) action(Action::OPEN_DISK);
-      if (ImGui::MenuItemEx("Open from clipboard", ICON_FA_CLIPBOARD)) action(Action::OPEN_CLIPBOARD);
+      if (ImGui::MenuItemEx("Open URL From Clipboard", ICON_FA_CLIPBOARD)) action(Action::OPEN_CLIPBOARD);
+      ImGui::Separator();
+      if (ImGui::MenuItemEx("Open DVD/Blu-ray Folder", ICON_FA_FOLDER_OPEN)) action(Action::OPEN_DISK);
+      if (ImGui::MenuItemEx("Open DVD/Blu-ray ISO Image", ICON_FA_COMPACT_DISC)) action(Action::OPEN_ISO);
       ImGui::EndMenu();
     }
     if (ImGui::MenuItemEx("Quit", ICON_FA_WINDOW_CLOSE, "q")) mpv->command("quit");

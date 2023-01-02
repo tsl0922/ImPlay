@@ -33,11 +33,17 @@ class Player {
   void initMpv();
   void initMenu();
 
+  void openFile(std::vector<nfdu8filteritem_t> filters, std::function<void(nfdu8char_t *)> callback);
   void openFiles(std::vector<nfdu8filteritem_t> filters, std::function<void(nfdu8char_t *, int)> callback);
   void openFolder(std::function<void(nfdu8char_t *)> callback);
   void openClipboard(std::function<void(const char *)> callback);
+
   void openMediaFiles(std::function<void(nfdu8char_t *, int)> callback);
   void openSubtitleFiles(std::function<void(nfdu8char_t *, int)> callback);
+
+  void openDvd(const char *path);
+  void openBluray(const char *path);
+
   bool isMediaType(std::string ext);
 
   GLFWwindow *window = nullptr;

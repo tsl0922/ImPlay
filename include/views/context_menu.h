@@ -13,6 +13,7 @@ class ContextMenu {
     PALETTE,
     OPEN_FILE,
     OPEN_DISK,
+    OPEN_ISO,
     OPEN_CLIPBOARD,
     OPEN_SUB,
     PLAYLIST_ADD_FILE,
