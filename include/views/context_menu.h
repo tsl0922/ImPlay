@@ -40,7 +40,7 @@ class ContextMenu {
 
   Mpv *mpv = nullptr;
   Theme theme;
-  bool demo = false;
+  bool metrics = false;
 
   std::map<Action, std::function<void()>> actionHandlers;
 };

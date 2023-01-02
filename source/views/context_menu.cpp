@@ -144,23 +144,30 @@ void ContextMenu::draw() {
     if (ImGui::BeginMenuEx("Tools", ICON_FA_HAMMER)) {
       if (ImGui::MenuItemEx("Screenshot", ICON_FA_FILE_IMAGE, "s")) mpv->command("async screenshot");
       if (ImGui::MenuItemEx("Window Border", ICON_FA_BORDER_NONE)) mpv->command("cycle border");
-      if (ImGui::MenuItemEx("Media Info", ICON_FA_INFO_CIRCLE, "i"))
-        mpv->command("script-binding stats/display-page-1");
-      if (ImGui::MenuItem("Show/Hide OSC", "DEL")) mpv->command("script-binding osc/visibility");
+      if (ImGui::BeginMenuEx("Show Stats", ICON_FA_INFO_CIRCLE)) {
+        if (ImGui::MenuItem("Media Info", "i")) mpv->command("script-binding stats/display-page-1");
+        if (ImGui::MenuItem("Extended Frame Timings")) mpv->command("script-binding stats/display-page-2");
+        if (ImGui::MenuItem("Cache Statistics")) mpv->command("script-binding stats/display-page-3");
+        if (ImGui::MenuItem("Internal performance info")) mpv->command("script-binding stats/display-page-0");
+        ImGui::EndMenu();
+      }
+      ImGui::Separator();
+      drawProfilelist();
+      if (ImGui::BeginMenuEx("Theme", ICON_FA_PALETTE)) {
+        if (ImGui::MenuItem("Dark", nullptr, theme == Theme::DARK)) setTheme(Theme::DARK);
+        if (ImGui::MenuItem("Light", nullptr, theme == Theme::LIGHT)) setTheme(Theme::LIGHT);
+        if (ImGui::MenuItem("Classic", nullptr, theme == Theme::CLASSIC)) setTheme(Theme::CLASSIC);
+        ImGui::EndMenu();
+      }
+      if (ImGui::MenuItem("Toggle OSC", "DEL")) mpv->command("script-binding osc/visibility");
+      ImGui::Separator();
+      ImGui::MenuItem("Metrics/Debugger", nullptr, &metrics);
       if (ImGui::MenuItem("Script Console", "`")) mpv->command("script-binding console/enable");
-      ImGui::EndMenu();
-    }
-    drawProfilelist();
-    if (ImGui::BeginMenuEx("Theme", ICON_FA_PALETTE)) {
-      if (ImGui::MenuItem("Dark", nullptr, theme == Theme::DARK)) setTheme(Theme::DARK);
-      if (ImGui::MenuItem("Light", nullptr, theme == Theme::LIGHT)) setTheme(Theme::LIGHT);
-      if (ImGui::MenuItem("Classic", nullptr, theme == Theme::CLASSIC)) setTheme(Theme::CLASSIC);
       ImGui::EndMenu();
     }
     if (ImGui::BeginMenuEx("Help", ICON_FA_QUESTION_CIRCLE)) {
       if (ImGui::MenuItemEx("About", ICON_FA_INFO_CIRCLE)) action(Action::ABOUT);
       if (ImGui::MenuItem("Keybindings")) mpv->command("script-binding stats/display-page-4");
-      ImGui::MenuItem("ImGui Demo", nullptr, &demo);
       ImGui::EndMenu();
     }
     ImGui::Separator();
@@ -175,7 +182,7 @@ void ContextMenu::draw() {
     if (ImGui::MenuItemEx("Quit", ICON_FA_WINDOW_CLOSE, "q")) mpv->command("quit");
     ImGui::EndPopup();
   }
-  if (demo) ImGui::ShowDemoWindow(&demo);
+  if (metrics) ImGui::ShowMetricsWindow(&metrics);
 }
 
 void ContextMenu::drawAudioDeviceList() {
@@ -192,7 +199,6 @@ void ContextMenu::drawAudioDeviceList() {
 
 void ContextMenu::drawTracklist(const char *type, const char *prop) {
   auto tracklist = mpv->trackList(type);
-
   std::vector<Mpv::TrackItem> list;
   std::copy_if(tracklist.begin(), tracklist.end(), std::back_inserter(list),
                [type](const auto &track) { return strcmp(track.type, type) == 0; });
@@ -216,7 +222,6 @@ void ContextMenu::drawTracklist(const char *type, const char *prop) {
 void ContextMenu::drawChapterlist() {
   auto chapterlist = mpv->chapterList();
   auto pos = mpv->property<int64_t, MPV_FORMAT_INT64>("chapter");
-
   if (ImGui::BeginMenuEx("Chapters", ICON_FA_LIST, !chapterlist.empty())) {
     if (ImGui::MenuItemEx("Previous", ICON_FA_ARROW_LEFT)) mpv->command("add chapter -1");
     if (ImGui::MenuItemEx("Next", ICON_FA_ARROW_RIGHT)) mpv->command("add chapter 1");
@@ -239,13 +244,12 @@ void ContextMenu::drawChapterlist() {
 void ContextMenu::drawPlaylist() {
   auto playlist = mpv->playlist();
   auto pos = mpv->property<int64_t, MPV_FORMAT_INT64>("playlist-pos");
-
   if (ImGui::BeginMenuEx("Playlist", ICON_FA_LIST)) {
     if (ImGui::MenuItemEx("Previous", ICON_FA_ARROW_LEFT, "<", false, playlist.size() > 1))
       mpv->command("playlist-prev");
     if (ImGui::MenuItemEx("Next", ICON_FA_ARROW_RIGHT, ">", false, playlist.size() > 1)) mpv->command("playlist-next");
     ImGui::Separator();
-    if (ImGui::MenuItemEx("Add Files..", ICON_FA_FILE)) action(Action::PLAYLIST_ADD_FILE);
+    if (ImGui::MenuItemEx("Add Files..", ICON_FA_FILE_UPLOAD)) action(Action::PLAYLIST_ADD_FILE);
     if (ImGui::MenuItemEx("Add Folder", ICON_FA_FOLDER_PLUS)) action(Action::PLAYLIST_ADD_FOLDER);
     ImGui::Separator();
     if (ImGui::MenuItem("Clear")) mpv->command("playlist-clear");
@@ -268,7 +272,6 @@ void ContextMenu::drawPlaylist() {
 
 void ContextMenu::drawProfilelist() {
   auto profilelist = mpv->profileList();
-
   if (ImGui::BeginMenuEx("Profiles", ICON_FA_USER)) {
     for (auto &profile : profilelist) {
       if (ImGui::MenuItem(profile.c_str()))
@@ -279,8 +282,7 @@ void ContextMenu::drawProfilelist() {
 }
 
 void ContextMenu::action(ContextMenu::Action action) {
-  auto s = actionHandlers.find(action);
-  if (s != actionHandlers.end()) s->second();
+  if (auto s = actionHandlers.find(action); s != actionHandlers.end()) s->second();
 }
 
 void ContextMenu::setTheme(Theme theme) {
