@@ -167,6 +167,7 @@ typedef struct _GLFWlibraryNS
     short int           keycodes[256];
     short int           scancodes[GLFW_KEY_LAST + 1];
     char*               clipboardString;
+    char**              openedFilenames;
     CGPoint             cascadePoint;
     // Where to place the cursor when re-enabled
     double              restoreCursorPosX, restoreCursorPosY;
