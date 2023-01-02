@@ -261,7 +261,7 @@ void ContextMenu::drawPlaylist() {
       if (item.title != nullptr && item.title[0] != '\0')
         title = item.title;
       else if (item.filename != nullptr)
-        title = std::filesystem::u8path(item.filename).filename().string();
+        title = std::filesystem::path(reinterpret_cast<char8_t *>(item.filename)).filename().string();
       if (title.empty()) title = fmt::format("Item {}", item.id + 1);
       if (ImGui::MenuItemEx(title.c_str(), nullptr, nullptr, item.id == pos))
         mpv->property<int64_t, MPV_FORMAT_INT64>("playlist-pos", item.id);

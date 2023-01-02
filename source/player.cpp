@@ -57,7 +57,8 @@ void Player::initMenu() {
         [](void* data) {
           auto player = static_cast<Player*>(data);
           player->openFolder([&](nfdu8char_t* path) {
-            if (std::filesystem::exists(std::filesystem::u8path(path) / u8"BDMV"))
+            auto fp = std::filesystem::path(reinterpret_cast<char8_t*>(path));
+            if (std::filesystem::exists(fp / u8"BDMV"))
               player->openBluray(path);
             else
               player->openDvd(path);
@@ -70,8 +71,8 @@ void Player::initMenu() {
         [](void* data) {
           auto player = static_cast<Player*>(data);
           player->openFile({{"ISO Image Files", "iso"}}, [&](nfdu8char_t* path) {
-            auto size = std::filesystem::file_size(std::filesystem::u8path(path));
-            if ((double)size / 1000 / 1000 / 1000 > 4.7)
+            auto fp = std::filesystem::path(reinterpret_cast<char8_t*>(path));
+            if ((double)std::filesystem::file_size(fp) / 1000 / 1000 / 1000 > 4.7)
               player->openBluray(path);
             else
               player->openDvd(path);
@@ -103,7 +104,8 @@ void Player::initMenu() {
         [](void* data) {
           auto player = static_cast<Player*>(data);
           player->openFolder([&](nfdu8char_t* path) {
-            for (const auto& entry : std::filesystem::recursive_directory_iterator(std::filesystem::u8path(path))) {
+            auto fp = std::filesystem::path(reinterpret_cast<char8_t*>(path));
+            for (const auto& entry : std::filesystem::recursive_directory_iterator(fp)) {
               if (player->isMediaType(entry.path().extension().string()))
                 player->mpv->commandv("loadfile", entry.path().u8string().c_str(), "append", nullptr);
             }
