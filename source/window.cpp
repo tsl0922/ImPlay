@@ -190,7 +190,7 @@ void Window::initGLFW() {
     win->requestRender();
     if (ImGui::GetIO().WantCaptureMouse) return;
     win->player->setCursor(x, y);
-    if (win->player->allowDrag() && glfwGetTime() - win->lastMousePressAt > 0.05) {
+    if (win->player->allowDrag() && win->height - y > 150 && glfwGetTime() - win->lastMousePressAt > 0.01) {
       if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS) glfwDragWindow(window);
     }
   });
