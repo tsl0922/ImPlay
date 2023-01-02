@@ -9,6 +9,15 @@
 #include <GLES2/gl2.h>
 #endif
 #include <GLFW/glfw3.h>
+#ifdef _WIN32
+#define GLFW_EXPOSE_NATIVE_WIN32
+#elif defined(__APPLE__)
+#define GLFW_EXPOSE_NATIVE_COCOA
+#else
+#define GLFW_EXPOSE_NATIVE_X11
+#define GLFW_EXPOSE_NATIVE_WAYLAND
+#endif
+#include <GLFW/glfw3native.h>
 #include <iostream>
 #include <thread>
 #include "window.h"
@@ -36,6 +45,14 @@ Window::~Window() {
 bool Window::run(int argc, char* argv[]) {
   glfwMakeContextCurrent(window);
   if (!player->init(argc, argv)) return false;
+#ifdef __APPLE__
+  const char** openedFileNames = glfwGetOpenedFilenames();
+  if (openedFileNames != nullptr) {
+    int count = 0;
+    while (openedFileNames[count] != nullptr) count++;
+    player->setDrop(count, openedFileNames);
+  }
+#endif
   glfwShowWindow(window);
   glfwMakeContextCurrent(nullptr);
 
