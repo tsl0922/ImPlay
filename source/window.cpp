@@ -75,9 +75,10 @@ bool Window::run(int argc, char* argv[]) {
     glfwWaitEvents();
     player->waitEvent();
 
-    if (player->wantRender()) requestRender();
-
-    updateWaitTimeout();
+    double delta = glfwGetTime() - lastRenderAt;
+    bool hasInputEvents = !ImGui::GetCurrentContext()->InputEventsQueue.empty();
+    waitTimeout = hasInputEvents ? std::max(defaultTimeout, (int)delta * 1000) : 1000;
+    if (hasInputEvents || player->wantRender()) requestRender();
 
     dispatch_process();
   }
@@ -85,13 +86,6 @@ bool Window::run(int argc, char* argv[]) {
   renderThread.join();
 
   return true;
-}
-
-void Window::updateWaitTimeout() {
-  bool hasInputEvents = !ImGui::GetCurrentContext()->InputEventsQueue.empty();
-  double delta = glfwGetTime() - lastRenderAt;
-  waitTimeout = hasInputEvents ? std::max(defaultTimeout, (int)delta * 1000) : 1000;
-  if (hasInputEvents) requestRender();
 }
 
 void Window::render() {

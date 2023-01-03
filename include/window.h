@@ -19,7 +19,6 @@ class Window {
  private:
   void render();
   void requestRender();
-  void updateWaitTimeout();
 
   void initGLFW();
   void initImGui();
