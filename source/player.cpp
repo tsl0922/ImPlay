@@ -66,7 +66,7 @@ void Player::draw() {
       ImGui::GetTopMostPopupModal() == nullptr)
     contextMenu->show();
 
-  if (about->isOpen()) about->draw();
+  about->draw();
   contextMenu->draw();
   commandPalette->draw();
 }
