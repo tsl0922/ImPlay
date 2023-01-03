@@ -1,10 +1,7 @@
-#include <imgui.h>
-#include <imgui_internal.h>
 #include <fmt/printf.h>
 #include <fmt/color.h>
 #include <filesystem>
 #include "player.h"
-#include "dispatch.h"
 
 namespace ImPlay {
 Player::Player(GLFWwindow* window, const char* title) : Views::View() {
@@ -13,23 +10,11 @@ Player::Player(GLFWwindow* window, const char* title) : Views::View() {
 
   mpv = new Mpv();
   cmd = new Command(window, mpv);
-  about = new Views::About();
-  commandPalette = new Views::CommandPalette(mpv);
-  contextMenu = new Views::ContextMenu(mpv);
-
-  initMenu();
 }
 
 Player::~Player() {
-  delete about;
-  delete commandPalette;
-  delete contextMenu;
   delete mpv;
-}
-
-void Player::initMenu() {
-  contextMenu->setAction(Views::ContextMenu::Action::ABOUT, [this]() { about->show(); });
-  contextMenu->setAction(Views::ContextMenu::Action::PALETTE, [this]() { commandPalette->show(); });
+  delete cmd;
 }
 
 bool Player::init(int argc, char* argv[]) {
@@ -60,17 +45,7 @@ bool Player::init(int argc, char* argv[]) {
   return true;
 }
 
-void Player::draw() {
-  ImGuiIO& io = ImGui::GetIO();
-  if (io.KeyCtrl && io.KeyShift && ImGui::IsKeyDown(ImGuiKey_P)) commandPalette->show();
-  if (ImGui::IsMouseReleased(ImGuiMouseButton_Right) && !ImGui::IsWindowHovered(ImGuiHoveredFlags_AnyWindow) &&
-      ImGui::GetTopMostPopupModal() == nullptr)
-    contextMenu->show();
-
-  about->draw();
-  contextMenu->draw();
-  commandPalette->draw();
-}
+void Player::draw() { cmd->draw(); }
 
 void Player::render(int w, int h) { mpv->render(w, h); }
 

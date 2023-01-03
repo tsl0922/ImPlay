@@ -138,7 +138,8 @@ void ContextMenu::draw() {
     ImGui::Separator();
     if (ImGui::MenuItemEx("Fullscreen", ICON_FA_EXPAND, "f")) mpv->command("cycle fullscreen");
     if (ImGui::MenuItemEx("Always Ontop", ICON_FA_ARROW_UP, "T")) mpv->command("cycle ontop");
-    if (ImGui::MenuItemEx("Command Palette", ICON_FA_SEARCH, "Ctrl+Shift+p")) action(Action::PALETTE);
+    if (ImGui::MenuItemEx("Command Palette", ICON_FA_SEARCH, "Ctrl+Shift+p"))
+      mpv->commandv("script-message-to", "implay", "command-palette", nullptr);
     ImGui::Separator();
     if (ImGui::BeginMenuEx("Tools", ICON_FA_HAMMER)) {
       if (ImGui::MenuItemEx("Screenshot", ICON_FA_FILE_IMAGE, "s")) mpv->command("async screenshot");
@@ -165,7 +166,8 @@ void ContextMenu::draw() {
       ImGui::EndMenu();
     }
     if (ImGui::BeginMenuEx("Help", ICON_FA_QUESTION_CIRCLE)) {
-      if (ImGui::MenuItemEx("About", ICON_FA_INFO_CIRCLE)) action(Action::ABOUT);
+      if (ImGui::MenuItemEx("About", ICON_FA_INFO_CIRCLE))
+        mpv->commandv("script-message-to", "implay", "about", nullptr);
       if (ImGui::MenuItem("Keybindings")) mpv->command("script-binding stats/display-page-4");
       ImGui::EndMenu();
     }
@@ -284,10 +286,6 @@ void ContextMenu::drawProfilelist() {
     }
     ImGui::EndMenu();
   }
-}
-
-void ContextMenu::action(ContextMenu::Action action) {
-  if (auto s = actionHandlers.find(action); s != actionHandlers.end()) s->second();
 }
 
 void ContextMenu::setTheme(Theme theme) {

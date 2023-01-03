@@ -3,14 +3,18 @@
 #include <GLFW/glfw3.h>
 #include "mpv.h"
 #include "views/view.h"
+#include "views/about.h"
+#include "views/context_menu.h"
+#include "views/command_palette.h"
 
 namespace ImPlay {
 class Command : public Views::View {
  public:
   Command(GLFWwindow *window, Mpv *mpv);
+  ~Command() override;
 
-  void execute(int num_args, const char **args);
   void draw() override;
+  void execute(int num_args, const char **args);
 
  private:
   void open();
@@ -29,6 +33,10 @@ class Command : public Views::View {
 
   GLFWwindow *window = nullptr;
   Mpv *mpv = nullptr;
+
+  Views::About *about;
+  Views::ContextMenu *contextMenu;
+  Views::CommandPalette *commandPalette;
 
   const std::vector<std::string> videoTypes = {
       "yuv", "y4m",   "m2ts", "m2t",   "mts",  "mtv",  "ts",   "tsv",    "tsa",  "tts",  "trp",  "mpeg", "mpg",

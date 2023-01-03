@@ -5,9 +5,6 @@
 #include "mpv.h"
 #include "command.h"
 #include "views/view.h"
-#include "views/about.h"
-#include "views/command_palette.h"
-#include "views/context_menu.h"
 
 namespace ImPlay {
 class Player : public Views::View {
@@ -32,16 +29,11 @@ class Player : public Views::View {
 
  private:
   void initMpv();
-  void initMenu();
 
   GLFWwindow *window = nullptr;
   Mpv *mpv = nullptr;
   Command *cmd = nullptr;
   const char *title;
-
-  Views::About *about;
-  Views::CommandPalette *commandPalette;
-  Views::ContextMenu *contextMenu;
 
   static void translateMod(std::vector<std::string> &keys, int mods) {
     if (mods & GLFW_MOD_CONTROL) keys.emplace_back("Ctrl");

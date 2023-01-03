@@ -1,6 +1,7 @@
 #include <filesystem>
 #include <fmt/format.h>
 #include <imgui.h>
+#include <imgui_internal.h>
 #include "dispatch.h"
 #include "command.h"
 
@@ -13,6 +14,28 @@ namespace ImPlay {
 Command::Command(GLFWwindow *window, Mpv *mpv) : View() {
   this->window = window;
   this->mpv = mpv;
+
+  about = new Views::About();
+  contextMenu = new Views::ContextMenu(mpv);
+  commandPalette = new Views::CommandPalette(mpv);
+}
+
+Command::~Command() {
+  delete about;
+  delete contextMenu;
+  delete commandPalette;
+}
+
+void Command::draw() {
+  ImGuiIO &io = ImGui::GetIO();
+  if (io.KeyCtrl && io.KeyShift && ImGui::IsKeyDown(ImGuiKey_P)) commandPalette->show();
+  if (ImGui::IsMouseReleased(ImGuiMouseButton_Right) && !ImGui::IsWindowHovered(ImGuiHoveredFlags_AnyWindow) &&
+      ImGui::GetTopMostPopupModal() == nullptr)
+    contextMenu->show();
+
+  about->draw();
+  contextMenu->draw();
+  commandPalette->draw();
 }
 
 void Command::execute(int num_args, const char **args) {
@@ -32,9 +55,11 @@ void Command::execute(int num_args, const char **args) {
     dispatch(playlistAddFiles);
   else if (strcmp(cmd, "playlist-add-folder") == 0)
     dispatch(playlistAddFolder);
+  else if (strcmp(cmd, "about") == 0)
+    about->show();
+  else if (strcmp(cmd, "command-palette") == 0)
+    commandPalette->show();
 }
-
-void Command::draw() {}
 
 void Command::open() {
   openFiles(
