@@ -24,6 +24,8 @@ bool Player::init(int argc, char* argv[]) {
   mpv->option("force-window", "yes");
   mpv->option("input-default-bindings", "yes");
   mpv->option("input-vo-keyboard", "yes");
+  mpv->option("osd-playing-msg", "${media-title}");
+  mpv->option("screenshot-directory", "~~desktop/");
 
   Mpv::OptionParser optionParser;
   optionParser.parse(argc, argv);
