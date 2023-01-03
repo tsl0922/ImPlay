@@ -12,9 +12,10 @@ Player::Player(GLFWwindow* window, const char* title) : Views::View() {
   this->title = title;
 
   mpv = new Mpv();
+  cmd = new Command(window, mpv);
   about = new Views::About();
   commandPalette = new Views::CommandPalette(mpv);
-  contextMenu = new Views::ContextMenu(window, mpv);
+  contextMenu = new Views::ContextMenu(mpv);
 
   initMenu();
 }
@@ -162,6 +163,11 @@ void Player::initMpv() {
   mpv->observeEvent(MPV_EVENT_END_FILE, [this](void* data) {
     glfwSetWindowTitle(window, title);
     glfwSetWindowAspectRatio(window, GLFW_DONT_CARE, GLFW_DONT_CARE);
+  });
+
+  mpv->observeEvent(MPV_EVENT_CLIENT_MESSAGE, [this](void* data) {
+    auto msg = static_cast<mpv_event_client_message*>(data);
+    cmd->execute(msg->num_args, msg->args);
   });
 
   mpv->observeProperty("media-title", MPV_FORMAT_STRING, [this](void* data) {

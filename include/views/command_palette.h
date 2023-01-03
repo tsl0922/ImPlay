@@ -1,7 +1,7 @@
 #pragma once
-#include "../mpv.h"
-#include "view.h"
 #include <vector>
+#include "view.h"
+#include "../mpv.h"
 
 namespace ImPlay::Views {
 class CommandPalette : public View {

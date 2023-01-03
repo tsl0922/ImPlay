@@ -1,21 +1,16 @@
 #include <imgui.h>
 #include <imgui_internal.h>
 #include <fonts/fontawesome.h>
-#include <fmt/core.h>
 #include <fmt/format.h>
 #include <fmt/chrono.h>
 #include <filesystem>
-#include "dispatch.h"
 #include "views/context_menu.h"
 
 namespace ImPlay::Views {
-ContextMenu::ContextMenu(GLFWwindow *window, Mpv *mpv) : View() {
-  this->window = window;
+ContextMenu::ContextMenu(Mpv *mpv) : View() {
   this->mpv = mpv;
   setTheme(Theme::DARK);
 }
-
-#define dispatch(action) dispatch_async([&](void *) { action(); }, nullptr);
 
 void ContextMenu::draw() {
   if (m_open) {
@@ -126,7 +121,8 @@ void ContextMenu::draw() {
     }
     if (ImGui::BeginMenuEx("Subtitle", ICON_FA_FONT)) {
       drawTracklist("sub", "sid");
-      if (ImGui::MenuItemEx("Load..", ICON_FA_FOLDER_OPEN)) dispatch(openSubtitles);
+      if (ImGui::MenuItemEx("Load..", ICON_FA_FOLDER_OPEN))
+        mpv->commandv("script-message-to", "implay", "load-sub", nullptr);
       if (ImGui::MenuItem("Show/Hide", "v")) mpv->command("cycle sub-visibility");
       ImGui::Separator();
       if (ImGui::MenuItem("Move Up", "r")) mpv->command("add sub-pos -1");
@@ -175,11 +171,15 @@ void ContextMenu::draw() {
     }
     ImGui::Separator();
     if (ImGui::BeginMenuEx("Open", ICON_FA_FOLDER_OPEN)) {
-      if (ImGui::MenuItemEx("Open Files..", ICON_FA_FILE)) dispatch(open);
-      if (ImGui::MenuItemEx("Open URL From Clipboard", ICON_FA_CLIPBOARD)) dispatch(openClipboard);
+      if (ImGui::MenuItemEx("Open Files..", ICON_FA_FILE))
+        mpv->commandv("script-message-to", "implay", "open", nullptr);
+      if (ImGui::MenuItemEx("Open URL From Clipboard", ICON_FA_CLIPBOARD))
+        mpv->commandv("script-message-to", "implay", "open-clipboard", nullptr);
       ImGui::Separator();
-      if (ImGui::MenuItemEx("Open DVD/Blu-ray Folder", ICON_FA_FOLDER_OPEN)) dispatch(openDisk);
-      if (ImGui::MenuItemEx("Open DVD/Blu-ray ISO Image", ICON_FA_COMPACT_DISC)) dispatch(openIso);
+      if (ImGui::MenuItemEx("Open DVD/Blu-ray Folder", ICON_FA_FOLDER_OPEN))
+        mpv->commandv("script-message-to", "implay", "open-disk", nullptr);
+      if (ImGui::MenuItemEx("Open DVD/Blu-ray ISO Image", ICON_FA_COMPACT_DISC))
+        mpv->commandv("script-message-to", "implay", "open-iso", nullptr);
       ImGui::EndMenu();
     }
     if (ImGui::MenuItemEx("Quit", ICON_FA_WINDOW_CLOSE, "q")) mpv->command("quit");
@@ -252,8 +252,10 @@ void ContextMenu::drawPlaylist() {
       mpv->command("playlist-prev");
     if (ImGui::MenuItemEx("Next", ICON_FA_ARROW_RIGHT, ">", false, playlist.size() > 1)) mpv->command("playlist-next");
     ImGui::Separator();
-    if (ImGui::MenuItemEx("Add Files..", ICON_FA_FILE_UPLOAD)) dispatch(playlistAddFiles);
-    if (ImGui::MenuItemEx("Add Folder", ICON_FA_FOLDER_PLUS)) dispatch(playlistAddFolder);
+    if (ImGui::MenuItemEx("Add Files..", ICON_FA_FILE_UPLOAD))
+      mpv->commandv("script-message-to", "implay", "playlist-add-files", nullptr);
+    if (ImGui::MenuItemEx("Add Folder", ICON_FA_FOLDER_PLUS))
+      mpv->commandv("script-message-to", "implay", "playlist-add-folder", nullptr);
     ImGui::Separator();
     if (ImGui::MenuItem("Clear")) mpv->command("playlist-clear");
     if (ImGui::MenuItem("Shuffle")) mpv->command("playlist-shuffle");
@@ -282,85 +284,6 @@ void ContextMenu::drawProfilelist() {
     }
     ImGui::EndMenu();
   }
-}
-
-void ContextMenu::open() {
-  openFiles(
-      {
-          {"Videos Files", fmt::format("{}", fmt::join(videoTypes, ",")).c_str()},
-          {"Audio Files", fmt::format("{}", fmt::join(audioTypes, ",")).c_str()},
-      },
-      [&](nfdu8char_t *path, int i) { mpv->commandv("loadfile", path, i > 0 ? "append-play" : "replace", nullptr); });
-}
-
-void ContextMenu::openDisk() {
-  openFolder([&](nfdu8char_t *path) {
-    auto fp = std::filesystem::path(reinterpret_cast<char8_t *>(path));
-    if (std::filesystem::exists(fp / u8"BDMV"))
-      openBluray(path);
-    else
-      openDvd(path);
-  });
-}
-
-void ContextMenu::openIso() {
-  openFile({{"ISO Image Files", "iso"}}, [&](nfdu8char_t *path) {
-    auto fp = std::filesystem::path(reinterpret_cast<char8_t *>(path));
-    if ((double)std::filesystem::file_size(fp) / 1000 / 1000 / 1000 > 4.7)
-      openBluray(path);
-    else
-      openDvd(path);
-  });
-}
-
-void ContextMenu::openSubtitles() {
-  openFiles({{"Subtitle Files", fmt::format("{}", fmt::join(subtitleTypes, ",")).c_str()}},
-            [&](nfdu8char_t *path, int i) { mpv->commandv("sub-add", path, i > 0 ? "auto" : "select", nullptr); });
-}
-
-void ContextMenu::openClipboard() {
-  auto content = glfwGetClipboardString(window);
-  if (content != nullptr && content[0] != '\0') {
-    mpv->commandv("loadfile", content, nullptr);
-    mpv->commandv("show-text", content, nullptr);
-  }
-}
-
-void ContextMenu::playlistAddFiles() {
-  openFiles(
-      {
-          {"Videos Files", fmt::format("{}", fmt::join(videoTypes, ",")).c_str()},
-          {"Audio Files", fmt::format("{}", fmt::join(audioTypes, ",")).c_str()},
-      },
-      [&](nfdu8char_t *path, int i) { mpv->commandv("loadfile", path, "append", nullptr); });
-}
-
-void ContextMenu::playlistAddFolder() {
-  openFolder([&](nfdu8char_t *path) {
-    auto fp = std::filesystem::path(reinterpret_cast<char8_t *>(path));
-    for (const auto &entry : std::filesystem::recursive_directory_iterator(fp)) {
-      if (isMediaType(entry.path().extension().string()))
-        mpv->commandv("loadfile", entry.path().u8string().c_str(), "append", nullptr);
-    }
-  });
-}
-
-void ContextMenu::openDvd(const char *path) {
-  mpv->property("dvd-device", path);
-  mpv->commandv("loadfile", "dvd://", nullptr);
-}
-
-void ContextMenu::openBluray(const char *path) {
-  mpv->property("bluray-device", path);
-  mpv->commandv("loadfile", "bd://", nullptr);
-}
-
-bool ContextMenu::isMediaType(std::string ext) {
-  if (ext.empty()) return false;
-  if (ext[0] == '.') ext = ext.substr(1);
-  if (std::find(videoTypes.begin(), videoTypes.end(), ext) != videoTypes.end()) return true;
-  if (std::find(audioTypes.begin(), audioTypes.end(), ext) != audioTypes.end()) return true;
-  return false;
 }
 
 void ContextMenu::action(ContextMenu::Action action) {

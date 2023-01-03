@@ -3,6 +3,7 @@
 #include <map>
 #include <vector>
 #include "mpv.h"
+#include "command.h"
 #include "views/view.h"
 #include "views/about.h"
 #include "views/command_palette.h"
@@ -35,6 +36,7 @@ class Player : public Views::View {
 
   GLFWwindow *window = nullptr;
   Mpv *mpv = nullptr;
+  Command *cmd = nullptr;
   const char *title;
 
   Views::About *about;

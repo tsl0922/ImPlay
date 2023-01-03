@@ -20,8 +20,11 @@ Mpv::Mpv(int64_t wid) : Mpv() {
 }
 
 Mpv::Mpv() {
-  mpv = mpv_create();
-  if (!mpv) throw std::runtime_error("could not create mpv context");
+  mpv_handle* main = mpv_create();
+  if (!main) throw std::runtime_error("could not create mpv handle");
+  mpv = mpv_create_client(main, "implay");
+  if (!mpv) throw std::runtime_error("could not create mpv client");
+  mpv_destroy(main);
 }
 
 Mpv::~Mpv() {
