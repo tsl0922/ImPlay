@@ -24,6 +24,7 @@ add_subdirectory(third_party/imgui)
 add_subdirectory(third_party/nativefiledialog)
 
 set(SOURCE_FILES
+    source/views/view.cpp
     source/views/command_palette.cpp
     source/views/context_menu.cpp
     source/views/about.cpp

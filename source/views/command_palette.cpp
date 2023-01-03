@@ -5,16 +5,12 @@
 #include "views/command_palette.h"
 
 namespace ImPlay::Views {
-CommandPalette::CommandPalette(Mpv* mpv) { this->mpv = mpv; }
-
-CommandPalette::~CommandPalette() = default;
-
-void CommandPalette::show() { open = true; }
+CommandPalette::CommandPalette(Mpv* mpv) : View() { this->mpv = mpv; }
 
 void CommandPalette::draw() {
-  if (open) {
+  if (m_open) {
     ImGui::OpenPopup("##command_palette");
-    open = false;
+    m_open = false;
     justOpened = true;
   }
 

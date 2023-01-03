@@ -7,14 +7,14 @@
 #include "dispatch.h"
 
 namespace ImPlay {
-Player::Player(GLFWwindow* window, const char* title) {
+Player::Player(GLFWwindow* window, const char* title) : Views::View() {
   this->window = window;
   this->title = title;
 
   mpv = new Mpv();
   about = new Views::About();
   commandPalette = new Views::CommandPalette(mpv);
-  contextMenu = new Views::ContextMenu(mpv);
+  contextMenu = new Views::ContextMenu(window, mpv);
 
   initMenu();
 }
@@ -29,90 +29,6 @@ Player::~Player() {
 void Player::initMenu() {
   contextMenu->setAction(Views::ContextMenu::Action::ABOUT, [this]() { about->show(); });
   contextMenu->setAction(Views::ContextMenu::Action::PALETTE, [this]() { commandPalette->show(); });
-  contextMenu->setAction(Views::ContextMenu::Action::OPEN_CLIPBOARD, [this]() {
-    dispatch_async(
-        [](void* data) {
-          auto player = static_cast<Player*>(data);
-          player->openClipboard([&](const char* path) {
-            if (path != nullptr && path[0] != '\0') {
-              player->mpv->commandv("loadfile", path, nullptr);
-              player->mpv->commandv("show-text", path, nullptr);
-            }
-          });
-        },
-        this);
-  });
-  contextMenu->setAction(Views::ContextMenu::Action::OPEN_FILE, [this]() {
-    dispatch_async(
-        [](void* data) {
-          auto player = static_cast<Player*>(data);
-          player->openMediaFiles([&](nfdu8char_t* path, int i) {
-            player->mpv->commandv("loadfile", path, i > 0 ? "append-play" : "replace", nullptr);
-          });
-        },
-        this);
-  });
-  contextMenu->setAction(Views::ContextMenu::Action::OPEN_DISK, [this]() {
-    dispatch_async(
-        [](void* data) {
-          auto player = static_cast<Player*>(data);
-          player->openFolder([&](nfdu8char_t* path) {
-            auto fp = std::filesystem::path(reinterpret_cast<char8_t*>(path));
-            if (std::filesystem::exists(fp / u8"BDMV"))
-              player->openBluray(path);
-            else
-              player->openDvd(path);
-          });
-        },
-        this);
-  });
-  contextMenu->setAction(Views::ContextMenu::Action::OPEN_ISO, [this]() {
-    dispatch_async(
-        [](void* data) {
-          auto player = static_cast<Player*>(data);
-          player->openFile({{"ISO Image Files", "iso"}}, [&](nfdu8char_t* path) {
-            auto fp = std::filesystem::path(reinterpret_cast<char8_t*>(path));
-            if ((double)std::filesystem::file_size(fp) / 1000 / 1000 / 1000 > 4.7)
-              player->openBluray(path);
-            else
-              player->openDvd(path);
-          });
-        },
-        this);
-  });
-  contextMenu->setAction(Views::ContextMenu::Action::OPEN_SUB, [this]() {
-    dispatch_async(
-        [](void* data) {
-          auto player = static_cast<Player*>(data);
-          player->openSubtitleFiles([&](nfdu8char_t* path, int i) {
-            player->mpv->commandv("sub-add", path, i > 0 ? "auto" : "select", nullptr);
-          });
-        },
-        this);
-  });
-  contextMenu->setAction(Views::ContextMenu::Action::PLAYLIST_ADD_FILE, [this]() {
-    dispatch_async(
-        [](void* data) {
-          auto player = static_cast<Player*>(data);
-          player->openMediaFiles(
-              [&](nfdu8char_t* path, int i) { player->mpv->commandv("loadfile", path, "append", nullptr); });
-        },
-        this);
-  });
-  contextMenu->setAction(Views::ContextMenu::Action::PLAYLIST_ADD_FOLDER, [this]() {
-    dispatch_async(
-        [](void* data) {
-          auto player = static_cast<Player*>(data);
-          player->openFolder([&](nfdu8char_t* path) {
-            auto fp = std::filesystem::path(reinterpret_cast<char8_t*>(path));
-            for (const auto& entry : std::filesystem::recursive_directory_iterator(fp)) {
-              if (player->isMediaType(entry.path().extension().string()))
-                player->mpv->commandv("loadfile", entry.path().u8string().c_str(), "append", nullptr);
-            }
-          });
-        },
-        this);
-  });
 }
 
 bool Player::init(int argc, char* argv[]) {
@@ -146,10 +62,13 @@ bool Player::init(int argc, char* argv[]) {
 void Player::draw() {
   ImGuiIO& io = ImGui::GetIO();
   if (io.KeyCtrl && io.KeyShift && ImGui::IsKeyDown(ImGuiKey_P)) commandPalette->show();
+  if (ImGui::IsMouseReleased(ImGuiMouseButton_Right) && !ImGui::IsWindowHovered(ImGuiHoveredFlags_AnyWindow) &&
+      ImGui::GetTopMostPopupModal() == nullptr)
+    contextMenu->show();
 
-  about->draw();
-  commandPalette->draw();
+  if (about->isOpen()) about->draw();
   contextMenu->draw();
+  commandPalette->draw();
 }
 
 void Player::render(int w, int h) { mpv->render(w, h); }
@@ -291,74 +210,5 @@ void Player::initMpv() {
     bool enable = static_cast<bool>(*(int*)data);
     glfwSetWindowAttrib(window, GLFW_FLOATING, enable ? GLFW_TRUE : GLFW_FALSE);
   });
-}
-
-void Player::openFile(std::vector<nfdu8filteritem_t> filters, std::function<void(nfdu8char_t*)> callback) {
-  NFD::Init();
-  nfdchar_t* outPath;
-  if (NFD::OpenDialog(outPath, filters.data(), filters.size()) == NFD_OKAY) {
-    callback(outPath);
-    NFD::FreePath(outPath);
-  }
-  NFD::Quit();
-}
-
-void Player::openFiles(std::vector<nfdu8filteritem_t> filters, std::function<void(nfdu8char_t*, int)> callback) {
-  NFD::Init();
-  const nfdpathset_t* outPaths;
-  if (NFD::OpenDialogMultiple(outPaths, filters.data(), filters.size()) == NFD_OKAY) {
-    nfdpathsetsize_t numPaths;
-    NFD::PathSet::Count(outPaths, numPaths);
-    for (auto i = 0; i < numPaths; i++) {
-      nfdchar_t* path;
-      NFD::PathSet::GetPath(outPaths, i, path);
-      callback(path, i);
-    }
-    NFD::PathSet::Free(outPaths);
-  }
-  NFD::Quit();
-}
-
-void Player::openFolder(std::function<void(nfdu8char_t*)> callback) {
-  NFD::Init();
-  nfdchar_t* outPath;
-  if (NFD::PickFolder(outPath) == NFD_OKAY) {
-    callback(outPath);
-    NFD::FreePath(outPath);
-  }
-  NFD::Quit();
-}
-
-void Player::openClipboard(std::function<void(const char*)> callback) { callback(glfwGetClipboardString(window)); }
-
-void Player::openMediaFiles(std::function<void(nfdu8char_t*, int)> callback) {
-  return openFiles(
-      {
-          {"Videos Files", fmt::format("{}", fmt::join(videoTypes, ",")).c_str()},
-          {"Audio Files", fmt::format("{}", fmt::join(audioTypes, ",")).c_str()},
-      },
-      callback);
-}
-
-void Player::openSubtitleFiles(std::function<void(nfdu8char_t*, int)> callback) {
-  return openFiles({{"Subtitle Files", fmt::format("{}", fmt::join(subtitleTypes, ",")).c_str()}}, callback);
-}
-
-void Player::openDvd(const char* path) {
-  mpv->property("dvd-device", path);
-  mpv->commandv("loadfile", "dvd://", nullptr);
-}
-
-void Player::openBluray(const char* path) {
-  mpv->property("bluray-device", path);
-  mpv->commandv("loadfile", "bd://", nullptr);
-}
-
-bool Player::isMediaType(std::string ext) {
-  if (ext.empty()) return false;
-  if (ext[0] == '.') ext = ext.substr(1);
-  if (std::find(videoTypes.begin(), videoTypes.end(), ext) != videoTypes.end()) return true;
-  if (std::find(audioTypes.begin(), audioTypes.end(), ext) != audioTypes.end()) return true;
-  return false;
 }
 }  // namespace ImPlay

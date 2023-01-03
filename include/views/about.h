@@ -1,15 +1,9 @@
 #pragma once
+#include "view.h"
 
 namespace ImPlay::Views {
-class About {
+class About : public View {
  public:
-  About();
-  ~About();
-
-  void draw();
-  void show();
-
- private:
-  bool open = false;
+  void draw() override;
 };
 }  // namespace ImPlay::Views

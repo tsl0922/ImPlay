@@ -2,14 +2,11 @@
 #include "views/about.h"
 
 namespace ImPlay::Views {
-About::About() = default;
-
-About::~About() = default;
-
 void About::draw() {
-  if (open) ImGui::OpenPopup("About");
+  if (m_open) ImGui::OpenPopup("About");
+
   ImGui::SetNextWindowSize(ImVec2(600, 200), ImGuiCond_Always);
-  if (ImGui::BeginPopupModal("About", &open, ImGuiWindowFlags_NoResize)) {
+  if (ImGui::BeginPopupModal("About", &m_open, ImGuiWindowFlags_NoResize)) {
     ImGui::Text("ImPlay");
     ImGui::Separator();
     ImGui::NewLine();
@@ -17,6 +14,4 @@ void About::draw() {
     ImGui::EndPopup();
   }
 }
-
-void About::show() { open = true; }
 }  // namespace ImPlay::Views

@@ -1,16 +1,14 @@
 #pragma once
 #include "../mpv.h"
+#include "view.h"
 #include <vector>
-#include <functional>
 
 namespace ImPlay::Views {
-class CommandPalette {
+class CommandPalette : public View {
  public:
   explicit CommandPalette(Mpv *mpv);
-  ~CommandPalette();
 
-  void draw();
-  void show();
+  void draw() override;
 
  private:
   struct CommandMatch {
@@ -28,7 +26,6 @@ class CommandPalette {
   Mpv *mpv = nullptr;
   std::vector<char> buffer = std::vector<char>(1024, 0x00);
   std::vector<CommandMatch> matches;
-  bool open = false;
   bool filtered = false;
   bool focusInput = false;
   bool justOpened = false;

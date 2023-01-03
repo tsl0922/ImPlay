@@ -113,7 +113,7 @@ void Window::render() {
 
   if (ImGui::GetIO().ConfigFlags & ImGuiConfigFlags_ViewportsEnable) {
     dispatch_sync(
-        [&](void* data) {
+        [](void* data) {
           ImGui::UpdatePlatformWindows();
           ImGui::RenderPlatformWindowsDefault();
         },
