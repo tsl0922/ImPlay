@@ -289,23 +289,27 @@ void ContextMenu::drawProfilelist() {
 }
 
 void ContextMenu::setTheme(Theme theme) {
+  ImGuiStyle style;
   switch (theme) {
     case Theme::DARK:
-      ImGui::StyleColorsDark();
+      ImGui::StyleColorsDark(&style);
       break;
     case Theme::LIGHT:
-      ImGui::StyleColorsLight();
+      ImGui::StyleColorsLight(&style);
       break;
     case Theme::CLASSIC:
-      ImGui::StyleColorsClassic();
+      ImGui::StyleColorsClassic(&style);
       break;
+    default:
+      return;
   }
   this->theme = theme;
 
-  ImGuiStyle& style = ImGui::GetStyle();
   style.PopupRounding = 5.0f;
   style.WindowRounding = 5.0f;
   style.WindowShadowSize = 50.0f;
   style.Colors[ImGuiCol_WindowShadow] = ImVec4(0, 0, 0, 1.0f);
+
+  ImGui::GetStyle() = style;
 }
 }  // namespace ImPlay::Views
