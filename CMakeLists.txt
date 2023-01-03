@@ -55,3 +55,7 @@ if(WIN32)
             $<TARGET_FILE_DIR:ImPlay>
     )
 endif()
+
+if (UNIX AND NOT APPLE)
+    install(TARGETS ${PROJECT_NAME} RUNTIME DESTINATION bin)
+endif()

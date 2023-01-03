@@ -20,7 +20,7 @@ set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
 option(BUILD_SHARED_LIBS "Build shared libraries" OFF)
 option(GLFW_VULKAN_STATIC "Assume the Vulkan loader is linked with the application" OFF)
-option(GLFW_INSTALL "Generate installation target" ON)
+option(GLFW_INSTALL "Generate installation target" OFF)
 
 include(GNUInstallDirs)
 include(CMakeDependentOption)

@@ -1,0 +1,11 @@
+[Desktop Entry]
+Categories=AudioVideo;Player;
+Comment=Play videos
+Exec=ImPlay %U
+GenericName=Media Player
+Icon=implay
+Name=ImPlay
+StartupNotify=true
+StartupWMClass=ImPlay
+Terminal=false
+Type=Application
