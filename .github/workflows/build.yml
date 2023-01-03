@@ -2,6 +2,7 @@ name: build
 
 on:
   push:
+  workflow_dispatch:
 
 jobs:
   linux:
@@ -30,10 +31,22 @@ jobs:
           cp ../resources/icon.png implay.png
           DEPLOY_GTK_VERSION=3 ./linuxdeploy-x86_64.AppImage --appdir AppDir --plugin gtk --output appimage \
             --desktop-file implay.desktop --icon-file implay.png
+          mv ImPlay-*.AppImage ImPlay-linux.AppImage
+          echo "TAG_ANME=$(date +%Y%m%d)" >> $GITHUB_ENV
       - uses: actions/upload-artifact@v3
         with:
           name: ImPlay-linux
           path: build/ImPlay-*.AppImage
+      - uses: rickstaa/action-create-tag@v1
+        with:
+          tag: ${{ env.TAG_ANME }}
+          force_push_tag: true
+      - uses: ncipollo/release-action@v1
+        with:
+          commit: ${{ github.sha }}
+          tag: ${{ env.TAG_ANME }}
+          artifacts: build/ImPlay-*.AppImage
+          allowUpdates: true
   win:
     runs-on: windows-latest
     steps:
@@ -67,8 +80,15 @@ jobs:
             -DCMAKE_EXE_LINKER_FLAGS="-static -no-pie -Wl,-s -Wl,-Bsymbolic -Wl,--gc-sections" \
             ..
           cmake --build .
-          7z a -m0=lzma2 -mx=9 -ms=on ImPlay.7z ImPlay.exe libmpv-2.dll
+          7z a -m0=lzma2 -mx=9 -ms=on ImPlay-win.7z ImPlay.exe libmpv-2.dll
+          echo "TAG_ANME=$(date +%Y%m%d)" >> $GITHUB_ENV
       - uses: actions/upload-artifact@v3
         with:
           name: ImPlay-win
-          path: build/ImPlay.7z
+          path: build/ImPlay-*.7z
+      - uses: ncipollo/release-action@v1
+        with:
+          commit: ${{ github.sha }}
+          tag: ${{ env.TAG_ANME }}
+          artifacts: build/ImPlay-*.7z
+          allowUpdates: true
