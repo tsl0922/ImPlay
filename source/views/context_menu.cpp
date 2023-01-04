@@ -83,7 +83,7 @@ void ContextMenu::draw() {
         if (ImGui::MenuItem("2x")) mpv->command("multiply speed 2.0");
         if (ImGui::MenuItem("1.5x")) mpv->command("multiply speed 1.5");
         if (ImGui::MenuItem("1.25x")) mpv->command("multiply speed 1.25");
-        if (ImGui::MenuItem("1.0x")) mpv->command("set speed 1");
+        if (ImGui::MenuItem("1.0x")) mpv->command("set speed 1.0");
         if (ImGui::MenuItem("0.75x")) mpv->command("multiply speed 0.75");
         if (ImGui::MenuItem("0.5x")) mpv->command("multiply speed 0.5");
         ImGui::EndMenu();
@@ -163,6 +163,8 @@ void ContextMenu::draw() {
       ImGui::Separator();
       ImGui::MenuItem("Metrics/Debugger", nullptr, &metrics);
       if (ImGui::MenuItem("Script Console", "`")) mpv->command("script-binding console/enable");
+      ImGui::Separator();
+      if (ImGui::MenuItemEx("Quit Watch Later", ICON_FA_WINDOW_CLOSE, "Q")) mpv->command("quit-watch-later");
       ImGui::EndMenu();
     }
     if (ImGui::BeginMenuEx("Help", ICON_FA_QUESTION_CIRCLE)) {
