@@ -1,6 +1,7 @@
 #include <queue>
 #include <mutex>
 #include <condition_variable>
+#include <utility>
 #include <GLFW/glfw3.h>
 #include "dispatch.h"
 
@@ -24,12 +25,12 @@ void dispatch_push(dispatch_item *item) {
 }
 
 void dispatch_async(dispatch_fn func, void *data) {
-  auto item = new dispatch_item{func, data, false, true};
+  auto item = new dispatch_item{std::move(func), data, false, true};
   dispatch_push(item);
 }
 
 void dispatch_sync(dispatch_fn func, void *data) {
-  auto item = new dispatch_item{func, data, false, false};
+  auto item = new dispatch_item{std::move(func), data, false, false};
   dispatch_push(item);
 
   {
