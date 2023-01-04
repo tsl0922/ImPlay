@@ -1,4 +1,3 @@
-#include <iostream>
 #include <cstring>
 #include <stdexcept>
 #include <fmt/printf.h>
@@ -65,16 +64,12 @@ int main(int argc, char* argv[]) {
   ImPlay::Mpv::OptionParser parser;
   parser.parse(argc, argv);
   if (parser.options.contains("help")) {
-    std::cout << usage << std::endl;
+    fmt::print("{}", usage);
     return 0;
   }
 
   if (parser.options.contains("o")) return run_headless(parser);
 
-  auto window = new ImPlay::Window("ImPlay", 1280, 720);
-  int ret = window->run(parser) ? 0 : 1;
-
-  delete window;
-
-  return ret;
+  ImPlay::Window window("ImPlay", 1280, 720);
+  return window.run(parser);
 }
