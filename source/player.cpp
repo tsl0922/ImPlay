@@ -17,7 +17,7 @@ Player::~Player() {
   delete cmd;
 }
 
-bool Player::init(int argc, char* argv[]) {
+bool Player::init(Mpv::OptionParser parser) {
   mpv->option("config", "yes");
   mpv->option("osc", "yes");
   mpv->option("idle", "yes");
@@ -27,9 +27,9 @@ bool Player::init(int argc, char* argv[]) {
   mpv->option("osd-playing-msg", "${media-title}");
   mpv->option("screenshot-directory", "~~desktop/");
 
-  Mpv::OptionParser optionParser;
-  optionParser.parse(argc, argv);
-  for (auto& [key, value] : optionParser.options) {
+  for (const auto& option : parser.options) {
+    auto key = option.first;
+    auto value = option.second;
     if (int err = mpv->option(key.c_str(), value.c_str()); err < 0) {
       fmt::print(fg(fmt::color::red), "mpv: {} [{}={}]\n", mpv_error_string(err), key, value);
       return false;
@@ -40,7 +40,7 @@ bool Player::init(int argc, char* argv[]) {
 
   initMpv();
 
-  for (auto& path : optionParser.paths) mpv->commandv("loadfile", path.c_str(), "append-play", nullptr);
+  for (auto& path : parser.paths) mpv->commandv("loadfile", path.c_str(), "append-play", nullptr);
 
   mpv->command("keybind MBTN_RIGHT ignore");
 

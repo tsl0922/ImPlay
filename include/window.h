@@ -14,7 +14,7 @@ class Window {
   Window(const char *title, int width, int height);
   ~Window();
 
-  bool run(int argc, char *argv[]);
+  bool run(Mpv::OptionParser optionParser);
 
  private:
   void render();

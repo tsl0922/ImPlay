@@ -12,7 +12,7 @@ class Player : public Views::View {
   Player(GLFWwindow *window, const char *title);
   ~Player() override;
 
-  bool init(int argc, char *argv[]);
+  bool init(Mpv::OptionParser parser);
   void draw() override;
   void render(int w, int h);
   bool wantRender();

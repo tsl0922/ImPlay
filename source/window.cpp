@@ -42,9 +42,9 @@ Window::~Window() {
   exitGLFW();
 }
 
-bool Window::run(int argc, char* argv[]) {
+bool Window::run(Mpv::OptionParser parser) {
   glfwMakeContextCurrent(window);
-  if (!player->init(argc, argv)) return false;
+  if (!player->init(parser)) return false;
 #ifdef __APPLE__
   const char** openedFileNames = glfwGetOpenedFilenames();
   if (openedFileNames != nullptr) {

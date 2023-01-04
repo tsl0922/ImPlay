@@ -57,11 +57,11 @@ void Mpv::OptionParser::parse(int argc, char **argv) {
       }
       if (arg.starts_with("no-")) {
         if (arg[3] == '\0') continue;
-        options.emplace_back(arg.substr(3), "no");
+        options.emplace(arg.substr(3), "no");
       } else if (auto n = arg.find_first_of('='); n != std::string::npos) {
-        options.emplace_back(arg.substr(0, n), arg.substr(n + 1));
+        options.emplace(arg.substr(0, n), arg.substr(n + 1));
       } else {
-        options.emplace_back(arg, "yes");
+        options.emplace(arg, "yes");
       }
     } else {
       paths.emplace_back(arg);

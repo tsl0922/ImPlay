@@ -2,6 +2,7 @@
 #include <mpv/client.h>
 #include <mpv/render_gl.h>
 #include <string>
+#include <map>
 #include <vector>
 #include <functional>
 
@@ -15,7 +16,7 @@ class Mpv {
   using EventHandler = std::function<void(void *)>;
 
   struct OptionParser {
-    std::vector<std::pair<std::string, std::string>> options;
+    std::map<std::string, std::string> options;
     std::vector<std::string> paths;
 
     void parse(int argc, char **argv);
