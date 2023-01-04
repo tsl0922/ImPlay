@@ -195,7 +195,8 @@ void ContextMenu::drawAudioDeviceList() {
   const char *name = mpv->property("audio-device");
   if (ImGui::BeginMenuEx("Devices", ICON_FA_AUDIO_DESCRIPTION, !devices.empty())) {
     for (auto &device : devices) {
-      if (ImGui::MenuItem(device.description, nullptr, strcmp(device.name, name) == 0))
+      auto title = fmt::format("[{}] {}", device.description, device.name);
+      if (ImGui::MenuItem(title.c_str(), nullptr, strcmp(device.name, name) == 0))
         mpv->property("audio-device", device.name);
     }
     ImGui::EndMenu();
