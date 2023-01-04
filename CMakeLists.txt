@@ -37,13 +37,25 @@ set(SOURCE_FILES
 )
 set(INCLUDE_DIRS include ${MPV_INCLUDE_DIRS})
 set(LINK_LIBS fmt json nfd imgui ${MPV_LIBRARIES})
+set(APPLICATION_TYPE)
 
 if(WIN32)
     configure_file(${CMAKE_CURRENT_SOURCE_DIR}/resources/win32/app.rc.in ${CMAKE_CURRENT_BINARY_DIR}/app.rc @ONLY)
     list(APPEND SOURCE_FILES ${CMAKE_CURRENT_BINARY_DIR}/app.rc)
+elseif(APPLE)
+    set(APPLICATION_TYPE MACOSX_BUNDLE)
+    set(MACOSX_BUNDLE_BUNDLE_NAME ${PROJECT_NAME})
+    set(MACOSX_BUNDLE_ICON_FILE "app.icns")
+    set(MACOSX_BUNDLE_INFO_PLIST "${CMAKE_CURRENT_SOURCE_DIR}/resources/macos/Info.plist.in")
+    set(MACOSX_BUNDLE_BUNDLE_VERSION "${PROJECT_VERSION}")
+    set(MACOSX_BUNDLE_LONG_VERSION_STRING "${PROJECT_VERSION}")
+    set(MACOSX_BUNDLE_SHORT_VERSION_STRING "${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}")
+    set(MACOSX_BUNDLE_INFO_STRING "tsl0922")
+    set(MACOSX_BUNDLE_GUI_IDENTIFIER "com.tsl0922.ImPlay")
+    set(MACOSX_BUNDLE_COPYRIGHT "Copyright © 2022 tsl0922. All rights reserved." )
 endif()
 
-add_executable(ImPlay ${SOURCE_FILES})
+add_executable(ImPlay ${APPLICATION_TYPE} ${SOURCE_FILES})
 target_include_directories(ImPlay PRIVATE ${INCLUDE_DIRS})
 target_link_directories(ImPlay PRIVATE ${MPV_LIBRARY_DIRS})
 target_link_libraries(ImPlay PRIVATE ${LINK_LIBS})
@@ -54,8 +66,26 @@ if(WIN32)
             $<TARGET_FILE:mpv>
             $<TARGET_FILE_DIR:ImPlay>
     )
-endif()
-
-if (UNIX AND NOT APPLE)
+elseif (APPLE)
+    set(CMAKE_INSTALL_PREFIX ${CMAKE_BINARY_DIR})
+    set_property(TARGET ImPlay PROPERTY MACOSX_BUNDLE_INFO_PLIST ${MACOSX_BUNDLE_INFO_PLIST})
+    add_custom_command(TARGET ImPlay POST_BUILD
+        COMMAND ${CMAKE_INSTALL_NAME_TOOL} -add_rpath
+            "@executable_path/../Frameworks/"
+            $<TARGET_FILE:ImPlay>
+    )
+    install(TARGETS ImPlay BUNDLE DESTINATION .)
+    install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/resources/macos/app.icns
+            DESTINATION ${CMAKE_BINARY_DIR}/ImPlay.app/Contents/Resources)
+    set(APPS "\${CMAKE_INSTALL_PREFIX}/ImPlay.app")
+    set(DIRS ${CMAKE_BINARY_DIR})
+    install(CODE "include(BundleUtilities)
+        fixup_bundle(\"${APPS}\" \"\" \"${DIRS}\" IGNORE_ITEM Python)")
+    set(CPACK_GENERATOR "DragNDrop")
+    set(CPACK_BUNDLE_NAME ImPlay)
+    set(CPACK_BUNDLE_ICON ${CMAKE_CURRENT_SOURCE_DIR}/resources/macos/app.icns)
+    set(CPACK_BUNDLE_PLIST ${CMAKE_BINARY_DIR}/ImHex.app/Contents/Info.plist)
+    include(CPack)
+else()
     install(TARGETS ${PROJECT_NAME} RUNTIME DESTINATION bin)
 endif()
