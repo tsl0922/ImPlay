@@ -2,13 +2,7 @@
 #include <fmt/format.h>
 #include <imgui.h>
 #include <imgui_internal.h>
-#include "dispatch.h"
 #include "command.h"
-
-#define dispatch(action)                                \
-  do {                                                  \
-    dispatch_async([&](void *) { action(); }, nullptr); \
-  } while (0)
 
 namespace ImPlay {
 Command::Command(GLFWwindow *window, Mpv *mpv) : View() {
@@ -42,19 +36,19 @@ void Command::execute(int num_args, const char **args) {
   if (num_args == 0) return;
   const char *cmd = args[0];
   if (strcmp(cmd, "open") == 0)
-    dispatch(open);
+    open();
   else if (strcmp(cmd, "open-disk") == 0)
-    dispatch(openDisk);
+    openDisk();
   else if (strcmp(cmd, "open-iso") == 0)
-    dispatch(openIso);
+    openIso();
   else if (strcmp(cmd, "open-clipboard") == 0)
-    dispatch(openClipboard);
+    openClipboard();
   else if (strcmp(cmd, "load-sub") == 0)
-    dispatch(loadSubtitles);
+    loadSubtitles();
   else if (strcmp(cmd, "playlist-add-files") == 0)
-    dispatch(playlistAddFiles);
+    playlistAddFiles();
   else if (strcmp(cmd, "playlist-add-folder") == 0)
-    dispatch(playlistAddFolder);
+    playlistAddFolder();
   else if (strcmp(cmd, "about") == 0)
     about->show();
   else if (strcmp(cmd, "command-palette") == 0)
