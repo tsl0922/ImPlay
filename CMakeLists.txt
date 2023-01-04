@@ -6,11 +6,11 @@ set(CMAKE_CXX_STANDARD 20)
 if(WIN32)
     add_library(mpv SHARED IMPORTED)
     set_target_properties(mpv PROPERTIES
-        IMPORTED_LOCATION ${CMAKE_CURRENT_SOURCE_DIR}/third_party/mpv/lib/libmpv-2.dll
-        IMPORTED_IMPLIB ${CMAKE_CURRENT_SOURCE_DIR}/third_party/mpv/lib/libmpv.dll.a
+        IMPORTED_LOCATION ${PROJECT_SOURCE_DIR}/third_party/mpv/lib/libmpv-2.dll
+        IMPORTED_IMPLIB ${PROJECT_SOURCE_DIR}/third_party/mpv/lib/libmpv.dll.a
     )
-    set(MPV_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/third_party/mpv/include)
-    set(MPV_LIBRARY_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/third_party/mpv/lib)
+    set(MPV_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/third_party/mpv/include)
+    set(MPV_LIBRARY_DIRS ${PROJECT_SOURCE_DIR}/third_party/mpv/lib)
     set(MPV_LIBRARIES mpv)
 else()
     find_package(PkgConfig REQUIRED)
@@ -67,23 +67,23 @@ if(WIN32)
             $<TARGET_FILE_DIR:ImPlay>
     )
 elseif (APPLE)
-    set(CMAKE_INSTALL_PREFIX ${CMAKE_BINARY_DIR})
     set_property(TARGET ImPlay PROPERTY MACOSX_BUNDLE_INFO_PLIST ${MACOSX_BUNDLE_INFO_PLIST})
     add_custom_command(TARGET ImPlay POST_BUILD
         COMMAND ${CMAKE_INSTALL_NAME_TOOL} -add_rpath
             "@executable_path/../Frameworks/"
             $<TARGET_FILE:ImPlay>
     )
-    install(TARGETS ImPlay BUNDLE DESTINATION .)
-    install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/resources/macos/app.icns
+    install(FILES ${PROJECT_SOURCE_DIR}/resources/macos/app.icns
             DESTINATION ${CMAKE_BINARY_DIR}/ImPlay.app/Contents/Resources)
+    install(TARGETS ImPlay BUNDLE DESTINATION .)
+    install(FILES $<TARGET_FILE:ImPlay> DESTINATION ${CMAKE_BINARY_DIR}/ImPlay.app)
     set(APPS "\${CMAKE_INSTALL_PREFIX}/ImPlay.app")
     set(DIRS ${CMAKE_BINARY_DIR})
     install(CODE "include(BundleUtilities)
         fixup_bundle(\"${APPS}\" \"\" \"${DIRS}\" IGNORE_ITEM Python)")
     set(CPACK_GENERATOR "DragNDrop")
     set(CPACK_BUNDLE_NAME ImPlay)
-    set(CPACK_BUNDLE_ICON ${CMAKE_CURRENT_SOURCE_DIR}/resources/macos/app.icns)
+    set(CPACK_BUNDLE_ICON ${PROJECT_SOURCE_DIR}/resources/macos/app.icns)
     set(CPACK_BUNDLE_PLIST ${CMAKE_BINARY_DIR}/ImHex.app/Contents/Info.plist)
     include(CPack)
 else()

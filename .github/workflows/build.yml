@@ -32,7 +32,7 @@ jobs:
           DEPLOY_GTK_VERSION=3 ./linuxdeploy-x86_64.AppImage --appdir AppDir --plugin gtk --output appimage \
             --desktop-file implay.desktop --icon-file implay.png
           mv ImPlay-*.AppImage ImPlay-linux.AppImage
-          echo "TAG_ANME=$(date +%Y%m%d)" >> $GITHUB_ENV
+          echo "TAG_ANME=$(date +%Y-%m-%d)" >> $GITHUB_ENV
       - uses: actions/upload-artifact@v3
         with:
           name: ImPlay-linux
@@ -46,6 +46,34 @@ jobs:
           commit: ${{ github.sha }}
           tag: ${{ env.TAG_ANME }}
           artifacts: build/ImPlay-*.AppImage
+          allowUpdates: true
+  macos:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Install dependencies
+        env:
+          HOMEBREW_NO_AUTO_UPDATE: 1
+          HOMEBREW_NO_INSTALL_CLEANUP: 1
+        run: |
+          brew update
+          brew install cmake mpv freetype2 pkg-config || brew link --overwrite python@3.11
+      - name: Build ImPlay
+        run: |
+          mkdir build && cd build
+          cmake -DCMAKE_BUILD_TYPE=RELEASE ..
+          cmake --build . --target package
+          mv ImPlay-*.dmg ImPlay-macOS.dmg
+          echo "TAG_ANME=$(date +%Y-%m-%d)" >> $GITHUB_ENV
+      - uses: actions/upload-artifact@v3
+        with:
+          name: ImPlay-macos
+          path: build/ImPlay-*.dmg
+      - uses: ncipollo/release-action@v1
+        with:
+          commit: ${{ github.sha }}
+          tag: ${{ env.TAG_ANME }}
+          artifacts: build/ImPlay-*.dmg
           allowUpdates: true
   win:
     runs-on: windows-latest
@@ -81,7 +109,7 @@ jobs:
             ..
           cmake --build .
           7z a -m0=lzma2 -mx=9 -ms=on ImPlay-win.7z ImPlay.exe libmpv-2.dll
-          echo "TAG_ANME=$(date +%Y%m%d)" >> $GITHUB_ENV
+          echo "TAG_ANME=$(date +%Y-%m-%d)" >> $GITHUB_ENV
       - uses: actions/upload-artifact@v3
         with:
           name: ImPlay-win
