@@ -4,13 +4,32 @@ project(ImPlay VERSION 1.0.0)
 set(CMAKE_CXX_STANDARD 20)
 
 if(WIN32)
-    add_library(mpv SHARED IMPORTED)
-    set_target_properties(mpv PROPERTIES
-        IMPORTED_LOCATION ${PROJECT_SOURCE_DIR}/third_party/mpv/lib/libmpv-2.dll
-        IMPORTED_IMPLIB   ${PROJECT_SOURCE_DIR}/third_party/mpv/lib/libmpv.dll.a
+    cmake_policy(SET CMP0135 NEW)
+    include(ExternalProject)
+    ExternalProject_Add(mpv_bin
+        URL https://github.com/shinchiro/mpv-winbuild-cmake/releases/download/20230101/mpv-x86_64-20230101-git-ad65c88.7z
+        UPDATE_COMMAND ""
+        CONFIGURE_COMMAND ""
+        BUILD_COMMAND ${CMAKE_COMMAND} -E copy <SOURCE_DIR>/mpv.com <BINARY_DIR>
+        INSTALL_COMMAND ""
     )
-    set(MPV_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/third_party/mpv/include)
-    set(MPV_LIBRARY_DIRS ${PROJECT_SOURCE_DIR}/third_party/mpv/lib)
+    ExternalProject_Add(mpv_dev
+        DEPENDS mpv_bin
+        URL https://github.com/shinchiro/mpv-winbuild-cmake/releases/download/20230101/mpv-dev-x86_64-20230101-git-ad65c88.7z
+        UPDATE_COMMAND ""
+        CONFIGURE_COMMAND ""
+        BUILD_COMMAND ${CMAKE_COMMAND} -E copy_directory <SOURCE_DIR>/include <BINARY_DIR>/include/mpv
+              COMMAND ${CMAKE_COMMAND} -E copy <SOURCE_DIR>/libmpv.dll.a <BINARY_DIR>
+              COMMAND ${CMAKE_COMMAND} -E copy <SOURCE_DIR>/mpv-2.dll <BINARY_DIR>/libmpv-2.dll
+        INSTALL_COMMAND ""
+    )
+    ExternalProject_Get_property(mpv_bin BINARY_DIR)
+    set(MPV_BIN_DIR ${BINARY_DIR})
+    ExternalProject_Get_property(mpv_dev BINARY_DIR)
+    set(MPV_DEV_DIR ${BINARY_DIR})
+
+    set(MPV_INCLUDE_DIRS ${MPV_DEV_DIR}/include)
+    set(MPV_LIBRARY_DIRS ${MPV_DEV_DIR})
     set(MPV_LIBRARIES mpv)
 else()
     find_package(PkgConfig REQUIRED)
@@ -56,13 +75,38 @@ target_include_directories(ImPlay PRIVATE ${INCLUDE_DIRS})
 target_link_directories(ImPlay PRIVATE ${MPV_LIBRARY_DIRS})
 target_link_libraries(ImPlay PRIVATE ${LINK_LIBS})
 if(WIN32)
+    add_dependencies(ImPlay mpv_dev)
     target_link_options(ImPlay PRIVATE -mwindows)
     install(TARGETS ${PROJECT_NAME} RUNTIME DESTINATION .)
-    install(FILES $<TARGET_FILE:mpv> DESTINATION .)
+    install(FILES ${MPV_BIN_DIR}/mpv.com DESTINATION . RENAME ImPlay.com)
+    
+    cmake_policy(SET CMP0087 NEW)
+    install(CODE [[
+    file(GET_RUNTIME_DEPENDENCIES
+        EXECUTABLES $<TARGET_FILE:ImPlay>
+        RESOLVED_DEPENDENCIES_VAR _r_deps
+        UNRESOLVED_DEPENDENCIES_VAR _u_deps
+        DIRECTORIES $ENV{PATH}
+        POST_EXCLUDE_REGEXES ".*system32/.*\\.dll"
+    )
+
+    if(_u_deps)
+        message(WARNING "Unresolved dependencies detected: \"${_u_deps}\"!")
+    endif()
+
+    foreach(_file ${_r_deps})
+        file(INSTALL
+            DESTINATION ${CMAKE_INSTALL_PREFIX}
+            TYPE SHARED_LIBRARY
+            FOLLOW_SYMLINK_CHAIN
+            FILES "${_file}"
+        )
+    endforeach()
+    ]])
 
     add_custom_command(TARGET ImPlay POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy_if_different
-            $<TARGET_FILE:mpv>
+            ${MPV_DEV_DIR}/libmpv-2.dll
             $<TARGET_FILE_DIR:ImPlay>
     )
     execute_process(COMMAND ${CMAKE_COMMAND} -E copy

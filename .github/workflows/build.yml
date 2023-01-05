@@ -19,9 +19,7 @@ jobs:
       - name: Build ImPlay
         run: |
           mkdir build && cd build
-          cmake -DCMAKE_BUILD_TYPE=RELEASE \
-            -DCMAKE_INSTALL_PREFIX:PATH=/usr \
-            ..
+          cmake -DCMAKE_BUILD_TYPE=RELEASE -DCMAKE_INSTALL_PREFIX:PATH=/usr ..
           cmake --build .
           make install DESTDIR=AppDir
           curl -LO https://github.com/linuxdeploy/linuxdeploy/releases/download/continuous/linuxdeploy-x86_64.AppImage
@@ -81,32 +79,19 @@ jobs:
       - uses: actions/checkout@v3
       - uses: msys2/setup-msys2@v2
         with:
-          msystem: ucrt64
+          msystem: mingw64
           install: >-
             base-devel
             p7zip
-            mingw-w64-ucrt-x86_64-gcc
-            mingw-w64-ucrt-x86_64-cmake
-            mingw-w64-ucrt-x86_64-freetype
+            mingw-w64-x86_64-gcc
+            mingw-w64-x86_64-cmake
+            mingw-w64-x86_64-freetype
           update: true
-      - name: Install libmpv
-        shell: msys2 {0}
-        run: |
-          curl -Lo libmpv.7z https://github.com/shinchiro/mpv-winbuild-cmake/releases/download/20230101/mpv-dev-x86_64-20230101-git-ad65c88.7z
-          7z x -othird_party/mpv libmpv.7z
-          mkdir third_party/mpv/include/mpv && mv third_party/mpv/include/*.h third_party/mpv/include/mpv
-          mkdir third_party/mpv/lib && rm third_party/mpv/mpv.def
-          mv third_party/mpv/libmpv.dll.a third_party/mpv/lib
-          mv third_party/mpv/mpv-2.dll third_party/mpv/lib/libmpv-2.dll
       - name: Build ImPlay
         shell: msys2 {0}
         run: |
           mkdir build && cd build
-          cmake -DCMAKE_BUILD_TYPE=RELEASE \
-            -DCMAKE_FIND_LIBRARY_SUFFIXES=".a" \
-            -DCMAKE_C_FLAGS="-Os -ffunction-sections -fdata-sections -fno-unwind-tables -fno-asynchronous-unwind-tables" \
-            -DCMAKE_EXE_LINKER_FLAGS="-static -no-pie -Wl,-s -Wl,-Bsymbolic -Wl,--gc-sections" \
-            ..
+          cmake -DCMAKE_BUILD_TYPE=RELEASE ..
           cmake --build . --target package
           mv ImPlay-*.msi ImPlay-win64.msi
           echo "TAG_ANME=$(date +%Y-%m-%d)" >> $GITHUB_ENV
