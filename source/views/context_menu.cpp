@@ -144,6 +144,7 @@ void ContextMenu::draw() {
     if (ImGui::BeginMenuEx("Tools", ICON_FA_HAMMER)) {
       if (ImGui::MenuItemEx("Screenshot", ICON_FA_FILE_IMAGE, "s")) mpv->command("async screenshot");
       if (ImGui::MenuItemEx("Window Border", ICON_FA_BORDER_NONE)) mpv->command("cycle border");
+      if (ImGui::MenuItemEx("Window Dragging", ICON_FA_HAND_POINTER)) mpv->command("cycle window-dragging");
       if (ImGui::BeginMenuEx("Show Stats", ICON_FA_INFO_CIRCLE)) {
         if (ImGui::MenuItem("Media Info", "i")) mpv->command("script-binding stats/display-page-1");
         if (ImGui::MenuItem("Extended Frame Timings")) mpv->command("script-binding stats/display-page-2");
