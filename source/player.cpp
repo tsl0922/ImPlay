@@ -1,6 +1,7 @@
 #include <fmt/printf.h>
 #include <fmt/color.h>
 #include <filesystem>
+#include <imgui.h>
 #include "player.h"
 
 namespace ImPlay {
@@ -8,7 +9,7 @@ Player::Player(GLFWwindow* window, const char* title) : Views::View() {
   this->window = window;
   this->title = title;
 
-  mpv = new Mpv();
+  mpv = new Mpv(window);
   cmd = new Command(window, mpv);
 }
 
@@ -143,8 +144,15 @@ void Player::initMpv() {
   });
 
   mpv->observeEvent(MPV_EVENT_CLIENT_MESSAGE, [this](void* data) {
+    ImGuiIO& io = ImGui::GetIO();
+    mpv->runLoop() = true;
+    io.SetAppAcceptingEvents(false);
+
     auto msg = static_cast<mpv_event_client_message*>(data);
     cmd->execute(msg->num_args, msg->args);
+    
+    mpv->runLoop() = false;
+    io.SetAppAcceptingEvents(true);
   });
 
   mpv->observeProperty("media-title", MPV_FORMAT_STRING, [this](void* data) {

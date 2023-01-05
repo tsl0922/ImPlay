@@ -1,9 +1,9 @@
-#include <GLFW/glfw3.h>
 #include <nlohmann/json.hpp>
 #include <stdexcept>
 #include <codecvt>
 #include <locale>
 #include <string>
+#include <thread>
 #include <cstring>
 #include <cstdarg>
 #ifdef _WIN32
@@ -14,22 +14,22 @@
 #include "dispatch.h"
 
 namespace ImPlay {
-Mpv::Mpv(int64_t wid) : Mpv() {
+Mpv::Mpv(GLFWwindow *window, int64_t wid) : Mpv(window) {
   this->wid = wid;
   if (mpv_set_property(mpv, "wid", MPV_FORMAT_INT64, &wid) < 0) throw std::runtime_error("could not set mpv wid");
 }
 
-Mpv::Mpv() {
-  mpv_handle* main = mpv_create();
+Mpv::Mpv(GLFWwindow *window) : window(window) {
+  main = mpv_create();
   if (!main) throw std::runtime_error("could not create mpv handle");
   mpv = mpv_create_client(main, "implay");
   if (!mpv) throw std::runtime_error("could not create mpv client");
-  mpv_destroy(main);
 }
 
 Mpv::~Mpv() {
   if (renderCtx != nullptr) mpv_render_context_free(renderCtx);
-  mpv_terminate_destroy(mpv);
+  mpv_destroy(main);
+  mpv_destroy(mpv);
 }
 
 void Mpv::OptionParser::parse(int argc, char **argv) {
@@ -220,8 +220,40 @@ void Mpv::waitEvent(double timeout) {
   }
 }
 
+void Mpv::eventLoop() {
+  while (main) {
+    mpv_event *event = mpv_wait_event(main, -1);
+    if (event->event_id == MPV_EVENT_SHUTDOWN) {
+      shutdown = true;
+      wakeupLoop();
+      break;
+    }
+  }
+}
+
+void Mpv::renderLoop() {
+  while (!shutdown) {
+    std::unique_lock<std::mutex> lk(mutex);
+    cond.wait(lk);
+    if (wantRender()) {
+      glfwMakeContextCurrent(window);
+      render(width, height);
+      glfwSwapBuffers(window);
+      glfwMakeContextCurrent(nullptr);
+    }
+  }
+}
+
+void Mpv::wakeupLoop() {
+  std::unique_lock<std::mutex> lk(mutex);
+  cond.notify_one();
+}
+
 void Mpv::render(int w, int h) {
   if (renderCtx == nullptr) return;
+
+  width = w;
+  height = h;
 
   int flip_y{1};
   mpv_opengl_fbo mpfbo{0, w, h};
@@ -244,8 +276,11 @@ bool Mpv::playing() { return property<int64_t, MPV_FORMAT_INT64>("playlist-playi
 void Mpv::init() {
   if (mpv_initialize(mpv) < 0) throw std::runtime_error("could not initialize mpv context");
   if (wid == 0) initRender();
+
   mpv_set_wakeup_callback(
       mpv, [](void *ctx) { dispatch_wakeup(); }, nullptr);
+
+  std::thread(&Mpv::eventLoop, this).detach();
 }
 
 void Mpv::initRender() {
@@ -263,6 +298,13 @@ void Mpv::initRender() {
     throw std::runtime_error("failed to initialize mpv GL context");
 
   mpv_render_context_set_update_callback(
-      renderCtx, [](void *ctx) { dispatch_wakeup(); }, nullptr);
+      renderCtx,
+      [](void *ctx) {
+        dispatch_wakeup();
+        Mpv *mpv_ = (Mpv *)ctx;
+        if (mpv_->runLoop_) mpv_->wakeupLoop();
+      },
+      this);
+  std::thread(&Mpv::renderLoop, this).detach();
 }
 }  // namespace ImPlay

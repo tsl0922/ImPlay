@@ -1,16 +1,20 @@
 #pragma once
 #include <mpv/client.h>
 #include <mpv/render_gl.h>
+#include <GLFW/glfw3.h>
 #include <string>
 #include <map>
 #include <vector>
 #include <functional>
+#include <atomic>
+#include <mutex>
+#include <condition_variable>
 
 namespace ImPlay {
 class Mpv {
  public:
-  explicit Mpv(int64_t wid);
-  Mpv();
+  explicit Mpv(GLFWwindow *window, int64_t wid);
+  explicit Mpv(GLFWwindow *window);
   ~Mpv();
 
   using EventHandler = std::function<void(void *)>;
@@ -60,6 +64,8 @@ class Mpv {
   bool paused();
   bool playing();
 
+  std::atomic_bool &runLoop() { return runLoop_; }
+
   std::vector<TrackItem> trackList(const char *type);
   std::vector<PlayItem> playlist();
   std::vector<ChapterItem> chapterList();
@@ -98,11 +104,21 @@ class Mpv {
 
  private:
   void initRender();
+  void eventLoop();
+  void renderLoop();
+  void wakeupLoop();
 
   int64_t wid = 0;
+  int width, height;
+  GLFWwindow *window = nullptr;
+  mpv_handle *main = nullptr;
   mpv_handle *mpv = nullptr;
   mpv_render_context *renderCtx = nullptr;
 
+  std::atomic_bool shutdown = false;
+  std::atomic_bool runLoop_ = false;
+  std::mutex mutex;
+  std::condition_variable cond;
   std::vector<std::tuple<mpv_event_id, EventHandler>> events;
   std::vector<std::tuple<std::string, mpv_format, EventHandler>> propertyEvents;
 };
