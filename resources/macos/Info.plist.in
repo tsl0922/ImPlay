@@ -174,10 +174,10 @@
   </array>
   <key>CFBundleExecutable</key>
   <string>${MACOSX_BUNDLE_EXECUTABLE_NAME}</string>
-  <key>CFBundleGetInfoString</key>
-  <string>${MACOSX_BUNDLE_INFO_STRING}</string>
   <key>CFBundleIconFile</key>
   <string>${MACOSX_BUNDLE_ICON_FILE}</string>
+  <key>CFBundleIconName</key>
+	<string>${MACOSX_BUNDLE_ICON_FILE}</string>
   <key>CFBundleIdentifier</key>
   <string>${MACOSX_BUNDLE_GUI_IDENTIFIER}</string>
   <key>CFBundleInfoDictionaryVersion</key>
@@ -187,9 +187,15 @@
   <key>CFBundlePackageType</key>
   <string>APPL</string>
   <key>CFBundleVersion</key>
-<string>${MACOSX_BUNDLE_BUNDLE_VERSION}</string>
+  <string>${MACOSX_BUNDLE_BUNDLE_VERSION}</string>
   <key>CFBundleShortVersionString</key>
   <string>${MACOSX_BUNDLE_SHORT_VERSION_STRING}</string>
+  <key>CFBundleSignature</key>
+	<string>????</string>
+  <key>CFBundleSupportedPlatforms</key>
+	<array>
+		<string>MacOSX</string>
+	</array>
   <key>NSHighResolutionCapable</key>
   <true/>
   <key>LSEnvironment</key>

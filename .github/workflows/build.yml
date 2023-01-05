@@ -107,16 +107,16 @@ jobs:
             -DCMAKE_C_FLAGS="-Os -ffunction-sections -fdata-sections -fno-unwind-tables -fno-asynchronous-unwind-tables -flto" \
             -DCMAKE_EXE_LINKER_FLAGS="-static -no-pie -Wl,-s -Wl,-Bsymbolic -Wl,--gc-sections" \
             ..
-          cmake --build .
-          7z a -m0=lzma2 -mx=9 -ms=on ImPlay-win.7z ImPlay.exe libmpv-2.dll
+          cmake --build . --target package
+          mv ImPlay-*.msi ImPlay-win64.msi
           echo "TAG_ANME=$(date +%Y-%m-%d)" >> $GITHUB_ENV
       - uses: actions/upload-artifact@v3
         with:
           name: ImPlay-win
-          path: build/ImPlay-*.7z
+          path: build/ImPlay-*.msi
       - uses: ncipollo/release-action@v1
         with:
           commit: ${{ github.sha }}
           tag: ${{ env.TAG_ANME }}
-          artifacts: build/ImPlay-*.7z
+          artifacts: build/ImPlay-*.msi
           allowUpdates: true
