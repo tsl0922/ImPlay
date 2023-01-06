@@ -1,4 +1,4 @@
-// dear imgui, v1.89.2 WIP
+// dear imgui, v1.89.2
 // (demo code)
 
 // Help:
@@ -3511,11 +3511,14 @@ static void ShowDemoWindowPopups()
         // and BeginPopupContextItem() will use the last item ID as the popup ID.
         {
             const char* names[5] = { "Label1", "Label2", "Label3", "Label4", "Label5" };
+            static int selected = -1;
             for (int n = 0; n < 5; n++)
             {
-                ImGui::Selectable(names[n]);
+                if (ImGui::Selectable(names[n], selected == n))
+                    selected = n;
                 if (ImGui::BeginPopupContextItem()) // <-- use last item id as popup id
                 {
+                    selected = n;
                     ImGui::Text("This a popup for \"%s\"!", names[n]);
                     if (ImGui::Button("Close"))
                         ImGui::CloseCurrentPopup();
@@ -5116,18 +5119,23 @@ static void ShowDemoWindowTables()
     if (ImGui::TreeNode("Synced instances"))
     {
         HelpMarker("Multiple tables with the same identifier will share their settings, width, visibility, order etc.");
+
+        static ImGuiTableFlags flags = ImGuiTableFlags_Resizable | ImGuiTableFlags_Reorderable | ImGuiTableFlags_Hideable | ImGuiTableFlags_Borders | ImGuiTableFlags_SizingFixedFit | ImGuiTableFlags_NoSavedSettings;
+        ImGui::CheckboxFlags("ImGuiTableFlags_ScrollY", &flags, ImGuiTableFlags_ScrollY);
+        ImGui::CheckboxFlags("ImGuiTableFlags_SizingFixedFit", &flags, ImGuiTableFlags_SizingFixedFit);
         for (int n = 0; n < 3; n++)
         {
             char buf[32];
             sprintf(buf, "Synced Table %d", n);
             bool open = ImGui::CollapsingHeader(buf, ImGuiTreeNodeFlags_DefaultOpen);
-            if (open && ImGui::BeginTable("Table", 3, ImGuiTableFlags_Resizable | ImGuiTableFlags_Reorderable | ImGuiTableFlags_Hideable | ImGuiTableFlags_Borders | ImGuiTableFlags_SizingFixedFit | ImGuiTableFlags_NoSavedSettings))
+            if (open && ImGui::BeginTable("Table", 3, flags, ImVec2(0.0f, ImGui::GetTextLineHeightWithSpacing() * 5)))
             {
                 ImGui::TableSetupColumn("One");
                 ImGui::TableSetupColumn("Two");
                 ImGui::TableSetupColumn("Three");
                 ImGui::TableHeadersRow();
-                for (int cell = 0; cell < 9; cell++)
+                const int cell_count = (n == 1) ? 27 : 9; // Make second table have a scrollbar to verify that additional decoration is not affecting column positions.
+                for (int cell = 0; cell < cell_count; cell++)
                 {
                     ImGui::TableNextColumn();
                     ImGui::Text("this cell %d", cell);
@@ -5801,18 +5809,6 @@ static void ShowDemoWindowInputs()
         ImGui::SetNextItemOpen(true, ImGuiCond_Once);
         if (ImGui::TreeNode("Outputs"))
         {
-            ImGui::Text("io.WantCaptureMouse: %d", io.WantCaptureMouse);
-            ImGui::Text("io.WantCaptureMouseUnlessPopupClose: %d", io.WantCaptureMouseUnlessPopupClose);
-            ImGui::Text("io.WantCaptureKeyboard: %d", io.WantCaptureKeyboard);
-            ImGui::Text("io.WantTextInput: %d", io.WantTextInput);
-            ImGui::Text("io.WantSetMousePos: %d", io.WantSetMousePos);
-            ImGui::Text("io.NavActive: %d, io.NavVisible: %d", io.NavActive, io.NavVisible);
-            ImGui::TreePop();
-        }
-
-        IMGUI_DEMO_MARKER("Inputs & Focus/IO Output: Capture override");
-        if (ImGui::TreeNode("IO Output: Capture override"))
-        {
             HelpMarker(
                 "The value of io.WantCaptureMouse and io.WantCaptureKeyboard are normally set by Dear ImGui "
                 "to instruct your application of how to route inputs. Typically, when a value is true, it means "
@@ -5820,28 +5816,35 @@ static void ShowDemoWindowInputs()
                 "The most typical case is: when hovering a window, Dear ImGui set io.WantCaptureMouse to true, "
                 "and underlying application should ignore mouse inputs (in practice there are many and more subtle "
                 "rules leading to how those flags are set).");
-
             ImGui::Text("io.WantCaptureMouse: %d", io.WantCaptureMouse);
             ImGui::Text("io.WantCaptureMouseUnlessPopupClose: %d", io.WantCaptureMouseUnlessPopupClose);
             ImGui::Text("io.WantCaptureKeyboard: %d", io.WantCaptureKeyboard);
+            ImGui::Text("io.WantTextInput: %d", io.WantTextInput);
+            ImGui::Text("io.WantSetMousePos: %d", io.WantSetMousePos);
+            ImGui::Text("io.NavActive: %d, io.NavVisible: %d", io.NavActive, io.NavVisible);
 
-            HelpMarker(
-                "Hovering the colored canvas will override io.WantCaptureXXX fields.\n"
-                "Notice how normally (when set to none), the value of io.WantCaptureKeyboard would be false when hovering and true when clicking.");
-            static int capture_override_mouse = -1;
-            static int capture_override_keyboard = -1;
-            const char* capture_override_desc[] = { "None", "Set to false", "Set to true" };
-            ImGui::SetNextItemWidth(ImGui::GetFontSize() * 15);
-            ImGui::SliderInt("SetNextFrameWantCaptureMouse()", &capture_override_mouse, -1, +1, capture_override_desc[capture_override_mouse + 1], ImGuiSliderFlags_AlwaysClamp);
-            ImGui::SetNextItemWidth(ImGui::GetFontSize() * 15);
-            ImGui::SliderInt("SetNextFrameWantCaptureKeyboard()", &capture_override_keyboard, -1, +1, capture_override_desc[capture_override_keyboard + 1], ImGuiSliderFlags_AlwaysClamp);
+            IMGUI_DEMO_MARKER("Inputs & Focus/Outputs/WantCapture override");
+            if (ImGui::TreeNode("WantCapture override"))
+            {
+                HelpMarker(
+                    "Hovering the colored canvas will override io.WantCaptureXXX fields.\n"
+                    "Notice how normally (when set to none), the value of io.WantCaptureKeyboard would be false when hovering and true when clicking.");
+                static int capture_override_mouse = -1;
+                static int capture_override_keyboard = -1;
+                const char* capture_override_desc[] = { "None", "Set to false", "Set to true" };
+                ImGui::SetNextItemWidth(ImGui::GetFontSize() * 15);
+                ImGui::SliderInt("SetNextFrameWantCaptureMouse() on hover", &capture_override_mouse, -1, +1, capture_override_desc[capture_override_mouse + 1], ImGuiSliderFlags_AlwaysClamp);
+                ImGui::SetNextItemWidth(ImGui::GetFontSize() * 15);
+                ImGui::SliderInt("SetNextFrameWantCaptureKeyboard() on hover", &capture_override_keyboard, -1, +1, capture_override_desc[capture_override_keyboard + 1], ImGuiSliderFlags_AlwaysClamp);
 
-            ImGui::ColorButton("##panel", ImVec4(0.7f, 0.1f, 0.7f, 1.0f), ImGuiColorEditFlags_NoTooltip | ImGuiColorEditFlags_NoDragDrop, ImVec2(256.0f, 192.0f)); // Dummy item
-            if (ImGui::IsItemHovered() && capture_override_mouse != -1)
-                ImGui::SetNextFrameWantCaptureMouse(capture_override_mouse == 1);
-            if (ImGui::IsItemHovered() && capture_override_keyboard != -1)
-                ImGui::SetNextFrameWantCaptureKeyboard(capture_override_keyboard == 1);
+                ImGui::ColorButton("##panel", ImVec4(0.7f, 0.1f, 0.7f, 1.0f), ImGuiColorEditFlags_NoTooltip | ImGuiColorEditFlags_NoDragDrop, ImVec2(128.0f, 96.0f)); // Dummy item
+                if (ImGui::IsItemHovered() && capture_override_mouse != -1)
+                    ImGui::SetNextFrameWantCaptureMouse(capture_override_mouse == 1);
+                if (ImGui::IsItemHovered() && capture_override_keyboard != -1)
+                    ImGui::SetNextFrameWantCaptureKeyboard(capture_override_keyboard == 1);
 
+                ImGui::TreePop();
+            }
             ImGui::TreePop();
         }
 
@@ -7139,7 +7142,7 @@ static void ShowExampleAppLayout(bool* p_open)
         {
             if (ImGui::BeginMenu("File"))
             {
-                if (ImGui::MenuItem("Close")) *p_open = false;
+                if (ImGui::MenuItem("Close", "Ctrl+W")) { *p_open = false; }
                 ImGui::EndMenu();
             }
             ImGui::EndMenuBar();
