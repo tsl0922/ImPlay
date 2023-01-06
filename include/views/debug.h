@@ -11,7 +11,7 @@ class Debug : public View {
 
  private:
 
-  void drawVersion();
+  void drawHeader();
   void drawBindings();
   void drawProperties(const char *title, const char *key);
   void drawPropNode(const char *name, mpv_node& node, int depth = 0);

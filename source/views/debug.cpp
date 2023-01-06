@@ -10,7 +10,7 @@ Debug::Debug(Mpv* mpv) : View() { this->mpv = mpv; }
 void Debug::draw() {
   ImGui::SetNextWindowSize(ImVec2(800, 450), ImGuiCond_FirstUseEver);
   if (ImGui::Begin("Metrics/Debug", &m_open)) {
-    drawVersion();
+    drawHeader();
     drawBindings();
     drawProperties("Properties", "property-list");
     drawProperties("Options", "options");
@@ -18,7 +18,7 @@ void Debug::draw() {
   }
 }
 
-void Debug::drawVersion() {
+void Debug::drawHeader() {
   ImGuiIO& io = ImGui::GetIO();
   char* version = mpv->property("mpv-version");
   ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(15.0f, 15.0f));
@@ -29,6 +29,9 @@ void Debug::drawVersion() {
   ImGui::TextColored(ImVec4(0, 0, 1.0f, 1.0f), "FPS: %.2f", io.Framerate);
   ImGui::PopStyleVar();
   mpv_free(version);
+
+  ImGui::TextWrapped("NOTE: playback may become very slow when Properties / Options are expanded.");
+  ImGui::Spacing();
 }
 
 void Debug::drawBindings() {
