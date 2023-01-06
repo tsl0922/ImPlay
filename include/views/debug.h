@@ -13,7 +13,8 @@ class Debug : public View {
 
   void drawVersion();
   void drawBindings();
-  void drawProperties();
+  void drawProperties(const char *title, const char *key);
+  void drawPropNode(const char *name, mpv_node& node, int depth = 0);
 
   Mpv *mpv = nullptr;
 };

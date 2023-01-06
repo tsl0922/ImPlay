@@ -1,5 +1,3 @@
-#include <chrono>
-#include <map>
 #include <imgui.h>
 #include <imgui_internal.h>
 #include <fmt/format.h>
@@ -14,14 +12,15 @@ void Debug::draw() {
   if (ImGui::Begin("Metrics/Debug", &m_open)) {
     drawVersion();
     drawBindings();
-    drawProperties();
+    drawProperties("Properties", "property-list");
+    drawProperties("Options", "options");
     ImGui::End();
   }
 }
 
 void Debug::drawVersion() {
   ImGuiIO& io = ImGui::GetIO();
-  char *version = mpv->property("mpv-version");
+  char* version = mpv->property("mpv-version");
   ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(15.0f, 15.0f));
   ImGui::Text("%s", version);
   ImGui::SameLine(ImGui::GetWindowWidth() - 300);
@@ -60,59 +59,82 @@ void Debug::drawBindings() {
   }
 }
 
-void Debug::drawProperties() {
-  mpv_node node = mpv->property<mpv_node, MPV_FORMAT_NODE>("property-list");
-  if (ImGui::CollapsingHeader(fmt::format("Properties ({})", node.u.list->num).c_str())) {
-    if (ImGui::BeginListBox("##mpv-properties", ImVec2(-FLT_MIN, -FLT_MIN))) {
-      auto color = ImVec4(0, 0, 1.0f, 1.0f);
-      for (int i = 0; i < node.u.list->num; i++) {
-        auto item = node.u.list->values[i];
-        ImGui::PushID(&item);
-        ImGui::Selectable("", false);
-        ImGui::SameLine();
-        ImGui::Text("%s", item.u.string);
-        if (!ImGui::IsItemVisible()) {
-          ImGui::PopID();
-          continue;
-        }
+void Debug::drawProperties(const char* title, const char* key) {
+  mpv_node node = mpv->property<mpv_node, MPV_FORMAT_NODE>(key);
+  if (!ImGui::CollapsingHeader(fmt::format("{} ({})", title, node.u.list->num).c_str())) return;
 
-        ImGui::SameLine(ImGui::GetWindowWidth() * 0.4f);
-        auto prop = mpv->property<mpv_node, MPV_FORMAT_NODE>(item.u.string);
-        switch (prop.format) {
-          case MPV_FORMAT_NONE:
-            ImGui::TextColored(color, "Invalid");
-            break;
-          case MPV_FORMAT_STRING:
-            ImGui::TextColored(color, "%s", prop.u.string);
-            break;
-          case MPV_FORMAT_FLAG:
-            ImGui::TextColored(color, "%s", prop.u.flag ? "true" : "false");
-            break;
-          case MPV_FORMAT_INT64:
-            ImGui::TextColored(color, "%lld", prop.u.int64);
-            break;
-          case MPV_FORMAT_DOUBLE:
-            ImGui::TextColored(color, "%f", prop.u.double_);
-            break;
-          case MPV_FORMAT_NODE_ARRAY:
-            ImGui::TextColored(color, "array: %d", prop.u.list->num);
-            break;
-          case MPV_FORMAT_NODE_MAP:
-            ImGui::TextColored(color, "map: %d", prop.u.list->num);
-            break;
-          case MPV_FORMAT_BYTE_ARRAY:
-            ImGui::TextColored(color, "byte array: %d", prop.u.ba->size);
-            break;
-          default:
-            ImGui::TextColored(color, "Unknown format: %d", prop.format);
-            break;
-        }
-        ImGui::PopID();
-        mpv_free_node_contents(&prop);
-      }
-      ImGui::EndListBox();
+  if (ImGui::BeginListBox("##mpv-prop-list", ImVec2(-FLT_MIN, -FLT_MIN))) {
+    for (int i = 0; i < node.u.list->num; i++) {
+      auto item = node.u.list->values[i];
+      auto prop = mpv->property<mpv_node, MPV_FORMAT_NODE>(item.u.string);
+      drawPropNode(item.u.string, prop);
+      mpv_free_node_contents(&prop);
     }
+    ImGui::EndListBox();
   }
+  
   mpv_free_node_contents(&node);
+}
+
+void Debug::drawPropNode(const char* name, mpv_node& node, int depth) {
+  static const ImVec4 color = ImVec4(0, 0, 1.0f, 1.0f);
+  constexpr static auto drawSimple = [&](const char* title, mpv_node prop) {
+    ImGui::PushID(&prop);
+    ImGui::Selectable("", false);
+    ImGui::SameLine();
+    ImGui::Text("%s", title);
+    ImGui::SameLine(ImGui::GetWindowWidth() * 0.4f);
+    switch (prop.format) {
+      case MPV_FORMAT_NONE:
+        ImGui::TextColored(ImVec4(1.0f, 0, 0, 1.0f), "Invalid");
+        break;
+      case MPV_FORMAT_STRING:
+        ImGui::TextColored(color, "%s", prop.u.string);
+        break;
+      case MPV_FORMAT_FLAG:
+        ImGui::TextColored(color, "%s", prop.u.flag ? "true" : "false");
+        break;
+      case MPV_FORMAT_INT64:
+        ImGui::TextColored(color, "%lld", prop.u.int64);
+        break;
+      case MPV_FORMAT_DOUBLE:
+        ImGui::TextColored(color, "%f", prop.u.double_);
+        break;
+      default:
+        ImGui::TextDisabled("Unknown format: %d", prop.format);
+        break;
+    }
+    ImGui::PopID();
+  };
+
+  switch (node.format) {
+    case MPV_FORMAT_NONE:
+    case MPV_FORMAT_STRING:
+    case MPV_FORMAT_FLAG:
+    case MPV_FORMAT_INT64:
+    case MPV_FORMAT_DOUBLE:
+      drawSimple(name, node);
+      break;
+    case MPV_FORMAT_NODE_ARRAY:
+      if (ImGui::TreeNode(fmt::format("{} [{}]", name, node.u.list->num).c_str())) {
+        for (int i = 0; i < node.u.list->num; i++)
+          drawPropNode(fmt::format("#{}", i).c_str(), node.u.list->values[i], depth + 1);
+        ImGui::TreePop();
+      }
+      break;
+    case MPV_FORMAT_NODE_MAP:
+      if (depth > 0) ImGui::SetNextItemOpen(true, ImGuiCond_Once);
+      if (ImGui::TreeNode(fmt::format("{} ({})", name, node.u.list->num).c_str())) {
+        for (int i = 0; i < node.u.list->num; i++) drawSimple(node.u.list->keys[i], node.u.list->values[i]);
+        ImGui::TreePop();
+      }
+      break;
+    case MPV_FORMAT_BYTE_ARRAY:
+      ImGui::Selectable(fmt::format("byte array [{}]", node.u.ba->size).c_str(), false);
+      break;
+    default:
+      ImGui::Selectable(fmt::format("Unknown format: {}", (int)node.format).c_str(), false);
+      break;
+  }
 }
 }  // namespace ImPlay::Views
