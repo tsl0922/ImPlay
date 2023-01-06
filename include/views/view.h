@@ -12,6 +12,7 @@ class View {
 
   virtual void draw() = 0;
   virtual void show() { m_open = true; }
+  bool isOpen() { return m_open; }
   
   void openFile(std::vector<nfdu8filteritem_t> filters, std::function<void(nfdu8char_t *)> callback);
   void openFiles(std::vector<nfdu8filteritem_t> filters, std::function<void(nfdu8char_t *, int)> callback);

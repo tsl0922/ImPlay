@@ -46,6 +46,7 @@ set(SOURCE_FILES
     source/views/view.cpp
     source/views/command_palette.cpp
     source/views/context_menu.cpp
+    source/views/debug.cpp
     source/views/about.cpp
     source/command.cpp
     source/dispatch.cpp

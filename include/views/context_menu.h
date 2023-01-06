@@ -22,6 +22,5 @@ class ContextMenu : public View {
 
   Mpv *mpv = nullptr;
   Theme theme;
-  bool metrics = false;
 };
 }  // namespace ImPlay::Views

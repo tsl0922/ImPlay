@@ -27,34 +27,34 @@ class Mpv {
   };
 
   struct TrackItem {
-    int64_t id;
-    char *type;
-    char *title;
-    char *lang;
+    int64_t id = -1;
+    std::string type;
+    std::string title;
+    std::string lang;
     bool selected;
   };
 
   struct PlayItem {
-    int64_t id;
-    char *title;
-    char *filename;
+    int64_t id = -1;
+    std::string title;
+    std::string filename;
   };
 
   struct ChapterItem {
-    int64_t id;
-    char *title;
+    int64_t id = -1;
+    std::string title;
     double time;
   };
 
   struct BindingItem {
-    char *key;
-    char *cmd;
-    char *comment;
+    std::string key;
+    std::string cmd;
+    std::string comment;
   };
 
   struct AudioDevice {
-    char *name;
-    char *description;
+    std::string name;
+    std::string description;
   };
 
   void init();

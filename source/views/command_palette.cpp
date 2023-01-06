@@ -125,13 +125,10 @@ void CommandPalette::match(const std::string& input) {
   auto bindingList = mpv->bindingList();
 
   for (auto& binding : bindingList) {
-    std::string key = binding.key ? binding.key : "";
-    std::string command = binding.cmd ? binding.cmd : "";
-    std::string comment = binding.comment ? binding.comment : "";
-    if (command.empty() || command == "ignore") continue;
-    int score = MatchCommand(input, comment) * 2;
-    if (score == 0) score = MatchCommand(input, command);
-    if (score > 0) matches.push_back({key, command, comment, input, score});
+    if (binding.cmd.empty() || binding.cmd == "ignore") continue;
+    int score = MatchCommand(input, binding.comment) * 2;
+    if (score == 0) score = MatchCommand(input, binding.cmd);
+    if (score > 0) matches.push_back({binding.key, binding.cmd, binding.comment, input, score});
   }
   if (input.empty()) return;
 

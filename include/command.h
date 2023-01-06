@@ -4,6 +4,7 @@
 #include "mpv.h"
 #include "views/view.h"
 #include "views/about.h"
+#include "views/debug.h"
 #include "views/context_menu.h"
 #include "views/command_palette.h"
 
@@ -35,6 +36,7 @@ class Command : public Views::View {
   Mpv *mpv = nullptr;
 
   Views::About *about;
+  Views::Debug *debug;
   Views::ContextMenu *contextMenu;
   Views::CommandPalette *commandPalette;
 

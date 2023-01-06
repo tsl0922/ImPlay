@@ -145,13 +145,6 @@ void ContextMenu::draw() {
       if (ImGui::MenuItemEx("Screenshot", ICON_FA_FILE_IMAGE, "s")) mpv->command("async screenshot");
       if (ImGui::MenuItemEx("Window Border", ICON_FA_BORDER_NONE)) mpv->command("cycle border");
       if (ImGui::MenuItemEx("Window Dragging", ICON_FA_HAND_POINTER)) mpv->command("cycle window-dragging");
-      if (ImGui::BeginMenuEx("Show Stats", ICON_FA_INFO_CIRCLE)) {
-        if (ImGui::MenuItem("Media Info", "i")) mpv->command("script-binding stats/display-page-1");
-        if (ImGui::MenuItem("Extended Frame Timings")) mpv->command("script-binding stats/display-page-2");
-        if (ImGui::MenuItem("Cache Statistics")) mpv->command("script-binding stats/display-page-3");
-        if (ImGui::MenuItem("Internal performance info")) mpv->command("script-binding stats/display-page-0");
-        ImGui::EndMenu();
-      }
       ImGui::Separator();
       drawProfilelist();
       if (ImGui::BeginMenuEx("Theme", ICON_FA_PALETTE)) {
@@ -160,9 +153,16 @@ void ContextMenu::draw() {
         if (ImGui::MenuItem("Classic", nullptr, theme == Theme::CLASSIC)) setTheme(Theme::CLASSIC);
         ImGui::EndMenu();
       }
+      if (ImGui::BeginMenuEx("Show Stats", ICON_FA_INFO_CIRCLE)) {
+        if (ImGui::MenuItem("Media Info", "i")) mpv->command("script-binding stats/display-page-1");
+        if (ImGui::MenuItem("Extended Frame Timings")) mpv->command("script-binding stats/display-page-2");
+        if (ImGui::MenuItem("Cache Statistics")) mpv->command("script-binding stats/display-page-3");
+        if (ImGui::MenuItem("Internal performance info")) mpv->command("script-binding stats/display-page-0");
+        ImGui::EndMenu();
+      }
       if (ImGui::MenuItem("Toggle OSC", "DEL")) mpv->command("script-binding osc/visibility");
       ImGui::Separator();
-      ImGui::MenuItem("Metrics/Debugger", nullptr, &metrics);
+      if (ImGui::MenuItem("Metrics & Debug")) mpv->commandv("script-message-to", "implay", "metrics", nullptr);
       if (ImGui::MenuItem("Script Console", "`")) mpv->command("script-binding console/enable");
       ImGui::Separator();
       if (ImGui::MenuItemEx("Quit Watch Later", ICON_FA_WINDOW_CLOSE, "Q")) mpv->command("quit-watch-later");
@@ -190,36 +190,32 @@ void ContextMenu::draw() {
     if (ImGui::MenuItemEx("Quit", ICON_FA_WINDOW_CLOSE, "q")) mpv->command("quit");
     ImGui::EndPopup();
   }
-  if (metrics) ImGui::ShowMetricsWindow(&metrics);
 }
 
 void ContextMenu::drawAudioDeviceList() {
   auto devices = mpv->audioDeviceList();
-  const char *name = mpv->property("audio-device");
+  char *name = mpv->property("audio-device");
   if (ImGui::BeginMenuEx("Devices", ICON_FA_AUDIO_DESCRIPTION, !devices.empty())) {
     for (auto &device : devices) {
       auto title = fmt::format("[{}] {}", device.description, device.name);
-      if (ImGui::MenuItem(title.c_str(), nullptr, strcmp(device.name, name) == 0))
-        mpv->property("audio-device", device.name);
+      if (ImGui::MenuItem(title.c_str(), nullptr, device.name == name))
+        mpv->property("audio-device", device.name.c_str());
     }
     ImGui::EndMenu();
   }
+  mpv_free(name);
 }
 
 void ContextMenu::drawTracklist(const char *type, const char *prop) {
   auto tracklist = mpv->trackList(type);
   std::vector<Mpv::TrackItem> list;
   std::copy_if(tracklist.begin(), tracklist.end(), std::back_inserter(list),
-               [type](const auto &track) { return strcmp(track.type, type) == 0; });
+               [type](const auto &track) { return track.type == type; });
   if (ImGui::BeginMenuEx("Tracks", ICON_FA_LIST, !list.empty())) {
     for (auto &track : list) {
-      if (strcmp(track.type, type) == 0) {
-        std::string title;
-        if (track.title == nullptr || track.title[0] == '\0')
-          title = fmt::format("Track {}", track.id);
-        else
-          title = track.title;
-        if (track.lang != nullptr) title += fmt::format(" [{}]", track.lang);
+      if (track.type == type) {
+        auto title = track.title.empty() ? fmt::format("Track {}", track.id) : track.title;
+        if (!track.lang.empty()) title += fmt::format(" [{}]", track.lang);
         if (ImGui::MenuItemEx(title.c_str(), nullptr, nullptr, track.selected))
           mpv->property<int64_t, MPV_FORMAT_INT64>(prop, track.id);
       }
@@ -236,11 +232,7 @@ void ContextMenu::drawChapterlist() {
     if (ImGui::MenuItemEx("Next", ICON_FA_ARROW_RIGHT)) mpv->command("add chapter 1");
     ImGui::Separator();
     for (auto &chapter : chapterlist) {
-      std::string title;
-      if (chapter.title == nullptr || chapter.title[0] == '\0')
-        title = fmt::format("Chapter {}", chapter.id + 1);
-      else
-        title = chapter.title;
+      auto title = chapter.title.empty() ? fmt::format("Chapter {}", chapter.id + 1) : chapter.title;
       title = fmt::format("{} [{:%H:%M:%S}]", title, std::chrono::duration<int>((int)chapter.time));
       if (ImGui::MenuItemEx(title.c_str(), nullptr, nullptr, chapter.id == pos)) {
         mpv->commandv("seek", std::to_string(chapter.time).c_str(), "absolute", nullptr);
@@ -269,10 +261,12 @@ void ContextMenu::drawPlaylist() {
     ImGui::Separator();
     for (auto &item : playlist) {
       std::string title;
-      if (item.title != nullptr && item.title[0] != '\0')
+      if (!item.title.empty())
         title = item.title;
-      else if (item.filename != nullptr)
-        title = std::filesystem::path(reinterpret_cast<char8_t *>(item.filename)).filename().string();
+      else if (!item.filename.empty()) {
+        auto filename = reinterpret_cast<char8_t *>(item.filename.data());
+        title = std::filesystem::path(filename).filename().string();
+      }
       if (title.empty()) title = fmt::format("Item {}", item.id + 1);
       if (ImGui::MenuItemEx(title.c_str(), nullptr, nullptr, item.id == pos))
         mpv->property<int64_t, MPV_FORMAT_INT64>("playlist-pos", item.id);

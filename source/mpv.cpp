@@ -74,7 +74,7 @@ std::vector<Mpv::TrackItem> Mpv::trackList(const char *type) {
   std::vector<Mpv::TrackItem> tracks;
   for (int i = 0; i < node.u.list->num; i++) {
     auto track = node.u.list->values[i];
-    Mpv::TrackItem t{0};
+    Mpv::TrackItem t;
     for (int j = 0; j < track.u.list->num; j++) {
       auto key = track.u.list->keys[j];
       auto value = track.u.list->values[j];
@@ -90,8 +90,9 @@ std::vector<Mpv::TrackItem> Mpv::trackList(const char *type) {
         t.selected = value.u.flag;
       }
     }
-    if (t.type != nullptr && strcmp(t.type, type) == 0) tracks.emplace_back(t);
+    tracks.emplace_back(t);
   }
+  mpv_free_node_contents(&node);
   return tracks;
 }
 
@@ -100,7 +101,7 @@ std::vector<Mpv::PlayItem> Mpv::playlist() {
   std::vector<Mpv::PlayItem> playlist;
   for (int i = 0; i < node.u.list->num; i++) {
     auto item = node.u.list->values[i];
-    Mpv::PlayItem t{0};
+    Mpv::PlayItem t;
     t.id = i;
     for (int j = 0; j < item.u.list->num; j++) {
       auto key = item.u.list->keys[j];
@@ -113,6 +114,7 @@ std::vector<Mpv::PlayItem> Mpv::playlist() {
     }
     playlist.emplace_back(t);
   }
+  mpv_free_node_contents(&node);
   return playlist;
 }
 
@@ -121,7 +123,7 @@ std::vector<Mpv::ChapterItem> Mpv::chapterList() {
   std::vector<Mpv::ChapterItem> chapters;
   for (int i = 0; i < node.u.list->num; i++) {
     auto item = node.u.list->values[i];
-    Mpv::ChapterItem t{0};
+    Mpv::ChapterItem t;
     t.id = i;
     for (int j = 0; j < item.u.list->num; j++) {
       auto key = item.u.list->keys[j];
@@ -134,6 +136,7 @@ std::vector<Mpv::ChapterItem> Mpv::chapterList() {
     }
     chapters.emplace_back(t);
   }
+  mpv_free_node_contents(&node);
   return chapters;
 }
 
@@ -142,7 +145,7 @@ std::vector<Mpv::BindingItem> Mpv::bindingList() {
   std::vector<Mpv::BindingItem> bindings;
   for (int i = 0; i < node.u.list->num; i++) {
     auto item = node.u.list->values[i];
-    Mpv::BindingItem t{nullptr};
+    Mpv::BindingItem t;
     for (int j = 0; j < item.u.list->num; j++) {
       auto key = item.u.list->keys[j];
       auto value = item.u.list->values[j];
@@ -156,11 +159,12 @@ std::vector<Mpv::BindingItem> Mpv::bindingList() {
     }
     bindings.emplace_back(t);
   }
+  mpv_free_node_contents(&node);
   return bindings;
 }
 
 std::vector<std::string> Mpv::profileList() {
-  const char *payload = property<const char *, MPV_FORMAT_STRING>("profile-list");
+  char *payload = property<char *, MPV_FORMAT_STRING>("profile-list");
   std::vector<std::string> profiles;
   auto j = nlohmann::json::parse(payload);
   for (auto &elm : j) {
@@ -168,6 +172,7 @@ std::vector<std::string> Mpv::profileList() {
     if (name != "builtin-pseudo-gui" && name != "encoding" && name != "libmpv" && name != "pseudo-gui")
       profiles.emplace_back(name);
   }
+  mpv_free(payload);
   return profiles;
 }
 
@@ -176,7 +181,7 @@ std::vector<Mpv::AudioDevice> Mpv::audioDeviceList() {
   std::vector<Mpv::AudioDevice> devices;
   for (int i = 0; i < node.u.list->num; i++) {
     auto item = node.u.list->values[i];
-    AudioDevice t{0};
+    AudioDevice t;
     for (int j = 0; j < item.u.list->num; j++) {
       auto key = item.u.list->keys[j];
       auto value = item.u.list->values[j];
@@ -188,6 +193,7 @@ std::vector<Mpv::AudioDevice> Mpv::audioDeviceList() {
     }
     devices.emplace_back(t);
   }
+  mpv_free_node_contents(&node);
   return devices;
 }
 

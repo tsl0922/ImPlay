@@ -1,3 +1,4 @@
+#include <map>
 #include <filesystem>
 #include <fmt/format.h>
 #include <imgui.h>
@@ -10,12 +11,14 @@ Command::Command(GLFWwindow *window, Mpv *mpv) : View() {
   this->mpv = mpv;
 
   about = new Views::About();
+  debug = new Views::Debug(mpv);
   contextMenu = new Views::ContextMenu(mpv);
   commandPalette = new Views::CommandPalette(mpv);
 }
 
 Command::~Command() {
   delete about;
+  delete debug;
   delete contextMenu;
   delete commandPalette;
 }
@@ -28,31 +31,30 @@ void Command::draw() {
     contextMenu->show();
 
   about->draw();
+  if (debug->isOpen()) debug->draw();
   contextMenu->draw();
   commandPalette->draw();
 }
 
 void Command::execute(int num_args, const char **args) {
   if (num_args == 0) return;
+
+  static std::map<std::string, std::function<void()>> commands = {
+      {"open", [&]() { open(); }},
+      {"open-disk", [&]() { openDisk(); }},
+      {"open-iso", [&]() { openIso(); }},
+      {"open-clipboard", [&]() { openClipboard(); }},
+      {"load-sub", [&]() { loadSubtitles(); }},
+      {"playlist-add-files", [&]() { playlistAddFiles(); }},
+      {"playlist-add-folder", [&]() { playlistAddFolder(); }},
+      {"about", [&]() { about->show(); }},
+      {"metrics", [&]() { debug->show(); }},
+      {"command-palette", [&]() { commandPalette->show(); }},
+  };
+
   const char *cmd = args[0];
-  if (strcmp(cmd, "open") == 0)
-    open();
-  else if (strcmp(cmd, "open-disk") == 0)
-    openDisk();
-  else if (strcmp(cmd, "open-iso") == 0)
-    openIso();
-  else if (strcmp(cmd, "open-clipboard") == 0)
-    openClipboard();
-  else if (strcmp(cmd, "load-sub") == 0)
-    loadSubtitles();
-  else if (strcmp(cmd, "playlist-add-files") == 0)
-    playlistAddFiles();
-  else if (strcmp(cmd, "playlist-add-folder") == 0)
-    playlistAddFolder();
-  else if (strcmp(cmd, "about") == 0)
-    about->show();
-  else if (strcmp(cmd, "command-palette") == 0)
-    commandPalette->show();
+  auto it = commands.find(cmd);
+  if (it != commands.end()) it->second();
 }
 
 void Command::open() {
