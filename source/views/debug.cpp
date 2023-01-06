@@ -33,7 +33,7 @@ void Debug::drawVersion() {
 
 void Debug::drawBindings() {
   auto bindings = mpv->bindingList();
-  if (ImGui::CollapsingHeader(fmt::format("Bindings ({})", bindings.size()).c_str())) {
+  if (ImGui::CollapsingHeader(fmt::format("Bindings [{}]", bindings.size()).c_str())) {
     if (ImGui::BeginListBox("##mpv-bindings", ImVec2(-FLT_MIN, -FLT_MIN))) {
       for (auto& binding : bindings) {
         std::string title = binding.comment;
@@ -61,7 +61,7 @@ void Debug::drawBindings() {
 
 void Debug::drawProperties(const char* title, const char* key) {
   mpv_node node = mpv->property<mpv_node, MPV_FORMAT_NODE>(key);
-  if (!ImGui::CollapsingHeader(fmt::format("{} ({})", title, node.u.list->num).c_str())) return;
+  if (!ImGui::CollapsingHeader(fmt::format("{} [{}]", title, node.u.list->num).c_str())) return;
 
   if (ImGui::BeginListBox("##mpv-prop-list", ImVec2(-FLT_MIN, -FLT_MIN))) {
     for (int i = 0; i < node.u.list->num; i++) {
@@ -80,9 +80,10 @@ void Debug::drawPropNode(const char* name, mpv_node& node, int depth) {
   static const ImVec4 color = ImVec4(0, 0, 1.0f, 1.0f);
   constexpr static auto drawSimple = [&](const char* title, mpv_node prop) {
     ImGui::PushID(&prop);
+    ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(0, 4.0f));
     ImGui::Selectable("", false);
     ImGui::SameLine();
-    ImGui::Text("%s", title);
+    ImGui::BulletText("%s", title);
     ImGui::SameLine(ImGui::GetWindowWidth() * 0.4f);
     switch (prop.format) {
       case MPV_FORMAT_NONE:
@@ -104,6 +105,7 @@ void Debug::drawPropNode(const char* name, mpv_node& node, int depth) {
         ImGui::TextDisabled("Unknown format: %d", prop.format);
         break;
     }
+    ImGui::PopStyleVar();
     ImGui::PopID();
   };
 
@@ -130,10 +132,10 @@ void Debug::drawPropNode(const char* name, mpv_node& node, int depth) {
       }
       break;
     case MPV_FORMAT_BYTE_ARRAY:
-      ImGui::Selectable(fmt::format("byte array [{}]", node.u.ba->size).c_str(), false);
+      ImGui::BulletText("byte array [%d]", node.u.ba->size);
       break;
     default:
-      ImGui::Selectable(fmt::format("Unknown format: {}", (int)node.format).c_str(), false);
+      ImGui::BulletText("Unknown format: %d", node.format);
       break;
   }
 }
