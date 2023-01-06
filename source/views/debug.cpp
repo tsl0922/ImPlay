@@ -9,57 +9,63 @@ namespace ImPlay::Views {
 Debug::Debug(Mpv* mpv) : View() { this->mpv = mpv; }
 
 void Debug::draw() {
+  if (!m_open) return;
   ImGui::SetNextWindowSize(ImVec2(1000, 550), ImGuiCond_FirstUseEver);
-  if (ImGui::Begin("Metrics/Debug", &m_open)) {
+  if (ImGui::Begin("Metrics & Debug", &m_open)) {
     drawHeader();
     drawProperties("Options", "options");
     drawProperties("Properties", "property-list");
     drawBindings();
     ImGui::End();
   }
+  if (m_demo) ImGui::ShowDemoWindow(&m_demo);
+  if (m_metrics) ImGui::ShowMetricsWindow(&m_metrics);
 }
 
 void Debug::drawHeader() {
   ImGuiIO& io = ImGui::GetIO();
   char* version = mpv->property("mpv-version");
+  auto style = ImGuiStyle();
   ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(15.0f, 15.0f));
   ImGui::Text("%s", version);
-  ImGui::SameLine(ImGui::GetWindowWidth() - 300);
+  ImGui::SameLine(ImGui::GetWindowWidth() - 260);
   ImGui::Text("ImGui %s", ImGui::GetVersion());
+  if (ImGui::IsItemClicked(ImGuiMouseButton_Left)) m_demo = !m_demo;
   ImGui::SameLine();
-  ImGui::TextColored(ImVec4(0, 0, 1.0f, 1.0f), "FPS: %.2f", io.Framerate);
+  ImGui::TextColored(style.Colors[ImGuiCol_CheckMark], "FPS: %.2f", io.Framerate);
+  if (ImGui::IsItemClicked(ImGuiMouseButton_Left)) m_metrics = !m_metrics;
   ImGui::PopStyleVar();
   mpv_free(version);
 
-  ImGui::TextWrapped("NOTE: playback may become very slow when Properties / Options are expanded.");
+  ImGui::TextWrapped("NOTE: playback may become very slow when Properties are expanded.");
   ImGui::Spacing();
 }
 
 void Debug::drawBindings() {
   auto bindings = mpv->bindingList();
-  if (ImGui::CollapsingHeader(fmt::format("Bindings [{}]", bindings.size()).c_str())) {
-    if (ImGui::BeginListBox("##mpv-bindings", ImVec2(-FLT_MIN, -FLT_MIN))) {
-      for (auto& binding : bindings) {
-        std::string title = binding.comment;
-        if (title.empty()) title = binding.cmd;
-        title = title.substr(0, 50);
-        if (title.size() == 50) title += "...";
+  if (!ImGui::CollapsingHeader(fmt::format("Bindings [{}]", bindings.size()).c_str())) return;
 
-        ImGui::PushID(&binding);
-        ImGui::Selectable("", false);
-        if (ImGui::IsItemHovered(ImGuiHoveredFlags_DelayNormal)) ImGui::SetTooltip("%s", binding.cmd.c_str());
+  if (ImGui::BeginListBox("input-bindings", ImVec2(-FLT_MIN, 400))) {
+    for (auto& binding : bindings) {
+      std::string title = binding.comment;
+      if (title.empty()) title = binding.cmd;
+      title = title.substr(0, 50);
+      if (title.size() == 50) title += "...";
 
-        ImGui::SameLine();
-        ImGui::Text("%s", title.c_str());
+      ImGui::PushID(&binding);
+      ImGui::Selectable("", false);
+      if (ImGui::IsItemHovered(ImGuiHoveredFlags_DelayNormal)) ImGui::SetTooltip("%s", binding.cmd.c_str());
 
-        ImGui::SameLine(ImGui::GetWindowWidth() * 0.75f);
-        ImGui::BeginDisabled();
-        ImGui::Button(binding.key.c_str());
-        ImGui::EndDisabled();
-        ImGui::PopID();
-      }
-      ImGui::EndListBox();
+      ImGui::SameLine();
+      ImGui::Text("%s", title.c_str());
+
+      ImGui::SameLine(ImGui::GetWindowWidth() * 0.75f);
+      ImGui::BeginDisabled();
+      ImGui::Button(binding.key.c_str());
+      ImGui::EndDisabled();
+      ImGui::PopID();
     }
+    ImGui::EndListBox();
   }
 }
 
@@ -100,8 +106,7 @@ void Debug::drawProperties(const char* title, const char* key) {
   ImGui::PushItemWidth(-1);
   ImGui::InputText("Filter", buf, IM_ARRAYSIZE(buf));
   ImGui::PopItemWidth();
-
-  if (format > 0 && ImGui::BeginListBox("##mpv-prop-list", ImVec2(-FLT_MIN, -FLT_MIN))) {
+  if (format > 0 && ImGui::BeginListBox(key, ImVec2(-FLT_MIN, 400))) {
     for (int i = 0; i < node.u.list->num; i++) {
       auto item = node.u.list->values[i];
       if (buf[0] != '\0' && !strstr(item.u.string, buf)) continue;
@@ -118,11 +123,12 @@ void Debug::drawProperties(const char* title, const char* key) {
 void Debug::drawPropNode(const char* name, mpv_node& node, int depth) {
   constexpr static auto drawSimple = [&](const char* title, mpv_node prop) {
     std::string value;
-    ImVec4 color = ImVec4(0, 0, 1.0f, 1.0f);
+    auto style = ImGuiStyle();
+    ImVec4 color = style.Colors[ImGuiCol_CheckMark];
     switch (prop.format) {
       case MPV_FORMAT_NONE:
         value = "Invalid";
-        color = ImVec4(1.0f, 0, 0, 1.0f);
+        color = style.Colors[ImGuiCol_TextDisabled];
         break;
       case MPV_FORMAT_OSD_STRING:
       case MPV_FORMAT_STRING:
@@ -139,13 +145,13 @@ void Debug::drawPropNode(const char* name, mpv_node& node, int depth) {
         break;
       default:
         value = fmt::format("Unknown format: {}", (int)prop.format);
-        color = ImGui::GetStyle().Colors[ImGuiCol_TextDisabled];
+        color = style.Colors[ImGuiCol_TextDisabled];
         break;
     }
     ImGui::PushID(&prop);
     ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(0, 4.0f));
     ImGui::Selectable("", false);
-    if (ImGui::BeginPopupContextItem(fmt::format("##context_menu_{}", title).c_str())) {
+    if (ImGui::BeginPopupContextItem(fmt::format("##menu_{}", title).c_str())) {
       if (ImGui::MenuItem("Copy")) ImGui::SetClipboardText(fmt::format("{}={}", title, value).c_str());
       if (ImGui::MenuItem("Copy Name")) ImGui::SetClipboardText(title);
       if (ImGui::MenuItem("Copy value")) ImGui::SetClipboardText(value.c_str());

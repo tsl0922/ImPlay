@@ -5,15 +5,9 @@
 namespace ImPlay::Views {
 void About::draw() {
   if (m_open) ImGui::OpenPopup("About");
-  if (m_demo) ImGui::ShowDemoWindow(&m_demo);
 
   ImGui::SetNextWindowSize(ImVec2(600, 200));
   if (ImGui::BeginPopupModal("About", &m_open, ImGuiWindowFlags_NoResize)) {
-    ImGuiIO& io = ImGui::GetIO();
-    if (io.KeyCtrl && io.KeyShift && ImGui::IsKeyDown(ImGuiKey_D)) {
-      m_open = false;
-      m_demo = true;
-    }
     textCentered("ImPlay");
     ImGui::Spacing();
     textCentered("A Cross-Platform Desktop Media Player");

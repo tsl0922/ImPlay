@@ -31,7 +31,7 @@ void Command::draw() {
     contextMenu->show();
 
   about->draw();
-  if (debug->isOpen()) debug->draw();
+  debug->draw();
   contextMenu->draw();
   commandPalette->draw();
 }

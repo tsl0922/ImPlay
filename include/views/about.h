@@ -8,7 +8,5 @@ class About : public View {
 
  private:
   void textCentered(const char* text);
-
-  bool m_demo = false;
 };
 }  // namespace ImPlay::Views

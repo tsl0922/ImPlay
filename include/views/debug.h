@@ -17,5 +17,7 @@ class Debug : public View {
   void drawPropNode(const char *name, mpv_node& node, int depth = 0);
 
   Mpv *mpv = nullptr;
+  bool m_demo = false;
+  bool m_metrics = false;
 };
 }  // namespace ImPlay::Views
