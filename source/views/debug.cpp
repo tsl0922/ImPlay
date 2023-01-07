@@ -282,7 +282,7 @@ void Debug::drawPropNode(const char* name, mpv_node& node, int depth) {
       }
       break;
     case MPV_FORMAT_BYTE_ARRAY:
-      ImGui::BulletText("byte array [%d]", node.u.ba->size);
+      ImGui::BulletText("byte array [%ld]", node.u.ba->size);
       break;
     default:
       ImGui::BulletText("Unknown format: %d", node.format);

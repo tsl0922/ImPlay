@@ -62,7 +62,9 @@ bool Player::playing() { return mpv->playing() && !mpv->paused(); }
 
 void Player::shutdown() { mpv->command("quit"); }
 
-bool Player::allowDrag() { return (bool)mpv->property<int, MPV_FORMAT_FLAG>("window-dragging"); }
+bool Player::allowDrag() {
+  return mpv->property<int, MPV_FORMAT_FLAG>("window-dragging") && !mpv->property<int, MPV_FORMAT_FLAG>("fullscreen");
+}
 
 void Player::setCursor(double x, double y) {
   std::string xs = std::to_string((int)x);
@@ -152,7 +154,7 @@ void Player::initMpv() {
 
     auto msg = static_cast<mpv_event_client_message*>(data);
     cmd->execute(msg->num_args, msg->args);
-    
+
     mpv->runLoop() = false;
     io.SetAppAcceptingEvents(true);
   });
