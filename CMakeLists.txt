@@ -11,7 +11,7 @@ include(ExternalProject)
 
 if(WIN32 AND USE_MPV_WIN_BUILD)
     ExternalProject_Add(mpv_dev
-        URL https://github.com/shinchiro/mpv-winbuild-cmake/releases/download/20230101/mpv-dev-x86_64-20230101-git-ad65c88.7z
+        URL https://github.com/shinchiro/mpv-winbuild-cmake/releases/download/20230107/mpv-dev-x86_64-20230107-git-33e73f4.7z
         UPDATE_COMMAND ""
         CONFIGURE_COMMAND ""
         BUILD_COMMAND ${CMAKE_COMMAND} -E copy_directory <SOURCE_DIR>/include <BINARY_DIR>/include/mpv
@@ -71,7 +71,7 @@ target_link_directories(ImPlay PRIVATE ${MPV_LIBRARY_DIRS})
 target_link_libraries(ImPlay PRIVATE ${LINK_LIBS})
 if(WIN32)
     ExternalProject_Add(mpv_bin
-        URL https://github.com/shinchiro/mpv-winbuild-cmake/releases/download/20230101/mpv-x86_64-20230101-git-ad65c88.7z
+        URL https://github.com/shinchiro/mpv-winbuild-cmake/releases/download/20230107/mpv-x86_64-20230107-git-33e73f4.7z
         UPDATE_COMMAND ""
         CONFIGURE_COMMAND ""
         BUILD_COMMAND ${CMAKE_COMMAND} -E copy <SOURCE_DIR>/mpv.com <BINARY_DIR>
