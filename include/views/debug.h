@@ -43,6 +43,7 @@ class Debug : public View {
   void drawHeader();
   void drawConsole();
   void drawBindings();
+  void drawCommands();
   void drawProperties(const char *title, const char *key);
   void drawPropNode(const char *name, mpv_node &node, int depth = 0);
 

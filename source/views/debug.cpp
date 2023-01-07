@@ -29,6 +29,7 @@ void Debug::draw() {
     drawProperties("Options", "options");
     drawProperties("Properties", "property-list");
     drawBindings();
+    drawCommands();
     drawConsole();
     ImGui::End();
   }
@@ -88,9 +89,69 @@ void Debug::drawBindings() {
   }
 }
 
+void Debug::drawCommands() {
+  auto node = mpv->property<mpv_node, MPV_FORMAT_NODE>("command-list");
+  if (!ImGui::CollapsingHeader(fmt::format("Commands [{}]", node.u.list->num).c_str())) {
+    mpv_free_node_contents(&node);
+    return;
+  }
+
+  static char buf[256] = "";
+  ImGui::Text("Filter:");
+  ImGui::SameLine();
+  ImGui::PushItemWidth(-1);
+  ImGui::InputText("Filter", buf, IM_ARRAYSIZE(buf));
+  ImGui::PopItemWidth();
+  if (ImGui::BeginListBox("command-list", ImVec2(-FLT_MIN, 400))) {
+    for (int i = 0; i < node.u.list->num; i++) {
+      auto item = node.u.list->values[i];
+      char* name = nullptr;
+      std::vector<std::string> args;
+      bool vararg = false;
+      for (int j = 0; j < item.u.list->num; j++) {
+        auto key = item.u.list->keys[j];
+        auto value = item.u.list->values[j];
+        if (strcmp(key, "name") == 0) name = value.u.string;
+        if (strcmp(key, "args") == 0) {
+          for (int k = 0; k < value.u.list->num; k++) {
+            auto arg = value.u.list->values[k];
+            char* name_;
+            bool optional_ = false;
+            for (int l = 0; l < arg.u.list->num; l++) {
+              auto k = arg.u.list->keys[l];
+              auto v = arg.u.list->values[l];
+              if (strcmp(k, "name") == 0) name_ = v.u.string;
+              if (strcmp(k, "optional") == 0) optional_ = v.u.flag;
+            }
+            args.push_back(optional_ ? fmt::format("<{}>", name_) : name_);
+          }
+        }
+        if (strcmp(key, "vararg") == 0) vararg = value.u.flag;
+      }
+      if (name == nullptr || strstr(name, buf) == nullptr) continue;
+      ImGui::PushID(&item);
+      ImGui::Selectable("", false);
+      ImGui::SameLine();
+      ImGui::TextColored(ImGui::GetStyle().Colors[ImGuiCol_CheckMark], "%s", name);
+      if (!args.empty()) {
+        ImGui::SameLine();
+        std::string args_str = fmt::format("{}", fmt::join(args, " "));
+        if (vararg) args_str += " ...";
+        ImGui::Text(args_str.c_str());
+      }
+      ImGui::PopID();
+    }
+    ImGui::EndListBox();
+  }
+  mpv_free_node_contents(&node);
+}
+
 void Debug::drawProperties(const char* title, const char* key) {
   mpv_node node = mpv->property<mpv_node, MPV_FORMAT_NODE>(key);
-  if (!ImGui::CollapsingHeader(fmt::format("{} [{}]", title, node.u.list->num).c_str())) return;
+  if (!ImGui::CollapsingHeader(fmt::format("{} [{}]", title, node.u.list->num).c_str())) {
+    mpv_free_node_contents(&node);
+    return;
+  }
 
   int mask = 1 << MPV_FORMAT_NONE | 1 << MPV_FORMAT_STRING | 1 << MPV_FORMAT_OSD_STRING | 1 << MPV_FORMAT_FLAG |
              1 << MPV_FORMAT_INT64 | 1 << MPV_FORMAT_DOUBLE | 1 << MPV_FORMAT_NODE | 1 << MPV_FORMAT_NODE_ARRAY |
