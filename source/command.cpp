@@ -23,6 +23,10 @@ Command::~Command() {
   delete commandPalette;
 }
 
+void Command::init() {
+  debug->init();
+}
+
 void Command::draw() {
   ImGuiIO &io = ImGui::GetIO();
   if (io.KeyCtrl && io.KeyShift && ImGui::IsKeyDown(ImGuiKey_P)) commandPalette->show();

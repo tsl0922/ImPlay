@@ -14,6 +14,7 @@ class Command : public Views::View {
   Command(GLFWwindow *window, Mpv *mpv);
   ~Command() override;
 
+  void init();
   void draw() override;
   void execute(int num_args, const char **args);
 

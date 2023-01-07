@@ -18,6 +18,7 @@ class Mpv {
   ~Mpv();
 
   using EventHandler = std::function<void(void *)>;
+  using LogHandler = std::function<void(const char *, const char *, const char*)>;
 
   struct OptionParser {
     std::map<std::string, std::string> options;
@@ -61,6 +62,7 @@ class Mpv {
   void render(int w, int h);
   bool wantRender();
   void waitEvent(double timeout = 0);
+  void requestLog(const char *level, LogHandler handler);
   bool paused();
   bool playing();
 
@@ -114,6 +116,7 @@ class Mpv {
   mpv_handle *main = nullptr;
   mpv_handle *mpv = nullptr;
   mpv_render_context *renderCtx = nullptr;
+  LogHandler logHandler = nullptr;
 
   std::atomic_bool shutdown = false;
   std::atomic_bool runLoop_ = false;

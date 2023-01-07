@@ -37,6 +37,8 @@ bool Player::init(Mpv::OptionParser parser) {
     }
   }
 
+  cmd->init();
+
   mpv->init();
 
   initMpv();

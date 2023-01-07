@@ -218,12 +218,21 @@ void Mpv::waitEvent(double timeout) {
           if (name == prop->name && format == prop->format) handler(prop->data);
         break;
       }
+      case MPV_EVENT_LOG_MESSAGE: {
+        mpv_event_log_message *msg = (mpv_event_log_message *)event->data;
+        if (logHandler) logHandler(msg->prefix, msg->level, msg->text);
+      } break;
       default:
         for (const auto &[event_id, handler] : events)
           if (event_id == event->event_id) handler(event->data);
         break;
     }
   }
+}
+
+void Mpv::requestLog(const char *level, LogHandler handler) {
+  this->logHandler = handler;
+  mpv_request_log_messages(mpv, level);
 }
 
 void Mpv::eventLoop() {
@@ -282,6 +291,8 @@ bool Mpv::playing() { return property<int64_t, MPV_FORMAT_INT64>("playlist-playi
 void Mpv::init() {
   if (mpv_initialize(mpv) < 0) throw std::runtime_error("could not initialize mpv context");
   if (wid == 0) initRender();
+
+  mpv_request_log_messages(main, "no");
 
   mpv_set_wakeup_callback(
       mpv, [](void *ctx) { dispatch_wakeup(); }, nullptr);

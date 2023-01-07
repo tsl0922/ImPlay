@@ -163,7 +163,6 @@ void ContextMenu::draw() {
       if (ImGui::MenuItem("Toggle OSC", "DEL")) mpv->command("script-binding osc/visibility");
       ImGui::Separator();
       if (ImGui::MenuItem("Metrics & Debug")) mpv->commandv("script-message-to", "implay", "metrics", nullptr);
-      if (ImGui::MenuItem("Script Console", "`")) mpv->command("script-binding console/enable");
       ImGui::Separator();
       if (ImGui::MenuItemEx("Quit Watch Later", ICON_FA_WINDOW_CLOSE, "Q")) mpv->command("quit-watch-later");
       ImGui::EndMenu();
