@@ -24,6 +24,10 @@ ImPlay aims to be mpv compatible, which means almost all mpv features from the [
   - Open DVD / Blu-ray Folder and ISO Image
   - Playlist Editing: Add, Clear, Shuffle
   - Shadow and Rounding effect for Interface
+- Scripting Developer Friendly
+  - Visual view of mpv's internal properties
+  - Console with completion, history support
+  - Realtime mpv logs view with filter support
 - Cross platform: Window, Linux, macOS
 
 # Installation
@@ -40,6 +44,9 @@ ImPlay aims to be mpv compatible, which means almost all mpv features from the [
 
 ![screenshot](screenshot/2.jpg)
 
+### Metrics & Debug
+
+![screenshot](screenshot/3.jpg)
 # License
 
 [GPLv2](LICENSE).
