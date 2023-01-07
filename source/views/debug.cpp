@@ -336,8 +336,9 @@ static void Strtrim(char* s) {
 }
 
 void Debug::Console::init(const char* level) {
-  mpv->requestLog(level,
-                  [this](const char* prefix, const char* level, const char* text) { AddLog("[%s] %s", prefix, text); });
+  mpv->requestLog(level, [this](const char* prefix, const char* level, const char* text) {
+    AddLog("[%s:%s] %s", prefix, level, text);
+  });
 }
 
 void Debug::Console::initCommands() {
@@ -374,8 +375,9 @@ void Debug::Console::AddLog(const char* fmt, ...) {
   va_end(args);
   Items.push_back(Strdup(buf));
   if (Items.Size > LogLimit) {
-    free(Items[0]);
-    Items.erase(Items.begin());
+    int offset = Items.Size - LogLimit;
+    for (int i = 0; i < offset; i++) free(Items[i]);
+    Items.erase(Items.begin(), Items.begin() + offset);
   }
 }
 
