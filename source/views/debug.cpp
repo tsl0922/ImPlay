@@ -23,7 +23,9 @@ void Debug::show() {
 
 void Debug::draw() {
   if (!m_open) return;
-  ImGui::SetNextWindowSize(ImVec2(1000, 550), ImGuiCond_FirstUseEver);
+  const ImGuiViewport* viewport = ImGui::GetMainViewport();
+  ImGui::SetNextWindowPos(ImVec2(viewport->WorkPos.x + 60, viewport->WorkPos.y + 20), ImGuiCond_FirstUseEver);
+  ImGui::SetNextWindowSize(ImVec2(550, 680), ImGuiCond_FirstUseEver);
   if (ImGui::Begin("Metrics & Debug", &m_open)) {
     drawHeader();
     drawProperties("Options", "options");
@@ -185,7 +187,6 @@ void Debug::drawProperties(const char* title, const char* key) {
   ImGui::CheckboxFlags("FLAG", &format, 1 << MPV_FORMAT_FLAG);
   ImGui::SameLine();
   ImGui::CheckboxFlags("INT64", &format, 1 << MPV_FORMAT_INT64);
-  ImGui::SameLine();
   ImGui::CheckboxFlags("DOUBLE", &format, 1 << MPV_FORMAT_DOUBLE);
   ImGui::SameLine();
   ImGui::CheckboxFlags("NODE_ARRAY", &format, 1 << MPV_FORMAT_NODE_ARRAY);
@@ -252,7 +253,7 @@ void Debug::drawPropNode(const char* name, mpv_node& node, int depth) {
     }
     ImGui::SameLine();
     ImGui::BulletText("%s", title);
-    ImGui::SameLine(ImGui::GetWindowWidth() * 0.4f);
+    ImGui::SameLine(ImGui::GetWindowWidth() * 0.5f);
     ImGui::TextColored(color, "%s", value.c_str());
     ImGui::PopStyleVar();
     ImGui::PopID();
@@ -411,7 +412,7 @@ void Debug::Console::draw() {
     ImGui::EndPopup();
   }
 
-  Filter.Draw("Filter##log", 300);
+  Filter.Draw("Filter##log", 150);
   ImGui::SameLine();
   ImGui::SetNextItemWidth(80);
   ImGui::InputInt("Limit", &LogLimit, 0);
