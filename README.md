@@ -27,7 +27,7 @@ ImPlay aims to be mpv compatible, which means almost all mpv features from the [
 - Scripting Developer Friendly
   - Visual view of mpv's internal properties
   - Console with completion, history support
-  - Realtime mpv logs view with filter support
+  - Colorful mpv logs view with filter support
 - Cross platform: Window, Linux, macOS
 
 # Installation
@@ -46,7 +46,7 @@ ImPlay aims to be mpv compatible, which means almost all mpv features from the [
 
 ### Metrics & Debug
 
-![screenshot](screenshot/3.jpg)
+![screenshot](screenshot/3.png)
 # License
 
 [GPLv2](LICENSE).

@@ -1,5 +1,7 @@
 #pragma once
 #include <vector>
+#include <map>
+#include <string>
 #include <imgui.h>
 #include "view.h"
 #include "mpv.h"
@@ -23,16 +25,23 @@ class Debug : public View {
     void draw();
 
     void ClearLog();
-    void AddLog(const char *fmt, ...);
+    void AddLog(const char *level, const char *fmt, ...);
     void ExecCommand(const char *command_line);
     int TextEditCallback(ImGuiInputTextCallbackData *data);
     void initCommands();
 
+    ImVec4 LogColor(const char *level);
+
     const std::vector<std::string> builtinCommands = {"HELP", "CLEAR", "HISTORY"};
+
+    struct LogItem {
+      char *Str;
+      const char *Lev;
+    };
 
     Mpv *mpv;
     char InputBuf[256];
-    ImVector<char *> Items;
+    ImVector<LogItem> Items;
     ImVector<char *> Commands;
     ImVector<char *> History;
     int HistoryPos = -1;  // -1: new line, 0..History.Size-1 browsing history.

@@ -337,7 +337,7 @@ static void Strtrim(char* s) {
 
 void Debug::Console::init(const char* level) {
   mpv->requestLog(level, [this](const char* prefix, const char* level, const char* text) {
-    AddLog("[%s:%s] %s", prefix, level, text);
+    AddLog(level, "[%s] %s", prefix, text);
   });
 }
 
@@ -361,24 +361,37 @@ void Debug::Console::initCommands() {
 }
 
 void Debug::Console::ClearLog() {
-  for (int i = 0; i < Items.Size; i++) free(Items[i]);
+  for (int i = 0; i < Items.Size; i++) free(Items[i].Str);
   Items.clear();
 }
 
-void Debug::Console::AddLog(const char* fmt, ...) {
-  // FIXME-OPT
+void Debug::Console::AddLog(const char* level, const char* fmt, ...) {
   char buf[1024];
   va_list args;
   va_start(args, fmt);
   vsnprintf(buf, IM_ARRAYSIZE(buf), fmt, args);
   buf[IM_ARRAYSIZE(buf) - 1] = 0;
   va_end(args);
-  Items.push_back(Strdup(buf));
+  Items.push_back({Strdup(buf), level});
   if (Items.Size > LogLimit) {
     int offset = Items.Size - LogLimit;
-    for (int i = 0; i < offset; i++) free(Items[i]);
+    for (int i = 0; i < offset; i++) free(Items[i].Str);
     Items.erase(Items.begin(), Items.begin() + offset);
   }
+}
+
+ImVec4 Debug::Console::LogColor(const char* level) {
+  std::map<std::string, ImVec4> logColors = {
+      {"fatal", ImVec4{0.804f, 0, 0, 1.0f}},
+      {"error", ImVec4{0.804f, 0, 0, 1.0f}},
+      {"warn", ImVec4{0.804f, 0.804f, 0, 1.0f}},
+      {"info", ImGui::GetStyle().Colors[ImGuiCol_Text]},
+      {"v", ImVec4{0.075f, 0.631f, 0.055f, 1.0f}},
+      {"debug", ImGui::GetStyle().Colors[ImGuiCol_Text]},
+      {"trace", ImGui::GetStyle().Colors[ImGuiCol_Text]},
+  };
+  if (level == nullptr || !logColors.contains(level)) level = "info";
+  return logColors[level];
 }
 
 void Debug::Console::draw() {
@@ -447,23 +460,12 @@ void Debug::Console::draw() {
     ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(4, 1));  // Tighten spacing
     if (copy_to_clipboard) ImGui::LogToClipboard();
     for (int i = 0; i < Items.Size; i++) {
-      const char* item = Items[i];
-      if (!Filter.PassFilter(item)) continue;
+      auto item = Items[i];
+      if (!Filter.PassFilter(item.Str)) continue;
 
-      // Normally you would store more information in your item than just a string.
-      // (e.g. make Items[] an array of structure, store color/type etc.)
-      ImVec4 color;
-      bool has_color = false;
-      if (strstr(item, "[error]")) {
-        color = ImVec4(1.0f, 0.4f, 0.4f, 1.0f);
-        has_color = true;
-      } else if (strncmp(item, "# ", 2) == 0) {
-        color = ImVec4(1.0f, 0.8f, 0.6f, 1.0f);
-        has_color = true;
-      }
-      if (has_color) ImGui::PushStyleColor(ImGuiCol_Text, color);
-      ImGui::TextUnformatted(item);
-      if (has_color) ImGui::PopStyleColor();
+      ImGui::PushStyleColor(ImGuiCol_Text, LogColor(item.Lev));
+      ImGui::TextUnformatted(item.Str);
+      ImGui::PopStyleColor();
     }
     if (copy_to_clipboard) ImGui::LogFinish();
 
@@ -501,7 +503,7 @@ void Debug::Console::draw() {
 }
 
 void Debug::Console::ExecCommand(const char* command_line) {
-  AddLog("# %s\n", command_line);
+  AddLog("info", "# %s\n", command_line);
 
   // Insert into history. First find match and delete it so it can be pushed to the back.
   // This isn't trying to be smart or optimal.
@@ -518,22 +520,22 @@ void Debug::Console::ExecCommand(const char* command_line) {
   if (Stricmp(command_line, "CLEAR") == 0) {
     ClearLog();
   } else if (Stricmp(command_line, "HELP") == 0) {
-    AddLog("Builtin Commands:");
+    AddLog("info", "Builtin Commands:");
     for (auto& cmd : builtinCommands) AddLog("- %s", cmd.c_str());
-    AddLog("MPV Commands:");
+    AddLog("info", "MPV Commands:");
     auto node = mpv->property<mpv_node, MPV_FORMAT_NODE>("command-list");
     auto commands = formatCommands(node);
-    for (auto& [name, args] : commands) AddLog("- %s %s", name.c_str(), args.c_str());
+    for (auto& [name, args] : commands) AddLog("info", "- %s %s", name.c_str(), args.c_str());
     mpv_free_node_contents(&node);
   } else if (Stricmp(command_line, "HISTORY") == 0) {
     int first = History.Size - 10;
-    for (int i = first > 0 ? first : 0; i < History.Size; i++) AddLog("%3d: %s\n", i, History[i]);
+    for (int i = first > 0 ? first : 0; i < History.Size; i++) AddLog("info", "%3d: %s\n", i, History[i]);
   } else {
     int err = mpv->command(command_line);
     if (err < 0) {
-      AddLog("[error] %s", mpv_error_string(err));
+      AddLog("error", "%s", mpv_error_string(err));
     } else {
-      AddLog("[mpv] Success");
+      AddLog("info", "[mpv] Success");
     }
   }
 
@@ -542,11 +544,8 @@ void Debug::Console::ExecCommand(const char* command_line) {
 }
 
 int Debug::Console::TextEditCallback(ImGuiInputTextCallbackData* data) {
-  // AddLog("cursor: %d, selection: %d-%d", data->CursorPos, data->SelectionStart, data->SelectionEnd);
   switch (data->EventFlag) {
     case ImGuiInputTextFlags_CallbackCompletion: {
-      // Example of TEXT COMPLETION
-
       // Locate beginning of current word
       const char* word_end = data->Buf + data->CursorPos;
       const char* word_start = word_end;
@@ -563,7 +562,7 @@ int Debug::Console::TextEditCallback(ImGuiInputTextCallbackData* data) {
 
       if (candidates.Size == 0) {
         // No match
-        AddLog("No match for \"%.*s\"!\n", (int)(word_end - word_start), word_start);
+        AddLog("info", "No match for \"%.*s\"!\n", (int)(word_end - word_start), word_start);
       } else if (candidates.Size == 1) {
         // Single match. Delete the beginning of the word and replace it entirely so we've got nice casing.
         data->DeleteChars((int)(word_start - data->Buf), (int)(word_end - word_start));
@@ -591,16 +590,16 @@ int Debug::Console::TextEditCallback(ImGuiInputTextCallbackData* data) {
         }
 
         // List matches
-        AddLog("Possible matches:\n");
+        AddLog("info", "Possible matches:\n");
         std::string s;
         for (int i = 0; i < candidates.Size; i++) {
           s += fmt::format("{:<32}", candidates[i]);
           if (i != 0 && (i + 1) % 4 == 0) {
-            AddLog("%s\n", s.c_str());
+            AddLog("info", "%s\n", s.c_str());
             s.clear();
           }
         }
-        if (!s.empty()) AddLog("%s\n", s.c_str());
+        if (!s.empty()) AddLog("info", "%s\n", s.c_str());
       }
 
       break;
