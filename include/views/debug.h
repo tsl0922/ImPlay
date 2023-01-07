@@ -1,4 +1,5 @@
 #pragma once
+#include <vector>
 #include <imgui.h>
 #include "view.h"
 #include "mpv.h"
@@ -26,6 +27,8 @@ class Debug : public View {
     void ExecCommand(const char *command_line);
     int TextEditCallback(ImGuiInputTextCallbackData *data);
     void initCommands();
+
+    const std::vector<std::string> builtinCommands = {"HELP", "CLEAR", "HISTORY"};
 
     Mpv *mpv;
     char InputBuf[256];

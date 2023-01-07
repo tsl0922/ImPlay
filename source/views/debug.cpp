@@ -89,6 +89,44 @@ void Debug::drawBindings() {
   }
 }
 
+static std::vector<std::pair<std::string, std::string>> formatCommands(mpv_node& node) {
+  std::vector<std::pair<std::string, std::string>> commands;
+  for (int i = 0; i < node.u.list->num; i++) {
+    auto item = node.u.list->values[i];
+    char* name = nullptr;
+    std::vector<std::string> args;
+    bool vararg = false;
+    for (int j = 0; j < item.u.list->num; j++) {
+      auto key = item.u.list->keys[j];
+      auto value = item.u.list->values[j];
+      if (strcmp(key, "name") == 0) name = value.u.string;
+      if (strcmp(key, "args") == 0) {
+        for (int k = 0; k < value.u.list->num; k++) {
+          auto arg = value.u.list->values[k];
+          char* name_;
+          bool optional_ = false;
+          for (int l = 0; l < arg.u.list->num; l++) {
+            auto k = arg.u.list->keys[l];
+            auto v = arg.u.list->values[l];
+            if (strcmp(k, "name") == 0) name_ = v.u.string;
+            if (strcmp(k, "optional") == 0) optional_ = v.u.flag;
+          }
+          args.push_back(optional_ ? fmt::format("<{}>", name_) : name_);
+        }
+      }
+      if (strcmp(key, "vararg") == 0) vararg = value.u.flag;
+    }
+    if (name == nullptr) continue;
+    std::string args_str;
+    if (!args.empty()) {
+      args_str = fmt::format("{}", fmt::join(args, " "));
+      if (vararg) args_str += " ...";
+    }
+    commands.push_back({name, args_str});
+  }
+  return commands;
+}
+
 void Debug::drawCommands() {
   auto node = mpv->property<mpv_node, MPV_FORMAT_NODE>("command-list");
   if (!ImGui::CollapsingHeader(fmt::format("Commands [{}]", node.u.list->num).c_str())) {
@@ -100,44 +138,19 @@ void Debug::drawCommands() {
   ImGui::Text("Filter:");
   ImGui::SameLine();
   ImGui::PushItemWidth(-1);
-  ImGui::InputText("Filter", buf, IM_ARRAYSIZE(buf));
+  ImGui::InputText("Filter##commands", buf, IM_ARRAYSIZE(buf));
   ImGui::PopItemWidth();
   if (ImGui::BeginListBox("command-list", ImVec2(-FLT_MIN, 400))) {
-    for (int i = 0; i < node.u.list->num; i++) {
-      auto item = node.u.list->values[i];
-      char* name = nullptr;
-      std::vector<std::string> args;
-      bool vararg = false;
-      for (int j = 0; j < item.u.list->num; j++) {
-        auto key = item.u.list->keys[j];
-        auto value = item.u.list->values[j];
-        if (strcmp(key, "name") == 0) name = value.u.string;
-        if (strcmp(key, "args") == 0) {
-          for (int k = 0; k < value.u.list->num; k++) {
-            auto arg = value.u.list->values[k];
-            char* name_;
-            bool optional_ = false;
-            for (int l = 0; l < arg.u.list->num; l++) {
-              auto k = arg.u.list->keys[l];
-              auto v = arg.u.list->values[l];
-              if (strcmp(k, "name") == 0) name_ = v.u.string;
-              if (strcmp(k, "optional") == 0) optional_ = v.u.flag;
-            }
-            args.push_back(optional_ ? fmt::format("<{}>", name_) : name_);
-          }
-        }
-        if (strcmp(key, "vararg") == 0) vararg = value.u.flag;
-      }
-      if (name == nullptr || strstr(name, buf) == nullptr) continue;
-      ImGui::PushID(&item);
+    auto commands = formatCommands(node);
+    for (auto& [name, args] : commands) {
+      if (!name.starts_with(buf)) continue;
+      ImGui::PushID(name.c_str());
       ImGui::Selectable("", false);
       ImGui::SameLine();
-      ImGui::TextColored(ImGui::GetStyle().Colors[ImGuiCol_CheckMark], "%s", name);
+      ImGui::TextColored(ImGui::GetStyle().Colors[ImGuiCol_CheckMark], "%s", name.c_str());
       if (!args.empty()) {
         ImGui::SameLine();
-        std::string args_str = fmt::format("{}", fmt::join(args, " "));
-        if (vararg) args_str += " ...";
-        ImGui::Text(args_str.c_str());
+        ImGui::Text(args.c_str());
       }
       ImGui::PopID();
     }
@@ -329,9 +342,7 @@ void Debug::Console::init(const char* level) {
 
 void Debug::Console::initCommands() {
   if (CommandInited) return;
-  Commands.push_back(Strdup("HELP"));
-  Commands.push_back(Strdup("HISTORY"));
-  Commands.push_back(Strdup("CLEAR"));
+  for (auto& cmd : builtinCommands) Commands.push_back(Strdup(cmd.c_str()));
 
   auto node = mpv->property<mpv_node, MPV_FORMAT_NODE>("command-list");
   for (int i = 0; i < node.u.list->num; i++) {
@@ -385,7 +396,7 @@ void Debug::Console::draw() {
     ImGui::EndPopup();
   }
 
-  Filter.Draw("Filter", 300);
+  Filter.Draw("Filter##log", 300);
   ImGui::SameLine();
   ImGui::SetNextItemWidth(80);
   ImGui::InputInt("Limit", &LogLimit, 0);
@@ -505,8 +516,13 @@ void Debug::Console::ExecCommand(const char* command_line) {
   if (Stricmp(command_line, "CLEAR") == 0) {
     ClearLog();
   } else if (Stricmp(command_line, "HELP") == 0) {
-    AddLog("Commands:");
-    for (int i = 0; i < Commands.Size; i++) AddLog("- %s", Commands[i]);
+    AddLog("Builtin Commands:");
+    for (auto& cmd : builtinCommands) AddLog("- %s", cmd.c_str());
+    AddLog("MPV Commands:");
+    auto node = mpv->property<mpv_node, MPV_FORMAT_NODE>("command-list");
+    auto commands = formatCommands(node);
+    for (auto& [name, args] : commands) AddLog("- %s %s", name.c_str(), args.c_str());
+    mpv_free_node_contents(&node);
   } else if (Stricmp(command_line, "HISTORY") == 0) {
     int first = History.Size - 10;
     for (int i = first > 0 ? first : 0; i < History.Size; i++) AddLog("%3d: %s\n", i, History[i]);
@@ -515,7 +531,7 @@ void Debug::Console::ExecCommand(const char* command_line) {
     if (err < 0) {
       AddLog("[error] %s", mpv_error_string(err));
     } else {
-      AddLog("Success");
+      AddLog("[mpv] Success");
     }
   }
 
@@ -574,7 +590,15 @@ int Debug::Console::TextEditCallback(ImGuiInputTextCallbackData* data) {
 
         // List matches
         AddLog("Possible matches:\n");
-        for (int i = 0; i < candidates.Size; i++) AddLog("- %s\n", candidates[i]);
+        std::string s;
+        for (int i = 0; i < candidates.Size; i++) {
+          s += fmt::format("{:<32}", candidates[i]);
+          if (i != 0 && (i + 1) % 4 == 0) {
+            AddLog("%s\n", s.c_str());
+            s.clear();
+          }
+        }
+        if (!s.empty()) AddLog("%s\n", s.c_str());
       }
 
       break;
