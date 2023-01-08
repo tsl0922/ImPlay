@@ -4,6 +4,8 @@
 #include <cstdlib>
 #include <cctype>
 #include <cstring>
+#include <string>
+#include <fmt/format.h>
 #include "helpers.h"
 #ifdef _WIN32
 #include <windows.h>
@@ -58,6 +60,17 @@ std::string toupper(std::string s) {
   std::string str = s;
   std::transform(str.begin(), str.end(), str.begin(), ::toupper);
   return str;
+}
+
+int openUri(const char* uri) {
+#ifdef __APPLE__
+  return system(fmt::format("open {}", uri).c_str());
+#elif defined(_WIN32) || defined(__CYGWIN__)
+  return ShellExecute(0, 0, uri, 0, 0, SW_SHOW) > (HINSTANCE)32 ? 0 : 1;
+#else
+  char command[256];
+  return system(fmt::format("xdg-open {}", uri).c_str());
+#endif
 }
 
 const char* getDataDir() {

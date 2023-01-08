@@ -149,7 +149,7 @@ void ContextMenu::draw() {
       ImGui::Separator();
       drawProfilelist();
       if (ImGui::BeginMenuEx("Theme", ICON_FA_PALETTE)) {
-        const char* themes[] = {"dark", "light", "classic"};
+        const char *themes[] = {"dark", "light", "classic"};
         for (int i = 0; i < IM_ARRAYSIZE(themes); i++) {
           std::string title = Helpers::tolower(themes[i]);
           title[0] = std::toupper(title[0]);
@@ -169,8 +169,9 @@ void ContextMenu::draw() {
         ImGui::EndMenu();
       }
       ImGui::Separator();
-      if (ImGui::MenuItem("Metrics & Debug")) mpv->commandv("script-message-to", "implay", "metrics", nullptr);
       if (ImGui::MenuItem("OSC visibility", "DEL")) mpv->command("script-binding osc/visibility");
+      if (ImGui::MenuItem("Open Config Dir")) Helpers::openUri(Helpers::getDataDir());
+      if (ImGui::MenuItem("Metrics & Debug")) mpv->commandv("script-message-to", "implay", "metrics", nullptr);
       ImGui::Separator();
       if (ImGui::MenuItemEx("Quit Watch Later", ICON_FA_WINDOW_CLOSE, "Q")) mpv->command("quit-watch-later");
       ImGui::EndMenu();

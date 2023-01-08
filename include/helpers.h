@@ -14,5 +14,6 @@ struct OptionParser {
 std::string tolower(std::string s);
 std::string toupper(std::string s);
 
+int openUri(const char* uri);
 const char* getDataDir();
 }  // namespace ImPlay::Helpers
