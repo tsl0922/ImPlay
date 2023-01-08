@@ -54,13 +54,20 @@ void Command::execute(int num_args, const char **args) {
       {"open-iso", [&](int n, const char **args) { openIso(); }},
       {"open-clipboard", [&](int n, const char **args) { openClipboard(); }},
       {"load-sub", [&](int n, const char **args) { loadSubtitles(); }},
+      {"load-conf",
+       [&](int n, const char **args) {
+         if (n > 0) mpv->loadConfig(args[0]);
+       }},
       {"playlist-add-files", [&](int n, const char **args) { playlistAddFiles(); }},
       {"playlist-add-folder", [&](int n, const char **args) { playlistAddFolder(); }},
       {"about", [&](int n, const char **args) { about->show(); }},
       {"settings", [&](int n, const char **args) { settings->show(); }},
       {"metrics", [&](int n, const char **args) { debug->show(); }},
       {"command-palette", [&](int n, const char **args) { commandPalette->show(); }},
-      {"theme", [&](int n, const char **args) { setTheme(args[0]); }},
+      {"theme",
+       [&](int n, const char **args) {
+         if (n > 0) setTheme(args[0]);
+       }},
   };
 
   const char *cmd = args[0];

@@ -73,7 +73,7 @@ int openUri(const char* uri) {
 #endif
 }
 
-const char* getDataDir() {
+const char* getDataDir(const char* subdir) {
   static char dataDir[256] = {0};
 #ifdef _WIN32
   wchar_t* dir = nullptr;
@@ -91,7 +91,10 @@ const char* getDataDir() {
     strncat(dataDir, "/.config", 9);
   }
 #endif
-  if (dataDir[0] != '\0') strncat(dataDir, "/implay", 8);
+  if (dataDir[0] != '\0' && subdir != nullptr && subdir[0] != '\0') {
+    strncat(dataDir, "/", 2);
+    strncat(dataDir, subdir, 20);
+  }
   return &dataDir[0];
 }
 }  // namespace ImPlay::Helpers

@@ -25,6 +25,7 @@ class Mpv {
   bool wantRender();
   void waitEvent(double timeout = 0);
   void requestLog(const char *level, LogHandler handler);
+  int loadConfig(const char *path);
   bool paused();
   bool playing();
 

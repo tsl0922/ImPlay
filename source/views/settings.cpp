@@ -31,8 +31,10 @@ void Settings::drawGeneralTab() {
   if (ImGui::BeginTabItem("General")) {
     ImGui::Text("MPV");
     ImGui::Indent();
-    if (ImGui::Checkbox("Use mpv's config folder", &config->mpvConfig)) {
-      mpv->property("config-dir", config->mpvConfig ? "" : Helpers::getDataDir());
+    if (ImGui::Checkbox("Use mpv's config dir", &config->mpvConfig)) {
+      const char *configDir = config->mpvConfig ? Helpers::getDataDir("mpv") : Helpers::getDataDir();
+      mpv->property("config-dir", configDir);
+      mpv->loadConfig(fmt::format("{}/mpv.conf", configDir).c_str());
       config->save();
     }
     ImGui::Unindent();

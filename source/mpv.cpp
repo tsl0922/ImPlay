@@ -68,6 +68,8 @@ void Mpv::requestLog(const char *level, LogHandler handler) {
   mpv_request_log_messages(mpv, level);
 }
 
+int Mpv::loadConfig(const char *path) { return mpv_load_config_file(mpv, path); }
+
 void Mpv::eventLoop() {
   while (main) {
     mpv_event *event = mpv_wait_event(main, -1);
