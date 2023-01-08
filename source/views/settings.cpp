@@ -18,6 +18,7 @@ void Settings::draw() {
     ImGui::TextWrapped("* Changes will take effect after restart.");
     if (ImGui::BeginTabBar("Settings")) {
       drawGeneralTab();
+      drawInterfaceTab();
       drawFontTab();
       ImGui::EndTabBar();
     }
@@ -28,6 +29,19 @@ void Settings::draw() {
 
 void Settings::drawGeneralTab() {
   if (ImGui::BeginTabItem("General")) {
+    ImGui::Text("MPV");
+    ImGui::Indent();
+    if (ImGui::Checkbox("Use mpv's config folder", &config->mpvConfig)) {
+      mpv->property("config-dir", config->mpvConfig ? "" : Helpers::getDataDir());
+      config->save();
+    }
+    ImGui::Unindent();
+    ImGui::EndTabItem();
+  }
+}
+
+void Settings::drawInterfaceTab() {
+  if (ImGui::BeginTabItem("Interface")) {
     const char *t_items[] = {"Dark", "Light", "Classic"};
     static int t_current;
     for (int i = 0; i < IM_ARRAYSIZE(t_items); i++) {

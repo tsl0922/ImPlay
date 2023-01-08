@@ -29,6 +29,7 @@ class Config {
   std::string FontPath;
   int FontSize = 13;
   int glyphRange = GlyphRange_Default;
+  bool mpvConfig = false;
 
  private:
   inipp::Ini<char> ini;

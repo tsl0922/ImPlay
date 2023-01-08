@@ -32,6 +32,7 @@ class Player : public Views::View {
  private:
   void initMpv();
 
+  Config *config = nullptr;
   GLFWwindow *window = nullptr;
   Mpv *mpv = nullptr;
   Command *cmd = nullptr;

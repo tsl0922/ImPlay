@@ -3,9 +3,11 @@
 #include <filesystem>
 #include <imgui.h>
 #include "player.h"
+#include "helpers.h"
 
 namespace ImPlay {
 Player::Player(Config* config, GLFWwindow* window, const char* title) : Views::View() {
+  this->config = config;
   this->window = window;
   this->title = title;
 
@@ -27,6 +29,7 @@ bool Player::init(Helpers::OptionParser parser) {
   mpv->option("input-vo-keyboard", "yes");
   mpv->option("osd-playing-msg", "${media-title}");
   mpv->option("screenshot-directory", "~~desktop/");
+  if (!config->mpvConfig) mpv->option("config-dir", Helpers::getDataDir());
 
   for (const auto& option : parser.options) {
     auto key = option.first;

@@ -24,6 +24,7 @@ void Config::load() {
   inipp::get_value(ini.sections["font"], "path", FontPath);
   inipp::get_value(ini.sections["font"], "size", FontSize);
   inipp::get_value(ini.sections["font"], "glyph-range", glyphRange);
+  inipp::get_value(ini.sections["mpv"], "config", mpvConfig);
 }
 
 void Config::save() {
@@ -32,6 +33,7 @@ void Config::save() {
   ini.sections["font"]["path"] = FontPath;
   ini.sections["font"]["size"] = std::to_string(FontSize);
   ini.sections["font"]["glyph-range"] = std::to_string(glyphRange);
+  ini.sections["mpv"]["config"] = fmt::format("{}", mpvConfig);
 
   std::ofstream file(configFile);
   ini.generate(file);
