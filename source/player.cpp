@@ -5,7 +5,7 @@
 #include "player.h"
 
 namespace ImPlay {
-Player::Player(Config *config, GLFWwindow* window, const char* title) : Views::View() {
+Player::Player(Config* config, GLFWwindow* window, const char* title) : Views::View() {
   this->window = window;
   this->title = title;
 
@@ -18,7 +18,7 @@ Player::~Player() {
   delete cmd;
 }
 
-bool Player::init(Mpv::OptionParser parser) {
+bool Player::init(Helpers::OptionParser parser) {
   mpv->option("config", "yes");
   mpv->option("osc", "yes");
   mpv->option("idle", "yes");

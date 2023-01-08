@@ -8,6 +8,7 @@
 #include <condition_variable>
 #include "player.h"
 #include "config.h"
+#include "helpers.h"
 
 namespace ImPlay {
 class Window {
@@ -15,7 +16,7 @@ class Window {
   Window(const char *title, int width, int height);
   ~Window();
 
-  bool run(Mpv::OptionParser optionParser);
+  bool run(Helpers::OptionParser optionParser);
 
  private:
   void render();

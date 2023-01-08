@@ -5,6 +5,7 @@
 #include "mpv.h"
 #include "config.h"
 #include "command.h"
+#include "helpers.h"
 #include "views/view.h"
 
 namespace ImPlay {
@@ -13,7 +14,7 @@ class Player : public Views::View {
   Player(Config *config, GLFWwindow *window, const char *title);
   ~Player() override;
 
-  bool init(Mpv::OptionParser parser);
+  bool init(Helpers::OptionParser parser);
   void draw() override;
   void render(int w, int h);
   bool wantRender();

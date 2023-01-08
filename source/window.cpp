@@ -45,7 +45,7 @@ Window::~Window() {
   exitGLFW();
 }
 
-bool Window::run(Mpv::OptionParser parser) {
+bool Window::run(Helpers::OptionParser parser) {
   glfwMakeContextCurrent(window);
   if (!player->init(parser)) return false;
 #ifdef __APPLE__
