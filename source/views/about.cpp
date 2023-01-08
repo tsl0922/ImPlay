@@ -1,6 +1,7 @@
 #include <imgui.h>
 #include <imgui_internal.h>
 #include "views/about.h"
+#include "helpers.h"
 
 namespace ImPlay::Views {
 void About::draw() {
@@ -12,9 +13,14 @@ void About::draw() {
     ImGui::Spacing();
     textCentered("A Cross-Platform Desktop Media Player");
     ImGui::NewLine();
+    ImGui::PushStyleColor(ImGuiCol_Text, ImGui::GetStyle().Colors[ImGuiCol_ButtonActive]);
     textCentered("https://github.com/tsl0922/ImPlay");
+    if (ImGui::IsItemClicked()) Helpers::openUri("https://github.com/tsl0922/ImPlay");
+    ImGui::PopStyleColor();
     ImGui::Spacing();
     textCentered("Copyright (C) 2022-2023 Shuanglei Tao");
+    ImGui::Spacing();
+    textCentered("GPL-2.0 License");
     ImGui::EndPopup();
   }
 }
