@@ -5,11 +5,12 @@
 #include <fmt/chrono.h>
 #include <filesystem>
 #include "views/context_menu.h"
+#include "helpers.h"
 
 namespace ImPlay::Views {
-ContextMenu::ContextMenu(Mpv *mpv) : View() {
+ContextMenu::ContextMenu(Config *config, Mpv *mpv) : View() {
+  this->config = config;
   this->mpv = mpv;
-  setTheme(Theme::LIGHT);
 }
 
 void ContextMenu::draw() {
@@ -141,28 +142,35 @@ void ContextMenu::draw() {
     if (ImGui::MenuItemEx("Command Palette", ICON_FA_SEARCH, "Ctrl+Shift+p"))
       mpv->commandv("script-message-to", "implay", "command-palette", nullptr);
     ImGui::Separator();
-    if (ImGui::BeginMenuEx("Tools", ICON_FA_HAMMER)) {
+    if (ImGui::BeginMenuEx("Tools", ICON_FA_TOOLS)) {
       if (ImGui::MenuItemEx("Screenshot", ICON_FA_FILE_IMAGE, "s")) mpv->command("async screenshot");
       if (ImGui::MenuItemEx("Window Border", ICON_FA_BORDER_NONE)) mpv->command("cycle border");
       if (ImGui::MenuItemEx("Window Dragging", ICON_FA_HAND_POINTER)) mpv->command("cycle window-dragging");
       ImGui::Separator();
       drawProfilelist();
       if (ImGui::BeginMenuEx("Theme", ICON_FA_PALETTE)) {
-        if (ImGui::MenuItem("Dark", nullptr, theme == Theme::DARK)) setTheme(Theme::DARK);
-        if (ImGui::MenuItem("Light", nullptr, theme == Theme::LIGHT)) setTheme(Theme::LIGHT);
-        if (ImGui::MenuItem("Classic", nullptr, theme == Theme::CLASSIC)) setTheme(Theme::CLASSIC);
+        const char* themes[] = {"dark", "light", "classic"};
+        for (int i = 0; i < IM_ARRAYSIZE(themes); i++) {
+          std::string title = Helpers::tolower(themes[i]);
+          title[0] = std::toupper(title[0]);
+          if (ImGui::MenuItem(title.c_str(), nullptr, config->Theme == themes[i])) {
+            config->Theme = themes[i];
+            mpv->commandv("script-message-to", "implay", "theme", themes[i], nullptr);
+            config->save();
+          }
+        }
         ImGui::EndMenu();
       }
-      if (ImGui::BeginMenuEx("Show Stats", ICON_FA_INFO_CIRCLE)) {
+      if (ImGui::BeginMenuEx("Stats", ICON_FA_INFO_CIRCLE)) {
         if (ImGui::MenuItem("Media Info", "i")) mpv->command("script-binding stats/display-page-1");
         if (ImGui::MenuItem("Extended Frame Timings")) mpv->command("script-binding stats/display-page-2");
         if (ImGui::MenuItem("Cache Statistics")) mpv->command("script-binding stats/display-page-3");
         if (ImGui::MenuItem("Internal performance info")) mpv->command("script-binding stats/display-page-0");
         ImGui::EndMenu();
       }
-      if (ImGui::MenuItem("Toggle OSC", "DEL")) mpv->command("script-binding osc/visibility");
       ImGui::Separator();
       if (ImGui::MenuItem("Metrics & Debug")) mpv->commandv("script-message-to", "implay", "metrics", nullptr);
+      if (ImGui::MenuItem("OSC visibility", "DEL")) mpv->command("script-binding osc/visibility");
       ImGui::Separator();
       if (ImGui::MenuItemEx("Quit Watch Later", ICON_FA_WINDOW_CLOSE, "Q")) mpv->command("quit-watch-later");
       ImGui::EndMenu();
@@ -171,6 +179,7 @@ void ContextMenu::draw() {
       if (ImGui::MenuItemEx("About", ICON_FA_INFO_CIRCLE))
         mpv->commandv("script-message-to", "implay", "about", nullptr);
       if (ImGui::MenuItem("Keybindings")) mpv->command("script-binding stats/display-page-4");
+      if (ImGui::MenuItem("Settings")) mpv->commandv("script-message-to", "implay", "settings", nullptr);
       ImGui::EndMenu();
     }
     ImGui::Separator();
@@ -283,30 +292,5 @@ void ContextMenu::drawProfilelist() {
     }
     ImGui::EndMenu();
   }
-}
-
-void ContextMenu::setTheme(Theme theme) {
-  ImGuiStyle style;
-  switch (theme) {
-    case Theme::DARK:
-      ImGui::StyleColorsDark(&style);
-      break;
-    case Theme::LIGHT:
-      ImGui::StyleColorsLight(&style);
-      break;
-    case Theme::CLASSIC:
-      ImGui::StyleColorsClassic(&style);
-      break;
-    default:
-      return;
-  }
-  this->theme = theme;
-
-  style.PopupRounding = 5.0f;
-  style.WindowRounding = 5.0f;
-  style.WindowShadowSize = 50.0f;
-  style.Colors[ImGuiCol_WindowShadow] = ImVec4(0, 0, 0, 1.0f);
-
-  ImGui::GetStyle() = style;
 }
 }  // namespace ImPlay::Views

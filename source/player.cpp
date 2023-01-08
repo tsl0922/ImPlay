@@ -5,12 +5,12 @@
 #include "player.h"
 
 namespace ImPlay {
-Player::Player(GLFWwindow* window, const char* title) : Views::View() {
+Player::Player(Config *config, GLFWwindow* window, const char* title) : Views::View() {
   this->window = window;
   this->title = title;
 
   mpv = new Mpv(window);
-  cmd = new Command(window, mpv);
+  cmd = new Command(config, window, mpv);
 }
 
 Player::~Player() {

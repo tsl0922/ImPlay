@@ -7,6 +7,7 @@
 #include <mutex>
 #include <condition_variable>
 #include "player.h"
+#include "config.h"
 
 namespace ImPlay {
 class Window {
@@ -25,6 +26,7 @@ class Window {
   void exitGLFW();
   void exitImGui();
 
+  Config *config;
   GLFWwindow *window = nullptr;
   Player *player = nullptr;
   const char *title;

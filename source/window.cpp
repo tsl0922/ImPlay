@@ -28,15 +28,18 @@ Window::Window(const char* title, int width, int height) {
   this->title = title;
   this->width = width;
   this->height = height;
+  this->config = new Config();
 
+  config->load();
   initGLFW();
   initImGui();
 
-  player = new Player(window, title);
+  player = new Player(config, window, title);
 }
 
 Window::~Window() {
   delete player;
+  delete config;
 
   exitImGui();
   exitGLFW();
@@ -210,13 +213,16 @@ void Window::initImGui() {
   IMGUI_CHECKVERSION();
   ImGui::CreateContext();
 
-  float scale = 1.0f;
-  glfwGetWindowContentScale(window, &scale, nullptr);
+  float scale = config->Scale;
+  if (scale == 0) {
+    glfwGetWindowContentScale(window, &scale, nullptr);
 #if defined(__APPLE__)
-  scale /= 2.0f;
+    scale /= 2.0f;
 #endif
-  float fontSize = 13.0f * scale;
-  float iconSize = 11.0f * scale;
+  }
+
+  float fontSize = config->FontSize * scale;
+  float iconSize = (config->FontSize - 2) * scale;
 
   ImGuiIO& io = ImGui::GetIO();
   io.IniFilename = nullptr;
@@ -233,10 +239,13 @@ void Window::initImGui() {
   io.Fonts->AddFontDefault(&cfg);
   cfg.MergeMode = true;
   ImWchar fontAwesomeRange[] = {ICON_MIN_FA, ICON_MAX_FA, 0};
-  ImWchar unifontRange[] = {0x0100, 0xFFF0, 0};
+  const ImWchar* unifontRange = config->buildGlyphRanges();
   io.Fonts->AddFontFromMemoryCompressedTTF(font_awesome_compressed_data, font_awesome_compressed_size, iconSize, &cfg,
                                            fontAwesomeRange);
-  io.Fonts->AddFontFromMemoryCompressedTTF(unifont_compressed_data, unifont_compressed_size, 0, &cfg, unifontRange);
+  if (config->FontPath.empty())
+    io.Fonts->AddFontFromMemoryCompressedTTF(unifont_compressed_data, unifont_compressed_size, 0, &cfg, unifontRange);
+  else
+    io.Fonts->AddFontFromFileTTF(config->FontPath.c_str(), 0, &cfg, unifontRange);
   io.Fonts->Build();
 
   glfwMakeContextCurrent(window);

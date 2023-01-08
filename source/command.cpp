@@ -6,24 +6,28 @@
 #include "command.h"
 
 namespace ImPlay {
-Command::Command(GLFWwindow *window, Mpv *mpv) : View() {
+Command::Command(Config *config, GLFWwindow *window, Mpv *mpv) : View() {
+  this->config = config;
   this->window = window;
   this->mpv = mpv;
 
   about = new Views::About();
   debug = new Views::Debug(mpv);
-  contextMenu = new Views::ContextMenu(mpv);
+  settings = new Views::Settings(config, mpv);
+  contextMenu = new Views::ContextMenu(config, mpv);
   commandPalette = new Views::CommandPalette(mpv);
 }
 
 Command::~Command() {
   delete about;
   delete debug;
+  delete settings;
   delete contextMenu;
   delete commandPalette;
 }
 
 void Command::init() {
+  setTheme(config->Theme.c_str());
   debug->init();
 }
 
@@ -36,6 +40,7 @@ void Command::draw() {
 
   about->draw();
   debug->draw();
+  settings->draw();
   contextMenu->draw();
   commandPalette->draw();
 }
@@ -43,22 +48,24 @@ void Command::draw() {
 void Command::execute(int num_args, const char **args) {
   if (num_args == 0) return;
 
-  static std::map<std::string, std::function<void()>> commands = {
-      {"open", [&]() { open(); }},
-      {"open-disk", [&]() { openDisk(); }},
-      {"open-iso", [&]() { openIso(); }},
-      {"open-clipboard", [&]() { openClipboard(); }},
-      {"load-sub", [&]() { loadSubtitles(); }},
-      {"playlist-add-files", [&]() { playlistAddFiles(); }},
-      {"playlist-add-folder", [&]() { playlistAddFolder(); }},
-      {"about", [&]() { about->show(); }},
-      {"metrics", [&]() { debug->show(); }},
-      {"command-palette", [&]() { commandPalette->show(); }},
+  static std::map<std::string, std::function<void(int, const char **)>> commands = {
+      {"open", [&](int n, const char **args) { open(); }},
+      {"open-disk", [&](int n, const char **args) { openDisk(); }},
+      {"open-iso", [&](int n, const char **args) { openIso(); }},
+      {"open-clipboard", [&](int n, const char **args) { openClipboard(); }},
+      {"load-sub", [&](int n, const char **args) { loadSubtitles(); }},
+      {"playlist-add-files", [&](int n, const char **args) { playlistAddFiles(); }},
+      {"playlist-add-folder", [&](int n, const char **args) { playlistAddFolder(); }},
+      {"about", [&](int n, const char **args) { about->show(); }},
+      {"settings", [&](int n, const char **args) { settings->show(); }},
+      {"metrics", [&](int n, const char **args) { debug->show(); }},
+      {"command-palette", [&](int n, const char **args) { commandPalette->show(); }},
+      {"theme", [&](int n, const char **args) { setTheme(args[0]); }},
   };
 
   const char *cmd = args[0];
   auto it = commands.find(cmd);
-  if (it != commands.end()) it->second();
+  if (it != commands.end()) it->second(num_args - 1, args + 1);
 }
 
 void Command::open() {
@@ -130,6 +137,25 @@ void Command::openDvd(const char *path) {
 void Command::openBluray(const char *path) {
   mpv->property("bluray-device", path);
   mpv->commandv("loadfile", "bd://", nullptr);
+}
+
+void Command::setTheme(const char *theme) {
+  ImGuiStyle style;
+  if (strcmp(theme, "dark") == 0)
+    ImGui::StyleColorsDark(&style);
+  else if (strcmp(theme, "light") == 0)
+    ImGui::StyleColorsLight(&style);
+  else if (strcmp(theme, "classic") == 0)
+    ImGui::StyleColorsClassic(&style);
+  else
+    return;
+
+  style.PopupRounding = 5.0f;
+  style.WindowRounding = 5.0f;
+  style.WindowShadowSize = 50.0f;
+  style.Colors[ImGuiCol_WindowShadow] = ImVec4(0, 0, 0, 1.0f);
+
+  ImGui::GetStyle() = style;
 }
 
 bool Command::isMediaType(std::string ext) {

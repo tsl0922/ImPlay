@@ -3,13 +3,14 @@
 #include <map>
 #include <vector>
 #include "mpv.h"
+#include "config.h"
 #include "command.h"
 #include "views/view.h"
 
 namespace ImPlay {
 class Player : public Views::View {
  public:
-  Player(GLFWwindow *window, const char *title);
+  Player(Config *config, GLFWwindow *window, const char *title);
   ~Player() override;
 
   bool init(Mpv::OptionParser parser);

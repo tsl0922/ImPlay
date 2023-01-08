@@ -33,6 +33,7 @@ endif()
 add_subdirectory(third_party/fmt)
 add_subdirectory(third_party/glfw)
 add_subdirectory(third_party/json)
+add_subdirectory(third_party/inipp)
 add_subdirectory(third_party/imgui)
 add_subdirectory(third_party/nativefiledialog)
 
@@ -42,7 +43,10 @@ set(SOURCE_FILES
     source/views/context_menu.cpp
     source/views/debug.cpp
     source/views/about.cpp
+    source/views/settings.cpp
+    source/helpers.cpp
     source/command.cpp
+    source/config.cpp
     source/dispatch.cpp
     source/mpv.cpp
     source/player.cpp
@@ -50,7 +54,7 @@ set(SOURCE_FILES
     source/main.cpp
 )
 set(INCLUDE_DIRS include ${MPV_INCLUDE_DIRS})
-set(LINK_LIBS fmt json nfd imgui ${MPV_LIBRARIES})
+set(LINK_LIBS fmt json inipp nfd imgui ${MPV_LIBRARIES})
 
 if(WIN32)
     configure_file(${PROJECT_SOURCE_DIR}/resources/win32/app.rc.in ${PROJECT_BINARY_DIR}/app.rc @ONLY)

@@ -152,7 +152,7 @@ void Debug::drawCommands() {
       ImGui::TextColored(ImGui::GetStyle().Colors[ImGuiCol_CheckMark], "%s", name.c_str());
       if (!args.empty()) {
         ImGui::SameLine();
-        ImGui::Text(args.c_str());
+        ImGui::Text("%s", args.c_str());
       }
       ImGui::PopID();
     }

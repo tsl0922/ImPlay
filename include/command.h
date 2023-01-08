@@ -2,16 +2,18 @@
 #include <functional>
 #include <GLFW/glfw3.h>
 #include "mpv.h"
+#include "config.h"
 #include "views/view.h"
 #include "views/about.h"
 #include "views/debug.h"
+#include "views/settings.h"
 #include "views/context_menu.h"
 #include "views/command_palette.h"
 
 namespace ImPlay {
 class Command : public Views::View {
  public:
-  Command(GLFWwindow *window, Mpv *mpv);
+  Command(Config *config, GLFWwindow *window, Mpv *mpv);
   ~Command() override;
 
   void init();
@@ -31,13 +33,16 @@ class Command : public Views::View {
   void openDvd(const char *path);
   void openBluray(const char *path);
 
+  void setTheme(const char* theme);
   bool isMediaType(std::string ext);
 
+  Config *config = nullptr;
   GLFWwindow *window = nullptr;
   Mpv *mpv = nullptr;
 
   Views::About *about;
   Views::Debug *debug;
+  Views::Settings *settings;
   Views::ContextMenu *contextMenu;
   Views::CommandPalette *commandPalette;
 
