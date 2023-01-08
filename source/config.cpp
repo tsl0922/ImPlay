@@ -9,10 +9,9 @@ Config::Config() {
   const char* dataDir = Helpers::getDataDir();
   if (dataDir[0] != '\0') {
     std::filesystem::create_directories(dataDir);
-    configFile = fmt::format("{}/config.ini", dataDir);
-  }
-  else
-    configFile = "config.ini";
+    configFile = fmt::format("{}/implay.conf", dataDir);
+  } else
+    configFile = "implay.conf";
 }
 
 void Config::load() {
