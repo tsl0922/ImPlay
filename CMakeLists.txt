@@ -5,9 +5,13 @@ set(CMAKE_CXX_STANDARD 20)
 
 option(USE_MPV_WIN_BUILD "Use Prebuilt static mpv dll for Windows" ON)
 
-cmake_policy(SET CMP0087 NEW)
-cmake_policy(SET CMP0135 NEW)
 include(ExternalProject)
+if (${CMAKE_VERSION} VERSION_GREATER_EQUAL "3.14.0")
+    cmake_policy(SET CMP0087 NEW)
+endif()
+if (${CMAKE_VERSION} VERSION_GREATER_EQUAL "3.24.0")
+    cmake_policy(SET CMP0135 NEW)
+endif()
 
 if(WIN32 AND USE_MPV_WIN_BUILD)
     ExternalProject_Add(mpv_dev
@@ -81,13 +85,24 @@ if(WIN32)
         BUILD_COMMAND ${CMAKE_COMMAND} -E copy <SOURCE_DIR>/mpv.com <BINARY_DIR>
         INSTALL_COMMAND ""
     )
-    add_dependencies(ImPlay mpv_bin)
+    ExternalProject_Add(yt_dlp
+        URL https://github.com/yt-dlp/yt-dlp/releases/download/2023.01.06/yt-dlp.exe
+        DOWNLOAD_NO_EXTRACT ON
+        UPDATE_COMMAND ""
+        CONFIGURE_COMMAND ""
+        BUILD_COMMAND ""
+        INSTALL_COMMAND ""
+    )
+    add_dependencies(ImPlay mpv_bin yt_dlp)
     ExternalProject_Get_property(mpv_bin BINARY_DIR)
     set(MPV_BIN_DIR ${BINARY_DIR})
+    ExternalProject_Get_property(yt_dlp DOWNLOAD_DIR)
+    set(YT_DLP_BIN ${DOWNLOAD_DIR}/yt-dlp.exe)
 
     target_link_options(ImPlay PRIVATE -mwindows)
     install(TARGETS ${PROJECT_NAME} RUNTIME DESTINATION .)
     install(FILES ${MPV_BIN_DIR}/mpv.com DESTINATION . RENAME ImPlay.com)
+    install(FILES ${YT_DLP_BIN} DESTINATION .)
     if(USE_MPV_WIN_BUILD)
         add_dependencies(ImPlay mpv_dev)
         add_custom_command(TARGET ImPlay POST_BUILD
