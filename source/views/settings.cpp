@@ -50,6 +50,8 @@ void Settings::drawInterfaceTab() {
       if (Helpers::tolower(t_items[i]) == config->Theme) t_current = i;
     }
     ImGui::Text("Theme");
+    ImGui::SameLine();
+    helpMarker("Color theme of the interface.");
     ImGui::Indent();
     if (ImGui::Combo("##Theme", &t_current, t_items, IM_ARRAYSIZE(t_items))) {
       config->Theme = Helpers::tolower(t_items[t_current]);
@@ -82,6 +84,8 @@ void Settings::drawFontTab() {
   strncpy(fontPath, config->FontPath.c_str(), IM_ARRAYSIZE(fontPath));
   if (ImGui::BeginTabItem("Font")) {
     ImGui::Text("Path*");
+    ImGui::SameLine();
+    helpMarker("An embedded font will be used if not specified.");
     ImGui::Indent();
     if (ImGui::InputText("##Path", fontPath, IM_ARRAYSIZE(fontPath))) config->FontPath = fontPath;
     ImGui::SameLine();
@@ -97,6 +101,8 @@ void Settings::drawFontTab() {
     ImGui::SliderInt("##Size", &config->FontSize, 8, 72);
     ImGui::Unindent();
     ImGui::Text("Glyph Ranges*");
+    ImGui::SameLine();
+    helpMarker("Required for displaying non-English characters on interface.");
     ImGui::Indent();
     ImGui::CheckboxFlags("Chinese", &config->glyphRange, Config::GlyphRange_Chinese);
     ImGui::SameLine();
@@ -110,6 +116,17 @@ void Settings::drawFontTab() {
     ImGui::CheckboxFlags("Vietnamese", &config->glyphRange, Config::GlyphRange_Vietnamese);
     ImGui::Unindent();
     ImGui::EndTabItem();
+  }
+}
+
+void Settings::helpMarker(const char *desc) {
+  ImGui::TextDisabled("(?)");
+  if (ImGui::IsItemHovered(ImGuiHoveredFlags_DelayShort)) {
+    ImGui::BeginTooltip();
+    ImGui::PushTextWrapPos(ImGui::GetFontSize() * 35.0f);
+    ImGui::TextUnformatted(desc);
+    ImGui::PopTextWrapPos();
+    ImGui::EndTooltip();
   }
 }
 }  // namespace ImPlay::Views

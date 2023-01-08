@@ -14,6 +14,8 @@ class Settings : public View {
   void drawFontTab();
 
  private:
+  void helpMarker(const char *desc);
+
   Config *config;
   Mpv *mpv;
 };
