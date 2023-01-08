@@ -205,6 +205,10 @@ void Debug::drawProperties(const char* title, const char* key) {
     for (int i = 0; i < node.u.list->num; i++) {
       auto item = node.u.list->values[i];
       if (buf[0] != '\0' && !strstr(item.u.string, buf)) continue;
+      if (!ImGui::IsItemVisible()) {
+        ImGui::Selectable(item.u.string, false);
+        continue;
+      }
       auto prop = mpv->property<mpv_node, MPV_FORMAT_NODE>(item.u.string);
       if (format & 1 << prop.format) drawPropNode(item.u.string, prop);
       mpv_free_node_contents(&prop);
