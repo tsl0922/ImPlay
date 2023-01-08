@@ -146,6 +146,8 @@ void ContextMenu::draw() {
       if (ImGui::MenuItemEx("Screenshot", ICON_FA_FILE_IMAGE, "s")) mpv->command("async screenshot");
       if (ImGui::MenuItemEx("Window Border", ICON_FA_BORDER_NONE)) mpv->command("cycle border");
       if (ImGui::MenuItemEx("Window Dragging", ICON_FA_HAND_POINTER)) mpv->command("cycle window-dragging");
+      if (ImGui::MenuItem("OSC visibility", "DEL")) mpv->command("script-binding osc/visibility");
+      if (ImGui::MenuItem("Open Config Dir")) Helpers::openUri(Helpers::getDataDir());
       ImGui::Separator();
       drawProfilelist();
       if (ImGui::BeginMenuEx("Theme", ICON_FA_PALETTE)) {
@@ -169,9 +171,8 @@ void ContextMenu::draw() {
         ImGui::EndMenu();
       }
       ImGui::Separator();
-      if (ImGui::MenuItem("OSC visibility", "DEL")) mpv->command("script-binding osc/visibility");
-      if (ImGui::MenuItem("Open Config Dir")) Helpers::openUri(Helpers::getDataDir());
-      if (ImGui::MenuItem("Metrics & Debug")) mpv->commandv("script-message-to", "implay", "metrics", nullptr);
+      if (ImGui::MenuItemEx("Metrics & Debug", ICON_FA_BUG))
+        mpv->commandv("script-message-to", "implay", "metrics", nullptr);
       ImGui::Separator();
       if (ImGui::MenuItemEx("Quit Watch Later", ICON_FA_WINDOW_CLOSE, "Q")) mpv->command("quit-watch-later");
       ImGui::EndMenu();

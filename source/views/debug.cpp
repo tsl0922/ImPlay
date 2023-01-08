@@ -59,6 +59,7 @@ void Debug::drawHeader() {
 }
 
 void Debug::drawConsole() {
+  ImGui::SetNextItemOpen(true, ImGuiCond_Once);
   if (!ImGui::CollapsingHeader("Console & Logs")) return;
   console->draw();
 }
