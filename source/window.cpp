@@ -24,17 +24,17 @@
 #include "dispatch.h"
 
 namespace ImPlay {
-Window::Window(const char* title, int width, int height) {
-  this->title = title;
-  this->width = width;
-  this->height = height;
+Window::Window(Mpv* mpv) : mpv(mpv) {
   this->config = new Config();
 
   config->load();
   initGLFW();
   initImGui();
 
-  player = new Player(config, window, title);
+  mpv->win() = window;
+  mpv->runLoop() = true;
+  mpv->wakeupLoop();
+  player = new Player(config, window, mpv, title);
 }
 
 Window::~Window() {
@@ -48,6 +48,7 @@ Window::~Window() {
 bool Window::run(Helpers::OptionParser parser) {
   glfwMakeContextCurrent(window);
   if (!player->init(parser)) return false;
+  glfwMakeContextCurrent(nullptr);
 #ifdef __APPLE__
   const char** openedFileNames = glfwGetOpenedFilenames();
   if (openedFileNames != nullptr) {
@@ -56,8 +57,7 @@ bool Window::run(Helpers::OptionParser parser) {
     player->setDrop(count, openedFileNames);
   }
 #endif
-  glfwShowWindow(window);
-  glfwMakeContextCurrent(nullptr);
+  mpv->runLoop() = false;
 
   std::atomic_bool shutdown = false;
 
@@ -145,7 +145,6 @@ void Window::initGLFW() {
   glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
 #endif
   glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
-  glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
 
   window = glfwCreateWindow(width, height, title, nullptr, nullptr);
   if (window == nullptr) {
@@ -156,6 +155,9 @@ void Window::initGLFW() {
   glfwSetWindowUserPointer(window, this);
   glfwMakeContextCurrent(window);
   glfwSwapInterval(1);
+  glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+  glClear(GL_COLOR_BUFFER_BIT);
+  glfwSwapBuffers(window);
   glfwMakeContextCurrent(nullptr);
 
   GLFWmonitor* monitor = glfwGetPrimaryMonitor();

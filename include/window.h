@@ -13,7 +13,7 @@
 namespace ImPlay {
 class Window {
  public:
-  Window(const char *title, int width, int height);
+  explicit Window(Mpv *mpv);
   ~Window();
 
   bool run(Helpers::OptionParser optionParser);
@@ -29,9 +29,11 @@ class Window {
 
   Config *config;
   GLFWwindow *window = nullptr;
+  Mpv *mpv = nullptr;
   Player *player = nullptr;
-  const char *title;
-  int width, height;
+  const char *title = "ImPlay";
+  int width = 1280;
+  int height = 720;
 
   const int defaultTimeout = 50;  // ms
 

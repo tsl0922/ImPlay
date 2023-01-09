@@ -6,19 +6,16 @@
 #include "helpers.h"
 
 namespace ImPlay {
-Player::Player(Config* config, GLFWwindow* window, const char* title) : Views::View() {
+Player::Player(Config* config, GLFWwindow* window, Mpv* mpv, const char* title) : Views::View() {
   this->config = config;
   this->window = window;
+  this->mpv = mpv;
   this->title = title;
 
-  mpv = new Mpv(window);
   cmd = new Command(config, window, mpv);
 }
 
-Player::~Player() {
-  delete mpv;
-  delete cmd;
-}
+Player::~Player() { delete cmd; }
 
 bool Player::init(Helpers::OptionParser parser) {
   mpv->option("config", "yes");
@@ -49,6 +46,8 @@ bool Player::init(Helpers::OptionParser parser) {
   for (auto& path : parser.paths) mpv->commandv("loadfile", path.c_str(), "append-play", nullptr);
 
   mpv->command("keybind MBTN_RIGHT ignore");
+
+  mpv->runLoop() = false;
 
   return true;
 }

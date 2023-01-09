@@ -11,7 +11,7 @@
 namespace ImPlay {
 class Player : public Views::View {
  public:
-  Player(Config *config, GLFWwindow *window, const char *title);
+  Player(Config *config, GLFWwindow *window, Mpv *mpv, const char *title);
   ~Player() override;
 
   bool init(Helpers::OptionParser parser);

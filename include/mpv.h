@@ -13,8 +13,8 @@
 namespace ImPlay {
 class Mpv {
  public:
-  explicit Mpv(GLFWwindow *window, int64_t wid);
-  explicit Mpv(GLFWwindow *window);
+  Mpv(GLFWwindow *window, int64_t wid = 0);
+  Mpv();
   ~Mpv();
 
   using EventHandler = std::function<void(void *)>;
@@ -23,6 +23,7 @@ class Mpv {
   void init();
   void render(int w, int h);
   bool wantRender();
+  void wakeupLoop();
   void waitEvent(double timeout = 0);
   void requestLog(const char *level, LogHandler handler);
   int loadConfig(const char *path);
@@ -30,6 +31,7 @@ class Mpv {
   bool playing();
 
   std::atomic_bool &runLoop() { return runLoop_; }
+  GLFWwindow *&win() { return window; }
 
   int command(const char *args) { return mpv_command_string(mpv, args); }
   int command(const char *args[]) { return mpv_command(mpv, args); }
@@ -102,7 +104,6 @@ class Mpv {
   void initRender();
   void eventLoop();
   void renderLoop();
-  void wakeupLoop();
 
   int64_t wid = 0;
   int width, height;

@@ -12,12 +12,13 @@
 #include "dispatch.h"
 
 namespace ImPlay {
-Mpv::Mpv(GLFWwindow *window, int64_t wid) : Mpv(window) {
+Mpv::Mpv(GLFWwindow *window, int64_t wid) : Mpv() {
+  this->window = window;
   this->wid = wid;
   if (mpv_set_property(mpv, "wid", MPV_FORMAT_INT64, &wid) < 0) throw std::runtime_error("could not set mpv wid");
 }
 
-Mpv::Mpv(GLFWwindow *window) : window(window) {
+Mpv::Mpv() {
   main = mpv_create();
   if (!main) throw std::runtime_error("could not create mpv handle");
   mpv = mpv_create_client(main, "implay");
@@ -85,7 +86,7 @@ void Mpv::renderLoop() {
   while (!shutdown) {
     std::unique_lock<std::mutex> lk(mutex);
     cond.wait(lk);
-    if (wantRender()) {
+    if (window != nullptr && wantRender()) {
       glfwMakeContextCurrent(window);
       render(width, height);
       glfwSwapBuffers(window);

@@ -5,6 +5,7 @@
 #ifdef _WIN32
 #include <windows.h>
 #endif
+#include "mpv.h"
 #include "window.h"
 
 static const char* usage =
@@ -70,6 +71,7 @@ int main(int argc, char* argv[]) {
 
   if (parser.options.contains("o")) return run_headless(parser);
 
-  ImPlay::Window window("ImPlay", 1280, 720);
+  ImPlay::Mpv mpv;
+  ImPlay::Window window(&mpv);
   return window.run(parser);
 }
