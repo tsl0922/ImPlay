@@ -61,6 +61,7 @@ class Debug : public View {
 
   Mpv *mpv = nullptr;
   Console *console = nullptr;
+  std::string m_node = "Console";
   bool m_demo = false;
   bool m_metrics = false;
 };

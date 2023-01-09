@@ -26,7 +26,8 @@ void Debug::draw() {
   const ImGuiViewport* viewport = ImGui::GetMainViewport();
   ImGui::SetNextWindowPos(ImVec2(viewport->WorkPos.x + 60, viewport->WorkPos.y + 20), ImGuiCond_FirstUseEver);
   ImGui::SetNextWindowSize(ImVec2(580, 680), ImGuiCond_FirstUseEver);
-  if (ImGui::Begin(ICON_FA_BUG " Metrics & Debug", &m_open, ImGuiWindowFlags_NoCollapse)) {
+  if (ImGui::Begin(ICON_FA_BUG " Metrics & Debug", &m_open,
+                   ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoScrollbar)) {
     drawHeader();
     drawProperties("Options", "options");
     drawProperties("Properties", "property-list");
@@ -63,15 +64,19 @@ void Debug::drawHeader() {
 
 void Debug::drawConsole() {
   ImGui::SetNextItemOpen(true, ImGuiCond_Once);
+  if (m_node != "Console") ImGui::SetNextItemOpen(false, ImGuiCond_Always);
   if (!ImGui::CollapsingHeader("Console & Logs")) return;
+  m_node = "Console";
   console->draw();
 }
 
 void Debug::drawBindings() {
   auto bindings = mpv->bindingList();
+  if (m_node != "Bindings") ImGui::SetNextItemOpen(false, ImGuiCond_Always);
   if (!ImGui::CollapsingHeader(fmt::format("Bindings [{}]", bindings.size()).c_str())) return;
+  m_node = "Bindings";
 
-  if (ImGui::BeginListBox("input-bindings", ImVec2(-FLT_MIN, 400))) {
+  if (ImGui::BeginListBox("input-bindings", ImVec2(-FLT_MIN, -FLT_MIN))) {
     for (auto& binding : bindings) {
       std::string title = binding.comment;
       if (title.empty()) title = binding.cmd;
@@ -135,10 +140,12 @@ static std::vector<std::pair<std::string, std::string>> formatCommands(mpv_node&
 
 void Debug::drawCommands() {
   auto node = mpv->property<mpv_node, MPV_FORMAT_NODE>("command-list");
+  if (m_node != "Commands") ImGui::SetNextItemOpen(false, ImGuiCond_Always);
   if (!ImGui::CollapsingHeader(fmt::format("Commands [{}]", node.u.list->num).c_str())) {
     mpv_free_node_contents(&node);
     return;
   }
+  m_node = "Commands";
 
   static char buf[256] = "";
   ImGui::Text("Filter:");
@@ -146,7 +153,7 @@ void Debug::drawCommands() {
   ImGui::PushItemWidth(-1);
   ImGui::InputText("Filter##commands", buf, IM_ARRAYSIZE(buf));
   ImGui::PopItemWidth();
-  if (ImGui::BeginListBox("command-list", ImVec2(-FLT_MIN, 400))) {
+  if (ImGui::BeginListBox("command-list", ImVec2(-FLT_MIN, -FLT_MIN))) {
     auto commands = formatCommands(node);
     for (auto& [name, args] : commands) {
       if (!name.starts_with(buf)) continue;
@@ -167,10 +174,12 @@ void Debug::drawCommands() {
 
 void Debug::drawProperties(const char* title, const char* key) {
   mpv_node node = mpv->property<mpv_node, MPV_FORMAT_NODE>(key);
+  if (m_node != title) ImGui::SetNextItemOpen(false, ImGuiCond_Always);
   if (!ImGui::CollapsingHeader(fmt::format("{} [{}]", title, node.u.list->num).c_str())) {
     mpv_free_node_contents(&node);
     return;
   }
+  m_node = title;
 
   int mask = 1 << MPV_FORMAT_NONE | 1 << MPV_FORMAT_STRING | 1 << MPV_FORMAT_OSD_STRING | 1 << MPV_FORMAT_FLAG |
              1 << MPV_FORMAT_INT64 | 1 << MPV_FORMAT_DOUBLE | 1 << MPV_FORMAT_NODE | 1 << MPV_FORMAT_NODE_ARRAY |
@@ -204,7 +213,7 @@ void Debug::drawProperties(const char* title, const char* key) {
   ImGui::PushItemWidth(-1);
   ImGui::InputText("Filter", buf, IM_ARRAYSIZE(buf));
   ImGui::PopItemWidth();
-  if (format > 0 && ImGui::BeginListBox(key, ImVec2(-FLT_MIN, 400))) {
+  if (format > 0 && ImGui::BeginListBox(key, ImVec2(-FLT_MIN, -FLT_MIN))) {
     for (int i = 0; i < node.u.list->num; i++) {
       auto item = node.u.list->values[i];
       if (buf[0] != '\0' && !strstr(item.u.string, buf)) continue;
