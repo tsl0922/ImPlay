@@ -208,8 +208,8 @@ void Debug::drawProperties(const char* title, const char* key) {
     for (int i = 0; i < node.u.list->num; i++) {
       auto item = node.u.list->values[i];
       if (buf[0] != '\0' && !strstr(item.u.string, buf)) continue;
-      if (!ImGui::IsItemVisible()) {
-        ImGui::Selectable(item.u.string, false);
+      if (i > 0 && !ImGui::IsItemVisible()) {
+        ImGui::BulletText("%s", item.u.string);
         continue;
       }
       auto prop = mpv->property<mpv_node, MPV_FORMAT_NODE>(item.u.string);
