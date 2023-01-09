@@ -45,7 +45,10 @@ void Debug::drawHeader() {
   auto style = ImGuiStyle();
   ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(15.0f, 15.0f));
   ImGui::Text("%s", version);
-  ImGui::SameLine(ImGui::GetWindowWidth() - 260);
+  auto vSize = ImGui::CalcTextSize(fmt::format("ImGui {}", ImGui::GetVersion()).c_str());
+  auto mSize = ImGui::CalcTextSize(fmt::format("FPS: %.2f", io.Framerate).c_str());
+  ImGui::SameLine(ImGui::GetWindowWidth() -
+                  (vSize.x + mSize.x + 4 * style.ItemInnerSpacing.x + 3 * style.ItemSpacing.x));
   ImGui::Text("ImGui %s", ImGui::GetVersion());
   if (ImGui::IsItemClicked(ImGuiMouseButton_Left)) m_demo = !m_demo;
   ImGui::SameLine();
