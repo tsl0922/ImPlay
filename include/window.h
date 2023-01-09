@@ -22,7 +22,7 @@ class Window {
   void render();
   void requestRender();
 
-  void initGLFW();
+  void initGLFW(const char *title);
   void initImGui();
   void exitGLFW();
   void exitImGui();
@@ -31,7 +31,6 @@ class Window {
   GLFWwindow *window = nullptr;
   Mpv *mpv = nullptr;
   Player *player = nullptr;
-  const char *title = "ImPlay";
   int width = 1280;
   int height = 720;
 

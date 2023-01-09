@@ -26,9 +26,10 @@
 namespace ImPlay {
 Window::Window(Mpv* mpv) : mpv(mpv) {
   this->config = new Config();
-
   config->load();
-  initGLFW();
+
+  const char* title = "ImPlay";
+  initGLFW(title);
   initImGui();
 
   mpv->win() = window;
@@ -129,7 +130,7 @@ void Window::requestRender() {
   lastRenderAt = glfwGetTime();
 }
 
-void Window::initGLFW() {
+void Window::initGLFW(const char* title) {
   if (!glfwInit()) {
     std::cout << "Failed to initialize GLFW!" << std::endl;
     std::abort();
@@ -146,11 +147,17 @@ void Window::initGLFW() {
 #endif
   glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 
+  GLFWmonitor* monitor = glfwGetPrimaryMonitor();
+  const GLFWvidmode* mode = glfwGetVideoMode(monitor);
+  width = mode->width * 0.4;
+  height = mode->height * 0.4;
+
   window = glfwCreateWindow(width, height, title, nullptr, nullptr);
   if (window == nullptr) {
     std::cout << "Failed to create window!" << std::endl;
     std::abort();
   }
+  glfwSetWindowPos(window, (mode->width - width) / 2, (mode->height - height) / 2);
 
   glfwSetWindowUserPointer(window, this);
   glfwMakeContextCurrent(window);
@@ -159,10 +166,6 @@ void Window::initGLFW() {
   glClear(GL_COLOR_BUFFER_BIT);
   glfwSwapBuffers(window);
   glfwMakeContextCurrent(nullptr);
-
-  GLFWmonitor* monitor = glfwGetPrimaryMonitor();
-  const GLFWvidmode* mode = glfwGetVideoMode(monitor);
-  glfwSetWindowPos(window, (mode->width - width) / 2, (mode->height - height) / 2);
 
   glfwSetFramebufferSizeCallback(window, [](GLFWwindow* window, int w, int h) {
     auto win = static_cast<Window*>(glfwGetWindowUserPointer(window));
