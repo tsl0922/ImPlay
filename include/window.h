@@ -13,10 +13,10 @@
 namespace ImPlay {
 class Window {
  public:
-  explicit Window(Mpv *mpv);
+  Window();
   ~Window();
 
-  bool run(Helpers::OptionParser optionParser);
+  bool run(Helpers::OptionParser &optionParser);
 
  private:
   void render();

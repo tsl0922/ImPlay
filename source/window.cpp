@@ -24,29 +24,29 @@
 #include "dispatch.h"
 
 namespace ImPlay {
-Window::Window(Mpv* mpv) : mpv(mpv) {
-  this->config = new Config();
+Window::Window() {
+  config = new Config();
   config->load();
 
   const char* title = "ImPlay";
+
   initGLFW(title);
   initImGui();
 
-  mpv->win() = window;
-  mpv->runLoop() = true;
-  mpv->wakeupLoop();
+  mpv = new Mpv(window);
   player = new Player(config, window, mpv, title);
 }
 
 Window::~Window() {
   delete player;
+  delete mpv;
   delete config;
 
   exitImGui();
   exitGLFW();
 }
 
-bool Window::run(Helpers::OptionParser parser) {
+bool Window::run(Helpers::OptionParser& parser) {
   glfwMakeContextCurrent(window);
   if (!player->init(parser)) return false;
   glfwMakeContextCurrent(nullptr);
@@ -58,7 +58,6 @@ bool Window::run(Helpers::OptionParser parser) {
     player->setDrop(count, openedFileNames);
   }
 #endif
-  mpv->runLoop() = false;
 
   std::atomic_bool shutdown = false;
 

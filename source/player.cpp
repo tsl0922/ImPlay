@@ -17,7 +17,7 @@ Player::Player(Config* config, GLFWwindow* window, Mpv* mpv, const char* title) 
 
 Player::~Player() { delete cmd; }
 
-bool Player::init(Helpers::OptionParser parser) {
+bool Player::init(Helpers::OptionParser& parser) {
   mpv->option("config", "yes");
   mpv->option("osc", "yes");
   mpv->option("idle", "yes");
@@ -38,15 +38,12 @@ bool Player::init(Helpers::OptionParser parser) {
   }
 
   cmd->init();
-
   mpv->init();
-
   initMpv();
 
   for (auto& path : parser.paths) mpv->commandv("loadfile", path.c_str(), "append-play", nullptr);
 
   mpv->command("keybind MBTN_RIGHT ignore");
-
   mpv->runLoop() = false;
 
   return true;

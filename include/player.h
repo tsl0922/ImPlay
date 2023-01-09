@@ -14,7 +14,7 @@ class Player : public Views::View {
   Player(Config *config, GLFWwindow *window, Mpv *mpv, const char *title);
   ~Player() override;
 
-  bool init(Helpers::OptionParser parser);
+  bool init(Helpers::OptionParser &parser);
   void draw() override;
   void render(int w, int h);
   bool wantRender();
