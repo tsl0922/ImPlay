@@ -7,8 +7,8 @@ namespace ImPlay::Views {
 void About::draw() {
   if (m_open) ImGui::OpenPopup("About");
 
-  ImGui::SetNextWindowSize(ImVec2(600, 200));
-  if (ImGui::BeginPopupModal("About", &m_open, ImGuiWindowFlags_NoResize)) {
+  ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(80, 20));
+  if (ImGui::BeginPopupModal("About", &m_open, ImGuiWindowFlags_AlwaysAutoResize)) {
     textCentered("ImPlay");
     ImGui::Spacing();
     textCentered("A Cross-Platform Desktop Media Player");
@@ -20,9 +20,12 @@ void About::draw() {
     ImGui::Spacing();
     textCentered("Copyright (C) 2022-2023 Shuanglei Tao");
     ImGui::Spacing();
+    ImGui::PushStyleColor(ImGuiCol_Text, ImGui::GetStyle().Colors[ImGuiCol_TextDisabled]);
     textCentered("GPL-2.0 License");
+    ImGui::PopStyleColor();
     ImGui::EndPopup();
   }
+  ImGui::PopStyleVar();
 }
 
 void About::textCentered(const char* text) {
