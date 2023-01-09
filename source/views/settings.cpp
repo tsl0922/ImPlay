@@ -37,6 +37,11 @@ void Settings::drawGeneralTab() {
       mpv->loadConfig(fmt::format("{}/mpv.conf", configDir).c_str());
       config->save();
     }
+    ImGui::SameLine();
+    helpMarker("ImPlay will use it's own config dir for libmpv by default.");
+    if (ImGui::Checkbox("Remember playback progress on exit", &config->watchLater)) config->save();
+    ImGui::SameLine();
+    helpMarker("Exit mpv with the quit-watch-later command.");
     ImGui::Unindent();
     ImGui::EndTabItem();
   }

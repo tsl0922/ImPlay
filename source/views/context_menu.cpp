@@ -173,8 +173,6 @@ void ContextMenu::draw() {
       ImGui::Separator();
       if (ImGui::MenuItemEx("Metrics & Debug", ICON_FA_BUG))
         mpv->commandv("script-message-to", "implay", "metrics", nullptr);
-      ImGui::Separator();
-      if (ImGui::MenuItemEx("Quit Watch Later", ICON_FA_WINDOW_CLOSE, "Q")) mpv->command("quit-watch-later");
       ImGui::EndMenu();
     }
     if (ImGui::BeginMenuEx("Help", ICON_FA_QUESTION_CIRCLE)) {
@@ -197,7 +195,8 @@ void ContextMenu::draw() {
         mpv->commandv("script-message-to", "implay", "open-iso", nullptr);
       ImGui::EndMenu();
     }
-    if (ImGui::MenuItemEx("Quit", ICON_FA_WINDOW_CLOSE, "q")) mpv->command("quit");
+    if (ImGui::MenuItemEx("Quit", ICON_FA_WINDOW_CLOSE, "q"))
+      mpv->command(config->watchLater ? "quit-watch-later" : "quit");
     ImGui::EndPopup();
   }
 }

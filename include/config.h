@@ -30,6 +30,7 @@ class Config {
   int FontSize = 13;
   int glyphRange = GlyphRange_Default;
   bool mpvConfig = false;
+  bool watchLater = false;
 
  private:
   inipp::Ini<char> ini;

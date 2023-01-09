@@ -59,7 +59,7 @@ void Player::waitEvent() { mpv->waitEvent(); }
 
 bool Player::playing() { return mpv->playing() && !mpv->paused(); }
 
-void Player::shutdown() { mpv->command("quit"); }
+void Player::shutdown() { mpv->command(config->watchLater ? "quit-watch-later" : "quit"); }
 
 bool Player::allowDrag() {
   return mpv->property<int, MPV_FORMAT_FLAG>("window-dragging") && !mpv->property<int, MPV_FORMAT_FLAG>("fullscreen");
