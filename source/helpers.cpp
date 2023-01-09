@@ -6,11 +6,15 @@
 #include <cstring>
 #include <string>
 #include <fmt/format.h>
-#include "helpers.h"
+#define STB_IMAGE_IMPLEMENTATION
+#include <stb_image.h>
+#include <romfs/romfs.hpp>
 #ifdef _WIN32
 #include <windows.h>
 #include <shlobj.h>
 #endif
+#include "helpers.h"
+#include <imgui_impl_opengl3_loader.h>
 
 namespace ImPlay::Helpers {
 void OptionParser::parse(int argc, char** argv) {
@@ -48,6 +52,33 @@ void OptionParser::parse(int argc, char** argv) {
       paths.emplace_back(arg);
     }
   }
+}
+
+bool loadTexture(const char* path, ImTextureID* out_texture, int* out_width, int* out_height) {
+  int width, height;
+  auto icon = romfs::get(path);
+  unsigned char* m_data =
+      stbi_load_from_memory(reinterpret_cast<const stbi_uc*>(icon.data()), icon.size(), &width, &height, NULL, 4);
+  if (m_data == NULL) return false;
+
+  GLuint texture;
+  glGenTextures(1, &texture);
+  glBindTexture(GL_TEXTURE_2D, texture);
+
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+#if defined(GL_UNPACK_ROW_LENGTH) && !defined(__EMSCRIPTEN__)
+  glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
+#endif
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, height, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, m_data);
+  stbi_image_free(m_data);
+
+  *out_texture = reinterpret_cast<ImTextureID>(static_cast<intptr_t>(texture));
+  *out_width = width;
+  *out_height = height;
+
+  return true;
 }
 
 std::string tolower(std::string s) {

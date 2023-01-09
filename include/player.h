@@ -37,6 +37,10 @@ class Player : public Views::View {
   Mpv *mpv = nullptr;
   Command *cmd = nullptr;
   const char *title;
+  bool fileOpen = false;
+  ImTextureID iconTexture;
+  int iconWidth;
+  int iconHeight;
 
   static void translateMod(std::vector<std::string> &keys, int mods) {
     if (mods & GLFW_MOD_CONTROL) keys.emplace_back("Ctrl");

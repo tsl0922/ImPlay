@@ -2,6 +2,7 @@
 #include <fmt/color.h>
 #include <filesystem>
 #include <imgui.h>
+#include <imgui_internal.h>
 #include "player.h"
 #include "helpers.h"
 
@@ -18,10 +19,10 @@ Player::Player(Config* config, GLFWwindow* window, Mpv* mpv, const char* title) 
 Player::~Player() { delete cmd; }
 
 bool Player::init(Helpers::OptionParser& parser) {
+  if (!Helpers::loadTexture("icon.png", &iconTexture, &iconWidth, &iconHeight)) return false;
+
   mpv->option("config", "yes");
   mpv->option("osc", "yes");
-  mpv->option("idle", "yes");
-  mpv->option("force-window", "yes");
   mpv->option("input-default-bindings", "yes");
   mpv->option("input-vo-keyboard", "yes");
   mpv->option("osd-playing-msg", "${media-title}");
@@ -49,7 +50,20 @@ bool Player::init(Helpers::OptionParser& parser) {
   return true;
 }
 
-void Player::draw() { cmd->draw(); }
+void Player::draw() {
+  if (!mpv->property<int, MPV_FORMAT_FLAG>("force-window") && !fileOpen) {
+    const ImGuiViewport* viewport = ImGui::GetMainViewport();
+    ImGui::SetNextWindowPos(viewport->GetCenter(), ImGuiCond_Always, ImVec2(0.5f, 0.5f));
+    ImGui::PushStyleColor(ImGuiCol_WindowShadow, ImVec4(0, 0, 0, 0));
+    ImGui::Begin("Logo", nullptr,
+                 ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoNav | ImGuiWindowFlags_NoDecoration |
+                     ImGuiWindowFlags_NoInputs);
+    ImGui::Image(iconTexture, ImVec2(iconWidth * 0.5f, iconHeight * 0.5f));
+    ImGui::End();
+    ImGui::PopStyleColor();
+  }
+  cmd->draw();
+}
 
 void Player::render(int w, int h) { mpv->render(w, h); }
 
@@ -141,7 +155,10 @@ void Player::initMpv() {
     }
   });
 
+  mpv->observeEvent(MPV_EVENT_START_FILE, [this](void* data) { fileOpen = true; });
+
   mpv->observeEvent(MPV_EVENT_END_FILE, [this](void* data) {
+    fileOpen = false;
     glfwSetWindowTitle(window, title);
     glfwSetWindowAspectRatio(window, GLFW_DONT_CARE, GLFW_DONT_CARE);
   });

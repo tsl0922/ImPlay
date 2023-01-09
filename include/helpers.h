@@ -2,6 +2,8 @@
 #include <string>
 #include <map>
 #include <vector>
+#include <imgui.h>
+#include <imgui_internal.h>
 
 namespace ImPlay::Helpers {
 struct OptionParser {
@@ -10,6 +12,8 @@ struct OptionParser {
 
   void parse(int argc, char** argv);
 };
+
+bool loadTexture(const char* path, ImTextureID* out_texture, int* out_width, int* out_height);
 
 std::string tolower(std::string s);
 std::string toupper(std::string s);

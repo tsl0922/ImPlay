@@ -34,12 +34,16 @@ else()
     pkg_search_module(MPV REQUIRED mpv)
 endif()
 
+set(LIBROMFS_PROJECT_NAME ${PROJECT_NAME})
+set(LIBROMFS_RESOURCE_LOCATION "${CMAKE_SOURCE_DIR}/resources/romfs")
+
 add_subdirectory(third_party/fmt)
 add_subdirectory(third_party/glfw)
 add_subdirectory(third_party/json)
 add_subdirectory(third_party/inipp)
 add_subdirectory(third_party/imgui)
 add_subdirectory(third_party/nativefiledialog)
+add_subdirectory(third_party/libromfs)
 
 set(SOURCE_FILES
     source/views/view.cpp
@@ -58,7 +62,7 @@ set(SOURCE_FILES
     source/main.cpp
 )
 set(INCLUDE_DIRS include ${MPV_INCLUDE_DIRS})
-set(LINK_LIBS fmt json inipp nfd imgui ${MPV_LIBRARIES})
+set(LINK_LIBS fmt json inipp nfd imgui ${MPV_LIBRARIES} ${LIBROMFS_LIBRARY})
 
 if(WIN32)
     configure_file(${PROJECT_SOURCE_DIR}/resources/win32/app.rc.in ${PROJECT_BINARY_DIR}/app.rc @ONLY)

@@ -156,6 +156,7 @@ void Window::initGLFW(const char* title) {
     std::cout << "Failed to create window!" << std::endl;
     std::abort();
   }
+  glfwSetWindowSizeLimits(window, 640, 480, GLFW_DONT_CARE, GLFW_DONT_CARE);
   glfwSetWindowPos(window, (mode->width - width) / 2, (mode->height - height) / 2);
 
   glfwSetWindowUserPointer(window, this);
