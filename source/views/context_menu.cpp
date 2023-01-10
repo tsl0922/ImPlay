@@ -187,12 +187,14 @@ void ContextMenu::draw() {
     if (ImGui::BeginMenuEx("Open", ICON_FA_FOLDER_OPEN)) {
       if (ImGui::MenuItemEx("Open Files..", ICON_FA_FILE))
         mpv->commandv("script-message-to", "implay", "open", nullptr);
+      if (ImGui::MenuItemEx("Open Folder..", ICON_FA_FOLDER_PLUS))
+        mpv->commandv("script-message-to", "implay", "open-folder", nullptr);
       if (ImGui::MenuItemEx("Open URL From Clipboard", ICON_FA_CLIPBOARD))
         mpv->commandv("script-message-to", "implay", "open-clipboard", nullptr);
       ImGui::Separator();
-      if (ImGui::MenuItemEx("Open DVD/Blu-ray Folder", ICON_FA_FOLDER_OPEN))
+      if (ImGui::MenuItemEx("Open DVD/Blu-ray Folder..", ICON_FA_FOLDER_OPEN))
         mpv->commandv("script-message-to", "implay", "open-disk", nullptr);
-      if (ImGui::MenuItemEx("Open DVD/Blu-ray ISO Image", ICON_FA_COMPACT_DISC))
+      if (ImGui::MenuItemEx("Open DVD/Blu-ray ISO Image..", ICON_FA_COMPACT_DISC))
         mpv->commandv("script-message-to", "implay", "open-iso", nullptr);
       ImGui::EndMenu();
     }
@@ -269,7 +271,7 @@ void ContextMenu::drawPlaylist() {
     ImGui::Separator();
     if (ImGui::MenuItemEx("Add Files..", ICON_FA_FILE_UPLOAD))
       mpv->commandv("script-message-to", "implay", "playlist-add-files", nullptr);
-    if (ImGui::MenuItemEx("Add Folder", ICON_FA_FOLDER_PLUS))
+    if (ImGui::MenuItemEx("Add Folder..", ICON_FA_FOLDER_PLUS))
       mpv->commandv("script-message-to", "implay", "playlist-add-folder", nullptr);
     ImGui::Separator();
     if (ImGui::MenuItem("Clear")) mpv->command("playlist-clear");

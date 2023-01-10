@@ -16,6 +16,7 @@ ImPlay aims to be mpv compatible, which means almost all mpv features from the [
   - [On Screen Controler](https://mpv.io/manual/stable/#on-screen-controller) (OSC)
     - Compatible with popular OSC scripts: [mpv-osc-modern](https://github.com/maoiscat/mpv-osc-modern), [thumbfast](https://github.com/po5/thumbfast)
   - Take Video Screenshot
+  - Used as Image Viewer
 - Graphical User Interface
   - Context Menu with most commonly used commands
   - Command Palette to quickly search commands and keys

@@ -51,7 +51,18 @@ void Command::execute(int n_args, const char **args_) {
   if (n_args == 0) return;
 
   static std::map<std::string, std::function<void(int, const char **)>> commands = {
-      {"open", [&](int n, const char **args) { open(); }},
+      {"open",
+       [&](int n, const char **args) {
+         openMediaFiles([&](std::u8string path, int i) {
+           mpv->commandv("loadfile", path.c_str(), i > 0 ? "append-play" : "replace", nullptr);
+         });
+       }},
+      {"open-folder",
+       [&](int n, const char **args) {
+         openMediaFolder([&](std::u8string path, int i) {
+           mpv->commandv("loadfile", path.c_str(), i > 0 ? "append-play" : "replace", nullptr);
+         });
+       }},
       {"open-disk", [&](int n, const char **args) { openDisk(); }},
       {"open-iso", [&](int n, const char **args) { openIso(); }},
       {"open-clipboard", [&](int n, const char **args) { openClipboard(); }},
@@ -60,8 +71,15 @@ void Command::execute(int n_args, const char **args_) {
        [&](int n, const char **args) {
          if (n > 0) mpv->loadConfig(args[0]);
        }},
-      {"playlist-add-files", [&](int n, const char **args) { playlistAddFiles(); }},
-      {"playlist-add-folder", [&](int n, const char **args) { playlistAddFolder(); }},
+      {"playlist-add-files",
+       [&](int n, const char **args) {
+         openMediaFiles([&](std::u8string path, int i) { mpv->commandv("loadfile", path.c_str(), "append", nullptr); });
+       }},
+      {"playlist-add-folder",
+       [&](int n, const char **args) {
+         openMediaFolder(
+             [&](std::u8string path, int i) { mpv->commandv("loadfile", path.c_str(), "append", nullptr); });
+       }},
       {"about", [&](int n, const char **args) { about->show(); }},
       {"settings", [&](int n, const char **args) { settings->show(); }},
       {"metrics", [&](int n, const char **args) { debug->show(); }},
@@ -77,13 +95,25 @@ void Command::execute(int n_args, const char **args_) {
   if (it != commands.end()) it->second(n_args - 1, args_ + 1);
 }
 
-void Command::open() {
+void Command::openMediaFiles(std::function<void(std::u8string, int)> callback) {
   openFiles(
       {
           {"Videos Files", fmt::format("{}", fmt::join(videoTypes, ",")).c_str()},
           {"Audio Files", fmt::format("{}", fmt::join(audioTypes, ",")).c_str()},
+          {"Image Files", fmt::format("{}", fmt::join(imageTypes, ",")).c_str()},
       },
-      [&](nfdu8char_t *path, int i) { mpv->commandv("loadfile", path, i > 0 ? "append-play" : "replace", nullptr); });
+      [&](nfdu8char_t *path, int i) { callback(reinterpret_cast<const char8_t *>(path), i); });
+}
+
+void Command::openMediaFolder(std::function<void(std::u8string, int)> callback) {
+  openFolder([&](nfdu8char_t *path) {
+    auto fp = std::filesystem::path(reinterpret_cast<char8_t *>(path));
+    int i = 0;
+    for (const auto &entry : std::filesystem::recursive_directory_iterator(fp)) {
+      if (isMediaType(entry.path().extension().string())) callback(entry.path().u8string(), i);
+      i++;
+    }
+  });
 }
 
 void Command::openDisk() {
@@ -117,25 +147,6 @@ void Command::openClipboard() {
     mpv->commandv("loadfile", content, nullptr);
     mpv->commandv("show-text", content, nullptr);
   }
-}
-
-void Command::playlistAddFiles() {
-  openFiles(
-      {
-          {"Videos Files", fmt::format("{}", fmt::join(videoTypes, ",")).c_str()},
-          {"Audio Files", fmt::format("{}", fmt::join(audioTypes, ",")).c_str()},
-      },
-      [&](nfdu8char_t *path, int i) { mpv->commandv("loadfile", path, "append", nullptr); });
-}
-
-void Command::playlistAddFolder() {
-  openFolder([&](nfdu8char_t *path) {
-    auto fp = std::filesystem::path(reinterpret_cast<char8_t *>(path));
-    for (const auto &entry : std::filesystem::recursive_directory_iterator(fp)) {
-      if (isMediaType(entry.path().extension().string()))
-        mpv->commandv("loadfile", entry.path().u8string().c_str(), "append", nullptr);
-    }
-  });
 }
 
 void Command::openDvd(const char *path) {
@@ -236,6 +247,7 @@ bool Command::isMediaType(std::string ext) {
   if (ext[0] == '.') ext = ext.substr(1);
   if (std::find(videoTypes.begin(), videoTypes.end(), ext) != videoTypes.end()) return true;
   if (std::find(audioTypes.begin(), audioTypes.end(), ext) != audioTypes.end()) return true;
+  if (std::find(imageTypes.begin(), imageTypes.end(), ext) != imageTypes.end()) return true;
   return false;
 }
 }  // namespace ImPlay

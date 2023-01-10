@@ -21,14 +21,14 @@ class Command : public Views::View {
   void execute(int n_args, const char **args_);
 
  private:
-  void open();
+  void openMediaFiles(std::function<void(std::u8string, int)> callback);
+  void openMediaFolder(std::function<void(std::u8string, int)> callback);
+
   void openDisk();
   void openIso();
   void openClipboard();
-  void loadSubtitles();
 
-  void playlistAddFiles();
-  void playlistAddFolder();
+  void loadSubtitles();
 
   void openDvd(const char *path);
   void openBluray(const char *path);
@@ -61,6 +61,7 @@ class Command : public Views::View {
       "adt", "mpa",  "m1a",  "m2a",  "mp1", "mp2",    "mp3",   "m4a",     "aac",  "flac",   "oga",     "ogg", "opus",
       "spx", "mka",  "weba", "wma",  "f4a", "ra",     "ram",   "3ga",     "3ga2", "ay",     "gbs",     "gym", "hes",
       "kss", "nsf",  "nsfe", "sap",  "spc", "vgm",    "vgz",   "m3u",     "m3u8", "pls",    "cue"};
+  const std::vector<std::string> imageTypes = {"jpg", "bmp", "png", "gif", "webp"};
   const std::vector<std::string> subtitleTypes = {"srt",  "ass", "idx", "sub", "sup",
                                                   "ttxt", "txt", "ssa", "smi", "mks"};
 };
