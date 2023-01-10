@@ -213,11 +213,12 @@ void Debug::drawProperties(const char* title, const char* key) {
   ImGui::PushItemWidth(-1);
   ImGui::InputText("Filter", buf, IM_ARRAYSIZE(buf));
   ImGui::PopItemWidth();
+  auto posY = ImGui::GetCursorScreenPos().y;
   if (format > 0 && ImGui::BeginListBox(key, ImVec2(-FLT_MIN, -FLT_MIN))) {
     for (int i = 0; i < node.u.list->num; i++) {
       auto item = node.u.list->values[i];
       if (buf[0] != '\0' && !strstr(item.u.string, buf)) continue;
-      if (i > 0 && !ImGui::IsItemVisible()) {
+      if (ImGui::GetCursorScreenPos().y > posY + ImGui::GetStyle().FramePadding.y && !ImGui::IsItemVisible()) {
         ImGui::BulletText("%s", item.u.string);
         continue;
       }
