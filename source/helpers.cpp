@@ -54,6 +54,11 @@ void OptionParser::parse(int argc, char** argv) {
   }
 }
 
+bool OptionParser::check(std::string key, std::string value) {
+  auto it = options.find(key);
+  return it != options.end() && it->second == value;
+}
+
 void marker(const char* desc) {
   ImGui::TextDisabled("(?)");
   if (ImGui::IsItemHovered(ImGuiHoveredFlags_DelayShort)) {

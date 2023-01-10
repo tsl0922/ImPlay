@@ -11,6 +11,7 @@ struct OptionParser {
   std::vector<std::string> paths;
 
   void parse(int argc, char** argv);
+  bool check(std::string key, std::string value);
 };
 
 void marker(const char* desc);

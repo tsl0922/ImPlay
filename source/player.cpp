@@ -29,9 +29,7 @@ bool Player::init(Helpers::OptionParser& parser) {
   mpv->option("screenshot-directory", "~~desktop/");
   if (!config->mpvConfig) mpv->option("config-dir", Helpers::getDataDir());
 
-  for (const auto& option : parser.options) {
-    auto key = option.first;
-    auto value = option.second;
+  for (const auto& [key, value] : parser.options) {
     if (int err = mpv->option(key.c_str(), value.c_str()); err < 0) {
       fmt::print(fg(fmt::color::red), "mpv: {} [{}={}]\n", mpv_error_string(err), key, value);
       return false;

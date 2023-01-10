@@ -24,9 +24,7 @@ static int run_headless(ImPlay::Helpers::OptionParser& parser) {
   mpv_handle* ctx = mpv_create();
   if (!ctx) throw std::runtime_error("could not create mpv handle");
 
-  for (const auto& option : parser.options) {
-    auto key = option.first;
-    auto value = option.second;
+  for (const auto& [key, value] : parser.options) {
     if (int err = mpv_set_option_string(ctx, key.c_str(), value.c_str()); err < 0) {
       fmt::print(fg(fmt::color::red), "mpv: {} [{}={}]\n", mpv_error_string(err), key, value);
       return 1;
@@ -68,7 +66,8 @@ int main(int argc, char* argv[]) {
     return 0;
   }
 
-  if (parser.options.contains("o")) return run_headless(parser);
+  if (parser.options.contains("o") || parser.check("video", "no") || parser.check("vid", "no"))
+    return run_headless(parser);
 
   ImPlay::Window window;
   return window.run(parser);
