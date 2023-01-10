@@ -162,7 +162,7 @@ void Mpv::initRender() {
   std::thread(&Mpv::renderLoop, this).detach();
 }
 
-std::vector<Mpv::TrackItem> Mpv::trackList(const char *type) {
+std::vector<Mpv::TrackItem> Mpv::trackList() {
   auto node = property<mpv_node, MPV_FORMAT_NODE>("track-list");
   std::vector<Mpv::TrackItem> tracks;
   for (int i = 0; i < node.u.list->num; i++) {

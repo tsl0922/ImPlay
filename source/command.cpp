@@ -5,6 +5,7 @@
 #include <imgui.h>
 #include <imgui_internal.h>
 #include "command.h"
+#include "helpers.h"
 
 namespace ImPlay {
 Command::Command(Config *config, GLFWwindow *window, Mpv *mpv) : View() {
@@ -46,8 +47,8 @@ void Command::draw() {
   commandPalette->draw();
 }
 
-void Command::execute(int num_args, const char **args) {
-  if (num_args == 0) return;
+void Command::execute(int n_args, const char **args_) {
+  if (n_args == 0) return;
 
   static std::map<std::string, std::function<void(int, const char **)>> commands = {
       {"open", [&](int n, const char **args) { open(); }},
@@ -64,16 +65,16 @@ void Command::execute(int num_args, const char **args) {
       {"about", [&](int n, const char **args) { about->show(); }},
       {"settings", [&](int n, const char **args) { settings->show(); }},
       {"metrics", [&](int n, const char **args) { debug->show(); }},
-      {"command-palette", [&](int n, const char **args) { openCommandPalette(n > 0 ? args[0] : "bindings"); }},
+      {"command-palette", [&](int n, const char **args) { openCommandPalette(n, args); }},
       {"theme",
        [&](int n, const char **args) {
          if (n > 0) setTheme(args[0]);
        }},
   };
 
-  const char *cmd = args[0];
+  const char *cmd = args_[0];
   auto it = commands.find(cmd);
-  if (it != commands.end()) it->second(num_args - 1, args + 1);
+  if (it != commands.end()) it->second(n_args - 1, args_ + 1);
 }
 
 void Command::open() {
@@ -147,9 +148,11 @@ void Command::openBluray(const char *path) {
   mpv->commandv("loadfile", "bd://", nullptr);
 }
 
-void Command::openCommandPalette(const char *type) {
+void Command::openCommandPalette(int n, const char **args) {
   std::vector<Views::CommandPalette::CommandItem> items;
-  if (strcmp(type, "bindings") == 0) {
+  std::string source = "bindings";
+  if (n > 0) source = args[0];
+  if (source == "bindings") {
     auto bindings = mpv->bindingList();
     for (auto &item : bindings)
       items.push_back({
@@ -158,7 +161,7 @@ void Command::openCommandPalette(const char *type) {
           item.key,
           [=, this]() { mpv->command(item.cmd); },
       });
-  } else if (strcmp(type, "playlist") == 0) {
+  } else if (source == "playlist") {
     auto playlist = mpv->playlist();
     for (auto &item : playlist) {
       std::string title = item.title;
@@ -171,7 +174,7 @@ void Command::openCommandPalette(const char *type) {
           [=, this]() { mpv->property<int64_t, MPV_FORMAT_INT64>("playlist-pos", item.id); },
       });
     }
-  } else if (strcmp(type, "chapters") == 0) {
+  } else if (source == "chapters") {
     auto chapters = mpv->chapterList();
     for (auto &item : chapters) {
       auto title = item.title.empty() ? fmt::format("Chapter {}", item.id + 1) : item.title;
@@ -181,6 +184,27 @@ void Command::openCommandPalette(const char *type) {
           "",
           time,
           [=, this]() { mpv->commandv("seek", std::to_string(item.time).c_str(), "absolute", nullptr); },
+      });
+    }
+  } else if (source == "tracks") {
+    const char *type = n > 1 ? args[1] : "";
+    auto tracks = mpv->trackList();
+    for (auto &item : tracks) {
+      if (type[0] != '\0' && item.type != type) continue;
+      auto title = item.title.empty() ? fmt::format("Track {}", item.id) : item.title;
+      if (!item.lang.empty()) title += fmt::format(" [{}]", item.lang);
+      items.push_back({
+          title,
+          "",
+          Helpers::toupper(item.type),
+          [=, this]() {
+            if (item.type == "audio")
+              mpv->property<int64_t, MPV_FORMAT_INT64>("aid", item.id);
+            else if (item.type == "video")
+              mpv->property<int64_t, MPV_FORMAT_INT64>("vid", item.id);
+            else if (item.type == "sub")
+              mpv->property<int64_t, MPV_FORMAT_INT64>("sid", item.id);
+          },
       });
     }
   }

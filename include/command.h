@@ -18,7 +18,7 @@ class Command : public Views::View {
 
   void init();
   void draw() override;
-  void execute(int num_args, const char **args);
+  void execute(int n_args, const char **args_);
 
  private:
   void open();
@@ -33,7 +33,7 @@ class Command : public Views::View {
   void openDvd(const char *path);
   void openBluray(const char *path);
 
-  void openCommandPalette(const char *type);
+  void openCommandPalette(int n, const char **args);
 
   void setTheme(const char *theme);
   bool isMediaType(std::string ext);

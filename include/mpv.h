@@ -95,7 +95,7 @@ class Mpv {
     std::string description;
   };
 
-  std::vector<TrackItem> trackList(const char *type);
+  std::vector<TrackItem> trackList();
   std::vector<PlayItem> playlist();
   std::vector<ChapterItem> chapterList();
   std::vector<BindingItem> bindingList();

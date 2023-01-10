@@ -135,6 +135,8 @@ void ContextMenu::draw() {
       if (ImGui::MenuItem("Scale -0.1", "G")) mpv->command("add sub-scale -0.1");
       ImGui::EndMenu();
     }
+    if (ImGui::MenuItemEx("Tracks", ICON_FA_LIST))
+      mpv->commandv("script-message-to", "implay", "command-palette", "tracks", nullptr);
     ImGui::Separator();
     if (ImGui::MenuItemEx("Fullscreen", ICON_FA_EXPAND, "f")) mpv->command("cycle fullscreen");
     if (ImGui::MenuItemEx("Always Ontop", ICON_FA_ARROW_UP, "T")) mpv->command("cycle ontop");
@@ -215,7 +217,7 @@ void ContextMenu::drawAudioDeviceList() {
 }
 
 void ContextMenu::drawTracklist(const char *type, const char *prop) {
-  auto tracklist = mpv->trackList(type);
+  auto tracklist = mpv->trackList();
   std::vector<Mpv::TrackItem> list;
   std::copy_if(tracklist.begin(), tracklist.end(), std::back_inserter(list),
                [type](const auto &track) { return track.type == type; });
@@ -238,14 +240,20 @@ void ContextMenu::drawChapterlist() {
   if (ImGui::BeginMenuEx("Chapters", ICON_FA_LIST, !chapterlist.empty())) {
     if (ImGui::MenuItemEx("Previous", ICON_FA_ARROW_LEFT)) mpv->command("add chapter -1");
     if (ImGui::MenuItemEx("Next", ICON_FA_ARROW_RIGHT)) mpv->command("add chapter 1");
-    if (ImGui::MenuItem("Filter")) mpv->commandv("script-message-to", "implay", "command-palette", "chapters", nullptr);
     ImGui::Separator();
+    int i = 0;
     for (auto &chapter : chapterlist) {
+      if (i == 10) break;
       auto title = chapter.title.empty() ? fmt::format("Chapter {}", chapter.id + 1) : chapter.title;
       title = fmt::format("{} [{:%H:%M:%S}]", title, std::chrono::duration<int>((int)chapter.time));
       if (ImGui::MenuItemEx(title.c_str(), nullptr, nullptr, chapter.id == pos)) {
         mpv->commandv("seek", std::to_string(chapter.time).c_str(), "absolute", nullptr);
       }
+      i++;
+    }
+    if (chapterlist.size() > 10) {
+      if (ImGui::MenuItem(fmt::format("All.. ({})", chapterlist.size()).c_str()))
+        mpv->commandv("script-message-to", "implay", "command-palette", "chapters", nullptr);
     }
     ImGui::EndMenu();
   }
