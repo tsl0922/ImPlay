@@ -40,6 +40,7 @@ jobs:
           tag: ${{ env.TAG_ANME }}
           force_push_tag: true
       - uses: ncipollo/release-action@v1
+        if: ${{ github.ref == 'refs/heads/main' }}
         with:
           commit: ${{ github.sha }}
           tag: ${{ env.TAG_ANME }}
@@ -68,6 +69,7 @@ jobs:
           name: ImPlay-macos
           path: build/ImPlay-*.dmg
       - uses: ncipollo/release-action@v1
+        if: ${{ github.ref == 'refs/heads/main' }}
         with:
           commit: ${{ github.sha }}
           tag: ${{ env.TAG_ANME }}
@@ -100,6 +102,7 @@ jobs:
           name: ImPlay-win
           path: build/ImPlay-*.msi
       - uses: ncipollo/release-action@v1
+        if: ${{ github.ref == 'refs/heads/main' }}
         with:
           commit: ${{ github.sha }}
           tag: ${{ env.TAG_ANME }}
