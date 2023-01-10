@@ -5,16 +5,18 @@
 #include <fmt/format.h>
 #include "views/debug.h"
 #include "mpv.h"
+#include "helpers.h"
 
 namespace ImPlay::Views {
-Debug::Debug(Mpv* mpv) : View() {
+Debug::Debug(Config* config, Mpv* mpv) : View() {
+  this->config = config;
   this->mpv = mpv;
   console = new Console(mpv);
 }
 
 Debug::~Debug() { delete console; }
 
-void Debug::init() { console->init("v"); }
+void Debug::init() { console->init(config->logLevel.c_str(), config->logLimit); }
 
 void Debug::show() {
   m_open = true;
@@ -354,7 +356,9 @@ static void Strtrim(char* s) {
   *str_end = 0;
 }
 
-void Debug::Console::init(const char* level) {
+void Debug::Console::init(const char* level, int limit) {
+  LogLevel = level;
+  LogLimit = limit;
   mpv->requestLog(level, [this](const char* prefix, const char* level, const char* text) {
     AddLog(level, "[%s] %s", prefix, text);
   });
@@ -417,14 +421,12 @@ void Debug::Console::draw() {
   ImGui::TextWrapped("Enter 'HELP' for help, 'TAB' for completion, 'Up/Down' for history.");
 
   if (ImGui::BeginPopup("Log Level")) {
-    std::map<int, std::string> levels = {
-        {0, "fatal"}, {1, "error"}, {2, "warn"}, {3, "info"}, {4, "v"}, {5, "debug"}, {6, "trace"}, {7, "no"},
-    };
-    static int logLevel = 4;
-    for (auto& level : levels) {
-      if (ImGui::MenuItem(level.second.c_str(), nullptr, logLevel == level.first)) {
-        logLevel = level.first;
-        init(level.second.c_str());
+    const char* items[] = {"fatal", "error", "warn", "info", "v", "debug", "trace", "no"};
+    static std::string level = LogLevel;
+    for (int i = 0; i < IM_ARRAYSIZE(items); i++) {
+      if (ImGui::MenuItem(items[i], nullptr, level == items[i])) {
+        level = items[i];
+        init(items[i], LogLimit);
       }
     }
     ImGui::EndPopup();
@@ -438,6 +440,10 @@ void Debug::Console::draw() {
   ImGui::Text("(%d/%d)", Items.Size, LogLimit);
   ImGui::SameLine();
   if (ImGui::Button("Level")) ImGui::OpenPopup("Log Level");
+  ImGui::SameLine();
+  Helpers::marker(
+      "The log level and limit changed here won't be saved.\n"
+      "Update log settings in Help-Settings to control startup config.");
   ImGui::Separator();
 
   // Reserve enough left-over height for 1 separator + 1 input text

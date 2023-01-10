@@ -54,6 +54,17 @@ void OptionParser::parse(int argc, char** argv) {
   }
 }
 
+void marker(const char* desc) {
+  ImGui::TextDisabled("(?)");
+  if (ImGui::IsItemHovered(ImGuiHoveredFlags_DelayShort)) {
+    ImGui::BeginTooltip();
+    ImGui::PushTextWrapPos(ImGui::GetFontSize() * 35.0f);
+    ImGui::TextUnformatted(desc);
+    ImGui::PopTextWrapPos();
+    ImGui::EndTooltip();
+  }
+}
+
 bool loadTexture(const char* path, ImTextureID* out_texture, int* out_width, int* out_height) {
   int width, height;
   auto icon = romfs::get(path);

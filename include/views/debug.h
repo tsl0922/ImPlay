@@ -5,11 +5,12 @@
 #include <imgui.h>
 #include "view.h"
 #include "mpv.h"
+#include "config.h"
 
 namespace ImPlay::Views {
 class Debug : public View {
  public:
-  explicit Debug(Mpv *mpv);
+  Debug(Config *config, Mpv *mpv);
   ~Debug();
 
   void init();
@@ -21,7 +22,7 @@ class Debug : public View {
     explicit Console(Mpv *mpv);
     ~Console();
 
-    void init(const char *level);
+    void init(const char *level, int limit);
     void draw();
 
     void ClearLog();
@@ -49,6 +50,7 @@ class Debug : public View {
     bool AutoScroll = true;
     bool ScrollToBottom = false;
     bool CommandInited = false;
+    std::string LogLevel = "v";
     int LogLimit = 500;
   };
 
@@ -59,6 +61,7 @@ class Debug : public View {
   void drawProperties(const char *title, const char *key);
   void drawPropNode(const char *name, mpv_node &node, int depth = 0);
 
+  Config *config;
   Mpv *mpv = nullptr;
   Console *console = nullptr;
   std::string m_node = "Console";

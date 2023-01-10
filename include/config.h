@@ -31,6 +31,8 @@ class Config {
   int glyphRange = GlyphRange_Default;
   bool mpvConfig = false;
   bool watchLater = false;
+  std::string logLevel = "no";
+  int logLimit = 500;
 
  private:
   inipp::Ini<char> ini;

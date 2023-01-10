@@ -14,7 +14,7 @@ Command::Command(Config *config, GLFWwindow *window, Mpv *mpv) : View() {
   this->mpv = mpv;
 
   about = new Views::About();
-  debug = new Views::Debug(mpv);
+  debug = new Views::Debug(config, mpv);
   settings = new Views::Settings(config, mpv);
   contextMenu = new Views::ContextMenu(config, mpv);
   commandPalette = new Views::CommandPalette(mpv);

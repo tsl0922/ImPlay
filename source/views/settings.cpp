@@ -38,10 +38,31 @@ void Settings::drawGeneralTab() {
       config->save();
     }
     ImGui::SameLine();
-    helpMarker("ImPlay will use it's own config dir for libmpv by default.");
+    Helpers::marker("ImPlay will use it's own config dir for libmpv by default.");
     if (ImGui::Checkbox("Remember playback progress on exit", &config->watchLater)) config->save();
     ImGui::SameLine();
-    helpMarker("Exit mpv with the quit-watch-later command.");
+    Helpers::marker("Exit mpv with the quit-watch-later command.");
+    ImGui::Unindent();
+    ImGui::Text("Debug");
+    ImGui::Indent();
+    const char *items[] = {"fatal", "error", "warn", "info", "v", "debug", "trace", "no"};
+    static int current;
+    for (int i = 0; i < IM_ARRAYSIZE(items); i++) {
+      if (strcmp(items[i], config->logLevel.c_str()) == 0) current = i;
+    }
+    if (ImGui::Combo("Log Level*", &current, items, IM_ARRAYSIZE(items))) {
+      config->logLevel = items[current];
+      config->save();
+    }
+    ImGui::SameLine();
+    Helpers::marker(
+        "Controls the log level used on startup.\n"
+        "It can be changed later in debug window, but won't be saved.");
+    if (ImGui::InputInt("Log Limit*", &config->logLimit, 0)) config->save();
+    ImGui::SameLine();
+    Helpers::marker(
+        "Controls the log limit used on startup.\n"
+        "It can be changed later in debug window, but won't be saved.");
     ImGui::Unindent();
     ImGui::EndTabItem();
   }
@@ -56,7 +77,7 @@ void Settings::drawInterfaceTab() {
     }
     ImGui::Text("Theme");
     ImGui::SameLine();
-    helpMarker("Color theme of the interface.");
+    Helpers::marker("Color theme of the interface.");
     ImGui::Indent();
     if (ImGui::Combo("##Theme", &t_current, t_items, IM_ARRAYSIZE(t_items))) {
       config->Theme = Helpers::tolower(t_items[t_current]);
@@ -90,7 +111,7 @@ void Settings::drawFontTab() {
   if (ImGui::BeginTabItem("Font")) {
     ImGui::Text("Path*");
     ImGui::SameLine();
-    helpMarker("An embedded font will be used if not specified.");
+    Helpers::marker("An embedded font will be used if not specified.");
     ImGui::Indent();
     if (ImGui::InputText("##Path", fontPath, IM_ARRAYSIZE(fontPath))) config->FontPath = fontPath;
     ImGui::SameLine();
@@ -107,7 +128,7 @@ void Settings::drawFontTab() {
     ImGui::Unindent();
     ImGui::Text("Glyph Ranges*");
     ImGui::SameLine();
-    helpMarker("Required for displaying non-English characters on interface.");
+    Helpers::marker("Required for displaying non-English characters on interface.");
     ImGui::Indent();
     ImGui::CheckboxFlags("Chinese", &config->glyphRange, Config::GlyphRange_Chinese);
     ImGui::SameLine();
@@ -121,17 +142,6 @@ void Settings::drawFontTab() {
     ImGui::CheckboxFlags("Vietnamese", &config->glyphRange, Config::GlyphRange_Vietnamese);
     ImGui::Unindent();
     ImGui::EndTabItem();
-  }
-}
-
-void Settings::helpMarker(const char *desc) {
-  ImGui::TextDisabled("(?)");
-  if (ImGui::IsItemHovered(ImGuiHoveredFlags_DelayShort)) {
-    ImGui::BeginTooltip();
-    ImGui::PushTextWrapPos(ImGui::GetFontSize() * 35.0f);
-    ImGui::TextUnformatted(desc);
-    ImGui::PopTextWrapPos();
-    ImGui::EndTooltip();
   }
 }
 }  // namespace ImPlay::Views
