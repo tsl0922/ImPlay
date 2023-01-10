@@ -15,7 +15,6 @@
 #define GLFW_EXPOSE_NATIVE_COCOA
 #else
 #define GLFW_EXPOSE_NATIVE_X11
-#define GLFW_EXPOSE_NATIVE_WAYLAND
 #endif
 #include <GLFW/glfw3native.h>
 #include <iostream>
@@ -32,8 +31,13 @@ Window::Window() {
 
   initGLFW(title);
   initImGui();
-
+#ifdef _WIN32
+  HWND hwnd = glfwGetWin32Window(window);
+  int64_t wid = config->mpvWid ? static_cast<uint32_t>((intptr_t)hwnd) : 0;
+  mpv = new Mpv(window, wid);
+#else
   mpv = new Mpv(window);
+#endif
   player = new Player(config, window, mpv, title);
 }
 
