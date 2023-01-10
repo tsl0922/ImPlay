@@ -33,7 +33,9 @@ class Command : public Views::View {
   void openDvd(const char *path);
   void openBluray(const char *path);
 
-  void setTheme(const char* theme);
+  void openCommandPalette(const char *type);
+
+  void setTheme(const char *theme);
   bool isMediaType(std::string ext);
 
   Config *config = nullptr;

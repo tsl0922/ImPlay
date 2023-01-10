@@ -2,6 +2,7 @@
 #include <stdexcept>
 #include <string>
 #include <thread>
+#include <filesystem>
 #include <cstring>
 #include <cstdarg>
 #ifdef _WIN32
@@ -201,7 +202,8 @@ std::vector<Mpv::PlayItem> Mpv::playlist() {
       if (strcmp(key, "title") == 0) {
         t.title = value.u.string;
       } else if (strcmp(key, "filename") == 0) {
-        t.filename = value.u.string;
+        t.path = value.u.string;
+        t.filename = std::filesystem::path(reinterpret_cast<char8_t *>(t.path.data())).filename().string();
       }
     }
     playlist.emplace_back(t);

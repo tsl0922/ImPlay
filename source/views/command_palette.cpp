@@ -1,13 +1,16 @@
 #include <imgui.h>
+#define IMGUI_DEFINE_MATH_OPERATORS
 #include <imgui_internal.h>
 #include <algorithm>
 #include <cstring>
 #include "views/command_palette.h"
+#include "helpers.h"
 
 namespace ImPlay::Views {
 CommandPalette::CommandPalette(Mpv* mpv) : View() { this->mpv = mpv; }
 
 void CommandPalette::draw() {
+  if (items_.empty()) return;
   if (m_open) {
     ImGui::OpenPopup("##command_palette");
     m_open = false;
@@ -66,44 +69,45 @@ void CommandPalette::drawInput() {
 }
 
 void CommandPalette::drawList(float width) {
-  auto lWidth = width * 0.75f;
-  auto rWidth = width * 0.25f;
-  if (rWidth < 200.0f) rWidth = 200.0f;
-
   ImGui::BeginChild("##command_matches", ImVec2(0, 0), false, ImGuiWindowFlags_NavFlattened);
+  long maxWidth = 0;
   for (const auto& match : matches) {
-    std::string title = match.comment;
-    if (title.empty()) title = match.command;
-    ImGui::SetNextItemWidth(lWidth);
-    int charLimit = (int)(lWidth / ImGui::GetFontSize());
-    title = title.substr(0, charLimit);
-    if (title.size() == charLimit) title += "...";
+    auto width = ImGui::CalcTextSize(match.label.c_str()).x;
+    if (width > maxWidth) maxWidth = width;
+  }
+  ImGuiWindow* window = ImGui::GetCurrentWindow();
+  ImGuiStyle style = ImGui::GetStyle();
+  for (const auto& match : matches) {
+    std::string title = match.title;
+    if (title.empty()) title = match.tooltip;
+    ImVec2 contentAvail = ImGui::GetContentRegionAvail();
+    long lWidth = contentAvail.x;
+    auto rWidth = maxWidth + 2 * style.ItemSpacing.x + 2 * style.ItemInnerSpacing.x;
+    if (rWidth > 0) lWidth -= rWidth;
 
     ImGui::PushID(&match);
-    if (ImGui::Selectable("", false, ImGuiSelectableFlags_DontClosePopups)) mpv->command(match.command.c_str());
-    if (ImGui::IsItemHovered(ImGuiHoveredFlags_DelayNormal)) ImGui::SetTooltip("%s", match.command.c_str());
-    ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(0, 6.0f));
-
-    if (!match.input.empty()) {
-      size_t pos = 0;
-      size_t len = match.input.length();
-      while ((pos = title.find(match.input)) != std::string::npos) {
-        ImGui::SameLine();
-        ImGui::Text("%s", title.substr(0, pos).c_str());
-        ImGui::SameLine();
-        ImGui::TextColored(ImVec4(0.2f, 0.6f, 1.0f, 1.0f), "%s", match.input.c_str());
-        title.erase(0, pos + len);
-      }
-    }
+    ImGui::SetNextItemWidth(lWidth);
+    if (ImGui::Selectable("", false, ImGuiSelectableFlags_DontClosePopups)) match.callback();
+    if (!match.tooltip.empty() && ImGui::IsItemHovered(ImGuiHoveredFlags_DelayNormal))
+      ImGui::SetTooltip("%s", match.tooltip.c_str());
     ImGui::SameLine();
-    ImGui::Text("%s", title.c_str());
 
-    ImGui::SameLine(ImGui::GetWindowWidth() - rWidth);
-    ImGui::BeginDisabled();
-    ImGui::Button(match.key.c_str());
-    ImGui::EndDisabled();
+    ImVec2 textSize = ImGui::CalcTextSize(title.c_str());
+    ImVec2 min = ImGui::GetCursorScreenPos();
+    ImVec2 max = min + ImVec2(contentAvail.x - rWidth - 2 * style.ItemSpacing.x, textSize.y);
+    ImRect textRect(min, max);
+    ImGui::ItemSize(textRect);
+    if (ImGui::ItemAdd(textRect, window->GetID(title.data(), title.data() + title.size())))
+      ImGui::RenderTextEllipsis(ImGui::GetWindowDrawList(), min, max, max.x, max.x, title.data(),
+                                title.data() + title.size(), &textSize);
 
-    ImGui::PopStyleVar();
+    if (!match.label.empty()) {
+      ImGui::SameLine(contentAvail.x - rWidth);
+      ImGui::BeginDisabled();
+      ImGui::Button(match.label.c_str());
+      ImGui::EndDisabled();
+    }
+
     ImGui::PopID();
   }
   if (filtered) {
@@ -116,26 +120,32 @@ void CommandPalette::drawList(float width) {
 void CommandPalette::match(const std::string& input) {
   constexpr static auto MatchCommand = [](const std::string& input, const std::string& text) -> int {
     if (input.empty()) return 1;
-    if (text.starts_with(input)) return 3;
-    if (text.find(input) != std::string::npos) return 2;
+    auto l_text = Helpers::tolower(text);
+    auto l_input = Helpers::tolower(input);
+    if (l_text.starts_with(l_input)) return 3;
+    if (l_text.find(l_input) != std::string::npos) return 2;
     return 0;
   };
 
-  matches.clear();
-  auto bindingList = mpv->bindingList();
-
-  for (auto& binding : bindingList) {
-    if (binding.cmd.empty() || binding.cmd == "ignore") continue;
-    int score = MatchCommand(input, binding.comment) * 2;
-    if (score == 0) score = MatchCommand(input, binding.cmd);
-    if (score > 0) matches.push_back({binding.key, binding.cmd, binding.comment, input, score});
+  if (input.empty()) {
+    matches = items_;
+    return;
   }
-  if (input.empty()) return;
 
-  std::sort(matches.begin(), matches.end(), [](const auto& a, const auto& b) {
-    if (a.score != b.score) return a.score > b.score;
-    if (a.comment != b.comment) return a.comment < b.comment;
-    return a.command < b.command;
+  std::vector<std::pair<CommandItem, int>> result;
+
+  for (const auto& item : items_) {
+    int score = MatchCommand(input, item.title) * 2;
+    if (score == 0) score = MatchCommand(input, item.tooltip);
+    if (score > 0) result.push_back(std::make_pair(item, score));
+  }
+  std::sort(result.begin(), result.end(), [](const auto& a, const auto& b) {
+    if (a.second != b.second) return a.second > b.second;
+    if (a.first.title != b.first.title) return a.first.title < b.first.title;
+    return a.first.tooltip < b.first.tooltip;
   });
+
+  matches.clear();
+  for (const auto& [item, _] : result) matches.push_back(item);
 }
 }  // namespace ImPlay::Views

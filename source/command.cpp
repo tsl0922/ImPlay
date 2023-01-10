@@ -1,6 +1,7 @@
 #include <map>
 #include <filesystem>
 #include <fmt/format.h>
+#include <fmt/chrono.h>
 #include <imgui.h>
 #include <imgui_internal.h>
 #include "command.h"
@@ -63,7 +64,7 @@ void Command::execute(int num_args, const char **args) {
       {"about", [&](int n, const char **args) { about->show(); }},
       {"settings", [&](int n, const char **args) { settings->show(); }},
       {"metrics", [&](int n, const char **args) { debug->show(); }},
-      {"command-palette", [&](int n, const char **args) { commandPalette->show(); }},
+      {"command-palette", [&](int n, const char **args) { openCommandPalette(n > 0 ? args[0] : "bindings"); }},
       {"theme",
        [&](int n, const char **args) {
          if (n > 0) setTheme(args[0]);
@@ -144,6 +145,47 @@ void Command::openDvd(const char *path) {
 void Command::openBluray(const char *path) {
   mpv->property("bluray-device", path);
   mpv->commandv("loadfile", "bd://", nullptr);
+}
+
+void Command::openCommandPalette(const char *type) {
+  std::vector<Views::CommandPalette::CommandItem> items;
+  if (strcmp(type, "bindings") == 0) {
+    auto bindings = mpv->bindingList();
+    for (auto &item : bindings)
+      items.push_back({
+          item.comment,
+          item.cmd,
+          item.key,
+          [=, this]() { mpv->command(item.cmd); },
+      });
+  } else if (strcmp(type, "playlist") == 0) {
+    auto playlist = mpv->playlist();
+    for (auto &item : playlist) {
+      std::string title = item.title;
+      if (title.empty() && !item.filename.empty()) title = item.filename;
+      if (title.empty()) title = fmt::format("Item {}", item.id + 1);
+      items.push_back({
+          title,
+          item.path,
+          "",
+          [=, this]() { mpv->property<int64_t, MPV_FORMAT_INT64>("playlist-pos", item.id); },
+      });
+    }
+  } else if (strcmp(type, "chapters") == 0) {
+    auto chapters = mpv->chapterList();
+    for (auto &item : chapters) {
+      auto title = item.title.empty() ? fmt::format("Chapter {}", item.id + 1) : item.title;
+      auto time = fmt::format("{:%H:%M:%S}", std::chrono::duration<int>((int)item.time));
+      items.push_back({
+          title,
+          "",
+          time,
+          [=, this]() { mpv->commandv("seek", std::to_string(item.time).c_str(), "absolute", nullptr); },
+      });
+    }
+  }
+  commandPalette->items() = items;
+  commandPalette->show();
 }
 
 void Command::setTheme(const char *theme) {

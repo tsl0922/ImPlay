@@ -3,7 +3,6 @@
 #include <fonts/fontawesome.h>
 #include <fmt/format.h>
 #include <fmt/chrono.h>
-#include <filesystem>
 #include "views/context_menu.h"
 #include "helpers.h"
 
@@ -239,6 +238,7 @@ void ContextMenu::drawChapterlist() {
   if (ImGui::BeginMenuEx("Chapters", ICON_FA_LIST, !chapterlist.empty())) {
     if (ImGui::MenuItemEx("Previous", ICON_FA_ARROW_LEFT)) mpv->command("add chapter -1");
     if (ImGui::MenuItemEx("Next", ICON_FA_ARROW_RIGHT)) mpv->command("add chapter 1");
+    if (ImGui::MenuItem("Filter")) mpv->commandv("script-message-to", "implay", "command-palette", "chapters", nullptr);
     ImGui::Separator();
     for (auto &chapter : chapterlist) {
       auto title = chapter.title.empty() ? fmt::format("Chapter {}", chapter.id + 1) : chapter.title;
@@ -268,17 +268,19 @@ void ContextMenu::drawPlaylist() {
     if (ImGui::MenuItem("Shuffle")) mpv->command("playlist-shuffle");
     if (ImGui::MenuItem("Infinite Loop", "L")) mpv->command("cycle-values loop-file inf no");
     ImGui::Separator();
+    int i = 0;
     for (auto &item : playlist) {
-      std::string title;
-      if (!item.title.empty())
-        title = item.title;
-      else if (!item.filename.empty()) {
-        auto filename = reinterpret_cast<char8_t *>(item.filename.data());
-        title = std::filesystem::path(filename).filename().string();
-      }
+      if (i == 10) break;
+      std::string title = item.title;
+      if (title.empty() && !item.filename.empty()) title = item.filename;
       if (title.empty()) title = fmt::format("Item {}", item.id + 1);
       if (ImGui::MenuItemEx(title.c_str(), nullptr, nullptr, item.id == pos))
         mpv->property<int64_t, MPV_FORMAT_INT64>("playlist-pos", item.id);
+      i++;
+    }
+    if (playlist.size() > 10) {
+      if (ImGui::MenuItem(fmt::format("All.. ({})", playlist.size()).c_str()))
+        mpv->commandv("script-message-to", "implay", "command-palette", "playlist", nullptr);
     }
     ImGui::EndMenu();
   }

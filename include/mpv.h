@@ -33,6 +33,7 @@ class Mpv {
   std::atomic_bool &runLoop() { return runLoop_; }
   GLFWwindow *&win() { return window; }
 
+  int command(std::string args) { return mpv_command_string(mpv, args.c_str()); }
   int command(const char *args) { return mpv_command_string(mpv, args); }
   int command(const char *args[]) { return mpv_command(mpv, args); }
   int commandv(const char *arg, ...);
@@ -46,13 +47,13 @@ class Mpv {
     return data;
   }
   template <typename T, mpv_format format>
-  int property(const char *name, T &data) {
+  int property(const char *name, T data) {
     return mpv_set_property(mpv, name, format, static_cast<void *>(&data));
   }
 
   int option(const char *name, const char *data) { return mpv_set_option_string(mpv, name, data); }
   template <typename T, mpv_format format>
-  int option(const char *name, T &data) {
+  int option(const char *name, T data) {
     return mpv_set_option(mpv, name, format, static_cast<void *>(&data));
   }
 
@@ -73,6 +74,7 @@ class Mpv {
   struct PlayItem {
     int64_t id = -1;
     std::string title;
+    std::string path;
     std::string filename;
   };
 
