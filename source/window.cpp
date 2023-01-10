@@ -28,7 +28,13 @@ Window::Window() {
   initGLFW(title);
   initImGui();
 
+#ifdef _WIN32
+  HWND hwnd = glfwGetWin32Window(window);
+  int64_t wid = config.mpvWid ? static_cast<uint32_t>((intptr_t)hwnd) : 0;
+  mpv = new Mpv(wid);
+#else
   mpv = new Mpv();
+#endif
   player = new Player(&config, window, mpv, title);
 }
 

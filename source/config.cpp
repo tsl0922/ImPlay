@@ -25,6 +25,7 @@ void Config::load() {
   inipp::get_value(ini.sections["font"], "size", FontSize);
   inipp::get_value(ini.sections["font"], "glyph-range", glyphRange);
   inipp::get_value(ini.sections["mpv"], "config", mpvConfig);
+  inipp::get_value(ini.sections["mpv"], "wid", mpvWid);
   inipp::get_value(ini.sections["mpv"], "watch-later", watchLater);
   inipp::get_value(ini.sections["debug"], "log-level", logLevel);
   inipp::get_value(ini.sections["debug"], "log-limit", logLimit);
@@ -37,6 +38,7 @@ void Config::save() {
   ini.sections["font"]["size"] = std::to_string(FontSize);
   ini.sections["font"]["glyph-range"] = std::to_string(glyphRange);
   ini.sections["mpv"]["config"] = fmt::format("{}", mpvConfig);
+  ini.sections["mpv"]["wid"] = fmt::format("{}", mpvWid);
   ini.sections["mpv"]["watch-later"] = fmt::format("{}", watchLater);
   ini.sections["debug"]["log-level"] = logLevel;
   ini.sections["debug"]["log-limit"] = std::to_string(logLimit);

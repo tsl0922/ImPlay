@@ -39,6 +39,11 @@ void Settings::drawGeneralTab() {
     }
     ImGui::SameLine();
     Helpers::marker("ImPlay will use it's own config dir for libmpv by default.");
+    if (ImGui::Checkbox("Enable --wid for libmpv* (DO NOT USE)", &config->mpvWid)) config->save();
+    ImGui::SameLine();
+    Helpers::marker(
+        "Experimental, Windows only, still have issues.\n"
+        "This allow using DirectX, Which is usually faster than OpenGL.");
     if (ImGui::Checkbox("Remember playback progress on exit", &config->watchLater)) config->save();
     ImGui::SameLine();
     Helpers::marker("Exit mpv with the quit-watch-later command.");

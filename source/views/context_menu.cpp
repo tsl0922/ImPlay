@@ -21,6 +21,8 @@ void ContextMenu::draw() {
   bool paused = mpv->paused();
   bool playing = mpv->playing();
   if (ImGui::BeginPopup("##context_menu", ImGuiWindowFlags_NoMove)) {
+    if (ImGui::GetIO().AppFocusLost || ImGui::GetWindowViewport()->Flags & ImGuiViewportFlags_Minimized)
+      ImGui::CloseCurrentPopup();
     if (ImGui::MenuItemEx(paused ? "Play" : "Pause", paused ? ICON_FA_PLAY : ICON_FA_PAUSE, "Space", false, playing))
       mpv->command("cycle pause");
     if (ImGui::MenuItemEx("Stop", ICON_FA_STOP, nullptr, false, playing)) mpv->command("stop");

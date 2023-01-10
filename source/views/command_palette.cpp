@@ -27,7 +27,9 @@ void CommandPalette::draw() {
   ImGui::SetNextWindowPos(ImVec2(pos.x + size.x * 0.5f, pos.y + 50.0f), ImGuiCond_Always, ImVec2(0.5f, 0.0f));
 
   if (ImGui::BeginPopup("##command_palette")) {
-    if (ImGui::IsKeyDown(ImGuiKey_Escape)) ImGui::CloseCurrentPopup();
+    if (ImGui::IsKeyDown(ImGuiKey_Escape) || ImGui::GetIO().AppFocusLost ||
+        ImGui::GetWindowViewport()->Flags & ImGuiViewportFlags_Minimized)
+      ImGui::CloseCurrentPopup();
 
     if (justOpened) {
       focusInput = true;
