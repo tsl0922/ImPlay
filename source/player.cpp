@@ -54,8 +54,8 @@ void Player::draw() {
     ImGui::SetNextWindowPos(viewport->GetCenter(), ImGuiCond_Always, ImVec2(0.5f, 0.5f));
     ImGui::PushStyleColor(ImGuiCol_WindowShadow, ImVec4(0, 0, 0, 0));
     ImGui::Begin("Logo", nullptr,
-                 ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoNav | ImGuiWindowFlags_NoDecoration |
-                     ImGuiWindowFlags_NoInputs);
+                 ImGuiWindowFlags_NoNav | ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoInputs |
+                     ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoFocusOnAppearing);
     ImGui::Image(iconTexture, ImVec2(iconWidth * 0.5f, iconHeight * 0.5f));
     ImGui::End();
     ImGui::PopStyleColor();
