@@ -50,4 +50,4 @@ ImPlay aims to be mpv compatible, which means almost all mpv features from the [
 ![screenshot](screenshot/3.png)
 # License
 
-[GPLv2](LICENSE).
+[GPLv2](LICENSE.txt).

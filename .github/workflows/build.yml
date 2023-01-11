@@ -20,7 +20,7 @@ jobs:
         run: |
           mkdir build && cd build
           cmake -DCMAKE_BUILD_TYPE=RELEASE -DCMAKE_INSTALL_PREFIX:PATH=/usr ..
-          cmake --build .
+          cmake --build . --target package
           make install DESTDIR=AppDir
           curl -LO https://github.com/linuxdeploy/linuxdeploy/releases/download/continuous/linuxdeploy-x86_64.AppImage
           curl -LO https://raw.githubusercontent.com/linuxdeploy/linuxdeploy-plugin-gtk/master/linuxdeploy-plugin-gtk.sh
@@ -29,13 +29,16 @@ jobs:
           cp ../resources/icon.png implay.png
           DEPLOY_GTK_VERSION=3 ./linuxdeploy-x86_64.AppImage --appdir AppDir --plugin gtk --output appimage \
             --desktop-file implay.desktop --icon-file implay.png
-          mv ImPlay-*.AppImage ImPlay-linux.AppImage
+          mv ImPlay-*.AppImage ImPlay-linux64.AppImage
           echo "TAG_ANME=$(date +%Y-%m-%d)" >> $GITHUB_ENV
       - uses: actions/upload-artifact@v3
         with:
           name: ImPlay-linux
-          path: build/ImPlay-*.AppImage
+          path: |
+            build/ImPlay-*.AppImage
+            build/ImPlay-*.deb
       - uses: rickstaa/action-create-tag@v1
+        if: ${{ github.ref == 'refs/heads/main' }}
         with:
           tag: ${{ env.TAG_ANME }}
           force_push_tag: true
@@ -44,7 +47,7 @@ jobs:
         with:
           commit: ${{ github.sha }}
           tag: ${{ env.TAG_ANME }}
-          artifacts: build/ImPlay-*.AppImage
+          artifacts: "build/ImPlay-*.AppImage,build/ImPlay-*.deb"
           allowUpdates: true
   macos:
     runs-on: macos-latest
@@ -62,11 +65,10 @@ jobs:
           mkdir build && cd build
           cmake -DCMAKE_BUILD_TYPE=RELEASE ..
           cmake --build . --target package
-          mv ImPlay-*.dmg ImPlay-macOS.dmg
           echo "TAG_ANME=$(date +%Y-%m-%d)" >> $GITHUB_ENV
       - uses: actions/upload-artifact@v3
         with:
-          name: ImPlay-macos
+          name: ImPlay-macOS
           path: build/ImPlay-*.dmg
       - uses: ncipollo/release-action@v1
         if: ${{ github.ref == 'refs/heads/main' }}
@@ -95,16 +97,17 @@ jobs:
           mkdir build && cd build
           cmake -DCMAKE_BUILD_TYPE=RELEASE ..
           cmake --build . --target package
-          mv ImPlay-*.msi ImPlay-win64.msi
           echo "TAG_ANME=$(date +%Y-%m-%d)" >> $GITHUB_ENV
       - uses: actions/upload-artifact@v3
         with:
-          name: ImPlay-win
-          path: build/ImPlay-*.msi
+          name: ImPlay-win64
+          path: |
+            build/ImPlay-*.msi
+            build/ImPlay-*.zip
       - uses: ncipollo/release-action@v1
         if: ${{ github.ref == 'refs/heads/main' }}
         with:
           commit: ${{ github.sha }}
           tag: ${{ env.TAG_ANME }}
-          artifacts: build/ImPlay-*.msi
+          artifacts: "build/ImPlay-*.msi,build/ImPlay-*.zip"
           allowUpdates: true
