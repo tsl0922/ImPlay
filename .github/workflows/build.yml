@@ -101,4 +101,28 @@ jobs:
           tag: ${{ env.TAG_ANME }}
           artifacts: "ImPlay-linux/*,ImPlay-macOS/*,ImPlay-win64/*"
           allowUpdates: true
+          body: |
+            # Install
+            ## Windows
+            - MSI
+              - Download `ImPlay-win64.msi`
+              - Run the MSI
+              - Run ImPlay from Start Menu
+            - Zip
+              - Download `ImPlay-win64.zip`
+              - Extract the zip
+              - Run `ImPlay.exe`
+            ## macOS
+            - Download `ImPlay-macOS.dmg`
+            - Double click the dmg to show it's contents
+            - Drag the application to Applications
+            - Run ImPlay from Launchpad
+            ## Linux
+            - Debian Package
+              - Download `ImPlay-linux64.deb`
+              - Install: `sudo apt install ./ImPlay-linux64.deb`
+              - Run `ImPlay`
+            - AppImage
+              - Download `ImPlay-linux64.AppImage`
+              - Run `chmod u+x ImPlay-linux64.AppImage && ./ImPlay-linux64.AppImage`
 
