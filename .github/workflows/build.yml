@@ -30,25 +30,12 @@ jobs:
           DEPLOY_GTK_VERSION=3 ./linuxdeploy-x86_64.AppImage --appdir AppDir --plugin gtk --output appimage \
             --desktop-file implay.desktop --icon-file implay.png
           mv ImPlay-*.AppImage ImPlay-linux64.AppImage
-          echo "TAG_ANME=$(date +%Y-%m-%d)" >> $GITHUB_ENV
       - uses: actions/upload-artifact@v3
         with:
           name: ImPlay-linux
           path: |
             build/ImPlay-*.AppImage
             build/ImPlay-*.deb
-      - uses: rickstaa/action-create-tag@v1
-        if: ${{ github.ref == 'refs/heads/main' }}
-        with:
-          tag: ${{ env.TAG_ANME }}
-          force_push_tag: true
-      - uses: ncipollo/release-action@v1
-        if: ${{ github.ref == 'refs/heads/main' }}
-        with:
-          commit: ${{ github.sha }}
-          tag: ${{ env.TAG_ANME }}
-          artifacts: "build/ImPlay-*.AppImage,build/ImPlay-*.deb"
-          allowUpdates: true
   macos:
     runs-on: macos-latest
     steps:
@@ -65,18 +52,10 @@ jobs:
           mkdir build && cd build
           cmake -DCMAKE_BUILD_TYPE=RELEASE ..
           cmake --build . --target package
-          echo "TAG_ANME=$(date +%Y-%m-%d)" >> $GITHUB_ENV
       - uses: actions/upload-artifact@v3
         with:
           name: ImPlay-macOS
           path: build/ImPlay-*.dmg
-      - uses: ncipollo/release-action@v1
-        if: ${{ github.ref == 'refs/heads/main' }}
-        with:
-          commit: ${{ github.sha }}
-          tag: ${{ env.TAG_ANME }}
-          artifacts: build/ImPlay-*.dmg
-          allowUpdates: true
   win:
     runs-on: windows-latest
     steps:
@@ -97,17 +76,29 @@ jobs:
           mkdir build && cd build
           cmake -DCMAKE_BUILD_TYPE=RELEASE ..
           cmake --build . --target package
-          echo "TAG_ANME=$(date +%Y-%m-%d)" >> $GITHUB_ENV
       - uses: actions/upload-artifact@v3
         with:
           name: ImPlay-win64
           path: |
             build/ImPlay-*.msi
             build/ImPlay-*.zip
+  release:
+    needs: [linux, macos, win]
+    runs-on: ubuntu-latest
+    if: ${{ github.ref == 'refs/heads/main' }}
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/download-artifact@v3
+      - name: Setup tag name
+        run: echo "TAG_ANME=$(date +%Y-%m-%d)" >> $GITHUB_ENV
+      - uses: rickstaa/action-create-tag@v1
+        with:
+          tag: ${{ env.TAG_ANME }}
+          force_push_tag: true
       - uses: ncipollo/release-action@v1
-        if: ${{ github.ref == 'refs/heads/main' }}
         with:
           commit: ${{ github.sha }}
           tag: ${{ env.TAG_ANME }}
-          artifacts: "build/ImPlay-*.msi,build/ImPlay-*.zip"
+          artifacts: "ImPlay-linux/*,ImPlay-macOS/*,ImPlay-win64/*"
           allowUpdates: true
+
