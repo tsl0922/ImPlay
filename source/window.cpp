@@ -83,6 +83,7 @@ bool Window::run(Helpers::OptionParser& parser) {
 
   while (!shutdown) {
     glfwWaitEvents();
+    mpv->runLoop() = false;
     mpv->waitEvent();
     dispatch.process();
 
@@ -182,13 +183,11 @@ void Window::initGLFW(const char* title) {
   });
   glfwSetWindowRefreshCallback(window, [](GLFWwindow* window) {
     auto win = static_cast<Window*>(glfwGetWindowUserPointer(window));
-    win->requestRender();
-    win->dispatch.process();
+    win->mpv->runLoop() = true;
   });
   glfwSetWindowPosCallback(window, [](GLFWwindow* window, int x, int y) {
     auto win = static_cast<Window*>(glfwGetWindowUserPointer(window));
-    win->requestRender();
-    win->dispatch.process();
+    win->mpv->runLoop() = true;
   });
   glfwSetCursorPosCallback(window, [](GLFWwindow* window, double x, double y) {
     auto win = static_cast<Window*>(glfwGetWindowUserPointer(window));
