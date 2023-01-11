@@ -63,14 +63,6 @@ void Player::draw() {
   cmd->draw();
 }
 
-void Player::render(int w, int h) { mpv->render(w, h); }
-
-bool Player::wantRender() { return mpv->wantRender(); }
-
-void Player::waitEvent() { mpv->waitEvent(); }
-
-bool Player::playing() { return mpv->playing() && !mpv->paused(); }
-
 void Player::shutdown() { mpv->command(config->watchLater ? "quit-watch-later" : "quit"); }
 
 bool Player::allowDrag() {

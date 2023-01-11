@@ -15,38 +15,39 @@
 #define GLFW_EXPOSE_NATIVE_COCOA
 #else
 #define GLFW_EXPOSE_NATIVE_X11
-#define GLFW_EXPOSE_NATIVE_WAYLAND
 #endif
 #include <GLFW/glfw3native.h>
-#include <iostream>
 #include <thread>
 #include "window.h"
-#include "dispatch.h"
 
 namespace ImPlay {
 Window::Window() {
-  config = new Config();
-  config->load();
-
   const char* title = "ImPlay";
 
+  config.load();
   initGLFW(title);
   initImGui();
 
-  mpv = new Mpv(window);
-  player = new Player(config, window, mpv, title);
+  mpv = new Mpv();
+  player = new Player(&config, window, mpv, title);
 }
 
 Window::~Window() {
   delete player;
   delete mpv;
-  delete config;
 
   exitImGui();
   exitGLFW();
 }
 
 bool Window::run(Helpers::OptionParser& parser) {
+  mpv->win() = window;
+  mpv->wakeupCb() = [](Mpv* ctx) { glfwPostEmptyEvent(); };
+  mpv->updateCb() = [this](Mpv* ctx) {
+    if (ctx->wantRender()) requestRender();
+  };
+  dispatch.wakeup() = []() { glfwPostEmptyEvent(); };
+
   glfwMakeContextCurrent(window);
   if (!player->init(parser)) return false;
   glfwMakeContextCurrent(nullptr);
@@ -76,14 +77,13 @@ bool Window::run(Helpers::OptionParser& parser) {
 
   while (!shutdown) {
     glfwWaitEvents();
-    player->waitEvent();
+    mpv->waitEvent();
+    dispatch.process();
 
     double delta = glfwGetTime() - lastRenderAt;
     bool hasInputEvents = !ImGui::GetCurrentContext()->InputEventsQueue.empty();
     waitTimeout = hasInputEvents ? std::max(defaultTimeout, (int)delta * 1000) : 1000;
-    if (hasInputEvents || player->wantRender()) requestRender();
-
-    dispatch_process();
+    if (hasInputEvents && (glfwGetTime() - lastRenderAt > (double)defaultTimeout / 1000)) requestRender();
   }
 
   renderThread.join();
@@ -103,13 +103,13 @@ void Window::render() {
   glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
   glClear(GL_COLOR_BUFFER_BIT);
 
-  player->render(width, height);
+  mpv->render(width, height);
   ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
   glfwSwapBuffers(window);
   glfwMakeContextCurrent(nullptr);
 
   if (ImGui::GetIO().ConfigFlags & ImGuiConfigFlags_ViewportsEnable) {
-    dispatch_sync(
+    dispatch.sync(
         [](void* data) {
           ImGui::UpdatePlatformWindows();
           ImGui::RenderPlatformWindowsDefault();
@@ -119,13 +119,10 @@ void Window::render() {
 }
 
 void Window::requestRender() {
-  if (!player->playing() && (glfwGetTime() - lastRenderAt < (double)defaultTimeout / 1000)) return;
-
   std::unique_lock<std::mutex> lk(renderMutex);
   wantRender = true;
   lk.unlock();
   renderCond.notify_one();
-
   lastRenderAt = glfwGetTime();
 }
 
@@ -180,12 +177,12 @@ void Window::initGLFW(const char* title) {
   glfwSetWindowRefreshCallback(window, [](GLFWwindow* window) {
     auto win = static_cast<Window*>(glfwGetWindowUserPointer(window));
     win->requestRender();
-    dispatch_process();
+    win->dispatch.process();
   });
   glfwSetWindowPosCallback(window, [](GLFWwindow* window, int x, int y) {
     auto win = static_cast<Window*>(glfwGetWindowUserPointer(window));
     win->requestRender();
-    dispatch_process();
+    win->dispatch.process();
   });
   glfwSetCursorPosCallback(window, [](GLFWwindow* window, double x, double y) {
     auto win = static_cast<Window*>(glfwGetWindowUserPointer(window));
@@ -218,7 +215,7 @@ void Window::initImGui() {
   IMGUI_CHECKVERSION();
   ImGui::CreateContext();
 
-  float scale = config->Scale;
+  float scale = config.Scale;
   if (scale == 0) {
     glfwGetWindowContentScale(window, &scale, nullptr);
 #if defined(__APPLE__)
@@ -226,8 +223,8 @@ void Window::initImGui() {
 #endif
   }
 
-  float fontSize = config->FontSize * scale;
-  float iconSize = (config->FontSize - 2) * scale;
+  float fontSize = config.FontSize * scale;
+  float iconSize = (config.FontSize - 2) * scale;
 
   ImGuiIO& io = ImGui::GetIO();
   io.IniFilename = nullptr;
@@ -244,13 +241,13 @@ void Window::initImGui() {
   io.Fonts->AddFontDefault(&cfg);
   cfg.MergeMode = true;
   ImWchar fontAwesomeRange[] = {ICON_MIN_FA, ICON_MAX_FA, 0};
-  const ImWchar* unifontRange = config->buildGlyphRanges();
+  const ImWchar* unifontRange = config.buildGlyphRanges();
   io.Fonts->AddFontFromMemoryCompressedTTF(font_awesome_compressed_data, font_awesome_compressed_size, iconSize, &cfg,
                                            fontAwesomeRange);
-  if (config->FontPath.empty())
+  if (config.FontPath.empty())
     io.Fonts->AddFontFromMemoryCompressedTTF(unifont_compressed_data, unifont_compressed_size, 0, &cfg, unifontRange);
   else
-    io.Fonts->AddFontFromFileTTF(config->FontPath.c_str(), 0, &cfg, unifontRange);
+    io.Fonts->AddFontFromFileTTF(config.FontPath.c_str(), 0, &cfg, unifontRange);
   io.Fonts->Build();
 
   glfwMakeContextCurrent(window);

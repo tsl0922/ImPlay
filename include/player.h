@@ -16,10 +16,6 @@ class Player : public Views::View {
 
   bool init(Helpers::OptionParser &parser);
   void draw() override;
-  void render(int w, int h);
-  bool wantRender();
-  void waitEvent();
-  bool playing();
   void shutdown();
   bool allowDrag();
 

@@ -13,23 +13,25 @@
 namespace ImPlay {
 class Mpv {
  public:
-  Mpv(GLFWwindow *window, int64_t wid = 0);
-  Mpv();
+  explicit Mpv(int64_t wid = 0);
   ~Mpv();
 
   using EventHandler = std::function<void(void *)>;
   using LogHandler = std::function<void(const char *, const char *, const char *)>;
+  using Callback = std::function<void(Mpv *)>;
 
   void init();
   void render(int w, int h);
   bool wantRender();
-  void wakeupLoop();
+  void requestRender();
   void waitEvent(double timeout = 0);
   void requestLog(const char *level, LogHandler handler);
   int loadConfig(const char *path);
   bool paused();
   bool playing();
 
+  Callback &wakeupCb() { return wakeupCb_; }
+  Callback &updateCb() { return updateCb_; }
   std::atomic_bool &runLoop() { return runLoop_; }
   GLFWwindow *&win() { return window; }
 
@@ -114,11 +116,14 @@ class Mpv {
   mpv_handle *mpv = nullptr;
   mpv_render_context *renderCtx = nullptr;
   LogHandler logHandler = nullptr;
+  Callback wakeupCb_, updateCb_;
 
+  bool wantRender_ = false;
   std::atomic_bool shutdown = false;
   std::atomic_bool runLoop_ = false;
   std::mutex mutex;
   std::condition_variable cond;
+
   std::vector<std::tuple<mpv_event_id, EventHandler>> events;
   std::vector<std::tuple<std::string, mpv_format, EventHandler>> propertyEvents;
 };

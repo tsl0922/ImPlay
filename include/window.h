@@ -8,6 +8,7 @@
 #include <condition_variable>
 #include "player.h"
 #include "config.h"
+#include "dispatch.h"
 #include "helpers.h"
 
 namespace ImPlay {
@@ -27,7 +28,8 @@ class Window {
   void exitGLFW();
   void exitImGui();
 
-  Config *config;
+  Config config;
+  Dispatch dispatch;
   GLFWwindow *window = nullptr;
   Mpv *mpv = nullptr;
   Player *player = nullptr;

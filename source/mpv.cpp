@@ -1,29 +1,19 @@
 #include <nlohmann/json.hpp>
 #include <stdexcept>
 #include <string>
-#include <thread>
 #include <filesystem>
-#include <cstring>
 #include <cstdarg>
-#ifdef _WIN32
-#include <windows.h>
-#include <cwchar>
-#endif
+#include <thread>
+#include <fmt/format.h>
 #include "mpv.h"
-#include "dispatch.h"
 
 namespace ImPlay {
-Mpv::Mpv(GLFWwindow *window, int64_t wid) : Mpv() {
-  this->window = window;
-  this->wid = wid;
-  if (mpv_set_property(mpv, "wid", MPV_FORMAT_INT64, &wid) < 0) throw std::runtime_error("could not set mpv wid");
-}
-
-Mpv::Mpv() {
+Mpv::Mpv(int64_t wid) : wid(wid) {
   main = mpv_create();
   if (!main) throw std::runtime_error("could not create mpv handle");
   mpv = mpv_create_client(main, "implay");
   if (!mpv) throw std::runtime_error("could not create mpv client");
+  if (mpv_set_property(mpv, "wid", MPV_FORMAT_INT64, &wid) < 0) throw std::runtime_error("could not set mpv wid");
 }
 
 Mpv::~Mpv() {
@@ -77,7 +67,7 @@ void Mpv::eventLoop() {
     mpv_event *event = mpv_wait_event(main, -1);
     if (event->event_id == MPV_EVENT_SHUTDOWN) {
       shutdown = true;
-      wakeupLoop();
+      requestRender();
       break;
     }
   }
@@ -85,19 +75,23 @@ void Mpv::eventLoop() {
 
 void Mpv::renderLoop() {
   while (!shutdown) {
-    std::unique_lock<std::mutex> lk(mutex);
-    cond.wait(lk);
-    if (window != nullptr && wantRender()) {
-      glfwMakeContextCurrent(window);
-      render(width, height);
-      glfwSwapBuffers(window);
-      glfwMakeContextCurrent(nullptr);
+    {
+      std::unique_lock<std::mutex> lk(mutex);
+      cond.wait(lk, [this] { return wantRender_; });
+      wantRender_ = false;
     }
+    assert(window != nullptr);
+    glfwMakeContextCurrent(window);
+    render(width, height);
+    glfwSwapBuffers(window);
+    glfwMakeContextCurrent(nullptr);
   }
 }
 
-void Mpv::wakeupLoop() {
+void Mpv::requestRender() {
   std::unique_lock<std::mutex> lk(mutex);
+  wantRender_ = true;
+  lk.unlock();
   cond.notify_one();
 }
 
@@ -132,8 +126,12 @@ void Mpv::init() {
   mpv_request_log_messages(main, "no");
 
   mpv_set_wakeup_callback(
-      mpv, [](void *ctx) { dispatch_wakeup(); }, nullptr);
-
+      mpv,
+      [](void *ctx) {
+        Mpv *mpv = static_cast<Mpv *>(ctx);
+        if (mpv->wakeupCb_) mpv->wakeupCb_(mpv);
+      },
+      this);
   std::thread(&Mpv::eventLoop, this).detach();
 }
 
@@ -154,9 +152,9 @@ void Mpv::initRender() {
   mpv_render_context_set_update_callback(
       renderCtx,
       [](void *ctx) {
-        dispatch_wakeup();
-        Mpv *mpv_ = (Mpv *)ctx;
-        if (mpv_->runLoop_) mpv_->wakeupLoop();
+        Mpv *mpv = static_cast<Mpv *>(ctx);
+        if (mpv->runLoop_ && mpv->wantRender()) mpv->requestRender();
+        if (mpv->updateCb_) mpv->updateCb_(mpv);
       },
       this);
   std::thread(&Mpv::renderLoop, this).detach();
