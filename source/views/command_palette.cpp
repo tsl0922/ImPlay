@@ -95,8 +95,8 @@ void CommandPalette::drawList(float width) {
     ImGui::SameLine();
 
     ImVec2 textSize = ImGui::CalcTextSize(title.c_str());
-    ImVec2 min = ImGui::GetCursorScreenPos();
-    ImVec2 max = min + ImVec2(contentAvail.x - rWidth - 2 * style.ItemSpacing.x, textSize.y);
+    ImVec2 min = ImGui::GetCursorScreenPos() + style.FramePadding;
+    ImVec2 max = min + ImVec2(contentAvail.x - rWidth - 2 * style.ItemSpacing.x, textSize.y + style.FramePadding.y);
     ImRect textRect(min, max);
     ImGui::ItemSize(textRect);
     if (ImGui::ItemAdd(textRect, window->GetID(title.data(), title.data() + title.size())))
