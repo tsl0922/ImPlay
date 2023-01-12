@@ -10,6 +10,11 @@ void About::draw() {
   ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(80, 20));
   if (ImGui::BeginPopupModal("About", &m_open, ImGuiWindowFlags_AlwaysAutoResize)) {
     textCentered("ImPlay");
+#ifdef APP_VERSION
+    ImGui::PushStyleColor(ImGuiCol_Text, ImGui::GetStyle().Colors[ImGuiCol_TextDisabled]);
+    textCentered(APP_VERSION);
+    ImGui::PopStyleColor();
+#endif
     ImGui::Spacing();
     textCentered("A Cross-Platform Desktop Media Player");
     ImGui::NewLine();

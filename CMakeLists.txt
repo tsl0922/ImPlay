@@ -1,5 +1,34 @@
 cmake_minimum_required(VERSION 3.13)
-project(ImPlay VERSION 1.0.0)
+
+find_package(Git)
+set(GIT_VERSION "0.0.0")
+set(GIT_COMMIT "unknown")
+if(GIT_EXECUTABLE)
+    execute_process(COMMAND ${GIT_EXECUTABLE} describe --tags --match "[0-9]*.[0-9]*.[0-9]*"
+        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+        RESULT_VARIABLE status1
+        OUTPUT_VARIABLE GIT_VERSION_VAR
+        OUTPUT_STRIP_TRAILING_WHITESPACE
+        ERROR_QUIET
+    )
+    if (${status1} STREQUAL "0")
+        set(GIT_VERSION ${GIT_VERSION_VAR})
+    endif()
+    execute_process(
+        COMMAND ${GIT_EXECUTABLE} rev-parse --short HEAD
+        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+        RESULT_VARIABLE status2
+        OUTPUT_VARIABLE GIT_COMMIT_VAR
+        OUTPUT_STRIP_TRAILING_WHITESPACE
+        ERROR_QUIET
+    )
+    if (${status2} STREQUAL "0")
+        set(GIT_COMMIT ${GIT_COMMIT_VAR})
+    endif()
+endif()
+set(APP_VERSION "${GIT_VERSION}-${GIT_COMMIT}")
+
+project(ImPlay VERSION ${GIT_VERSION})
 
 set(CMAKE_CXX_STANDARD 20)
 
@@ -77,10 +106,11 @@ elseif(APPLE)
     set(MACOSX_BUNDLE_COPYRIGHT "Copyright © 2022 tsl0922. All rights reserved." )
 endif()
 
-add_executable(ImPlay ${SOURCE_FILES})
-target_include_directories(ImPlay PRIVATE ${INCLUDE_DIRS})
-target_link_directories(ImPlay PRIVATE ${MPV_LIBRARY_DIRS})
-target_link_libraries(ImPlay PRIVATE ${LINK_LIBS})
+add_executable(${PROJECT_NAME} ${SOURCE_FILES})
+target_compile_definitions(${PROJECT_NAME} PRIVATE APP_VERSION="${APP_VERSION}")
+target_include_directories(${PROJECT_NAME} PRIVATE ${INCLUDE_DIRS})
+target_link_directories(${PROJECT_NAME} PRIVATE ${MPV_LIBRARY_DIRS})
+target_link_libraries(${PROJECT_NAME} PRIVATE ${LINK_LIBS})
 if(WIN32)
     ExternalProject_Add(mpv_bin
         URL https://github.com/shinchiro/mpv-winbuild-cmake/releases/download/20230107/mpv-x86_64-20230107-git-33e73f4.7z
@@ -97,19 +127,19 @@ if(WIN32)
         BUILD_COMMAND ""
         INSTALL_COMMAND ""
     )
-    add_dependencies(ImPlay mpv_bin yt_dlp)
+    add_dependencies(${PROJECT_NAME} mpv_bin yt_dlp)
     ExternalProject_Get_property(mpv_bin BINARY_DIR)
     set(MPV_BIN_DIR ${BINARY_DIR})
     ExternalProject_Get_property(yt_dlp DOWNLOAD_DIR)
     set(YT_DLP_BIN ${DOWNLOAD_DIR}/yt-dlp.exe)
 
-    target_link_options(ImPlay PRIVATE -mwindows)
+    target_link_options(${PROJECT_NAME} PRIVATE -mwindows)
     install(TARGETS ${PROJECT_NAME} RUNTIME DESTINATION .)
     install(FILES ${MPV_BIN_DIR}/mpv.com DESTINATION . RENAME ImPlay.com)
     install(FILES ${YT_DLP_BIN} DESTINATION .)
     if(USE_MPV_WIN_BUILD)
-        add_dependencies(ImPlay mpv_dev)
-        add_custom_command(TARGET ImPlay POST_BUILD
+        add_dependencies(${PROJECT_NAME} mpv_dev)
+        add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
             COMMAND ${CMAKE_COMMAND} -E copy_if_different
                 ${MPV_DEV_DIR}/libmpv-2.dll
                 $<TARGET_FILE_DIR:ImPlay>
@@ -140,43 +170,43 @@ if(WIN32)
     ]])
 
     set(CPACK_GENERATOR ZIP WIX)
-    set(CPACK_PACKAGE_FILE_NAME "ImPlay-win64")
+    set(CPACK_PACKAGE_FILE_NAME "${PROJECT_NAME}-win64")
     set(CPACK_WIX_PRODUCT_ICON "${PROJECT_SOURCE_DIR}/resources/win32/app.ico")
     set(CPACK_WIX_UPGRADE_GUID "D7438EFE-D62A-4E94-A024-6E71AE1A7A63")
     set_property(INSTALL "$<TARGET_FILE_NAME:ImPlay>" PROPERTY CPACK_START_MENU_SHORTCUTS "ImPlay")
 elseif (APPLE)
-    set_target_properties(ImPlay PROPERTIES
+    set_target_properties(${PROJECT_NAME} PROPERTIES
         MACOSX_BUNDLE TRUE
         MACOSX_BUNDLE_INFO_PLIST ${PROJECT_SOURCE_DIR}/resources/macos/Info.plist.in
     )
-    add_custom_command(TARGET ImPlay POST_BUILD
+    add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
         COMMAND ${CMAKE_INSTALL_NAME_TOOL} -add_rpath
             "@executable_path/../Frameworks/"
             $<TARGET_FILE:ImPlay>
     )
     
-    target_sources(ImPlay PRIVATE ${PROJECT_SOURCE_DIR}/resources/macos/AppIcon.icns)
+    target_sources(${PROJECT_NAME} PRIVATE ${PROJECT_SOURCE_DIR}/resources/macos/AppIcon.icns)
     set_source_files_properties(${PROJECT_SOURCE_DIR}/resources/macos/AppIcon.icns
         PROPERTIES MACOSX_PACKAGE_LOCATION Resources
     )
 
-    install(TARGETS ImPlay BUNDLE DESTINATION .)
+    install(TARGETS ${PROJECT_NAME} BUNDLE DESTINATION .)
     
-    set(APPS "\${CMAKE_INSTALL_PREFIX}/ImPlay.app")
+    set(APPS "\${CMAKE_INSTALL_PREFIX}/${PROJECT_NAME}.app")
     set(DIRS ${CMAKE_BINARY_DIR})
     install(CODE "include(BundleUtilities)
         fixup_bundle(\"${APPS}\" \"\" \"${DIRS}\" IGNORE_ITEM Python)"
     )
     
     set(CPACK_GENERATOR DragNDrop)
-    set(CPACK_BUNDLE_NAME ImPlay)
-    set(CPACK_PACKAGE_FILE_NAME "ImPlay-macOS")
+    set(CPACK_BUNDLE_NAME ${PROJECT_NAME})
+    set(CPACK_PACKAGE_FILE_NAME "${PROJECT_NAME}-macOS")
     set(CPACK_BUNDLE_ICON ${PROJECT_SOURCE_DIR}/resources/macos/app.icns)
     set(CPACK_BUNDLE_PLIST ${CMAKE_BINARY_DIR}/ImHex.app/Contents/Info.plist)
 elseif(CMAKE_SYSTEM_NAME STREQUAL "Linux")
     set(CPACK_GENERATOR TGZ DEB)
-    set(CPACK_PACKAGE_FILE_NAME "ImPlay-linux64")
-    set(CPACK_DEBIAN_PACKAGE_NAME "ImPlay")
+    set(CPACK_PACKAGE_FILE_NAME "${PROJECT_NAME}-linux64")
+    set(CPACK_DEBIAN_PACKAGE_NAME "${PROJECT_NAME}")
     set(CPACK_DEBIAN_PACKAGE_MAINTAINER "tsl0922")
     set(CPACK_DEBIAN_PACKAGE_SHLIBDEPS TRUE)
     install(TARGETS ${PROJECT_NAME} RUNTIME DESTINATION bin)
@@ -184,7 +214,7 @@ else()
     set(CPACK_GENERATOR TGZ)
 endif()
 
-set(CPACK_PACKAGE_NAME "ImPlay")
+set(CPACK_PACKAGE_NAME "${PROJECT_NAME}")
 set(CPACK_PACKAGE_VENDOR "tsl0922")
 set(CPACK_PACKAGE_VERSION_MAJOR ${PROJECT_VERSION_MAJOR})
 set(CPACK_PACKAGE_VERSION_MINOR ${PROJECT_VERSION_MINOR})

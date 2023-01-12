@@ -2,6 +2,8 @@ name: build
 
 on:
   push:
+    branches: ["*"]
+    pull_request:
   workflow_dispatch:
 
 jobs:
@@ -82,25 +84,25 @@ jobs:
           path: |
             build/ImPlay-*.msi
             build/ImPlay-*.zip
-  release:
+  publish:
     needs: [linux, macos, win]
     runs-on: ubuntu-latest
     if: ${{ github.ref == 'refs/heads/main' }}
     steps:
       - uses: actions/checkout@v3
       - uses: actions/download-artifact@v3
-      - name: Setup tag name
-        run: echo "TAG_ANME=$(date +%Y-%m-%d)" >> $GITHUB_ENV
       - uses: rickstaa/action-create-tag@v1
         with:
-          tag: ${{ env.TAG_ANME }}
+          tag: continuous
           force_push_tag: true
       - uses: ncipollo/release-action@v1
         with:
           commit: ${{ github.sha }}
-          tag: ${{ env.TAG_ANME }}
+          tag: continuous
           artifacts: "ImPlay-linux/*,ImPlay-macOS/*,ImPlay-win64/*"
           allowUpdates: true
+          prerelease: true
+          name: Continuous build
           body: |
             # Install
             ## Windows
