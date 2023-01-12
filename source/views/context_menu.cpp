@@ -180,7 +180,8 @@ void ContextMenu::draw() {
     if (ImGui::BeginMenuEx("Help", ICON_FA_QUESTION_CIRCLE)) {
       if (ImGui::MenuItemEx("About", ICON_FA_INFO_CIRCLE))
         mpv->commandv("script-message-to", "implay", "about", nullptr);
-      if (ImGui::MenuItem("Keybindings")) mpv->command("script-binding stats/display-page-4");
+      if (ImGui::MenuItem("Keybindings"))
+        mpv->commandv("script-message-to", "implay", "command-palette", "bindings", nullptr);
       if (ImGui::MenuItem("Settings")) mpv->commandv("script-message-to", "implay", "settings", nullptr);
       ImGui::EndMenu();
     }
