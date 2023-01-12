@@ -121,7 +121,7 @@ void Settings::drawFontTab() {
     if (ImGui::InputText("##Path", fontPath, IM_ARRAYSIZE(fontPath))) config->FontPath = fontPath;
     ImGui::SameLine();
     if (ImGui::Button(ICON_FA_FOLDER_OPEN)) {
-      openFile({}, [&](const char *path) {
+      openFile({{"Font Files", "ttf,ttc,otf"}}, [&](const char *path) {
         config->FontPath = path;
         strncpy(fontPath, path, IM_ARRAYSIZE(fontPath));
       });
