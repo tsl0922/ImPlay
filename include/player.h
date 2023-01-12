@@ -18,6 +18,7 @@ class Player : public Views::View {
   void draw() override;
   void shutdown();
   bool allowDrag();
+  bool hasFile() { return fileOpen; }
 
   void setCursor(double x, double y);
   void setMouse(int button, int action, int mods);

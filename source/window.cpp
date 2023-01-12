@@ -115,7 +115,7 @@ void Window::render() {
   glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
   glClear(GL_COLOR_BUFFER_BIT);
 
-  mpv->render(width, height);
+  if (player->hasFile()) mpv->render(width, height);
   ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
   glfwSwapBuffers(window);
   glfwMakeContextCurrent(nullptr);
@@ -188,11 +188,16 @@ void Window::initGLFW(const char* title) {
   });
   glfwSetWindowRefreshCallback(window, [](GLFWwindow* window) {
     auto win = static_cast<Window*>(glfwGetWindowUserPointer(window));
-    win->mpv->runLoop() = true;
+    if (win->player->hasFile())
+      win->mpv->runLoop() = true;
+    else {
+      win->requestRender();
+      win->dispatch.process();
+    }
   });
   glfwSetWindowPosCallback(window, [](GLFWwindow* window, int x, int y) {
     auto win = static_cast<Window*>(glfwGetWindowUserPointer(window));
-    win->mpv->runLoop() = true;
+    if (win->player->hasFile()) win->mpv->runLoop() = true;
   });
   glfwSetCursorPosCallback(window, [](GLFWwindow* window, double x, double y) {
     auto win = static_cast<Window*>(glfwGetWindowUserPointer(window));
