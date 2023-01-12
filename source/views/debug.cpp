@@ -28,8 +28,7 @@ void Debug::draw() {
   const ImGuiViewport* viewport = ImGui::GetMainViewport();
   ImGui::SetNextWindowPos(ImVec2(viewport->WorkPos.x + 60, viewport->WorkPos.y + 20), ImGuiCond_FirstUseEver);
   ImGui::SetNextWindowSize(ImVec2(580, 680), ImGuiCond_FirstUseEver);
-  if (ImGui::Begin(ICON_FA_BUG " Metrics & Debug", &m_open,
-                   ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoScrollbar)) {
+  if (ImGui::Begin("Metrics & Debug", &m_open, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoScrollbar)) {
     drawHeader();
     drawProperties("Options", "options");
     drawProperties("Properties", "property-list");
