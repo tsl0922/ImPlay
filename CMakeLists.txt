@@ -1,34 +1,22 @@
 cmake_minimum_required(VERSION 3.13)
 
+project(ImPlay VERSION "1.0.0")
+
 find_package(Git)
-set(GIT_VERSION "0.0.0")
-set(GIT_COMMIT "unknown")
+set(APP_VERSION "${PROJECT_VERSION}")
 if(GIT_EXECUTABLE)
-    execute_process(COMMAND ${GIT_EXECUTABLE} describe --tags --match "[0-9]*.[0-9]*.[0-9]*"
-        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-        RESULT_VARIABLE status1
-        OUTPUT_VARIABLE GIT_VERSION_VAR
-        OUTPUT_STRIP_TRAILING_WHITESPACE
-        ERROR_QUIET
-    )
-    if (${status1} STREQUAL "0")
-        set(GIT_VERSION ${GIT_VERSION_VAR})
-    endif()
     execute_process(
         COMMAND ${GIT_EXECUTABLE} rev-parse --short HEAD
         WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-        RESULT_VARIABLE status2
-        OUTPUT_VARIABLE GIT_COMMIT_VAR
+        RESULT_VARIABLE status
+        OUTPUT_VARIABLE GIT_COMMIT
         OUTPUT_STRIP_TRAILING_WHITESPACE
         ERROR_QUIET
     )
-    if (${status2} STREQUAL "0")
-        set(GIT_COMMIT ${GIT_COMMIT_VAR})
+    if (${status} STREQUAL "0")
+        set(APP_VERSION "${APP_VERSION}-${GIT_COMMIT}")
     endif()
 endif()
-set(APP_VERSION "${GIT_VERSION}-${GIT_COMMIT}")
-
-project(ImPlay VERSION ${GIT_VERSION})
 
 set(CMAKE_CXX_STANDARD 20)
 

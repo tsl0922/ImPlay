@@ -1,0 +1,45 @@
+name: release
+
+on:
+  push:
+    tags: ["*"]
+  workflow_dispatch:
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: dawidd6/action-download-artifact@v2
+        with:
+          workflow: build.yml
+          commit: ${{ github.sha }}
+          workflow_conclusion: success
+      - uses: ncipollo/release-action@v1
+        with:
+          commit: ${{ github.sha }}
+          artifacts: "ImPlay-linux/*,ImPlay-macOS/*,ImPlay-win64/*"
+          body: |
+            # Install
+            ## Windows
+            - MSI
+              - Download `ImPlay-win64.msi`
+              - Run the MSI
+              - Run ImPlay from Start Menu
+            - Zip
+              - Download `ImPlay-win64.zip`
+              - Extract the zip
+              - Run `ImPlay.exe`
+            ## macOS
+            - Download `ImPlay-macOS.dmg`
+            - Double click the dmg to show it's contents
+            - Drag the application to Applications
+            - Run ImPlay from Launchpad
+            ## Linux
+            - Debian Package
+              - Download `ImPlay-linux64.deb`
+              - Install: `sudo apt install ./ImPlay-linux64.deb`
+              - Run `ImPlay`
+            - AppImage
+              - Download `ImPlay-linux64.AppImage`
+              - Run `chmod u+x ImPlay-linux64.AppImage && ./ImPlay-linux64.AppImage`
