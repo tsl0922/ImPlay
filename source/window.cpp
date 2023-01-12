@@ -87,10 +87,15 @@ bool Window::run(Helpers::OptionParser& parser) {
     mpv->waitEvent();
     dispatch.process();
 
-    double delta = glfwGetTime() - lastRenderAt;
     bool hasInputEvents = !ImGui::GetCurrentContext()->InputEventsQueue.empty();
+    if ((!glfwGetWindowAttrib(window, GLFW_VISIBLE) || glfwGetWindowAttrib(window, GLFW_ICONIFIED)) &&
+        !hasInputEvents && ImGui::GetCurrentContext()->Viewports.Size == 1) {
+      waitTimeout = INT_MAX;
+      continue;
+    }
+    double delta = glfwGetTime() - lastRenderAt;
     waitTimeout = hasInputEvents ? std::max(defaultTimeout, (int)delta * 1000) : 1000;
-    if (hasInputEvents && (glfwGetTime() - lastRenderAt > (double)defaultTimeout / 1000)) requestRender();
+    if (hasInputEvents && (delta > (double)defaultTimeout / 1000)) requestRender();
   }
 
   renderThread.join();
