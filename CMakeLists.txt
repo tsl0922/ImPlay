@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.13)
 
-project(ImPlay VERSION "1.0.0")
+project(ImPlay VERSION "1.0.1")
 
 find_package(Git)
 set(APP_VERSION "${PROJECT_VERSION}")
