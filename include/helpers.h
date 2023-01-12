@@ -19,6 +19,7 @@ bool loadTexture(const char* path, ImTextureID* out_texture, int* out_width, int
 
 std::string tolower(std::string s);
 std::string toupper(std::string s);
+std::string trim(std::string s);
 
 int openUri(const char* uri);
 const char* getDataDir(const char* subdir = "implay");

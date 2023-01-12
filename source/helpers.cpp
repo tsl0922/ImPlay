@@ -109,6 +109,14 @@ std::string toupper(std::string s) {
   return str;
 }
 
+std::string trim(std::string s) {
+  std::string str = s;
+  const char* ws = " \t\n\r\f\v";
+  str.erase(0, str.find_first_not_of(ws));
+  str.erase(str.find_last_not_of(ws) + 1);
+  return str;
+}
+
 int openUri(const char* uri) {
 #ifdef __APPLE__
   return system(fmt::format("open {}", uri).c_str());

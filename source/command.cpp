@@ -144,8 +144,9 @@ void Command::loadSubtitles() {
 void Command::openClipboard() {
   auto content = glfwGetClipboardString(window);
   if (content != nullptr && content[0] != '\0') {
-    mpv->commandv("loadfile", content, nullptr);
-    mpv->commandv("show-text", content, nullptr);
+    auto str = Helpers::trim(content);
+    mpv->commandv("loadfile", str.c_str(), nullptr);
+    mpv->commandv("show-text", str.c_str(), nullptr);
   }
 }
 
