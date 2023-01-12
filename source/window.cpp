@@ -115,7 +115,7 @@ void Window::render() {
   glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
   glClear(GL_COLOR_BUFFER_BIT);
 
-  if (player->hasFile()) mpv->render(width, height);
+  if (player->hasFile() || mpv->forceWindow()) mpv->render(width, height);
   ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
   glfwSwapBuffers(window);
   glfwMakeContextCurrent(nullptr);
@@ -203,7 +203,7 @@ void Window::initGLFW(const char* title) {
     auto win = static_cast<Window*>(glfwGetWindowUserPointer(window));
     if (ImGui::GetIO().WantCaptureMouse) return;
     win->player->setCursor(x, y);
-    if (win->player->allowDrag() && win->height - y > 150 && glfwGetTime() - win->lastMousePressAt > 0.01) {
+    if (win->mpv->allowDrag() && win->height - y > 150 && glfwGetTime() - win->lastMousePressAt > 0.01) {
       if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS) glfwDragWindow(window);
     }
   });

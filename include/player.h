@@ -17,7 +17,6 @@ class Player : public Views::View {
   bool init(Helpers::OptionParser &parser);
   void draw() override;
   void shutdown();
-  bool allowDrag();
   bool hasFile() { return fileOpen; }
 
   void setCursor(double x, double y);

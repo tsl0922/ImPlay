@@ -49,7 +49,7 @@ bool Player::init(Helpers::OptionParser& parser) {
 }
 
 void Player::draw() {
-  if (!mpv->property<int, MPV_FORMAT_FLAG>("force-window") && !fileOpen) {
+  if (!mpv->forceWindow() && !fileOpen) {
     const ImGuiViewport* viewport = ImGui::GetMainViewport();
     ImGui::SetNextWindowPos(viewport->GetCenter(), ImGuiCond_Always, ImVec2(0.5f, 0.5f));
     ImGui::PushStyleColor(ImGuiCol_WindowShadow, ImVec4(0, 0, 0, 0));
@@ -64,10 +64,6 @@ void Player::draw() {
 }
 
 void Player::shutdown() { mpv->command(config->watchLater ? "quit-watch-later" : "quit"); }
-
-bool Player::allowDrag() {
-  return mpv->property<int, MPV_FORMAT_FLAG>("window-dragging") && !mpv->property<int, MPV_FORMAT_FLAG>("fullscreen");
-}
 
 void Player::setCursor(double x, double y) {
   std::string xs = std::to_string((int)x);
