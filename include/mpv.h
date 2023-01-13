@@ -6,10 +6,6 @@
 #include <map>
 #include <vector>
 #include <functional>
-#include <atomic>
-#include <mutex>
-#include <condition_variable>
-#include <thread>
 
 namespace ImPlay {
 class Mpv {
@@ -20,7 +16,6 @@ class Mpv {
   using EventHandler = std::function<void(void *)>;
   using LogHandler = std::function<void(const char *, const char *, const char *)>;
   using Callback = std::function<void(Mpv *)>;
-  using RenderCb = std::function<void(std::function<void(int, int)>)>;
 
   void init();
   void render(int w, int h);
@@ -36,8 +31,6 @@ class Mpv {
 
   Callback &wakeupCb() { return wakeupCb_; }
   Callback &updateCb() { return updateCb_; }
-  RenderCb &renderCb() { return renderCb_; }
-  std::atomic_bool &runLoop() { return runLoop_; }
 
   int command(std::string args) { return mpv_command_string(mpv, args.c_str()); }
   int command(const char *args) { return mpv_command_string(mpv, args); }
@@ -111,7 +104,6 @@ class Mpv {
  private:
   void initRender();
   void eventLoop();
-  void renderLoop();
 
   int64_t wid = 0;
   mpv_handle *main = nullptr;
@@ -119,14 +111,6 @@ class Mpv {
   mpv_render_context *renderCtx = nullptr;
   LogHandler logHandler = nullptr;
   Callback wakeupCb_, updateCb_;
-
-  bool wantRender_ = false;
-  std::atomic_bool shutdown = false;
-  std::atomic_bool runLoop_ = false;
-  std::mutex mutex;
-  std::condition_variable cond;
-  std::thread renderThread;
-  RenderCb renderCb_;
 
   std::vector<std::tuple<mpv_event_id, EventHandler>> events;
   std::vector<std::tuple<std::string, mpv_format, EventHandler>> propertyEvents;

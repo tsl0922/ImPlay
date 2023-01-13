@@ -3,12 +3,15 @@
 #include <filesystem>
 #include <imgui.h>
 #include <imgui_internal.h>
+#include <imgui_impl_glfw.h>
+#include <imgui_impl_opengl3.h>
 #include "player.h"
 #include "helpers.h"
 
 namespace ImPlay {
-Player::Player(Config* config, GLFWwindow* window, Mpv* mpv, const char* title) : Views::View() {
+Player::Player(Config* config, Dispatch* dispatch, GLFWwindow* window, Mpv* mpv, const char* title) : Views::View() {
   this->config = config;
+  this->dispatch = dispatch;
   this->window = window;
   this->mpv = mpv;
   this->title = title;
@@ -43,7 +46,6 @@ bool Player::init(Helpers::OptionParser& parser) {
   for (auto& path : parser.paths) mpv->commandv("loadfile", path.c_str(), "append-play", nullptr);
 
   mpv->command("keybind MBTN_RIGHT ignore");
-  mpv->runLoop() = false;
 
   return true;
 }
@@ -61,6 +63,36 @@ void Player::draw() {
     ImGui::PopStyleColor();
   }
   cmd->draw();
+}
+
+void Player::render(int w, int h) {
+  glfwMakeContextCurrent(window);
+
+  glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+  glClear(GL_COLOR_BUFFER_BIT);
+
+  if (hasFile() || mpv->forceWindow()) mpv->render(w, h);
+
+  if (renderGui_) {
+    ImGui_ImplOpenGL3_NewFrame();
+    ImGui_ImplGlfw_NewFrame();
+    ImGui::NewFrame();
+    draw();
+    ImGui::Render();
+    ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+  }
+
+  glfwSwapBuffers(window);
+  glfwMakeContextCurrent(nullptr);
+
+  if (renderGui_ && ImGui::GetIO().ConfigFlags & ImGuiConfigFlags_ViewportsEnable) {
+    dispatch->sync(
+        [](void* data) {
+          ImGui::UpdatePlatformWindows();
+          ImGui::RenderPlatformWindowsDefault();
+        },
+        nullptr);
+  }
 }
 
 void Player::shutdown() { mpv->command(config->watchLater ? "quit-watch-later" : "quit"); }
@@ -151,13 +183,13 @@ void Player::initMpv() {
 
   mpv->observeEvent(MPV_EVENT_CLIENT_MESSAGE, [this](void* data) {
     ImGuiIO& io = ImGui::GetIO();
-    mpv->runLoop() = true;
+    renderGui_ = false;
     io.SetAppAcceptingEvents(false);
 
     auto msg = static_cast<mpv_event_client_message*>(data);
     cmd->execute(msg->num_args, msg->args);
 
-    mpv->runLoop() = false;
+    renderGui_ = true;
     io.SetAppAcceptingEvents(true);
   });
 

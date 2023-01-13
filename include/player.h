@@ -2,20 +2,24 @@
 #include <GLFW/glfw3.h>
 #include <map>
 #include <vector>
+#include <atomic>
 #include "mpv.h"
 #include "config.h"
 #include "command.h"
+#include "dispatch.h"
 #include "helpers.h"
 #include "views/view.h"
 
 namespace ImPlay {
 class Player : public Views::View {
  public:
-  Player(Config *config, GLFWwindow *window, Mpv *mpv, const char *title);
+  Player(Config *config, Dispatch *dispatch, GLFWwindow *window, Mpv *mpv, const char *title);
   ~Player() override;
 
   bool init(Helpers::OptionParser &parser);
   void draw() override;
+  void render(int w, int h);
+  std::atomic_bool &renderGui() { return renderGui_; }
   void shutdown();
   bool hasFile() { return fileOpen; }
 
@@ -32,11 +36,12 @@ class Player : public Views::View {
   GLFWwindow *window = nullptr;
   Mpv *mpv = nullptr;
   Command *cmd = nullptr;
+  Dispatch *dispatch;
   const char *title;
+  std::atomic_bool renderGui_ = true;
   bool fileOpen = false;
   ImTextureID iconTexture;
-  int iconWidth;
-  int iconHeight;
+  int iconWidth, iconHeight;
 
   static void translateMod(std::vector<std::string> &keys, int mods) {
     if (mods & GLFW_MOD_CONTROL) keys.emplace_back("Ctrl");

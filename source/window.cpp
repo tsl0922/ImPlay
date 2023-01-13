@@ -37,12 +37,14 @@ Window::Window() {
 #else
   mpv = new Mpv();
 #endif
-  player = new Player(&config, window, mpv, title);
+  player = new Player(&config, &dispatch, window, mpv, title);
 }
 
 Window::~Window() {
   delete player;
+  glfwMakeContextCurrent(window);
   delete mpv;
+  glfwMakeContextCurrent(nullptr);
 
   exitImGui();
   exitGLFW();
@@ -52,15 +54,6 @@ bool Window::run(Helpers::OptionParser& parser) {
   mpv->wakeupCb() = [](Mpv* ctx) { glfwPostEmptyEvent(); };
   mpv->updateCb() = [this](Mpv* ctx) {
     if (ctx->wantRender()) requestRender();
-  };
-  mpv->renderCb() = [this](std::function<void(int, int)> cb) {
-#ifdef __APPLE__
-    std::lock_guard<std::mutex> lk(contextMutex);
-#endif
-    glfwMakeContextCurrent(window);
-    cb(width, height);
-    glfwSwapBuffers(window);
-    glfwMakeContextCurrent(nullptr);
   };
   dispatch.wakeup() = []() { glfwPostEmptyEvent(); };
 
@@ -86,14 +79,14 @@ bool Window::run(Helpers::OptionParser& parser) {
         renderCond.wait_for(lk, timeout, [&]() { return wantRender; });
         wantRender = false;
       }
-      render();
+      player->render(width, height);
     }
     shutdown = true;
   });
 
   while (!shutdown) {
     glfwWaitEvents();
-    mpv->runLoop() = false;
+    player->renderGui() = true;
     mpv->waitEvent();
     dispatch.process();
 
@@ -111,36 +104,6 @@ bool Window::run(Helpers::OptionParser& parser) {
   renderThread.join();
 
   return true;
-}
-
-void Window::render() {
-#ifdef __APPLE__
-  std::lock_guard<std::mutex> lk(contextMutex);
-#endif
-  glfwMakeContextCurrent(window);
-  ImGui_ImplOpenGL3_NewFrame();
-  ImGui_ImplGlfw_NewFrame();
-  ImGui::NewFrame();
-
-  player->draw();
-  ImGui::Render();
-
-  glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
-  glClear(GL_COLOR_BUFFER_BIT);
-
-  if (player->hasFile() || mpv->forceWindow()) mpv->render(width, height);
-  ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-  glfwSwapBuffers(window);
-  glfwMakeContextCurrent(nullptr);
-
-  if (ImGui::GetIO().ConfigFlags & ImGuiConfigFlags_ViewportsEnable) {
-    dispatch.sync(
-        [](void* data) {
-          ImGui::UpdatePlatformWindows();
-          ImGui::RenderPlatformWindowsDefault();
-        },
-        nullptr);
-  }
 }
 
 void Window::requestRender() {
@@ -196,16 +159,15 @@ void Window::initGLFW(const char* title) {
   });
   glfwSetWindowRefreshCallback(window, [](GLFWwindow* window) {
     auto win = static_cast<Window*>(glfwGetWindowUserPointer(window));
-    if (win->player->hasFile())
-      win->mpv->runLoop() = true;
-    else {
-      win->requestRender();
-      win->dispatch.process();
-    }
+    if (win->player->hasFile()) win->player->renderGui() = false;
+    win->requestRender();
+    win->dispatch.process();
   });
   glfwSetWindowPosCallback(window, [](GLFWwindow* window, int x, int y) {
     auto win = static_cast<Window*>(glfwGetWindowUserPointer(window));
-    if (win->player->hasFile()) win->mpv->runLoop() = true;
+    if (win->player->hasFile()) win->player->renderGui() = false;
+    win->requestRender();
+    win->dispatch.process();
   });
   glfwSetCursorPosCallback(window, [](GLFWwindow* window, double x, double y) {
     auto win = static_cast<Window*>(glfwGetWindowUserPointer(window));

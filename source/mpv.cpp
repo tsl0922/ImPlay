@@ -1,13 +1,14 @@
 #include <nlohmann/json.hpp>
 #include <stdexcept>
 #include <string>
+#include <thread>
 #include <filesystem>
 #include <cstdarg>
 #include <fmt/format.h>
 #include "mpv.h"
 
 namespace ImPlay {
-Mpv::Mpv(int64_t wid) : wid(wid), renderThread() {
+Mpv::Mpv(int64_t wid) : wid(wid) {
   main = mpv_create();
   if (!main) throw std::runtime_error("could not create mpv handle");
   mpv = mpv_create_client(main, "implay");
@@ -16,7 +17,6 @@ Mpv::Mpv(int64_t wid) : wid(wid), renderThread() {
 }
 
 Mpv::~Mpv() {
-  if (renderThread.joinable()) renderThread.join();
   if (renderCtx != nullptr) mpv_render_context_free(renderCtx);
   mpv_destroy(main);
   mpv_destroy(mpv);
@@ -65,30 +65,8 @@ int Mpv::loadConfig(const char *path) { return mpv_load_config_file(mpv, path); 
 void Mpv::eventLoop() {
   while (main) {
     mpv_event *event = mpv_wait_event(main, -1);
-    if (event->event_id == MPV_EVENT_SHUTDOWN) {
-      shutdown = true;
-      requestRender();
-      break;
-    }
+    if (event->event_id == MPV_EVENT_SHUTDOWN) break;
   }
-}
-
-void Mpv::renderLoop() {
-  while (!shutdown) {
-    {
-      std::unique_lock<std::mutex> lk(mutex);
-      cond.wait(lk, [this] { return wantRender_; });
-      wantRender_ = false;
-    }
-    renderCb_([this](int w, int h) { render(w, h); });
-  }
-}
-
-void Mpv::requestRender() {
-  std::unique_lock<std::mutex> lk(mutex);
-  wantRender_ = true;
-  lk.unlock();
-  cond.notify_one();
 }
 
 void Mpv::render(int w, int h) {
@@ -152,11 +130,9 @@ void Mpv::initRender() {
       renderCtx,
       [](void *ctx) {
         Mpv *mpv = static_cast<Mpv *>(ctx);
-        if (mpv->runLoop_ && mpv->wantRender()) mpv->requestRender();
         if (mpv->updateCb_) mpv->updateCb_(mpv);
       },
       this);
-  renderThread = std::thread(&Mpv::renderLoop, this);
 }
 
 std::vector<Mpv::TrackItem> Mpv::trackList() {
