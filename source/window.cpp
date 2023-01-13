@@ -17,6 +17,8 @@
 #define GLFW_EXPOSE_NATIVE_X11
 #endif
 #include <GLFW/glfw3native.h>
+#include <fmt/format.h>
+#include <stdexcept>
 #include <thread>
 #include "window.h"
 
@@ -150,10 +152,8 @@ void Window::requestRender() {
 }
 
 void Window::initGLFW(const char* title) {
-  if (!glfwInit()) {
-    std::cout << "Failed to initialize GLFW!" << std::endl;
-    std::abort();
-  }
+  glfwSetErrorCallback([](int error, const char* desc) { fmt::print("GLFW Error [{}]: {}\n", error, desc); });
+  if (!glfwInit()) throw std::runtime_error("Failed to initialize GLFW!");
 
 #if defined(__APPLE__)
   glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
@@ -172,10 +172,7 @@ void Window::initGLFW(const char* title) {
   height = mode->height * 0.4;
 
   window = glfwCreateWindow(width, height, title, nullptr, nullptr);
-  if (window == nullptr) {
-    std::cout << "Failed to create window!" << std::endl;
-    std::abort();
-  }
+  if (window == nullptr) throw std::runtime_error("Failed to create window!");
   glfwSetWindowSizeLimits(window, 640, 480, GLFW_DONT_CARE, GLFW_DONT_CARE);
   glfwSetWindowPos(window, (mode->width - width) / 2, (mode->height - height) / 2);
 
