@@ -9,6 +9,7 @@
 #include <atomic>
 #include <mutex>
 #include <condition_variable>
+#include <thread>
 
 namespace ImPlay {
 class Mpv {
@@ -124,6 +125,7 @@ class Mpv {
   std::atomic_bool runLoop_ = false;
   std::mutex mutex;
   std::condition_variable cond;
+  std::thread renderThread;
   RenderCb renderCb_;
 
   std::vector<std::tuple<mpv_event_id, EventHandler>> events;

@@ -3,12 +3,11 @@
 #include <string>
 #include <filesystem>
 #include <cstdarg>
-#include <thread>
 #include <fmt/format.h>
 #include "mpv.h"
 
 namespace ImPlay {
-Mpv::Mpv(int64_t wid) : wid(wid) {
+Mpv::Mpv(int64_t wid) : wid(wid), renderThread() {
   main = mpv_create();
   if (!main) throw std::runtime_error("could not create mpv handle");
   mpv = mpv_create_client(main, "implay");
@@ -17,6 +16,7 @@ Mpv::Mpv(int64_t wid) : wid(wid) {
 }
 
 Mpv::~Mpv() {
+  if (renderThread.joinable()) renderThread.join();
   if (renderCtx != nullptr) mpv_render_context_free(renderCtx);
   mpv_destroy(main);
   mpv_destroy(mpv);
@@ -156,7 +156,7 @@ void Mpv::initRender() {
         if (mpv->updateCb_) mpv->updateCb_(mpv);
       },
       this);
-  std::thread(&Mpv::renderLoop, this).detach();
+  renderThread = std::thread(&Mpv::renderLoop, this);
 }
 
 std::vector<Mpv::TrackItem> Mpv::trackList() {
