@@ -20,4 +20,4 @@ add_library(imgui OBJECT
 )
 
 target_include_directories(imgui PUBLIC include ${FREETYPE_INCLUDE_DIRS} ${GLFW_INCLUDE_DIRS})
-target_link_libraries(imgui PUBLIC glfw ${FREETYPE_LIBRARIES} ${OPENGL_LIBRARIES})
+target_link_libraries(imgui PUBLIC ${FREETYPE_LIBRARIES} ${GLFW_LIBRARIES} ${OPENGL_LIBRARIES})

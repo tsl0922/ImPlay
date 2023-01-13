@@ -57,7 +57,7 @@ bool Window::run(Helpers::OptionParser& parser) {
   glfwMakeContextCurrent(window);
   if (!player->init(parser)) return false;
   glfwMakeContextCurrent(nullptr);
-#ifdef __APPLE__
+#if defined(__APPLE__) && defined(GLFW_PATCHED)
   const char** openedFileNames = glfwGetOpenedFilenames();
   if (openedFileNames != nullptr) {
     int count = 0;
@@ -203,9 +203,11 @@ void Window::initGLFW(const char* title) {
     auto win = static_cast<Window*>(glfwGetWindowUserPointer(window));
     if (ImGui::GetIO().WantCaptureMouse) return;
     win->player->setCursor(x, y);
+#ifdef GLFW_PATCHED
     if (win->mpv->allowDrag() && win->height - y > 150 && glfwGetTime() - win->lastMousePressAt > 0.01) {
       if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS) glfwDragWindow(window);
     }
+#endif
   });
   glfwSetMouseButtonCallback(window, [](GLFWwindow* window, int button, int action, int mods) {
     auto win = static_cast<Window*>(glfwGetWindowUserPointer(window));

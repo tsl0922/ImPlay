@@ -2,6 +2,19 @@ cmake_minimum_required(VERSION 3.13)
 
 project(ImPlay VERSION "1.0.1")
 
+set(CMAKE_CXX_STANDARD 20)
+
+option(USE_MPV_WIN_BUILD "Use Prebuilt static mpv dll for Windows" ON)
+option(USE_PATCHED_GLFW "Use patched GLFW to support additional features" ON)
+
+include(ExternalProject)
+if (${CMAKE_VERSION} VERSION_GREATER_EQUAL "3.14.0")
+    cmake_policy(SET CMP0087 NEW)
+endif()
+if (${CMAKE_VERSION} VERSION_GREATER_EQUAL "3.24.0")
+    cmake_policy(SET CMP0135 NEW)
+endif()
+
 find_package(Git)
 set(APP_VERSION "${PROJECT_VERSION}")
 if(GIT_EXECUTABLE)
@@ -18,18 +31,7 @@ if(GIT_EXECUTABLE)
     endif()
 endif()
 
-set(CMAKE_CXX_STANDARD 20)
-
-option(USE_MPV_WIN_BUILD "Use Prebuilt static mpv dll for Windows" ON)
-
-include(ExternalProject)
-if (${CMAKE_VERSION} VERSION_GREATER_EQUAL "3.14.0")
-    cmake_policy(SET CMP0087 NEW)
-endif()
-if (${CMAKE_VERSION} VERSION_GREATER_EQUAL "3.24.0")
-    cmake_policy(SET CMP0135 NEW)
-endif()
-
+find_package(PkgConfig REQUIRED)
 if(WIN32 AND USE_MPV_WIN_BUILD)
     ExternalProject_Add(mpv_dev
         URL https://github.com/shinchiro/mpv-winbuild-cmake/releases/download/20230107/mpv-dev-x86_64-20230107-git-33e73f4.7z
@@ -47,15 +49,20 @@ if(WIN32 AND USE_MPV_WIN_BUILD)
     set(MPV_LIBRARY_DIRS ${MPV_DEV_DIR})
     set(MPV_LIBRARIES mpv)
 else()
-    find_package(PkgConfig REQUIRED)
     pkg_search_module(MPV REQUIRED mpv)
+endif()
+
+if(USE_PATCHED_GLFW)
+    add_subdirectory(third_party/glfw)
+    set(GLFW_LIBRARIES glfw)
+else()
+    pkg_search_module(GLFW REQUIRED glfw3)
 endif()
 
 set(LIBROMFS_PROJECT_NAME ${PROJECT_NAME})
 set(LIBROMFS_RESOURCE_LOCATION "${CMAKE_SOURCE_DIR}/resources/romfs")
 
 add_subdirectory(third_party/fmt)
-add_subdirectory(third_party/glfw)
 add_subdirectory(third_party/json)
 add_subdirectory(third_party/inipp)
 add_subdirectory(third_party/imgui)
@@ -78,8 +85,8 @@ set(SOURCE_FILES
     source/window.cpp
     source/main.cpp
 )
-set(INCLUDE_DIRS include ${MPV_INCLUDE_DIRS})
-set(LINK_LIBS fmt json inipp nfd imgui ${MPV_LIBRARIES} ${LIBROMFS_LIBRARY})
+set(INCLUDE_DIRS include ${MPV_INCLUDE_DIRS} ${GLFW_INCLUDE_DIRS})
+set(LINK_LIBS fmt json inipp nfd imgui ${MPV_LIBRARIES} ${GLFW_LIBRARIES} ${LIBROMFS_LIBRARY})
 
 if(WIN32)
     configure_file(${PROJECT_SOURCE_DIR}/resources/win32/app.rc.in ${PROJECT_BINARY_DIR}/app.rc @ONLY)
@@ -95,10 +102,14 @@ elseif(APPLE)
 endif()
 
 add_executable(${PROJECT_NAME} ${SOURCE_FILES})
-target_compile_definitions(${PROJECT_NAME} PRIVATE APP_VERSION="${APP_VERSION}")
 target_include_directories(${PROJECT_NAME} PRIVATE ${INCLUDE_DIRS})
 target_link_directories(${PROJECT_NAME} PRIVATE ${MPV_LIBRARY_DIRS})
 target_link_libraries(${PROJECT_NAME} PRIVATE ${LINK_LIBS})
+target_compile_definitions(${PROJECT_NAME} PRIVATE APP_VERSION="${APP_VERSION}")
+if(USE_PATCHED_GLFW)
+    target_compile_definitions(${PROJECT_NAME} PRIVATE GLFW_PATCHED)
+endif()
+
 if(WIN32)
     ExternalProject_Add(mpv_bin
         URL https://github.com/shinchiro/mpv-winbuild-cmake/releases/download/20230107/mpv-x86_64-20230107-git-33e73f4.7z
