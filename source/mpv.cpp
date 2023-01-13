@@ -80,11 +80,7 @@ void Mpv::renderLoop() {
       cond.wait(lk, [this] { return wantRender_; });
       wantRender_ = false;
     }
-    assert(window != nullptr);
-    glfwMakeContextCurrent(window);
-    render(width, height);
-    glfwSwapBuffers(window);
-    glfwMakeContextCurrent(nullptr);
+    renderCb_([this](int w, int h) { render(w, h); });
   }
 }
 
@@ -97,9 +93,6 @@ void Mpv::requestRender() {
 
 void Mpv::render(int w, int h) {
   if (renderCtx == nullptr) return;
-
-  width = w;
-  height = h;
 
   int flip_y{1};
   mpv_opengl_fbo mpfbo{0, w, h};

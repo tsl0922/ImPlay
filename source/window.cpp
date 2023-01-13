@@ -47,10 +47,18 @@ Window::~Window() {
 }
 
 bool Window::run(Helpers::OptionParser& parser) {
-  mpv->win() = window;
   mpv->wakeupCb() = [](Mpv* ctx) { glfwPostEmptyEvent(); };
   mpv->updateCb() = [this](Mpv* ctx) {
     if (ctx->wantRender()) requestRender();
+  };
+  mpv->renderCb() = [this](std::function<void(int, int)> cb) {
+#ifdef __APPLE__
+    std::lock_guard<std::mutex> lk(contextMutex);
+#endif
+    glfwMakeContextCurrent(window);
+    cb(width, height);
+    glfwSwapBuffers(window);
+    glfwMakeContextCurrent(nullptr);
   };
   dispatch.wakeup() = []() { glfwPostEmptyEvent(); };
 
@@ -104,6 +112,9 @@ bool Window::run(Helpers::OptionParser& parser) {
 }
 
 void Window::render() {
+#ifdef __APPLE__
+  std::lock_guard<std::mutex> lk(contextMutex);
+#endif
   glfwMakeContextCurrent(window);
   ImGui_ImplOpenGL3_NewFrame();
   ImGui_ImplGlfw_NewFrame();

@@ -19,6 +19,7 @@ class Mpv {
   using EventHandler = std::function<void(void *)>;
   using LogHandler = std::function<void(const char *, const char *, const char *)>;
   using Callback = std::function<void(Mpv *)>;
+  using RenderCb = std::function<void(std::function<void(int, int)>)>;
 
   void init();
   void render(int w, int h);
@@ -34,8 +35,8 @@ class Mpv {
 
   Callback &wakeupCb() { return wakeupCb_; }
   Callback &updateCb() { return updateCb_; }
+  RenderCb &renderCb() { return renderCb_; }
   std::atomic_bool &runLoop() { return runLoop_; }
-  GLFWwindow *&win() { return window; }
 
   int command(std::string args) { return mpv_command_string(mpv, args.c_str()); }
   int command(const char *args) { return mpv_command_string(mpv, args); }
@@ -112,8 +113,6 @@ class Mpv {
   void renderLoop();
 
   int64_t wid = 0;
-  int width, height;
-  GLFWwindow *window = nullptr;
   mpv_handle *main = nullptr;
   mpv_handle *mpv = nullptr;
   mpv_render_context *renderCtx = nullptr;
@@ -125,6 +124,7 @@ class Mpv {
   std::atomic_bool runLoop_ = false;
   std::mutex mutex;
   std::condition_variable cond;
+  RenderCb renderCb_;
 
   std::vector<std::tuple<mpv_event_id, EventHandler>> events;
   std::vector<std::tuple<std::string, mpv_format, EventHandler>> propertyEvents;

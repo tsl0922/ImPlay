@@ -38,6 +38,7 @@ class Window {
 
   const int defaultTimeout = 50;  // ms
 
+  std::mutex contextMutex;
   std::mutex renderMutex;
   std::condition_variable renderCond;
   std::atomic_int waitTimeout = defaultTimeout;
