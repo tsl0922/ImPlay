@@ -31,20 +31,15 @@ void Settings::drawGeneralTab() {
   if (ImGui::BeginTabItem("General")) {
     ImGui::Text("MPV");
     ImGui::Indent();
-    if (ImGui::Checkbox("Use mpv's config dir", &config->mpvConfig)) {
-      const char *configDir = config->mpvConfig ? Helpers::getDataDir("mpv") : Helpers::getDataDir();
-      mpv->property("config-dir", configDir);
-      mpv->loadConfig(fmt::format("{}/mpv.conf", configDir).c_str());
-      config->save();
-    }
+    ImGui::Checkbox("Use mpv's config dir*", &config->mpvConfig);
     ImGui::SameLine();
     Helpers::marker("ImPlay will use it's own config dir for libmpv by default.");
-    if (ImGui::Checkbox("Enable --wid for libmpv* (DO NOT USE)", &config->mpvWid)) config->save();
+    ImGui::Checkbox("Enable --wid for libmpv* (DO NOT USE)", &config->mpvWid);
     ImGui::SameLine();
     Helpers::marker(
         "Experimental, Windows only, still have issues.\n"
         "This allow using DirectX, Which is usually faster than OpenGL.");
-    if (ImGui::Checkbox("Remember playback progress on exit", &config->watchLater)) config->save();
+    ImGui::Checkbox("Remember playback progress on exit", &config->watchLater);
     ImGui::SameLine();
     Helpers::marker("Exit mpv with the quit-watch-later command.");
     ImGui::Unindent();
@@ -55,15 +50,12 @@ void Settings::drawGeneralTab() {
     for (int i = 0; i < IM_ARRAYSIZE(items); i++) {
       if (strcmp(items[i], config->logLevel.c_str()) == 0) current = i;
     }
-    if (ImGui::Combo("Log Level*", &current, items, IM_ARRAYSIZE(items))) {
-      config->logLevel = items[current];
-      config->save();
-    }
+    if (ImGui::Combo("Log Level*", &current, items, IM_ARRAYSIZE(items))) config->logLevel = items[current];
     ImGui::SameLine();
     Helpers::marker(
         "Controls the log level used on startup.\n"
         "It can be changed later in debug window, but won't be saved.");
-    if (ImGui::InputInt("Log Limit*", &config->logLimit, 0)) config->save();
+    ImGui::InputInt("Log Limit*", &config->logLimit, 0);
     ImGui::SameLine();
     Helpers::marker(
         "Controls the log limit used on startup.\n"
