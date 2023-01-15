@@ -23,11 +23,11 @@ class Player : public Views::View {
   void shutdown();
   bool hasFile() { return fileOpen; }
 
-  void setCursor(double x, double y);
-  void setMouse(int button, int action, int mods);
-  void setScroll(double x, double y);
-  void setKey(int key, int scancode, int action, int mods);
-  void setDrop(int count, const char **paths);
+  void onCursorEvent(double x, double y);
+  void onMouseEvent(int button, int action, int mods);
+  void onScrollEvent(double x, double y);
+  void onKeyEvent(int key, int scancode, int action, int mods);
+  void onDropEvent(int count, const char **paths);
 
  private:
   void initMpv();

@@ -65,7 +65,7 @@ bool Window::run(Helpers::OptionParser& parser) {
   if (openedFileNames != nullptr) {
     int count = 0;
     while (openedFileNames[count] != nullptr) count++;
-    player->setDrop(count, openedFileNames);
+    player->onDropEvent(count, openedFileNames);
   }
 #endif
 
@@ -172,7 +172,7 @@ void Window::initGLFW(const char* title) {
   glfwSetCursorPosCallback(window, [](GLFWwindow* window, double x, double y) {
     auto win = static_cast<Window*>(glfwGetWindowUserPointer(window));
     if (ImGui::GetIO().WantCaptureMouse) return;
-    win->player->setCursor(x, y);
+    win->player->onCursorEvent(x, y);
 #ifdef GLFW_PATCHED
     if (win->mpv->allowDrag() && win->height - y > 150 && glfwGetTime() - win->lastMousePressAt > 0.01) {
       if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS) glfwDragWindow(window);
@@ -182,19 +182,19 @@ void Window::initGLFW(const char* title) {
   glfwSetMouseButtonCallback(window, [](GLFWwindow* window, int button, int action, int mods) {
     auto win = static_cast<Window*>(glfwGetWindowUserPointer(window));
     if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS) win->lastMousePressAt = glfwGetTime();
-    if (!ImGui::GetIO().WantCaptureMouse) win->player->setMouse(button, action, mods);
+    if (!ImGui::GetIO().WantCaptureMouse) win->player->onMouseEvent(button, action, mods);
   });
   glfwSetScrollCallback(window, [](GLFWwindow* window, double x, double y) {
     auto win = static_cast<Window*>(glfwGetWindowUserPointer(window));
-    if (!ImGui::GetIO().WantCaptureMouse) win->player->setScroll(x, y);
+    if (!ImGui::GetIO().WantCaptureMouse) win->player->onScrollEvent(x, y);
   });
   glfwSetKeyCallback(window, [](GLFWwindow* window, int key, int scancode, int action, int mods) {
     auto win = static_cast<Window*>(glfwGetWindowUserPointer(window));
-    if (!ImGui::GetIO().WantCaptureKeyboard) win->player->setKey(key, scancode, action, mods);
+    if (!ImGui::GetIO().WantCaptureKeyboard) win->player->onKeyEvent(key, scancode, action, mods);
   });
   glfwSetDropCallback(window, [](GLFWwindow* window, int count, const char* paths[]) {
     auto win = static_cast<Window*>(glfwGetWindowUserPointer(window));
-    if (!ImGui::GetIO().WantCaptureMouse) win->player->setDrop(count, paths);
+    if (!ImGui::GetIO().WantCaptureMouse) win->player->onDropEvent(count, paths);
   });
 }
 

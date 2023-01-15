@@ -97,13 +97,13 @@ void Player::render(int w, int h) {
 
 void Player::shutdown() { mpv->command(config->watchLater ? "quit-watch-later" : "quit"); }
 
-void Player::setCursor(double x, double y) {
+void Player::onCursorEvent(double x, double y) {
   std::string xs = std::to_string((int)x);
   std::string ys = std::to_string((int)y);
   mpv->commandv("mouse", xs.c_str(), ys.c_str(), nullptr);
 }
 
-void Player::setMouse(int button, int action, int mods) {
+void Player::onMouseEvent(int button, int action, int mods) {
   auto s = actionMappings.find(action);
   if (s == actionMappings.end()) return;
   const std::string cmd = s->second;
@@ -117,7 +117,7 @@ void Player::setMouse(int button, int action, int mods) {
   mpv->commandv(cmd.c_str(), arg.c_str(), nullptr);
 }
 
-void Player::setScroll(double x, double y) {
+void Player::onScrollEvent(double x, double y) {
   if (abs(x) > 0) {
     mpv->command(x > 0 ? "keypress WHEEL_LEFT" : "keypress WHEEL_RIGH");
     mpv->command(x > 0 ? "keyup WHEEL_LEFT" : "keyup WHEEL_RIGH");
@@ -128,7 +128,7 @@ void Player::setScroll(double x, double y) {
   }
 }
 
-void Player::setKey(int key, int scancode, int action, int mods) {
+void Player::onKeyEvent(int key, int scancode, int action, int mods) {
   auto s = actionMappings.find(action);
   if (s == actionMappings.end()) return;
   const std::string cmd = s->second;
@@ -154,7 +154,7 @@ void Player::setKey(int key, int scancode, int action, int mods) {
   mpv->commandv(cmd.c_str(), arg.c_str(), nullptr);
 }
 
-void Player::setDrop(int count, const char** paths) {
+void Player::onDropEvent(int count, const char** paths) {
   std::sort(paths, paths + count, [](const auto& a, const auto& b) { return strcmp(a, b) < 0; });
   for (int i = 0; i < count; i++) {
     mpv->commandv("loadfile", paths[i], i > 0 ? "append-play" : "replace", nullptr);
