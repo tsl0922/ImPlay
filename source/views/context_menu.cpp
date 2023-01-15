@@ -21,6 +21,7 @@ void ContextMenu::draw() {
   bool paused = mpv->paused();
   bool playing = mpv->playing();
   if (ImGui::BeginPopup("##context_menu", ImGuiWindowFlags_NoMove)) {
+    ImGui::GetWindowViewport()->Flags |= ImGuiViewportFlags_TopMost;
     if (ImGui::GetIO().AppFocusLost || ImGui::GetWindowViewport()->Flags & ImGuiViewportFlags_Minimized)
       ImGui::CloseCurrentPopup();
     if (ImGui::MenuItemEx(paused ? "Play" : "Pause", paused ? ICON_FA_PLAY : ICON_FA_PAUSE, "Space", false, playing))
@@ -53,7 +54,7 @@ void ContextMenu::draw() {
         if (ImGui::MenuItem("90°")) mpv->command("set video-rotate 90");
         if (ImGui::MenuItem("180°")) mpv->command("set video-rotate 180");
         if (ImGui::MenuItem("270°")) mpv->command("set video-rotate 270");
-        if (ImGui::MenuItem("Reset")) mpv->command("set video-rotate 0");
+        if (ImGui::MenuItem("0°")) mpv->command("set video-rotate 0");
         ImGui::EndMenu();
       }
       if (ImGui::BeginMenuEx("Zoom", ICON_FA_GLASSES)) {
@@ -72,7 +73,7 @@ void ContextMenu::draw() {
         if (ImGui::MenuItem("Left", "Alt+right")) mpv->command("add video-pan-x -0.1");
         if (ImGui::MenuItem("Down", "Alt+up")) mpv->command("add video-pan-y 0.1");
         if (ImGui::MenuItem("Up", "Alt+down")) mpv->command("add video-pan-y -0.1");
-        if (ImGui::MenuItem("Rest", "Alt+BS")) mpv->command("set video-pan-x 0 ; set video-pan-y 0");
+        if (ImGui::MenuItem("Reset", "Alt+BS")) mpv->command("set video-pan-x 0 ; set video-pan-y 0");
         ImGui::EndMenu();
       }
       if (ImGui::BeginMenu("Panscan")) {
@@ -98,18 +99,18 @@ void ContextMenu::draw() {
         if (ImGui::MenuItem("Reset")) mpv->command("set video-aspect -1");
         ImGui::EndMenu();
       }
-      if (ImGui::BeginMenu("Effect")) {
-        if (ImGui::MenuItem("Contrast +1", "2")) mpv->command("add contrast 1");
-        if (ImGui::MenuItem("Contrast -1", "1")) mpv->command("add contrast -1");
-        ImGui::Separator();
+      if (ImGui::BeginMenu("Equalizer")) {
         if (ImGui::MenuItem("Brightness +1", "4")) mpv->command("add brightness 1");
         if (ImGui::MenuItem("Brightness -1", "3")) mpv->command("add brightness -1");
         ImGui::Separator();
-        if (ImGui::MenuItem("Gamma +1", "6")) mpv->command("add gamma 1");
-        if (ImGui::MenuItem("Gamma -1", "5")) mpv->command("add gamma -1");
+        if (ImGui::MenuItem("Contrast +1", "2")) mpv->command("add contrast 1");
+        if (ImGui::MenuItem("Contrast -1", "1")) mpv->command("add contrast -1");
         ImGui::Separator();
         if (ImGui::MenuItem("Saturation +1", "8")) mpv->command("add saturation 1");
         if (ImGui::MenuItem("Saturation -1", "7")) mpv->command("add saturation -1");
+        ImGui::Separator();
+        if (ImGui::MenuItem("Gamma +1", "6")) mpv->command("add gamma 1");
+        if (ImGui::MenuItem("Gamma -1", "5")) mpv->command("add gamma -1");
         ImGui::Separator();
         if (ImGui::MenuItem("Hue +1")) mpv->command("add hue 1");
         if (ImGui::MenuItem("Hue -1")) mpv->command("add hue -1");
