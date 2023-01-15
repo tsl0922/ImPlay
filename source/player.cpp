@@ -2,7 +2,6 @@
 #include <fmt/color.h>
 #include <filesystem>
 #include <imgui.h>
-#define IMGUI_DEFINE_MATH_OPERATORS
 #include <imgui_internal.h>
 #include <imgui_impl_glfw.h>
 #include <imgui_impl_opengl3.h>
