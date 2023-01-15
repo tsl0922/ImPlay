@@ -319,40 +319,6 @@ Debug::Console::~Console() {
   for (int i = 0; i < Commands.Size; i++) free(Commands[i]);
 }
 
-// Portable helpers
-static int Stricmp(const char* s1, const char* s2) {
-  int d;
-  while ((d = toupper(*s2) - toupper(*s1)) == 0 && *s1) {
-    s1++;
-    s2++;
-  }
-  return d;
-}
-
-static int Strnicmp(const char* s1, const char* s2, int n) {
-  int d = 0;
-  while (n > 0 && (d = toupper(*s2) - toupper(*s1)) == 0 && *s1) {
-    s1++;
-    s2++;
-    n--;
-  }
-  return d;
-}
-
-static char* Strdup(const char* s) {
-  IM_ASSERT(s);
-  size_t len = strlen(s) + 1;
-  void* buf = malloc(len);
-  IM_ASSERT(buf);
-  return (char*)memcpy(buf, (const void*)s, len);
-}
-
-static void Strtrim(char* s) {
-  char* str_end = s + strlen(s);
-  while (str_end > s && str_end[-1] == ' ') str_end--;
-  *str_end = 0;
-}
-
 void Debug::Console::init(const char* level, int limit) {
   LogLevel = level;
   LogLimit = limit;
@@ -363,7 +329,7 @@ void Debug::Console::init(const char* level, int limit) {
 
 void Debug::Console::initCommands() {
   if (CommandInited) return;
-  for (auto& cmd : builtinCommands) Commands.push_back(Strdup(cmd.c_str()));
+  for (auto& cmd : builtinCommands) Commands.push_back(ImStrdup(cmd.c_str()));
 
   auto node = mpv->property<mpv_node, MPV_FORMAT_NODE>("command-list");
   for (int i = 0; i < node.u.list->num; i++) {
@@ -372,7 +338,7 @@ void Debug::Console::initCommands() {
       auto key = item.u.list->keys[j];
       auto value = item.u.list->values[j];
       if (strcmp(key, "name") == 0) {
-        Commands.push_back(Strdup(value.u.string));
+        Commands.push_back(ImStrdup(value.u.string));
       }
     }
   }
@@ -392,7 +358,7 @@ void Debug::Console::AddLog(const char* level, const char* fmt, ...) {
   vsnprintf(buf, IM_ARRAYSIZE(buf), fmt, args);
   buf[IM_ARRAYSIZE(buf) - 1] = 0;
   va_end(args);
-  Items.push_back({Strdup(buf), level});
+  Items.push_back({ImStrdup(buf), level});
   if (Items.Size > LogLimit) {
     int offset = Items.Size - LogLimit;
     for (int i = 0; i < offset; i++) free(Items[i].Str);
@@ -513,7 +479,7 @@ void Debug::Console::draw() {
           },
           (void*)this)) {
     char* s = InputBuf;
-    Strtrim(s);
+    ImStrTrimBlanks(s);
     if (s[0]) ExecCommand(s);
     strcpy(s, "");
     reclaim_focus = true;
@@ -531,17 +497,17 @@ void Debug::Console::ExecCommand(const char* command_line) {
   // This isn't trying to be smart or optimal.
   HistoryPos = -1;
   for (int i = History.Size - 1; i >= 0; i--)
-    if (Stricmp(History[i], command_line) == 0) {
+    if (ImStricmp(History[i], command_line) == 0) {
       free(History[i]);
       History.erase(History.begin() + i);
       break;
     }
-  History.push_back(Strdup(command_line));
+  History.push_back(ImStrdup(command_line));
 
   // Process command
-  if (Stricmp(command_line, "CLEAR") == 0) {
+  if (ImStricmp(command_line, "CLEAR") == 0) {
     ClearLog();
-  } else if (Stricmp(command_line, "HELP") == 0) {
+  } else if (ImStricmp(command_line, "HELP") == 0) {
     AddLog("info", "Builtin Commands:");
     for (auto& cmd : builtinCommands) AddLog("- %s", cmd.c_str());
     AddLog("info", "MPV Commands:");
@@ -549,7 +515,7 @@ void Debug::Console::ExecCommand(const char* command_line) {
     auto commands = formatCommands(node);
     for (auto& [name, args] : commands) AddLog("info", "- %s %s", name.c_str(), args.c_str());
     mpv_free_node_contents(&node);
-  } else if (Stricmp(command_line, "HISTORY") == 0) {
+  } else if (ImStricmp(command_line, "HISTORY") == 0) {
     int first = History.Size - 10;
     for (int i = first > 0 ? first : 0; i < History.Size; i++) AddLog("info", "%3d: %s\n", i, History[i]);
   } else {
@@ -580,7 +546,7 @@ int Debug::Console::TextEditCallback(ImGuiInputTextCallbackData* data) {
       // Build a list of candidates
       ImVector<const char*> candidates;
       for (int i = 0; i < Commands.Size; i++)
-        if (Strnicmp(Commands[i], word_start, (int)(word_end - word_start)) == 0) candidates.push_back(Commands[i]);
+        if (ImStrnicmp(Commands[i], word_start, (int)(word_end - word_start)) == 0) candidates.push_back(Commands[i]);
 
       if (candidates.Size == 0) {
         // No match
@@ -627,7 +593,6 @@ int Debug::Console::TextEditCallback(ImGuiInputTextCallbackData* data) {
       break;
     }
     case ImGuiInputTextFlags_CallbackHistory: {
-      // Example of HISTORY
       const int prev_history_pos = HistoryPos;
       if (data->EventKey == ImGuiKey_UpArrow) {
         if (HistoryPos == -1)
