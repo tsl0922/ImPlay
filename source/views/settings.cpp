@@ -13,8 +13,10 @@ Settings::Settings(Config *config, Mpv *mpv) : View() {
 void Settings::draw() {
   if (!m_open) return;
   ImGui::OpenPopup("Settings");
-  ImGui::SetNextWindowSize(ImVec2(850, 400), ImGuiCond_FirstUseEver);
-  if (ImGui::BeginPopupModal("Settings", &m_open)) {
+  ImVec2 wSize = ImGui::GetMainViewport()->WorkSize;
+  ImGui::SetNextWindowSize(ImVec2(wSize.x * 0.6f, wSize.y * 0.5f), ImGuiCond_Always);
+  ImGui::SetNextWindowPos(ImGui::GetMainViewport()->GetWorkCenter(), ImGuiCond_Always, ImVec2(0.5f, 0.5f));
+  if (ImGui::BeginPopupModal("Settings", &m_open, ImGuiWindowFlags_NoMove)) {
     ImGui::TextWrapped("* Changes will take effect after restart.");
     if (ImGui::BeginTabBar("Settings")) {
       drawGeneralTab();

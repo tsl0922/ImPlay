@@ -1,6 +1,3 @@
-#include <imgui.h>
-#define IMGUI_DEFINE_MATH_OPERATORS
-#include <imgui_internal.h>
 #include <algorithm>
 #include <cstring>
 #include "views/command_palette.h"
@@ -17,15 +14,11 @@ void CommandPalette::draw() {
     justOpened = true;
   }
 
-  auto viewport = ImGui::GetMainViewport();
-  auto pos = viewport->Pos;
-  auto size = viewport->Size;
-  auto width = size.x * 0.5f;
-  auto height = size.y * 0.45f;
-
-  ImGui::SetNextWindowSize(ImVec2(width, height), ImGuiCond_Always);
-  ImGui::SetNextWindowPos(ImVec2(pos.x + size.x * 0.5f, pos.y + 50.0f), ImGuiCond_Always, ImVec2(0.5f, 0.0f));
-
+  auto pos = ImGui::GetMainViewport()->Pos;
+  auto size = ImGui::GetMainViewport()->Size;
+  ImVec2 popupSize = ImVec2(size.x * 0.5f, size.y * 0.45f);
+  ImGui::SetNextWindowSize(popupSize, ImGuiCond_Always);
+  ImGui::SetNextWindowPos(ImVec2(pos.x + size.x * 0.5f, pos.y + size.y * 0.1), ImGuiCond_Always, ImVec2(0.5f, 0.0f));
   if (ImGui::BeginPopup("##command_palette")) {
     if (ImGui::IsKeyDown(ImGuiKey_Escape) || ImGui::GetIO().AppFocusLost ||
         ImGui::GetWindowViewport()->Flags & ImGuiViewportFlags_Minimized)
@@ -40,7 +33,7 @@ void CommandPalette::draw() {
 
     drawInput();
     ImGui::Separator();
-    drawList(width);
+    drawList(popupSize.x);
 
     ImGui::EndPopup();
   }

@@ -2,6 +2,7 @@
 #include <fmt/color.h>
 #include <filesystem>
 #include <imgui.h>
+#define IMGUI_DEFINE_MATH_OPERATORS
 #include <imgui_internal.h>
 #include <imgui_impl_glfw.h>
 #include <imgui_impl_opengl3.h>
@@ -53,12 +54,14 @@ bool Player::init(Helpers::OptionParser& parser) {
 void Player::draw() {
   if (!mpv->forceWindow() && !fileOpen) {
     const ImGuiViewport* viewport = ImGui::GetMainViewport();
+    const float imageSize = std::min(viewport->WorkSize.x, viewport->WorkSize.y) * 0.2f;
+    ImGui::SetNextWindowSize(ImVec2(imageSize, imageSize) * 1.5f, ImGuiCond_Always);
     ImGui::SetNextWindowPos(viewport->GetCenter(), ImGuiCond_Always, ImVec2(0.5f, 0.5f));
     ImGui::PushStyleColor(ImGuiCol_WindowShadow, ImVec4(0, 0, 0, 0));
     ImGui::Begin("Logo", nullptr,
                  ImGuiWindowFlags_NoNav | ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoInputs |
                      ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoFocusOnAppearing);
-    ImGui::Image(iconTexture, ImVec2(iconWidth * 0.5f, iconHeight * 0.5f));
+    ImGui::Image(iconTexture, ImVec2(imageSize, imageSize));
     ImGui::End();
     ImGui::PopStyleColor();
   }

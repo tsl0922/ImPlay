@@ -2,8 +2,6 @@
 #include <filesystem>
 #include <fmt/format.h>
 #include <fmt/chrono.h>
-#include <imgui.h>
-#include <imgui_internal.h>
 #include "command.h"
 #include "helpers.h"
 
@@ -238,6 +236,7 @@ void Command::setTheme(const char *theme) {
   style.PopupRounding = 5.0f;
   style.WindowRounding = 5.0f;
   style.WindowShadowSize = 50.0f;
+  style.ScrollbarSize = 10.0f;
   style.Colors[ImGuiCol_WindowShadow] = ImVec4(0, 0, 0, 1.0f);
 
   ImGui::GetStyle() = style;

@@ -1,5 +1,3 @@
-#include <imgui.h>
-#include <imgui_internal.h>
 #include <fonts/fontawesome.h>
 #include <fmt/format.h>
 #include <fmt/chrono.h>
@@ -183,7 +181,7 @@ void ContextMenu::draw() {
         mpv->commandv("script-message-to", "implay", "about", nullptr);
       if (ImGui::MenuItem("Keybindings"))
         mpv->commandv("script-message-to", "implay", "command-palette", "bindings", nullptr);
-      if (ImGui::MenuItem("Settings")) mpv->commandv("script-message-to", "implay", "settings", nullptr);
+      if (ImGui::MenuItemEx("Settings", ICON_FA_COG)) mpv->commandv("script-message-to", "implay", "settings", nullptr);
       ImGui::EndMenu();
     }
     ImGui::Separator();

@@ -1,6 +1,4 @@
 #include <map>
-#include <imgui.h>
-#include <imgui_internal.h>
 #include <fonts/fontawesome.h>
 #include <fmt/format.h>
 #include "views/debug.h"
@@ -25,9 +23,11 @@ void Debug::show() {
 
 void Debug::draw() {
   if (!m_open) return;
-  const ImGuiViewport* viewport = ImGui::GetMainViewport();
-  ImGui::SetNextWindowPos(ImVec2(viewport->WorkPos.x + 60, viewport->WorkPos.y + 20), ImGuiCond_FirstUseEver);
-  ImGui::SetNextWindowSize(ImVec2(580, 680), ImGuiCond_FirstUseEver);
+  ImVec2 wPos = ImGui::GetMainViewport()->WorkPos;
+  ImVec2 wSize = ImGui::GetMainViewport()->WorkSize;
+  ImGui::SetNextWindowSize(ImVec2(wSize.x * 0.4f, wSize.y * 0.8f), ImGuiCond_FirstUseEver);
+  ImGui::SetNextWindowPos(ImVec2(wPos.x + wSize.x * 0.2f, wPos.y + wSize.y * 0.5f), ImGuiCond_FirstUseEver,
+                          ImVec2(0.2f, 0.5f));
   if (ImGui::Begin("Metrics & Debug", &m_open, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoScrollbar)) {
     drawHeader();
     drawProperties("Options", "options");
@@ -45,7 +45,6 @@ void Debug::drawHeader() {
   ImGuiIO& io = ImGui::GetIO();
   char* version = mpv->property("mpv-version");
   auto style = ImGuiStyle();
-  ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(15.0f, 15.0f));
   ImGui::Text("%s", version);
   auto vSize = ImGui::CalcTextSize(fmt::format("ImGui {}", ImGui::GetVersion()).c_str());
   auto mSize = ImGui::CalcTextSize(fmt::format("FPS: %.2f", io.Framerate).c_str());
@@ -56,7 +55,6 @@ void Debug::drawHeader() {
   ImGui::SameLine();
   ImGui::TextColored(style.Colors[ImGuiCol_CheckMark], "FPS: %.2f", io.Framerate);
   if (ImGui::IsItemClicked(ImGuiMouseButton_Left)) m_metrics = !m_metrics;
-  ImGui::PopStyleVar();
   mpv_free(version);
 
   ImGui::TextWrapped("NOTE: playback may become very slow when Properties are expanded.");
@@ -262,7 +260,7 @@ void Debug::drawPropNode(const char* name, mpv_node& node, int depth) {
         break;
     }
     ImGui::PushID(&prop);
-    ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(0, 4.0f));
+    ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(0, ImGui::GetStyle().ItemSpacing.y));
     ImGui::Selectable("", false);
     if (ImGui::BeginPopupContextItem(fmt::format("##menu_{}", title).c_str())) {
       if (ImGui::MenuItem("Copy")) ImGui::SetClipboardText(fmt::format("{}={}", title, value).c_str());
@@ -431,9 +429,9 @@ void Debug::Console::draw() {
     ImGui::EndPopup();
   }
 
-  Filter.Draw("Filter##log", 150);
+  Filter.Draw("Filter##log", 8 * ImGui::GetFontSize());
   ImGui::SameLine();
-  ImGui::SetNextItemWidth(80);
+  ImGui::SetNextItemWidth(3 * ImGui::GetFontSize());
   ImGui::InputInt("Limit", &LogLimit, 0);
   ImGui::SameLine();
   ImGui::Text("(%d/%d)", Items.Size, LogLimit);
