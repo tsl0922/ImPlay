@@ -140,7 +140,6 @@ void ContextMenu::draw() {
       mpv->commandv("script-message-to", "implay", "command-palette", "tracks", nullptr);
     ImGui::Separator();
     if (ImGui::MenuItemEx("Fullscreen", ICON_FA_EXPAND, "f")) mpv->command("cycle fullscreen");
-    if (ImGui::MenuItemEx("Always Ontop", ICON_FA_ARROW_UP, "T")) mpv->command("cycle ontop");
     if (ImGui::MenuItemEx("Command Palette", ICON_FA_SEARCH, "Ctrl+Shift+p"))
       mpv->commandv("script-message-to", "implay", "command-palette", nullptr);
     ImGui::Separator();
@@ -148,6 +147,7 @@ void ContextMenu::draw() {
       if (ImGui::MenuItemEx("Screenshot", ICON_FA_FILE_IMAGE, "s")) mpv->command("async screenshot");
       if (ImGui::MenuItemEx("Window Border", ICON_FA_BORDER_NONE)) mpv->command("cycle border");
       if (ImGui::MenuItemEx("Window Dragging", ICON_FA_HAND_POINTER)) mpv->command("cycle window-dragging");
+      if (ImGui::MenuItemEx("Window Ontop", ICON_FA_ARROW_UP, "T")) mpv->command("cycle ontop");
       if (ImGui::MenuItem("OSC visibility", "DEL")) mpv->command("script-binding osc/visibility");
       ImGui::Separator();
       drawProfilelist();
@@ -179,8 +179,6 @@ void ContextMenu::draw() {
     if (ImGui::BeginMenuEx("Help", ICON_FA_QUESTION_CIRCLE)) {
       if (ImGui::MenuItemEx("About", ICON_FA_INFO_CIRCLE))
         mpv->commandv("script-message-to", "implay", "about", nullptr);
-      if (ImGui::MenuItem("Keybindings"))
-        mpv->commandv("script-message-to", "implay", "command-palette", "bindings", nullptr);
       if (ImGui::MenuItemEx("Settings", ICON_FA_COG)) mpv->commandv("script-message-to", "implay", "settings", nullptr);
       ImGui::EndMenu();
     }
