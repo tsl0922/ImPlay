@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.13)
 
-project(ImPlay VERSION "1.0.1")
+project(ImPlay VERSION "1.0.2")
 
 set(CMAKE_CXX_STANDARD 20)
 
