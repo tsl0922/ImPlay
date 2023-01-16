@@ -56,7 +56,7 @@ void ContextMenu::draw() {
       if (ImGui::BeginMenuEx("Zoom", ICON_FA_GLASSES)) {
         if (ImGui::MenuItemEx("Zoom In", ICON_FA_MINUS_CIRCLE, "Alt +")) mpv->command("add video-zoom  -0.1");
         if (ImGui::MenuItemEx("Zoom Out", ICON_FA_PLUS_CIRCLE, "Alt -")) mpv->command("add video-zoom  0.1");
-        if (ImGui::MenuItem("Rest", "Alt+BS")) mpv->command("set video-zoom 0");
+        if (ImGui::MenuItem("Reset", "Alt+BS")) mpv->command("set video-zoom 0");
         ImGui::Separator();
         if (ImGui::MenuItem("1:4 Quarter")) mpv->command("set video-zoom -2");
         if (ImGui::MenuItem("1:2 Half")) mpv->command("set video-zoom -1");
