@@ -206,7 +206,11 @@ void Window::initImGui() {
 
   float scale = config.Scale;
   if (scale == 0) glfwGetWindowContentScale(window, &scale, nullptr);
+#ifdef __APPLE__
+  float fontSize = config.FontSize;
+#else
   float fontSize = std::floor(config.FontSize * scale);
+#endif
   float iconSize = fontSize - 2;
 
   ImGuiIO& io = ImGui::GetIO();
@@ -215,12 +219,11 @@ void Window::initImGui() {
   io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
   io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
   io.DisplayFramebufferScale = ImVec2(scale, scale);
-#ifdef __APPLE__
-  io.FontGlobalScale = 1.0f / scale;
-#endif
 
   ImGuiStyle& style = ImGui::GetStyle();
   style.ScaleAllSizes(scale);
+
+  io.Fonts->Clear();
 
   ImFontConfig cfg;
   cfg.SizePixels = fontSize;
@@ -234,6 +237,7 @@ void Window::initImGui() {
     io.Fonts->AddFontFromMemoryCompressedTTF(unifont_compressed_data, unifont_compressed_size, 0, &cfg, unifontRange);
   else
     io.Fonts->AddFontFromFileTTF(config.FontPath.c_str(), 0, &cfg, unifontRange);
+
   io.Fonts->Build();
 
   glfwMakeContextCurrent(window);

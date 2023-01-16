@@ -18,7 +18,7 @@ void Settings::draw() {
   ImVec2 wSize = ImGui::GetMainViewport()->WorkSize;
   ImGui::SetNextWindowSize(ImVec2(wSize.x * 0.6f, wSize.y * 0.5f), ImGuiCond_Always);
   ImGui::SetNextWindowPos(ImGui::GetMainViewport()->GetWorkCenter(), ImGuiCond_Always, ImVec2(0.5f, 0.5f));
-  if (ImGui::BeginPopupModal("Settings", &m_open, ImGuiWindowFlags_NoMove)) {
+  if (ImGui::BeginPopupModal("Settings", &m_open, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize)) {
     ImGui::TextWrapped("* Changes will take effect after restart.");
     if (ImGui::BeginTabBar("Settings")) {
       drawGeneralTab();
