@@ -1,7 +1,5 @@
 #include <cstring>
 #include <stdexcept>
-#include <fmt/printf.h>
-#include <fmt/color.h>
 #ifdef _WIN32
 #include <windows.h>
 #endif
@@ -20,7 +18,7 @@ static const char* usage =
     "\n"
     "Visit https://mpv.io/manual/stable to get full mpv options.\n";
 
-static int run_headless(ImPlay::Helpers::OptionParser& parser) {
+static int run_headless(ImPlay::OptionParser& parser) {
   mpv_handle* ctx = mpv_create();
   if (!ctx) throw std::runtime_error("could not create mpv handle");
 
@@ -59,7 +57,7 @@ int main(int argc, char* argv[]) {
   }
 #endif
 
-  ImPlay::Helpers::OptionParser parser;
+  ImPlay::OptionParser parser;
   parser.parse(argc, argv);
   if (parser.options.contains("help")) {
     fmt::print("{}", usage);

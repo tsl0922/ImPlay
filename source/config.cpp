@@ -1,15 +1,14 @@
 #include <filesystem>
 #include <fstream>
-#include <fmt/format.h>
 #include "config.h"
 #include "helpers.h"
 
 namespace ImPlay {
 Config::Config() {
-  const char* dataDir = Helpers::getDataDir();
+  const char* dataDir = datadir();
   if (dataDir[0] != '\0') {
     std::filesystem::create_directories(dataDir);
-    configFile = fmt::format("{}/implay.conf", dataDir);
+    configFile = format("{}/implay.conf", dataDir);
   } else
     configFile = "implay.conf";
 }
@@ -33,13 +32,13 @@ void Config::load() {
 
 void Config::save() {
   ini.sections["interface"]["theme"] = Theme;
-  ini.sections["interface"]["scale"] = fmt::format("{}", Scale);
+  ini.sections["interface"]["scale"] = format("{}", Scale);
   ini.sections["font"]["path"] = FontPath;
   ini.sections["font"]["size"] = std::to_string(FontSize);
   ini.sections["font"]["glyph-range"] = std::to_string(glyphRange);
-  ini.sections["mpv"]["config"] = fmt::format("{}", mpvConfig);
-  ini.sections["mpv"]["wid"] = fmt::format("{}", mpvWid);
-  ini.sections["mpv"]["watch-later"] = fmt::format("{}", watchLater);
+  ini.sections["mpv"]["config"] = format("{}", mpvConfig);
+  ini.sections["mpv"]["wid"] = format("{}", mpvWid);
+  ini.sections["mpv"]["watch-later"] = format("{}", watchLater);
   ini.sections["debug"]["log-level"] = logLevel;
   ini.sections["debug"]["log-limit"] = std::to_string(logLimit);
 

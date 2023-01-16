@@ -17,7 +17,6 @@
 #define GLFW_EXPOSE_NATIVE_X11
 #endif
 #include <GLFW/glfw3native.h>
-#include <fmt/format.h>
 #include <stdexcept>
 #include <thread>
 #include "window.h"
@@ -50,7 +49,7 @@ Window::~Window() {
   exitGLFW();
 }
 
-bool Window::run(Helpers::OptionParser& parser) {
+bool Window::run(OptionParser& parser) {
   mpv->wakeupCb() = [](Mpv* ctx) { glfwPostEmptyEvent(); };
   mpv->updateCb() = [this](Mpv* ctx) {
     if (ctx->wantRender()) requestRender();
@@ -115,7 +114,7 @@ void Window::requestRender() {
 }
 
 void Window::initGLFW(const char* title) {
-  glfwSetErrorCallback([](int error, const char* desc) { fmt::print("GLFW Error [{}]: {}\n", error, desc); });
+  glfwSetErrorCallback([](int error, const char* desc) { print("GLFW Error [{}]: {}\n", error, desc); });
   if (!glfwInit()) throw std::runtime_error("Failed to initialize GLFW!");
 
 #if defined(__APPLE__)
@@ -204,7 +203,7 @@ void Window::initImGui() {
 
   float scale = config.Scale;
   if (scale == 0) glfwGetWindowContentScale(window, &scale, nullptr);
-  float fontSize = std::round(config.FontSize * scale);
+  float fontSize = std::floor(config.FontSize * scale);
   float iconSize = fontSize - 2;
 
   ImGuiIO& io = ImGui::GetIO();

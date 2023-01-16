@@ -17,7 +17,7 @@ class Window {
   Window();
   ~Window();
 
-  bool run(Helpers::OptionParser &optionParser);
+  bool run(OptionParser &optionParser);
 
  private:
   void render();

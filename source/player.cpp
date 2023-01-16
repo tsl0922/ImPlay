@@ -1,5 +1,3 @@
-#include <fmt/printf.h>
-#include <fmt/color.h>
 #include <filesystem>
 #include <imgui.h>
 #include <imgui_internal.h>
@@ -21,8 +19,8 @@ Player::Player(Config* config, Dispatch* dispatch, GLFWwindow* window, Mpv* mpv,
 
 Player::~Player() { delete cmd; }
 
-bool Player::init(Helpers::OptionParser& parser) {
-  if (!Helpers::loadTexture("icon.png", &iconTexture, &iconWidth, &iconHeight)) return false;
+bool Player::init(OptionParser& parser) {
+  if (!ImGui::LoadTexture("icon.png", &iconTexture, &iconWidth, &iconHeight)) return false;
 
   mpv->option("config", "yes");
   mpv->option("osc", "yes");
@@ -30,7 +28,7 @@ bool Player::init(Helpers::OptionParser& parser) {
   mpv->option("input-vo-keyboard", "yes");
   mpv->option("osd-playing-msg", "${media-title}");
   mpv->option("screenshot-directory", "~~desktop/");
-  if (!config->mpvConfig) mpv->option("config-dir", Helpers::getDataDir());
+  if (!config->mpvConfig) mpv->option("config-dir", datadir());
 
   for (const auto& [key, value] : parser.options) {
     if (int err = mpv->option(key.c_str(), value.c_str()); err < 0) {
@@ -115,7 +113,7 @@ void Player::onMouseEvent(int button, int action, int mods) {
   s = mbtnMappings.find(button);
   if (s == actionMappings.end()) return;
   keys.push_back(s->second);
-  const std::string arg = fmt::format("{}", fmt::join(keys, "+"));
+  const std::string arg = format("{}", join(keys, "+"));
   mpv->commandv(cmd.c_str(), arg.c_str(), nullptr);
 }
 
@@ -152,7 +150,7 @@ void Player::onKeyEvent(int key, int scancode, int action, int mods) {
   std::vector<std::string> keys;
   translateMod(keys, mods);
   keys.push_back(name);
-  const std::string arg = fmt::format("{}", fmt::join(keys, "+"));
+  const std::string arg = format("{}", join(keys, "+"));
   mpv->commandv(cmd.c_str(), arg.c_str(), nullptr);
 }
 

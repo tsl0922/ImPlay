@@ -16,8 +16,45 @@
 #include "helpers.h"
 #include <imgui_impl_opengl3_loader.h>
 
-namespace ImPlay::Helpers {
-void OptionParser::parse(int argc, char** argv) {
+void ImGui::HelpMarker(const char* desc) {
+  ImGui::TextDisabled("(?)");
+  if (ImGui::IsItemHovered(ImGuiHoveredFlags_DelayShort)) {
+    ImGui::BeginTooltip();
+    ImGui::PushTextWrapPos(ImGui::GetFontSize() * 35.0f);
+    ImGui::TextUnformatted(desc);
+    ImGui::PopTextWrapPos();
+    ImGui::EndTooltip();
+  }
+}
+
+bool ImGui::LoadTexture(const char* path, ImTextureID* out_texture, int* out_width, int* out_height) {
+  int width, height;
+  auto icon = romfs::get(path);
+  unsigned char* m_data =
+      stbi_load_from_memory(reinterpret_cast<const stbi_uc*>(icon.data()), icon.size(), &width, &height, NULL, 4);
+  if (m_data == NULL) return false;
+
+  GLuint texture;
+  glGenTextures(1, &texture);
+  glBindTexture(GL_TEXTURE_2D, texture);
+
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+#if defined(GL_UNPACK_ROW_LENGTH) && !defined(__EMSCRIPTEN__)
+  glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
+#endif
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, height, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, m_data);
+  stbi_image_free(m_data);
+
+  *out_texture = reinterpret_cast<ImTextureID>(static_cast<intptr_t>(texture));
+  *out_width = width;
+  *out_height = height;
+
+  return true;
+}
+
+void ImPlay::OptionParser::parse(int argc, char** argv) {
   bool optEnd = false;
 #ifdef _WIN32
   int wideArgc;
@@ -54,81 +91,23 @@ void OptionParser::parse(int argc, char** argv) {
   }
 }
 
-bool OptionParser::check(std::string key, std::string value) {
+bool ImPlay::OptionParser::check(std::string key, std::string value) {
   auto it = options.find(key);
   return it != options.end() && it->second == value;
 }
 
-void marker(const char* desc) {
-  ImGui::TextDisabled("(?)");
-  if (ImGui::IsItemHovered(ImGuiHoveredFlags_DelayShort)) {
-    ImGui::BeginTooltip();
-    ImGui::PushTextWrapPos(ImGui::GetFontSize() * 35.0f);
-    ImGui::TextUnformatted(desc);
-    ImGui::PopTextWrapPos();
-    ImGui::EndTooltip();
-  }
-}
-
-bool loadTexture(const char* path, ImTextureID* out_texture, int* out_width, int* out_height) {
-  int width, height;
-  auto icon = romfs::get(path);
-  unsigned char* m_data =
-      stbi_load_from_memory(reinterpret_cast<const stbi_uc*>(icon.data()), icon.size(), &width, &height, NULL, 4);
-  if (m_data == NULL) return false;
-
-  GLuint texture;
-  glGenTextures(1, &texture);
-  glBindTexture(GL_TEXTURE_2D, texture);
-
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-#if defined(GL_UNPACK_ROW_LENGTH) && !defined(__EMSCRIPTEN__)
-  glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
-#endif
-  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, height, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, m_data);
-  stbi_image_free(m_data);
-
-  *out_texture = reinterpret_cast<ImTextureID>(static_cast<intptr_t>(texture));
-  *out_width = width;
-  *out_height = height;
-
-  return true;
-}
-
-std::string tolower(std::string s) {
-  std::string str = s;
-  std::transform(str.begin(), str.end(), str.begin(), ::tolower);
-  return str;
-}
-
-std::string toupper(std::string s) {
-  std::string str = s;
-  std::transform(str.begin(), str.end(), str.begin(), ::toupper);
-  return str;
-}
-
-std::string trim(std::string s) {
-  std::string str = s;
-  const char* ws = " \t\n\r\f\v";
-  str.erase(0, str.find_first_not_of(ws));
-  str.erase(str.find_last_not_of(ws) + 1);
-  return str;
-}
-
-int openUri(const char* uri) {
+int ImPlay::openUri(const char* uri) {
 #ifdef __APPLE__
-  return system(fmt::format("open {}", uri).c_str());
+  return system(format("open {}", uri).c_str());
 #elif defined(_WIN32) || defined(__CYGWIN__)
   return ShellExecute(0, 0, uri, 0, 0, SW_SHOW) > (HINSTANCE)32 ? 0 : 1;
 #else
   char command[256];
-  return system(fmt::format("xdg-open {}", uri).c_str());
+  return system(format("xdg-open {}", uri).c_str());
 #endif
 }
 
-const char* getDataDir(const char* subdir) {
+const char* ImPlay::datadir(const char* subdir) {
   static char dataDir[256] = {0};
 #ifdef _WIN32
   wchar_t* dir = nullptr;
@@ -152,4 +131,3 @@ const char* getDataDir(const char* subdir) {
   }
   return &dataDir[0];
 }
-}  // namespace ImPlay::Helpers

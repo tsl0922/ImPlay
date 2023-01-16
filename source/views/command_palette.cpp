@@ -115,8 +115,8 @@ void CommandPalette::drawList(float width) {
 void CommandPalette::match(const std::string& input) {
   constexpr static auto MatchCommand = [](const std::string& input, const std::string& text) -> int {
     if (input.empty()) return 1;
-    auto l_text = Helpers::tolower(text);
-    auto l_input = Helpers::tolower(input);
+    auto l_text = tolower(text);
+    auto l_input = tolower(input);
     if (l_text.starts_with(l_input)) return 3;
     if (l_text.find(l_input) != std::string::npos) return 2;
     return 0;

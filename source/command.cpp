@@ -1,7 +1,5 @@
 #include <map>
 #include <filesystem>
-#include <fmt/format.h>
-#include <fmt/chrono.h>
 #include "command.h"
 #include "helpers.h"
 
@@ -96,9 +94,9 @@ void Command::execute(int n_args, const char **args_) {
 void Command::openMediaFiles(std::function<void(std::u8string, int)> callback) {
   openFiles(
       {
-          {"Videos Files", fmt::format("{}", fmt::join(videoTypes, ",")).c_str()},
-          {"Audio Files", fmt::format("{}", fmt::join(audioTypes, ",")).c_str()},
-          {"Image Files", fmt::format("{}", fmt::join(imageTypes, ",")).c_str()},
+          {"Videos Files", format("{}", join(videoTypes, ",")).c_str()},
+          {"Audio Files", format("{}", join(audioTypes, ",")).c_str()},
+          {"Image Files", format("{}", join(imageTypes, ",")).c_str()},
       },
       [&](nfdu8char_t *path, int i) { callback(reinterpret_cast<const char8_t *>(path), i); });
 }
@@ -135,14 +133,14 @@ void Command::openIso() {
 }
 
 void Command::loadSubtitles() {
-  openFiles({{"Subtitle Files", fmt::format("{}", fmt::join(subtitleTypes, ",")).c_str()}},
+  openFiles({{"Subtitle Files", format("{}", join(subtitleTypes, ",")).c_str()}},
             [&](nfdu8char_t *path, int i) { mpv->commandv("sub-add", path, i > 0 ? "auto" : "select", nullptr); });
 }
 
 void Command::openClipboard() {
   auto content = glfwGetClipboardString(window);
   if (content != nullptr && content[0] != '\0') {
-    auto str = Helpers::trim(content);
+    auto str = trim(content);
     mpv->commandv("loadfile", str.c_str(), nullptr);
     mpv->commandv("show-text", str.c_str(), nullptr);
   }
@@ -176,7 +174,7 @@ void Command::openCommandPalette(int n, const char **args) {
     for (auto &item : playlist) {
       std::string title = item.title;
       if (title.empty() && !item.filename.empty()) title = item.filename;
-      if (title.empty()) title = fmt::format("Item {}", item.id + 1);
+      if (title.empty()) title = format("Item {}", item.id + 1);
       items.push_back({
           title,
           item.path,
@@ -187,8 +185,8 @@ void Command::openCommandPalette(int n, const char **args) {
   } else if (source == "chapters") {
     auto chapters = mpv->chapterList();
     for (auto &item : chapters) {
-      auto title = item.title.empty() ? fmt::format("Chapter {}", item.id + 1) : item.title;
-      auto time = fmt::format("{:%H:%M:%S}", std::chrono::duration<int>((int)item.time));
+      auto title = item.title.empty() ? format("Chapter {}", item.id + 1) : item.title;
+      auto time = format("{:%H:%M:%S}", std::chrono::duration<int>((int)item.time));
       items.push_back({
           title,
           "",
@@ -201,12 +199,12 @@ void Command::openCommandPalette(int n, const char **args) {
     auto tracks = mpv->trackList();
     for (auto &item : tracks) {
       if (type[0] != '\0' && item.type != type) continue;
-      auto title = item.title.empty() ? fmt::format("Track {}", item.id) : item.title;
-      if (!item.lang.empty()) title += fmt::format(" [{}]", item.lang);
+      auto title = item.title.empty() ? format("Track {}", item.id) : item.title;
+      if (!item.lang.empty()) title += format(" [{}]", item.lang);
       items.push_back({
           title,
           "",
-          Helpers::toupper(item.type),
+          toupper(item.type),
           [=, this]() {
             if (item.type == "audio")
               mpv->property<int64_t, MPV_FORMAT_INT64>("aid", item.id);

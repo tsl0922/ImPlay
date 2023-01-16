@@ -1,6 +1,5 @@
 #include <map>
 #include <fonts/fontawesome.h>
-#include <fmt/format.h>
 #include "views/debug.h"
 #include "mpv.h"
 #include "helpers.h"
@@ -46,8 +45,8 @@ void Debug::drawHeader() {
   char* version = mpv->property("mpv-version");
   auto style = ImGuiStyle();
   ImGui::Text("%s", version);
-  auto vSize = ImGui::CalcTextSize(fmt::format("ImGui {}", ImGui::GetVersion()).c_str());
-  auto mSize = ImGui::CalcTextSize(fmt::format("FPS: %.2f", io.Framerate).c_str());
+  auto vSize = ImGui::CalcTextSize(format("ImGui {}", ImGui::GetVersion()).c_str());
+  auto mSize = ImGui::CalcTextSize(format("FPS: %.2f", io.Framerate).c_str());
   ImGui::SameLine(ImGui::GetWindowWidth() -
                   (vSize.x + mSize.x + 4 * style.ItemInnerSpacing.x + 3 * style.ItemSpacing.x));
   ImGui::Text("ImGui %s", ImGui::GetVersion());
@@ -72,7 +71,7 @@ void Debug::drawConsole() {
 void Debug::drawBindings() {
   auto bindings = mpv->bindingList();
   if (m_node != "Bindings") ImGui::SetNextItemOpen(false, ImGuiCond_Always);
-  if (!ImGui::CollapsingHeader(fmt::format("Bindings [{}]", bindings.size()).c_str())) return;
+  if (!ImGui::CollapsingHeader(format("Bindings [{}]", bindings.size()).c_str())) return;
   m_node = "Bindings";
 
   if (ImGui::BeginListBox("input-bindings", ImVec2(-FLT_MIN, -FLT_MIN))) {
@@ -121,7 +120,7 @@ static std::vector<std::pair<std::string, std::string>> formatCommands(mpv_node&
             if (strcmp(k, "name") == 0) name_ = v.u.string;
             if (strcmp(k, "optional") == 0) optional_ = v.u.flag;
           }
-          args.push_back(optional_ ? fmt::format("<{}>", name_) : name_);
+          args.push_back(optional_ ? format("<{}>", name_) : name_);
         }
       }
       if (strcmp(key, "vararg") == 0) vararg = value.u.flag;
@@ -129,7 +128,7 @@ static std::vector<std::pair<std::string, std::string>> formatCommands(mpv_node&
     if (name == nullptr) continue;
     std::string args_str;
     if (!args.empty()) {
-      args_str = fmt::format("{}", fmt::join(args, " "));
+      args_str = format("{}", join(args, " "));
       if (vararg) args_str += " ...";
     }
     commands.push_back({name, args_str});
@@ -140,7 +139,7 @@ static std::vector<std::pair<std::string, std::string>> formatCommands(mpv_node&
 void Debug::drawCommands() {
   auto node = mpv->property<mpv_node, MPV_FORMAT_NODE>("command-list");
   if (m_node != "Commands") ImGui::SetNextItemOpen(false, ImGuiCond_Always);
-  if (!ImGui::CollapsingHeader(fmt::format("Commands [{}]", node.u.list->num).c_str())) {
+  if (!ImGui::CollapsingHeader(format("Commands [{}]", node.u.list->num).c_str())) {
     mpv_free_node_contents(&node);
     return;
   }
@@ -174,7 +173,7 @@ void Debug::drawCommands() {
 void Debug::drawProperties(const char* title, const char* key) {
   mpv_node node = mpv->property<mpv_node, MPV_FORMAT_NODE>(key);
   if (m_node != title) ImGui::SetNextItemOpen(false, ImGuiCond_Always);
-  if (!ImGui::CollapsingHeader(fmt::format("{} [{}]", title, node.u.list->num).c_str())) {
+  if (!ImGui::CollapsingHeader(format("{} [{}]", title, node.u.list->num).c_str())) {
     mpv_free_node_contents(&node);
     return;
   }
@@ -249,21 +248,21 @@ void Debug::drawPropNode(const char* name, mpv_node& node, int depth) {
         value = prop.u.flag ? "yes" : "no";
         break;
       case MPV_FORMAT_INT64:
-        value = fmt::format("{}", prop.u.int64);
+        value = format("{}", prop.u.int64);
         break;
       case MPV_FORMAT_DOUBLE:
-        value = fmt::format("{}", prop.u.double_);
+        value = format("{}", prop.u.double_);
         break;
       default:
-        value = fmt::format("Unknown format: {}", (int)prop.format);
+        value = format("Unknown format: {}", (int)prop.format);
         color = style.Colors[ImGuiCol_TextDisabled];
         break;
     }
     ImGui::PushID(&prop);
     ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(0, ImGui::GetStyle().ItemSpacing.y));
     ImGui::Selectable("", false);
-    if (ImGui::BeginPopupContextItem(fmt::format("##menu_{}", title).c_str())) {
-      if (ImGui::MenuItem("Copy")) ImGui::SetClipboardText(fmt::format("{}={}", title, value).c_str());
+    if (ImGui::BeginPopupContextItem(format("##menu_{}", title).c_str())) {
+      if (ImGui::MenuItem("Copy")) ImGui::SetClipboardText(format("{}={}", title, value).c_str());
       if (ImGui::MenuItem("Copy Name")) ImGui::SetClipboardText(title);
       if (ImGui::MenuItem("Copy value")) ImGui::SetClipboardText(value.c_str());
       ImGui::EndPopup();
@@ -286,15 +285,15 @@ void Debug::drawPropNode(const char* name, mpv_node& node, int depth) {
       drawSimple(name, node);
       break;
     case MPV_FORMAT_NODE_ARRAY:
-      if (ImGui::TreeNode(fmt::format("{} [{}]", name, node.u.list->num).c_str())) {
+      if (ImGui::TreeNode(format("{} [{}]", name, node.u.list->num).c_str())) {
         for (int i = 0; i < node.u.list->num; i++)
-          drawPropNode(fmt::format("#{}", i).c_str(), node.u.list->values[i], depth + 1);
+          drawPropNode(format("#{}", i).c_str(), node.u.list->values[i], depth + 1);
         ImGui::TreePop();
       }
       break;
     case MPV_FORMAT_NODE_MAP:
       if (depth > 0) ImGui::SetNextItemOpen(true, ImGuiCond_Once);
-      if (ImGui::TreeNode(fmt::format("{} ({})", name, node.u.list->num).c_str())) {
+      if (ImGui::TreeNode(format("{} ({})", name, node.u.list->num).c_str())) {
         for (int i = 0; i < node.u.list->num; i++) drawPropNode(node.u.list->keys[i], node.u.list->values[i]);
         ImGui::TreePop();
       }
@@ -404,7 +403,7 @@ void Debug::Console::draw() {
   ImGui::SameLine();
   if (ImGui::Button("Level")) ImGui::OpenPopup("Log Level");
   ImGui::SameLine();
-  Helpers::marker(
+  ImGui::HelpMarker(
       "The log level and limit changed here won't be saved.\n"
       "Update log settings in Help-Settings to control startup config.");
   ImGui::Separator();
@@ -565,8 +564,8 @@ int Debug::Console::TextEditCallback(ImGuiInputTextCallbackData* data) {
           bool all_candidates_matches = true;
           for (int i = 0; i < candidates.Size && all_candidates_matches; i++)
             if (i == 0)
-              c = toupper(candidates[i][match_len]);
-            else if (c == 0 || c != toupper(candidates[i][match_len]))
+              c = std::toupper(candidates[i][match_len]);
+            else if (c == 0 || c != std::toupper(candidates[i][match_len]))
               all_candidates_matches = false;
           if (!all_candidates_matches) break;
           match_len++;
@@ -581,7 +580,7 @@ int Debug::Console::TextEditCallback(ImGuiInputTextCallbackData* data) {
         AddLog("info", "Possible matches:\n");
         std::string s;
         for (int i = 0; i < candidates.Size; i++) {
-          s += fmt::format("{:<32}", candidates[i]);
+          s += format("{:<32}", candidates[i]);
           if (i != 0 && (i + 1) % 4 == 0) {
             AddLog("info", "%s\n", s.c_str());
             s.clear();

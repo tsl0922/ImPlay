@@ -1,5 +1,4 @@
 #include <string>
-#include <fmt/format.h>
 #include <fonts/fontawesome.h>
 #include "views/settings.h"
 #include "helpers.h"
@@ -35,15 +34,15 @@ void Settings::drawGeneralTab() {
     ImGui::Indent();
     ImGui::Checkbox("Use mpv's config dir*", &config->mpvConfig);
     ImGui::SameLine();
-    Helpers::marker("ImPlay will use it's own config dir for libmpv by default.");
+    ImGui::HelpMarker("ImPlay will use it's own config dir for libmpv by default.");
     ImGui::Checkbox("Enable --wid for libmpv* (DO NOT USE)", &config->mpvWid);
     ImGui::SameLine();
-    Helpers::marker(
+    ImGui::HelpMarker(
         "Experimental, Windows only, still have issues.\n"
         "This allow using DirectX, Which is usually faster than OpenGL.");
     ImGui::Checkbox("Remember playback progress on exit", &config->watchLater);
     ImGui::SameLine();
-    Helpers::marker("Exit mpv with the quit-watch-later command.");
+    ImGui::HelpMarker("Exit mpv with the quit-watch-later command.");
     ImGui::Unindent();
     ImGui::Text("Debug");
     ImGui::Indent();
@@ -54,12 +53,12 @@ void Settings::drawGeneralTab() {
     }
     if (ImGui::Combo("Log Level*", &current, items, IM_ARRAYSIZE(items))) config->logLevel = items[current];
     ImGui::SameLine();
-    Helpers::marker(
+    ImGui::HelpMarker(
         "Controls the log level used on startup.\n"
         "It can be changed later in debug window, but won't be saved.");
     ImGui::InputInt("Log Limit*", &config->logLimit, 0);
     ImGui::SameLine();
-    Helpers::marker(
+    ImGui::HelpMarker(
         "Controls the log limit used on startup.\n"
         "It can be changed later in debug window, but won't be saved.");
     ImGui::Unindent();
@@ -72,14 +71,14 @@ void Settings::drawInterfaceTab() {
     const char *t_items[] = {"Dark", "Light", "Classic"};
     static int t_current;
     for (int i = 0; i < IM_ARRAYSIZE(t_items); i++) {
-      if (Helpers::tolower(t_items[i]) == config->Theme) t_current = i;
+      if (tolower(t_items[i]) == config->Theme) t_current = i;
     }
     ImGui::Text("Theme");
     ImGui::SameLine();
-    Helpers::marker("Color theme of the interface.");
+    ImGui::HelpMarker("Color theme of the interface.");
     ImGui::Indent();
     if (ImGui::Combo("##Theme", &t_current, t_items, IM_ARRAYSIZE(t_items))) {
-      config->Theme = Helpers::tolower(t_items[t_current]);
+      config->Theme = tolower(t_items[t_current]);
       config->save();
       mpv->commandv("script-message-to", "implay", "theme", config->Theme.c_str(), nullptr);
     }
@@ -110,7 +109,7 @@ void Settings::drawFontTab() {
   if (ImGui::BeginTabItem("Font")) {
     ImGui::Text("Path*");
     ImGui::SameLine();
-    Helpers::marker("An embedded font will be used if not specified.");
+    ImGui::HelpMarker("An embedded font will be used if not specified.");
     ImGui::Indent();
     if (ImGui::InputText("##Path", fontPath, IM_ARRAYSIZE(fontPath))) config->FontPath = fontPath;
     ImGui::SameLine();
@@ -127,7 +126,7 @@ void Settings::drawFontTab() {
     ImGui::Unindent();
     ImGui::Text("Glyph Ranges*");
     ImGui::SameLine();
-    Helpers::marker("Required for displaying non-English characters on interface.");
+    ImGui::HelpMarker("Required for displaying non-English characters on interface.");
     ImGui::Indent();
     ImGui::CheckboxFlags("Chinese", &config->glyphRange, Config::GlyphRange_Chinese);
     ImGui::SameLine();

@@ -1,6 +1,4 @@
 #include <fonts/fontawesome.h>
-#include <fmt/format.h>
-#include <fmt/chrono.h>
 #include "views/context_menu.h"
 #include "helpers.h"
 
@@ -154,7 +152,7 @@ void ContextMenu::draw() {
       if (ImGui::BeginMenuEx("Theme", ICON_FA_PALETTE)) {
         const char *themes[] = {"dark", "light", "classic"};
         for (int i = 0; i < IM_ARRAYSIZE(themes); i++) {
-          std::string title = Helpers::tolower(themes[i]);
+          std::string title = tolower(themes[i]);
           title[0] = std::toupper(title[0]);
           if (ImGui::MenuItem(title.c_str(), nullptr, config->Theme == themes[i])) {
             config->Theme = themes[i];
@@ -173,7 +171,7 @@ void ContextMenu::draw() {
       }
       ImGui::Separator();
       if (ImGui::MenuItem("Metrics & Debug")) mpv->commandv("script-message-to", "implay", "metrics", nullptr);
-      if (ImGui::MenuItem("Open Config Dir")) Helpers::openUri(Helpers::getDataDir());
+      if (ImGui::MenuItem("Open Config Dir")) openUri(datadir());
       ImGui::EndMenu();
     }
     if (ImGui::BeginMenuEx("Help", ICON_FA_QUESTION_CIRCLE)) {
@@ -208,7 +206,7 @@ void ContextMenu::drawAudioDeviceList() {
   char *name = mpv->property("audio-device");
   if (ImGui::BeginMenuEx("Devices", ICON_FA_AUDIO_DESCRIPTION, !devices.empty())) {
     for (auto &device : devices) {
-      auto title = fmt::format("[{}] {}", device.description, device.name);
+      auto title = format("[{}] {}", device.description, device.name);
       if (ImGui::MenuItem(title.c_str(), nullptr, device.name == name))
         mpv->property("audio-device", device.name.c_str());
     }
@@ -225,8 +223,8 @@ void ContextMenu::drawTracklist(const char *type, const char *prop) {
   if (ImGui::BeginMenuEx("Tracks", ICON_FA_LIST, !list.empty())) {
     for (auto &track : list) {
       if (track.type == type) {
-        auto title = track.title.empty() ? fmt::format("Track {}", track.id) : track.title;
-        if (!track.lang.empty()) title += fmt::format(" [{}]", track.lang);
+        auto title = track.title.empty() ? format("Track {}", track.id) : track.title;
+        if (!track.lang.empty()) title += format(" [{}]", track.lang);
         if (ImGui::MenuItemEx(title.c_str(), nullptr, nullptr, track.selected))
           mpv->property<int64_t, MPV_FORMAT_INT64>(prop, track.id);
       }
@@ -245,15 +243,15 @@ void ContextMenu::drawChapterlist() {
     int i = 0;
     for (auto &chapter : chapterlist) {
       if (i == 10) break;
-      auto title = chapter.title.empty() ? fmt::format("Chapter {}", chapter.id + 1) : chapter.title;
-      title = fmt::format("{} [{:%H:%M:%S}]", title, std::chrono::duration<int>((int)chapter.time));
+      auto title = chapter.title.empty() ? format("Chapter {}", chapter.id + 1) : chapter.title;
+      title = format("{} [{:%H:%M:%S}]", title, std::chrono::duration<int>((int)chapter.time));
       if (ImGui::MenuItemEx(title.c_str(), nullptr, nullptr, chapter.id == pos)) {
         mpv->commandv("seek", std::to_string(chapter.time).c_str(), "absolute", nullptr);
       }
       i++;
     }
     if (chapterlist.size() > 10) {
-      if (ImGui::MenuItem(fmt::format("All.. ({})", chapterlist.size()).c_str()))
+      if (ImGui::MenuItem(format("All.. ({})", chapterlist.size()).c_str()))
         mpv->commandv("script-message-to", "implay", "command-palette", "chapters", nullptr);
     }
     ImGui::EndMenu();
@@ -282,13 +280,13 @@ void ContextMenu::drawPlaylist() {
       if (i == 10) break;
       std::string title = item.title;
       if (title.empty() && !item.filename.empty()) title = item.filename;
-      if (title.empty()) title = fmt::format("Item {}", item.id + 1);
+      if (title.empty()) title = format("Item {}", item.id + 1);
       if (ImGui::MenuItemEx(title.c_str(), nullptr, nullptr, item.id == pos))
         mpv->property<int64_t, MPV_FORMAT_INT64>("playlist-pos", item.id);
       i++;
     }
     if (playlist.size() > 10) {
-      if (ImGui::MenuItem(fmt::format("All.. ({})", playlist.size()).c_str()))
+      if (ImGui::MenuItem(format("All.. ({})", playlist.size()).c_str()))
         mpv->commandv("script-message-to", "implay", "command-palette", "playlist", nullptr);
     }
     ImGui::EndMenu();
@@ -300,7 +298,7 @@ void ContextMenu::drawProfilelist() {
   if (ImGui::BeginMenuEx("Profiles", ICON_FA_USER)) {
     for (auto &profile : profilelist) {
       if (ImGui::MenuItem(profile.c_str()))
-        mpv->command(fmt::format("show-text {}; apply-profile {}", profile, profile).c_str());
+        mpv->command(format("show-text {}; apply-profile {}", profile, profile).c_str());
     }
     ImGui::EndMenu();
   }

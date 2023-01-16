@@ -16,7 +16,7 @@ class Player : public Views::View {
   Player(Config *config, Dispatch *dispatch, GLFWwindow *window, Mpv *mpv, const char *title);
   ~Player() override;
 
-  bool init(Helpers::OptionParser &parser);
+  bool init(OptionParser &parser);
   void draw() override;
   void render(int w, int h);
   std::atomic_bool &renderGui() { return renderGui_; }
