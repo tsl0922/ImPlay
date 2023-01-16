@@ -1,3 +1,6 @@
+// Copyright (c) 2022 tsl0922. All rights reserved.
+// SPDX-License-Identifier: GPL-2.0-only
+
 #include <filesystem>
 #include <imgui.h>
 #include <imgui_internal.h>

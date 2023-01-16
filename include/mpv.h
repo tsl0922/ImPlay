@@ -1,3 +1,6 @@
+// Copyright (c) 2022 tsl0922. All rights reserved.
+// SPDX-License-Identifier: GPL-2.0-only
+
 #pragma once
 #include <mpv/client.h>
 #include <mpv/render_gl.h>

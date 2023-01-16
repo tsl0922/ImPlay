@@ -1,3 +1,6 @@
+// Copyright (c) 2022 tsl0922. All rights reserved.
+// SPDX-License-Identifier: GPL-2.0-only
+
 #include "views/about.h"
 #include "helpers.h"
 
@@ -22,7 +25,7 @@ void About::draw() {
     if (ImGui::IsItemClicked()) openUri("https://github.com/tsl0922/ImPlay");
     ImGui::PopStyleColor();
     ImGui::Spacing();
-    textCentered("Copyright (C) 2022-2023 Shuanglei Tao");
+    textCentered("Copyright (C) 2022 tsl0922");
     ImGui::Spacing();
     ImGui::PushStyleColor(ImGuiCol_Text, ImGui::GetStyle().Colors[ImGuiCol_TextDisabled]);
     textCentered("GPL-2.0 License");
