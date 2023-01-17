@@ -1,6 +1,26 @@
 cmake_minimum_required(VERSION 3.13)
 
-project(ImPlay VERSION "1.0.2")
+find_package(Git)
+if(GIT_EXECUTABLE)
+    execute_process(
+        COMMAND ${GIT_EXECUTABLE} describe --tags --match "[0-9]*.[0-9]*.[0-9]*" --abbrev=8
+        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+        RESULT_VARIABLE status
+        OUTPUT_VARIABLE GIT_VERSION
+    )
+    if (${status})
+        set(GIT_VERSION "0.0.0")
+    else()
+        string(STRIP ${GIT_VERSION} GIT_VERSION)
+        string(REGEX REPLACE "-[0-9]+-g" "-" GIT_VERSION ${GIT_VERSION})
+    endif()
+else()
+    set(GIT_VERSION "0.0.0")
+endif()
+string(REGEX MATCH "^[0-9]+.[0-9]+.[0-9]+" SEMVER "${GIT_VERSION}")
+message("-- Git Tag: ${GIT_VERSION}, SemVer: ${SEMVER}")
+
+project(ImPlay VERSION "${SEMVER}")
 
 set(CMAKE_CXX_STANDARD 20)
 
@@ -13,22 +33,6 @@ if (${CMAKE_VERSION} VERSION_GREATER_EQUAL "3.14.0")
 endif()
 if (${CMAKE_VERSION} VERSION_GREATER_EQUAL "3.24.0")
     cmake_policy(SET CMP0135 NEW)
-endif()
-
-find_package(Git)
-set(APP_VERSION "${PROJECT_VERSION}")
-if(GIT_EXECUTABLE)
-    execute_process(
-        COMMAND ${GIT_EXECUTABLE} rev-parse --short HEAD
-        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-        RESULT_VARIABLE status
-        OUTPUT_VARIABLE GIT_COMMIT
-        OUTPUT_STRIP_TRAILING_WHITESPACE
-        ERROR_QUIET
-    )
-    if (${status} STREQUAL "0")
-        set(APP_VERSION "${APP_VERSION}-${GIT_COMMIT}")
-    endif()
 endif()
 
 find_package(PkgConfig REQUIRED)
@@ -105,7 +109,7 @@ add_executable(${PROJECT_NAME} ${SOURCE_FILES})
 target_include_directories(${PROJECT_NAME} PRIVATE ${INCLUDE_DIRS})
 target_link_directories(${PROJECT_NAME} PRIVATE ${MPV_LIBRARY_DIRS})
 target_link_libraries(${PROJECT_NAME} PRIVATE ${LINK_LIBS})
-target_compile_definitions(${PROJECT_NAME} PRIVATE APP_VERSION="${APP_VERSION}")
+target_compile_definitions(${PROJECT_NAME} PRIVATE APP_VERSION="${GIT_VERSION}")
 if(USE_PATCHED_GLFW)
     target_compile_definitions(${PROJECT_NAME} PRIVATE GLFW_PATCHED)
 endif()
