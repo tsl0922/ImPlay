@@ -37,7 +37,7 @@ void About::draw() {
 
 void About::textCentered(const char* text) {
   auto size = ImGui::CalcTextSize(text);
-  ImGui::SetCursorPosX((ImGui::GetWindowWidth() - size.x) / 2);
+  ImGui::SetCursorPosX((ImGui::GetWindowWidth() - size.x) * 0.5f);
   ImGui::Text("%s", text);
 }
 }  // namespace ImPlay::Views

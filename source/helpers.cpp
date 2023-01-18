@@ -30,12 +30,11 @@ void ImGui::HelpMarker(const char* desc) {
   }
 }
 
-bool ImGui::LoadTexture(const char* path, ImTextureID* out_texture, int* out_width, int* out_height) {
-  int width, height;
+ImTextureID ImGui::LoadTexture(const char* path, int* width, int* height) {
+  int w, h;
   auto icon = romfs::get(path);
-  unsigned char* m_data =
-      stbi_load_from_memory(reinterpret_cast<const stbi_uc*>(icon.data()), icon.size(), &width, &height, NULL, 4);
-  if (m_data == NULL) return false;
+  auto data = stbi_load_from_memory(reinterpret_cast<const stbi_uc*>(icon.data()), icon.size(), &w, &h, NULL, 4);
+  if (data == nullptr) return nullptr;
 
   GLuint texture;
   glGenTextures(1, &texture);
@@ -47,14 +46,13 @@ bool ImGui::LoadTexture(const char* path, ImTextureID* out_texture, int* out_wid
 #if defined(GL_UNPACK_ROW_LENGTH) && !defined(__EMSCRIPTEN__)
   glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
 #endif
-  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, height, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, m_data);
-  stbi_image_free(m_data);
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+  stbi_image_free(data);
 
-  *out_texture = reinterpret_cast<ImTextureID>(static_cast<intptr_t>(texture));
-  *out_width = width;
-  *out_height = height;
+  if (width != nullptr) *width = w;
+  if (height != nullptr) *height = h;
 
-  return true;
+  return reinterpret_cast<ImTextureID>(static_cast<intptr_t>(texture));
 }
 
 void ImPlay::OptionParser::parse(int argc, char** argv) {

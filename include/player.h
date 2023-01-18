@@ -43,8 +43,7 @@ class Player : public Views::View {
   const char *title;
   std::atomic_bool renderGui_ = true;
   bool fileOpen = false;
-  ImTextureID iconTexture;
-  int iconWidth, iconHeight;
+  ImTextureID iconTexture = nullptr;
 
   static void translateMod(std::vector<std::string> &keys, int mods) {
     if (mods & GLFW_MOD_CONTROL) keys.emplace_back("Ctrl");

@@ -13,7 +13,7 @@
 
 namespace ImGui {
 void HelpMarker(const char* desc);
-bool LoadTexture(const char* path, ImTextureID* out_texture, int* out_width, int* out_height);
+ImTextureID LoadTexture(const char* path, int* width = nullptr, int* height = nullptr);
 }  // namespace ImGui
 
 namespace ImPlay {
