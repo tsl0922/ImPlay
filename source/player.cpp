@@ -174,7 +174,7 @@ void Player::initMpv() {
     int height = (int)mpv->property<int64_t, MPV_FORMAT_INT64>("dheight");
     if (width > 0 && height > 0) {
       glfwSetWindowSize(window, width, height);
-      glfwSetWindowAspectRatio(window, width, height);
+      if (mpv->property<int, MPV_FORMAT_FLAG>("keepaspect-window")) glfwSetWindowAspectRatio(window, width, height);
     }
   });
 
