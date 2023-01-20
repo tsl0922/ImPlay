@@ -20,6 +20,7 @@
 #define GLFW_EXPOSE_NATIVE_X11
 #endif
 #include <GLFW/glfw3native.h>
+#include <algorithm>
 #include <stdexcept>
 #include <thread>
 #include "window.h"
@@ -133,8 +134,8 @@ void Window::initGLFW(const char* title) {
 
   GLFWmonitor* monitor = glfwGetPrimaryMonitor();
   const GLFWvidmode* mode = glfwGetVideoMode(monitor);
-  width = mode->width * 0.4;
-  height = mode->height * 0.4;
+  width = std::max((int)(mode->width * 0.4), 600);
+  height = std::max((int)(mode->height * 0.4), 400);
 
   window = glfwCreateWindow(width, height, title, nullptr, nullptr);
   if (window == nullptr) throw std::runtime_error("Failed to create window!");
