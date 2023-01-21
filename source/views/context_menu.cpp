@@ -57,28 +57,29 @@ void ContextMenu::draw() {
         ImGui::EndMenu();
       }
       if (ImGui::BeginMenuEx("Zoom", ICON_FA_GLASSES)) {
-        if (ImGui::MenuItemEx("Zoom In", ICON_FA_MINUS_CIRCLE, "Alt +")) mpv->command("add video-zoom  -0.1");
-        if (ImGui::MenuItemEx("Zoom Out", ICON_FA_PLUS_CIRCLE, "Alt -")) mpv->command("add video-zoom  0.1");
-        if (ImGui::MenuItem("Reset", "Alt+BS")) mpv->command("set video-zoom 0");
+        if (ImGui::MenuItemEx("Zoom In", ICON_FA_MINUS_CIRCLE)) mpv->command("add window-scale -0.1");
+        if (ImGui::MenuItemEx("Zoom Out", ICON_FA_PLUS_CIRCLE)) mpv->command("add window-scale 0.1");
+        if (ImGui::MenuItem("Reset")) mpv->command("set window-scale 0");
         ImGui::Separator();
-        if (ImGui::MenuItem("1:4 Quarter")) mpv->command("set video-zoom -2");
-        if (ImGui::MenuItem("1:2 Half")) mpv->command("set video-zoom -1");
-        if (ImGui::MenuItem("1:1 Original")) mpv->command("set video-zoom 0");
-        if (ImGui::MenuItem("2:1 Double")) mpv->command("set video-zoom 1");
-        ImGui::EndMenu();
-      }
-      if (ImGui::BeginMenu("Move")) {
-        if (ImGui::MenuItem("Right", "Alt+left")) mpv->command("add video-pan-x 0.1");
-        if (ImGui::MenuItem("Left", "Alt+right")) mpv->command("add video-pan-x -0.1");
-        if (ImGui::MenuItem("Down", "Alt+up")) mpv->command("add video-pan-y 0.1");
-        if (ImGui::MenuItem("Up", "Alt+down")) mpv->command("add video-pan-y -0.1");
-        if (ImGui::MenuItem("Reset", "Alt+BS")) mpv->command("set video-pan-x 0 ; set video-pan-y 0");
+        if (ImGui::MenuItem("1:4 Quarter")) mpv->command("set window-scale 0.25");
+        if (ImGui::MenuItem("1:2 Half")) mpv->command("set window-scale 0.5");
+        if (ImGui::MenuItem("1:1 Original")) mpv->command("set window-scale 1");
+        if (ImGui::MenuItem("2:1 Double")) mpv->command("set window-scale 2");
         ImGui::EndMenu();
       }
       if (ImGui::BeginMenu("Panscan")) {
-        if (ImGui::MenuItem("+0.1", "W")) mpv->command("add panscan 0.1");
-        if (ImGui::MenuItem("-0.1", "w")) mpv->command("add panscan -0.1");
-        if (ImGui::MenuItem("Reset")) mpv->command("set panscan 0");
+        if (ImGui::MenuItem("Increase Size", "Alt++")) mpv->command("add video-zoom 0.1");
+        if (ImGui::MenuItem("Decrease Size", "Alt+-")) mpv->command("add video-zoom -0.1");
+        ImGui::Separator();
+        if (ImGui::MenuItem("Increase Height", "W")) mpv->command("add panscan 0.1");
+        if (ImGui::MenuItem("Decrease Height", "w")) mpv->command("add panscan -0.1");
+        ImGui::Separator();
+        if (ImGui::MenuItem("Move Left", "Alt+right")) mpv->command("add video-pan-x -0.1");
+        if (ImGui::MenuItem("Move Right", "Alt+left")) mpv->command("add video-pan-x 0.1");        
+        if (ImGui::MenuItem("Move Down", "Alt+up")) mpv->command("add video-pan-y 0.1");
+        if (ImGui::MenuItem("Move Up", "Alt+down")) mpv->command("add video-pan-y -0.1");
+        ImGui::Separator();
+        if (ImGui::MenuItem("Reset", "Alt+BS")) mpv->command("set video-zoom 0; set video-pan-x 0 ; set video-pan-y 0");
         ImGui::EndMenu();
       }
       if (ImGui::BeginMenu("Speed")) {
