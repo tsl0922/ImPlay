@@ -45,6 +45,7 @@ class Window {
   std::mutex renderMutex;
   std::condition_variable renderCond;
   std::atomic_int waitTimeout = defaultTimeout;
+  bool ownCursor = false;
   double lastRenderAt = 0;
   double lastInputAt = 0;
   double lastMousePressAt = 0;

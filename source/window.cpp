@@ -96,7 +96,7 @@ bool Window::run(OptionParser& parser) {
     dispatch.process();
 
     bool hasInputEvents = !ImGui::GetCurrentContext()->InputEventsQueue.empty();
-    if (cursorAutoHide > 0 && mpv->playing() && !ImGui::GetIO().WantCaptureMouse) {
+    if (ownCursor && cursorAutoHide > 0 && mpv->playing() && !ImGui::GetIO().WantCaptureMouse) {
       int mode = (glfwGetTime() - lastInputAt) * 1000 > cursorAutoHide ? GLFW_CURSOR_DISABLED : GLFW_CURSOR_NORMAL;
       glfwSetInputMode(window, GLFW_CURSOR, mode);
     }
@@ -191,6 +191,10 @@ void Window::initGLFW(const char* title) {
     if (win->player->hasFile()) win->player->renderGui() = false;
     win->requestRender();
     win->dispatch.process();
+  });
+  glfwSetCursorEnterCallback(window, [](GLFWwindow* window, int entered) {
+    auto win = static_cast<Window*>(glfwGetWindowUserPointer(window));
+    win->ownCursor = entered;
   });
   glfwSetCursorPosCallback(window, [](GLFWwindow* window, double x, double y) {
     auto win = static_cast<Window*>(glfwGetWindowUserPointer(window));
