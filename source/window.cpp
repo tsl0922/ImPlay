@@ -87,6 +87,8 @@ bool Window::run(OptionParser& parser) {
     shutdown = true;
   });
 
+  int64_t cursorAutoHide = mpv->property<int64_t, MPV_FORMAT_INT64>("cursor-autohide");
+
   while (!shutdown) {
     glfwWaitEvents();
     player->renderGui() = true;
@@ -94,6 +96,10 @@ bool Window::run(OptionParser& parser) {
     dispatch.process();
 
     bool hasInputEvents = !ImGui::GetCurrentContext()->InputEventsQueue.empty();
+    if (cursorAutoHide > 0 && mpv->playing() && !ImGui::GetIO().WantCaptureMouse) {
+      int mode = (glfwGetTime() - lastInputAt) * 1000 > cursorAutoHide ? GLFW_CURSOR_DISABLED : GLFW_CURSOR_NORMAL;
+      glfwSetInputMode(window, GLFW_CURSOR, mode);
+    }
     if ((!glfwGetWindowAttrib(window, GLFW_VISIBLE) || glfwGetWindowAttrib(window, GLFW_ICONIFIED)) &&
         !hasInputEvents && ImGui::GetCurrentContext()->Viewports.Size == 1) {
       waitTimeout = INT_MAX;
@@ -174,6 +180,7 @@ void Window::initGLFW(const char* title) {
   });
   glfwSetCursorPosCallback(window, [](GLFWwindow* window, double x, double y) {
     auto win = static_cast<Window*>(glfwGetWindowUserPointer(window));
+    win->lastInputAt = glfwGetTime();
     if (ImGui::GetIO().WantCaptureMouse) return;
     win->player->onCursorEvent(x, y);
 #ifdef GLFW_PATCHED
@@ -184,15 +191,18 @@ void Window::initGLFW(const char* title) {
   });
   glfwSetMouseButtonCallback(window, [](GLFWwindow* window, int button, int action, int mods) {
     auto win = static_cast<Window*>(glfwGetWindowUserPointer(window));
+    win->lastInputAt = glfwGetTime();
     if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS) win->lastMousePressAt = glfwGetTime();
     if (!ImGui::GetIO().WantCaptureMouse) win->player->onMouseEvent(button, action, mods);
   });
   glfwSetScrollCallback(window, [](GLFWwindow* window, double x, double y) {
     auto win = static_cast<Window*>(glfwGetWindowUserPointer(window));
+    win->lastInputAt = glfwGetTime();
     if (!ImGui::GetIO().WantCaptureMouse) win->player->onScrollEvent(x, y);
   });
   glfwSetKeyCallback(window, [](GLFWwindow* window, int key, int scancode, int action, int mods) {
     auto win = static_cast<Window*>(glfwGetWindowUserPointer(window));
+    win->lastInputAt = glfwGetTime();
     if (!ImGui::GetIO().WantCaptureKeyboard) win->player->onKeyEvent(key, scancode, action, mods);
   });
   glfwSetDropCallback(window, [](GLFWwindow* window, int count, const char* paths[]) {
