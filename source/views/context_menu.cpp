@@ -117,7 +117,7 @@ void ContextMenu::draw() {
         ImGui::EndMenu();
       }
       ImGui::Separator();
-      if (ImGui::MenuItem("HW Decoding", "Ctrl h")) mpv->command("cycle-values hwdec auto no");
+      if (ImGui::MenuItem("HW Decoding", "Ctrl+h")) mpv->command("cycle-values hwdec auto no");
       if (ImGui::MenuItem("Toggle A-B Loop", "l", false, playing)) mpv->command("ab-loop");
       if (ImGui::MenuItem("Toggle Deinterlace", "d")) mpv->command("cycle deinterlace");
       ImGui::EndMenu();
