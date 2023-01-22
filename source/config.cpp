@@ -29,6 +29,11 @@ void Config::load() {
   inipp::get_value(ini.sections["mpv"], "config", mpvConfig);
   inipp::get_value(ini.sections["mpv"], "wid", mpvWid);
   inipp::get_value(ini.sections["mpv"], "watch-later", watchLater);
+  inipp::get_value(ini.sections["window"], "save", winSave);
+  inipp::get_value(ini.sections["window"], "x", winX);
+  inipp::get_value(ini.sections["window"], "y", winY);
+  inipp::get_value(ini.sections["window"], "w", winW);
+  inipp::get_value(ini.sections["window"], "h", winH);
   inipp::get_value(ini.sections["debug"], "log-level", logLevel);
   inipp::get_value(ini.sections["debug"], "log-limit", logLimit);
 }
@@ -42,6 +47,11 @@ void Config::save() {
   ini.sections["mpv"]["config"] = format("{}", mpvConfig);
   ini.sections["mpv"]["wid"] = format("{}", mpvWid);
   ini.sections["mpv"]["watch-later"] = format("{}", watchLater);
+  ini.sections["window"]["save"] = format("{}", winSave);
+  ini.sections["window"]["x"] = std::to_string(winX);
+  ini.sections["window"]["y"] = std::to_string(winY);
+  ini.sections["window"]["w"] = std::to_string(winW);
+  ini.sections["window"]["h"] = std::to_string(winH);
   ini.sections["debug"]["log-level"] = logLevel;
   ini.sections["debug"]["log-limit"] = std::to_string(logLimit);
 

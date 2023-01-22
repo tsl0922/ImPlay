@@ -112,6 +112,12 @@ bool Window::run(OptionParser& parser) {
 
   renderThread.join();
 
+  if (config.winSave) {
+    glfwGetWindowPos(window, &config.winX, &config.winY);
+    glfwGetWindowSize(window, &config.winW, &config.winH);
+    config.save();
+  }
+
   return true;
 }
 
@@ -142,11 +148,19 @@ void Window::initGLFW(const char* title) {
   const GLFWvidmode* mode = glfwGetVideoMode(monitor);
   width = std::max((int)(mode->width * 0.4), 600);
   height = std::max((int)(mode->height * 0.4), 400);
+  int posX = (mode->width - width) / 2;
+  int posY = (mode->height - height) / 2;
+  if (config.winSave) {
+    if (config.winW > 0) width = config.winW;
+    if (config.winH > 0) height = config.winH;
+    if (config.winX >= 0) posX = config.winX;
+    if (config.winY >= 0) posY = config.winY;
+  }
 
   window = glfwCreateWindow(width, height, title, nullptr, nullptr);
   if (window == nullptr) throw std::runtime_error("Failed to create window!");
   glfwSetWindowSizeLimits(window, 640, 480, GLFW_DONT_CARE, GLFW_DONT_CARE);
-  glfwSetWindowPos(window, (mode->width - width) / 2, (mode->height - height) / 2);
+  glfwSetWindowPos(window, posX, posY);
 
   glfwSetWindowUserPointer(window, this);
   glfwMakeContextCurrent(window);

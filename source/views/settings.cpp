@@ -33,7 +33,7 @@ void Settings::draw() {
 
 void Settings::drawGeneralTab() {
   if (ImGui::BeginTabItem("General")) {
-    ImGui::Text("MPV");
+    ImGui::Text("Core");
     ImGui::Indent();
     ImGui::Checkbox("Use mpv's config dir*", &config->mpvConfig);
     ImGui::SameLine();
@@ -48,6 +48,7 @@ void Settings::drawGeneralTab() {
     ImGui::Checkbox("Remember playback progress on exit", &config->watchLater);
     ImGui::SameLine();
     ImGui::HelpMarker("Exit mpv with the quit-watch-later command.");
+    ImGui::Checkbox("Remember window position and size on exit", &config->winSave);
     ImGui::Unindent();
     ImGui::Text("Debug");
     ImGui::SameLine();

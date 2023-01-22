@@ -27,14 +27,28 @@ class Config {
     GlyphRange_Vietnamese = 1 << 5,
   };
 
+  // interface
   std::string Theme = "light";
   float Scale = 0;
+  
+  // font
   std::string FontPath;
   int FontSize = 13;
   int glyphRange = GlyphRange_Default;
+  
+  // mpv
   bool mpvConfig = false;
   bool mpvWid = false;
   bool watchLater = false;
+  
+  // window
+  bool winSave = false;
+  int winX = 0;
+  int winY = 0;
+  int winW = 0;
+  int winH = 0;
+
+  // log
   std::string logLevel = "no";
   int logLimit = 500;
 
