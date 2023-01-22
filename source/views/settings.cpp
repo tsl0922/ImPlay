@@ -50,6 +50,10 @@ void Settings::drawGeneralTab() {
     ImGui::HelpMarker("Exit mpv with the quit-watch-later command.");
     ImGui::Unindent();
     ImGui::Text("Debug");
+    ImGui::SameLine();
+    ImGui::HelpMarker(
+        "Controls the debug settings used on startup.\n"
+        "It can be changed later in debug window, but won't be saved.");
     ImGui::Indent();
     const char *items[] = {"fatal", "error", "warn", "info", "v", "debug", "trace", "no"};
     static int current;
@@ -57,15 +61,7 @@ void Settings::drawGeneralTab() {
       if (strcmp(items[i], config->logLevel.c_str()) == 0) current = i;
     }
     if (ImGui::Combo("Log Level*", &current, items, IM_ARRAYSIZE(items))) config->logLevel = items[current];
-    ImGui::SameLine();
-    ImGui::HelpMarker(
-        "Controls the log level used on startup.\n"
-        "It can be changed later in debug window, but won't be saved.");
     ImGui::InputInt("Log Limit*", &config->logLimit, 0);
-    ImGui::SameLine();
-    ImGui::HelpMarker(
-        "Controls the log limit used on startup.\n"
-        "It can be changed later in debug window, but won't be saved.");
     ImGui::Unindent();
     ImGui::EndTabItem();
   }
