@@ -215,7 +215,9 @@ void ContextMenu::draw() {
         mpv->commandv("script-message-to", "implay", "open", nullptr);
       if (ImGui::MenuItemEx("Open Folder..", ICON_FA_FOLDER_PLUS))
         mpv->commandv("script-message-to", "implay", "open-folder", nullptr);
-      if (ImGui::MenuItemEx("Open URL From Clipboard", ICON_FA_CLIPBOARD))
+      if (ImGui::MenuItemEx("Open URL..", ICON_FA_LINK))
+        mpv->commandv("script-message-to", "implay", "open-url", nullptr);
+      if (ImGui::MenuItemEx("Open Clipboard", ICON_FA_CLIPBOARD))
         mpv->commandv("script-message-to", "implay", "open-clipboard", nullptr);
       ImGui::Separator();
       if (ImGui::MenuItemEx("Open DVD/Blu-ray Folder..", ICON_FA_FOLDER_OPEN))

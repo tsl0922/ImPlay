@@ -20,6 +20,7 @@ For example, run `script-message-to implay command-palette playlist` will show c
 - `open-disk`: show the open DVD/Blu-ray folder dialog
 - `open-iso`: show the open DVD/Blu-ray iso dialog
 - `open-clipboard`: Open URL From Clipboard
+- `open-url`: show the open URL dialog
 - `load-sub`: show the load subtitles dialog
 - `load-conf <path>`: load mpv.conf, path should be absolute
 - `playlist-add-files`: show the playlist add files dialog

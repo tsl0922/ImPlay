@@ -30,6 +30,7 @@ class Command : public Views::View {
   void openDisk();
   void openIso();
   void openClipboard();
+  void openURL();
 
   void loadSubtitles();
 
@@ -38,12 +39,14 @@ class Command : public Views::View {
 
   void openCommandPalette(int n, const char **args);
 
+  void drawOpenURL();
   void setTheme(const char *theme);
   bool isMediaType(std::string ext);
 
   Config *config = nullptr;
   GLFWwindow *window = nullptr;
   Mpv *mpv = nullptr;
+  bool m_openURL = false;
 
   Views::About *about;
   Views::Debug *debug;
