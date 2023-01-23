@@ -25,17 +25,17 @@ void Config::load() {
   inipp::get_value(ini.sections["interface"], "scale", Scale);
   inipp::get_value(ini.sections["font"], "path", FontPath);
   inipp::get_value(ini.sections["font"], "size", FontSize);
-  inipp::get_value(ini.sections["font"], "glyph-range", glyphRange);
-  inipp::get_value(ini.sections["mpv"], "config", mpvConfig);
-  inipp::get_value(ini.sections["mpv"], "wid", mpvWid);
-  inipp::get_value(ini.sections["mpv"], "watch-later", watchLater);
-  inipp::get_value(ini.sections["window"], "save", winSave);
-  inipp::get_value(ini.sections["window"], "x", winX);
-  inipp::get_value(ini.sections["window"], "y", winY);
-  inipp::get_value(ini.sections["window"], "w", winW);
-  inipp::get_value(ini.sections["window"], "h", winH);
-  inipp::get_value(ini.sections["debug"], "log-level", logLevel);
-  inipp::get_value(ini.sections["debug"], "log-limit", logLimit);
+  inipp::get_value(ini.sections["font"], "glyph-range", GlyphRange);
+  inipp::get_value(ini.sections["mpv"], "config", UseConfig);
+  inipp::get_value(ini.sections["mpv"], "wid", UseWid);
+  inipp::get_value(ini.sections["mpv"], "watch-later", WatchLater);
+  inipp::get_value(ini.sections["window"], "save", WinSave);
+  inipp::get_value(ini.sections["window"], "x", WinX);
+  inipp::get_value(ini.sections["window"], "y", WinY);
+  inipp::get_value(ini.sections["window"], "w", WinW);
+  inipp::get_value(ini.sections["window"], "h", WinH);
+  inipp::get_value(ini.sections["debug"], "log-level", LogLevel);
+  inipp::get_value(ini.sections["debug"], "log-limit", LogLimit);
 }
 
 void Config::save() {
@@ -43,17 +43,17 @@ void Config::save() {
   ini.sections["interface"]["scale"] = format("{}", Scale);
   ini.sections["font"]["path"] = FontPath;
   ini.sections["font"]["size"] = std::to_string(FontSize);
-  ini.sections["font"]["glyph-range"] = std::to_string(glyphRange);
-  ini.sections["mpv"]["config"] = format("{}", mpvConfig);
-  ini.sections["mpv"]["wid"] = format("{}", mpvWid);
-  ini.sections["mpv"]["watch-later"] = format("{}", watchLater);
-  ini.sections["window"]["save"] = format("{}", winSave);
-  ini.sections["window"]["x"] = std::to_string(winX);
-  ini.sections["window"]["y"] = std::to_string(winY);
-  ini.sections["window"]["w"] = std::to_string(winW);
-  ini.sections["window"]["h"] = std::to_string(winH);
-  ini.sections["debug"]["log-level"] = logLevel;
-  ini.sections["debug"]["log-limit"] = std::to_string(logLimit);
+  ini.sections["font"]["glyph-range"] = std::to_string(GlyphRange);
+  ini.sections["mpv"]["config"] = format("{}", UseConfig);
+  ini.sections["mpv"]["wid"] = format("{}", UseWid);
+  ini.sections["mpv"]["watch-later"] = format("{}", WatchLater);
+  ini.sections["window"]["save"] = format("{}", WinSave);
+  ini.sections["window"]["x"] = std::to_string(WinX);
+  ini.sections["window"]["y"] = std::to_string(WinY);
+  ini.sections["window"]["w"] = std::to_string(WinW);
+  ini.sections["window"]["h"] = std::to_string(WinH);
+  ini.sections["debug"]["log-level"] = LogLevel;
+  ini.sections["debug"]["log-limit"] = std::to_string(LogLimit);
 
   std::ofstream file(configFile);
   ini.generate(file);
@@ -63,13 +63,13 @@ const ImWchar* Config::buildGlyphRanges() {
   ImFontAtlas* fonts = ImGui::GetIO().Fonts;
   ImFontGlyphRangesBuilder glyphRangesBuilder;
   static ImVector<ImWchar> glyphRanges;
-  if (glyphRange & GlyphRange_Default) glyphRangesBuilder.AddRanges(fonts->GetGlyphRangesDefault());
-  if (glyphRange & GlyphRange_Chinese) glyphRangesBuilder.AddRanges(fonts->GetGlyphRangesChineseFull());
-  if (glyphRange & GlyphRange_Japanese) glyphRangesBuilder.AddRanges(fonts->GetGlyphRangesJapanese());
-  if (glyphRange & GlyphRange_Cyrillic) glyphRangesBuilder.AddRanges(fonts->GetGlyphRangesCyrillic());
-  if (glyphRange & GlyphRange_Korean) glyphRangesBuilder.AddRanges(fonts->GetGlyphRangesKorean());
-  if (glyphRange & GlyphRange_Thai) glyphRangesBuilder.AddRanges(fonts->GetGlyphRangesThai());
-  if (glyphRange & GlyphRange_Vietnamese) glyphRangesBuilder.AddRanges(fonts->GetGlyphRangesVietnamese());
+  if (GlyphRange & GlyphRange_Default) glyphRangesBuilder.AddRanges(fonts->GetGlyphRangesDefault());
+  if (GlyphRange & GlyphRange_Chinese) glyphRangesBuilder.AddRanges(fonts->GetGlyphRangesChineseFull());
+  if (GlyphRange & GlyphRange_Japanese) glyphRangesBuilder.AddRanges(fonts->GetGlyphRangesJapanese());
+  if (GlyphRange & GlyphRange_Cyrillic) glyphRangesBuilder.AddRanges(fonts->GetGlyphRangesCyrillic());
+  if (GlyphRange & GlyphRange_Korean) glyphRangesBuilder.AddRanges(fonts->GetGlyphRangesKorean());
+  if (GlyphRange & GlyphRange_Thai) glyphRangesBuilder.AddRanges(fonts->GetGlyphRangesThai());
+  if (GlyphRange & GlyphRange_Vietnamese) glyphRangesBuilder.AddRanges(fonts->GetGlyphRangesVietnamese());
   glyphRangesBuilder.BuildRanges(&glyphRanges);
   return &glyphRanges[0];
 }

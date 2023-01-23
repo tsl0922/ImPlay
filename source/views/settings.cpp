@@ -35,20 +35,20 @@ void Settings::drawGeneralTab() {
   if (ImGui::BeginTabItem("General")) {
     ImGui::Text("Core");
     ImGui::Indent();
-    ImGui::Checkbox("Use mpv's config dir*", &config->mpvConfig);
+    ImGui::Checkbox("Use mpv's config dir*", &config->UseConfig);
     ImGui::SameLine();
     ImGui::HelpMarker("ImPlay will use it's own config dir for libmpv by default.");
 #ifdef _WIN32
-    ImGui::Checkbox("Enable --wid for libmpv* (DO NOT USE)", &config->mpvWid);
+    ImGui::Checkbox("Enable --wid for libmpv* (DO NOT USE)", &config->UseWid);
     ImGui::SameLine();
     ImGui::HelpMarker(
         "Experimental, Windows only, still have issues.\n"
         "This allow using DirectX, Which is usually faster than OpenGL.");
 #endif
-    ImGui::Checkbox("Remember playback progress on exit", &config->watchLater);
+    ImGui::Checkbox("Remember playback progress on exit", &config->WatchLater);
     ImGui::SameLine();
     ImGui::HelpMarker("Exit mpv with the quit-watch-later command.");
-    ImGui::Checkbox("Remember window position and size on exit", &config->winSave);
+    ImGui::Checkbox("Remember window position and size on exit", &config->WinSave);
     ImGui::Unindent();
     ImGui::Text("Debug");
     ImGui::SameLine();
@@ -59,10 +59,10 @@ void Settings::drawGeneralTab() {
     const char *items[] = {"fatal", "error", "warn", "info", "v", "debug", "trace", "no"};
     static int current;
     for (int i = 0; i < IM_ARRAYSIZE(items); i++) {
-      if (strcmp(items[i], config->logLevel.c_str()) == 0) current = i;
+      if (strcmp(items[i], config->LogLevel.c_str()) == 0) current = i;
     }
-    if (ImGui::Combo("Log Level*", &current, items, IM_ARRAYSIZE(items))) config->logLevel = items[current];
-    ImGui::InputInt("Log Limit*", &config->logLimit, 0);
+    if (ImGui::Combo("Log Level*", &current, items, IM_ARRAYSIZE(items))) config->LogLevel = items[current];
+    ImGui::InputInt("Log Limit*", &config->LogLimit, 0);
     ImGui::Unindent();
     ImGui::EndTabItem();
   }
@@ -130,16 +130,16 @@ void Settings::drawFontTab() {
     ImGui::SameLine();
     ImGui::HelpMarker("Required for displaying non-English characters on interface.");
     ImGui::Indent();
-    ImGui::CheckboxFlags("Chinese", &config->glyphRange, Config::GlyphRange_Chinese);
+    ImGui::CheckboxFlags("Chinese", &config->GlyphRange, Config::GlyphRange_Chinese);
     ImGui::SameLine();
-    ImGui::CheckboxFlags("Cyrillic", &config->glyphRange, Config::GlyphRange_Cyrillic);
+    ImGui::CheckboxFlags("Cyrillic", &config->GlyphRange, Config::GlyphRange_Cyrillic);
     ImGui::SameLine();
-    ImGui::CheckboxFlags("Japanese", &config->glyphRange, Config::GlyphRange_Japanese);
-    ImGui::CheckboxFlags("Korean", &config->glyphRange, Config::GlyphRange_Korean);
+    ImGui::CheckboxFlags("Japanese", &config->GlyphRange, Config::GlyphRange_Japanese);
+    ImGui::CheckboxFlags("Korean", &config->GlyphRange, Config::GlyphRange_Korean);
     ImGui::SameLine();
-    ImGui::CheckboxFlags("Thai", &config->glyphRange, Config::GlyphRange_Thai);
+    ImGui::CheckboxFlags("Thai", &config->GlyphRange, Config::GlyphRange_Thai);
     ImGui::SameLine();
-    ImGui::CheckboxFlags("Vietnamese", &config->glyphRange, Config::GlyphRange_Vietnamese);
+    ImGui::CheckboxFlags("Vietnamese", &config->GlyphRange, Config::GlyphRange_Vietnamese);
     ImGui::Unindent();
     ImGui::EndTabItem();
   }

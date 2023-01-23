@@ -35,7 +35,7 @@ Window::Window() {
 
 #ifdef _WIN32
   HWND hwnd = glfwGetWin32Window(window);
-  int64_t wid = config.mpvWid ? static_cast<uint32_t>((intptr_t)hwnd) : 0;
+  int64_t wid = config.UseWid ? static_cast<uint32_t>((intptr_t)hwnd) : 0;
   mpv = new Mpv(wid);
 #else
   mpv = new Mpv();
@@ -112,9 +112,9 @@ bool Window::run(OptionParser& parser) {
 
   renderThread.join();
 
-  if (config.winSave) {
-    glfwGetWindowPos(window, &config.winX, &config.winY);
-    glfwGetWindowSize(window, &config.winW, &config.winH);
+  if (config.WinSave) {
+    glfwGetWindowPos(window, &config.WinX, &config.WinY);
+    glfwGetWindowSize(window, &config.WinW, &config.WinH);
     config.save();
   }
 
@@ -150,11 +150,11 @@ void Window::initGLFW(const char* title) {
   height = std::max((int)(mode->height * 0.4), 400);
   int posX = (mode->width - width) / 2;
   int posY = (mode->height - height) / 2;
-  if (config.winSave) {
-    if (config.winW > 0) width = config.winW;
-    if (config.winH > 0) height = config.winH;
-    if (config.winX >= 0) posX = config.winX;
-    if (config.winY >= 0) posY = config.winY;
+  if (config.WinSave) {
+    if (config.WinW > 0) width = config.WinW;
+    if (config.WinH > 0) height = config.WinH;
+    if (config.WinX >= 0) posX = config.WinX;
+    if (config.WinY >= 0) posY = config.WinY;
   }
 
   window = glfwCreateWindow(width, height, title, nullptr, nullptr);

@@ -200,7 +200,7 @@ void ContextMenu::draw() {
       ImGui::EndMenu();
     }
     if (ImGui::MenuItemEx("Quit", ICON_FA_WINDOW_CLOSE, "q"))
-      mpv->command(config->watchLater ? "quit-watch-later" : "quit");
+      mpv->command(config->WatchLater ? "quit-watch-later" : "quit");
     ImGui::EndPopup();
   }
 }

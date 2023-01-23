@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: GPL-2.0-only
 
 #include <map>
-#include <fonts/fontawesome.h>
 #include "views/debug.h"
 #include "mpv.h"
 #include "helpers.h"
@@ -16,7 +15,7 @@ Debug::Debug(Config* config, Mpv* mpv) : View() {
 
 Debug::~Debug() { delete console; }
 
-void Debug::init() { console->init(config->logLevel.c_str(), config->logLimit); }
+void Debug::init() { console->init(config->LogLevel.c_str(), config->LogLimit); }
 
 void Debug::show() {
   m_open = true;

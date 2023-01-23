@@ -30,27 +30,25 @@ class Config {
   // interface
   std::string Theme = "light";
   float Scale = 0;
-  
+
   // font
   std::string FontPath;
   int FontSize = 13;
-  int glyphRange = GlyphRange_Default;
-  
+  int GlyphRange = GlyphRange_Default;
+
   // mpv
-  bool mpvConfig = false;
-  bool mpvWid = false;
-  bool watchLater = false;
-  
+  bool UseConfig = false;
+  bool UseWid = false;
+  bool WatchLater = false;
+
   // window
-  bool winSave = false;
-  int winX = 0;
-  int winY = 0;
-  int winW = 0;
-  int winH = 0;
+  bool WinSave = false;
+  int WinX = 0, WinY = 0;
+  int WinW = 0, WinH = 0;
 
   // log
-  std::string logLevel = "no";
-  int logLimit = 500;
+  std::string LogLevel = "no";
+  int LogLimit = 500;
 
  private:
   inipp::Ini<char> ini;
