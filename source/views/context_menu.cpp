@@ -17,22 +17,59 @@ void ContextMenu::draw() {
     m_open = false;
   }
 
-  bool paused = mpv->paused();
-  bool playing = mpv->playing();
   if (ImGui::BeginPopup("##context_menu", ImGuiWindowFlags_NoMove)) {
-    ImGui::GetWindowViewport()->Flags |= ImGuiViewportFlags_TopMost;
+    bool paused = mpv->paused();
+    bool playing = mpv->playing();
+    auto playlist = mpv->playlist();
+    auto chapterlist = mpv->chapterList();
     if (ImGui::GetIO().AppFocusLost || ImGui::GetWindowViewport()->Flags & ImGuiViewportFlags_Minimized)
       ImGui::CloseCurrentPopup();
     if (ImGui::MenuItemEx(paused ? "Play" : "Pause", paused ? ICON_FA_PLAY : ICON_FA_PAUSE, "Space", false, playing))
       mpv->command("cycle pause");
     if (ImGui::MenuItemEx("Stop", ICON_FA_STOP, nullptr, false, playing)) mpv->command("stop");
     ImGui::Separator();
-    if (ImGui::MenuItemEx("Jump Forward", ICON_FA_FORWARD, "UP", false, playing)) mpv->command("seek 10");
-    if (ImGui::MenuItemEx("Jump Backward", ICON_FA_BACKWARD, "DOWN", false, playing)) mpv->command("seek -10");
-    if (ImGui::MenuItemEx("Show Progress", ICON_FA_SPINNER, "o", false, playing)) mpv->command("show-progress");
-    ImGui::Separator();
-    drawChapterlist();
-    drawPlaylist();
+    if (ImGui::BeginMenuEx("Playback", ICON_FA_PLAY_CIRCLE)) {
+      if (ImGui::MenuItemEx("Seek +10s", ICON_FA_FORWARD, "WHEEL_UP", false, playing)) mpv->command("seek 10");
+      if (ImGui::MenuItem("Seek +1m", "UP", false, playing)) mpv->command("seek 60");
+      if (ImGui::MenuItemEx("Seek -10s", ICON_FA_BACKWARD, "WHEEL_DOWN", false, playing)) mpv->command("seek -10");
+      if (ImGui::MenuItem("Seek -1m", "DOWN", false, playing)) mpv->command("seek -60");
+      if (ImGui::BeginMenu("Speed", playing)) {
+        if (ImGui::MenuItem("2x")) mpv->command("multiply speed 2.0");
+        if (ImGui::MenuItem("1.5x")) mpv->command("multiply speed 1.5");
+        if (ImGui::MenuItem("1.25x")) mpv->command("multiply speed 1.25");
+        if (ImGui::MenuItem("1.0x")) mpv->command("set speed 1.0");
+        if (ImGui::MenuItem("0.75x")) mpv->command("multiply speed 0.75");
+        if (ImGui::MenuItem("0.5x")) mpv->command("multiply speed 0.5");
+        ImGui::EndMenu();
+      }
+      ImGui::Separator();
+      if (ImGui::MenuItemEx("Next Frame", ICON_FA_ARROW_RIGHT, ".", false, playing)) mpv->command("frame-step");
+      if (ImGui::MenuItemEx("Previous Frame", ICON_FA_ARROW_LEFT, ",", false, playing)) mpv->command("frame-back-step");
+      ImGui::Separator();
+      if (ImGui::MenuItemEx("Next Media", ICON_FA_ARROW_RIGHT, ">", false, playlist.size() > 1))
+        mpv->command("playlist-next");
+      if (ImGui::MenuItemEx("Previous Media", ICON_FA_ARROW_LEFT, "<", false, playlist.size() > 1))
+        mpv->command("playlist-prev");
+      if (ImGui::MenuItemEx("Playlist", ICON_FA_LIST, nullptr, false, playlist.size() > 0))
+        mpv->commandv("script-message-to", "implay", "command-palette", "playlist", nullptr);
+      if (ImGui::MenuItem("Playlist Loop", nullptr, false, playlist.size() > 0))
+        mpv->command("cycle-values loop-playlist inf no");
+      ImGui::Separator();
+      if (ImGui::MenuItemEx("Next Chapter", ICON_FA_ARROW_RIGHT, nullptr, false, chapterlist.size() > 1))
+        mpv->command("add chapter 1");
+      if (ImGui::MenuItemEx("Previous Chapter", ICON_FA_ARROW_LEFT, nullptr, false, chapterlist.size() > 1))
+        mpv->command("add chapter -1");
+      if (ImGui::MenuItemEx("Chapters", ICON_FA_LIST, nullptr, false, chapterlist.size() > 0))
+        mpv->commandv("script-message-to", "implay", "command-palette", "chapters", nullptr);
+      ImGui::Separator();
+      if (ImGui::MenuItem("A-B Loop", "l", false, playing)) mpv->command("ab-loop");
+      if (ImGui::MenuItem("File Loop", "L", false, playing)) mpv->command("cycle-values loop-file inf no");
+      ImGui::Separator();
+      if (ImGui::MenuItemEx("Show Progress", ICON_FA_SPINNER, "o", false, playing)) mpv->command("show-progress");
+      ImGui::EndMenu();
+    }
+    drawPlaylist(playlist);
+    drawChapterlist(chapterlist);
     ImGui::Separator();
     if (ImGui::BeginMenuEx("Audio", ICON_FA_VOLUME_UP)) {
       drawTracklist("audio", "aid");
@@ -75,20 +112,11 @@ void ContextMenu::draw() {
         if (ImGui::MenuItem("Decrease Height", "w")) mpv->command("add panscan -0.1");
         ImGui::Separator();
         if (ImGui::MenuItem("Move Left", "Alt+right")) mpv->command("add video-pan-x -0.1");
-        if (ImGui::MenuItem("Move Right", "Alt+left")) mpv->command("add video-pan-x 0.1");        
+        if (ImGui::MenuItem("Move Right", "Alt+left")) mpv->command("add video-pan-x 0.1");
         if (ImGui::MenuItem("Move Down", "Alt+up")) mpv->command("add video-pan-y 0.1");
         if (ImGui::MenuItem("Move Up", "Alt+down")) mpv->command("add video-pan-y -0.1");
         ImGui::Separator();
         if (ImGui::MenuItem("Reset", "Alt+BS")) mpv->command("set video-zoom 0; set video-pan-x 0 ; set video-pan-y 0");
-        ImGui::EndMenu();
-      }
-      if (ImGui::BeginMenu("Speed")) {
-        if (ImGui::MenuItem("2x")) mpv->command("multiply speed 2.0");
-        if (ImGui::MenuItem("1.5x")) mpv->command("multiply speed 1.5");
-        if (ImGui::MenuItem("1.25x")) mpv->command("multiply speed 1.25");
-        if (ImGui::MenuItem("1.0x")) mpv->command("set speed 1.0");
-        if (ImGui::MenuItem("0.75x")) mpv->command("multiply speed 0.75");
-        if (ImGui::MenuItem("0.5x")) mpv->command("multiply speed 0.5");
         ImGui::EndMenu();
       }
       if (ImGui::BeginMenu("Aspect")) {
@@ -118,7 +146,6 @@ void ContextMenu::draw() {
       }
       ImGui::Separator();
       if (ImGui::MenuItem("HW Decoding", "Ctrl+h")) mpv->command("cycle-values hwdec auto no");
-      if (ImGui::MenuItem("Toggle A-B Loop", "l", false, playing)) mpv->command("ab-loop");
       if (ImGui::MenuItem("Toggle Deinterlace", "d")) mpv->command("cycle deinterlace");
       ImGui::EndMenu();
     }
@@ -138,8 +165,6 @@ void ContextMenu::draw() {
       if (ImGui::MenuItem("Scale -0.1", "G")) mpv->command("add sub-scale -0.1");
       ImGui::EndMenu();
     }
-    if (ImGui::MenuItemEx("Tracks", ICON_FA_LIST))
-      mpv->commandv("script-message-to", "implay", "command-palette", "tracks", nullptr);
     ImGui::Separator();
     if (ImGui::MenuItemEx("Fullscreen", ICON_FA_EXPAND, "f")) mpv->command("cycle fullscreen");
     if (ImGui::MenuItemEx("Command Palette", ICON_FA_SEARCH, "Ctrl+Shift+p"))
@@ -237,15 +262,14 @@ void ContextMenu::drawTracklist(const char *type, const char *prop) {
   }
 }
 
-void ContextMenu::drawChapterlist() {
-  auto chapterlist = mpv->chapterList();
+void ContextMenu::drawChapterlist(std::vector<Mpv::ChapterItem> items) {
   auto pos = mpv->property<int64_t, MPV_FORMAT_INT64>("chapter");
-  if (ImGui::BeginMenuEx("Chapters", ICON_FA_LIST, !chapterlist.empty())) {
-    if (ImGui::MenuItemEx("Previous", ICON_FA_ARROW_LEFT)) mpv->command("add chapter -1");
+  if (ImGui::BeginMenuEx("Chapters", ICON_FA_LIST, !items.empty())) {
     if (ImGui::MenuItemEx("Next", ICON_FA_ARROW_RIGHT)) mpv->command("add chapter 1");
+    if (ImGui::MenuItemEx("Previous", ICON_FA_ARROW_LEFT)) mpv->command("add chapter -1");
     ImGui::Separator();
     int i = 0;
-    for (auto &chapter : chapterlist) {
+    for (auto &chapter : items) {
       if (i == 10) break;
       auto title = chapter.title.empty() ? format("Chapter {}", chapter.id + 1) : chapter.title;
       title = format("{} [{:%H:%M:%S}]", title, std::chrono::duration<int>((int)chapter.time));
@@ -254,21 +278,19 @@ void ContextMenu::drawChapterlist() {
       }
       i++;
     }
-    if (chapterlist.size() > 10) {
-      if (ImGui::MenuItem(format("All.. ({})", chapterlist.size()).c_str()))
+    if (items.size() > 10) {
+      if (ImGui::MenuItem(format("All.. ({})", items.size()).c_str()))
         mpv->commandv("script-message-to", "implay", "command-palette", "chapters", nullptr);
     }
     ImGui::EndMenu();
   }
 }
 
-void ContextMenu::drawPlaylist() {
-  auto playlist = mpv->playlist();
+void ContextMenu::drawPlaylist(std::vector<Mpv::PlayItem> items) {
   auto pos = mpv->property<int64_t, MPV_FORMAT_INT64>("playlist-pos");
   if (ImGui::BeginMenuEx("Playlist", ICON_FA_LIST)) {
-    if (ImGui::MenuItemEx("Previous", ICON_FA_ARROW_LEFT, "<", false, playlist.size() > 1))
-      mpv->command("playlist-prev");
-    if (ImGui::MenuItemEx("Next", ICON_FA_ARROW_RIGHT, ">", false, playlist.size() > 1)) mpv->command("playlist-next");
+    if (ImGui::MenuItemEx("Next", ICON_FA_ARROW_RIGHT, ">", false, items.size() > 1)) mpv->command("playlist-next");
+    if (ImGui::MenuItemEx("Previous", ICON_FA_ARROW_LEFT, "<", false, items.size() > 1)) mpv->command("playlist-prev");
     ImGui::Separator();
     if (ImGui::MenuItemEx("Add Files..", ICON_FA_FILE_UPLOAD))
       mpv->commandv("script-message-to", "implay", "playlist-add-files", nullptr);
@@ -277,10 +299,10 @@ void ContextMenu::drawPlaylist() {
     ImGui::Separator();
     if (ImGui::MenuItem("Clear")) mpv->command("playlist-clear");
     if (ImGui::MenuItem("Shuffle")) mpv->command("playlist-shuffle");
-    if (ImGui::MenuItem("Infinite Loop", "L")) mpv->command("cycle-values loop-file inf no");
+    if (ImGui::MenuItem("Loop", "L")) mpv->command("cycle-values loop-playlist inf no");
     ImGui::Separator();
     int i = 0;
-    for (auto &item : playlist) {
+    for (auto &item : items) {
       if (i == 10) break;
       std::string title = item.title;
       if (title.empty() && !item.filename.empty()) title = item.filename;
@@ -289,8 +311,8 @@ void ContextMenu::drawPlaylist() {
         mpv->property<int64_t, MPV_FORMAT_INT64>("playlist-pos", item.id);
       i++;
     }
-    if (playlist.size() > 10) {
-      if (ImGui::MenuItem(format("All.. ({})", playlist.size()).c_str()))
+    if (items.size() > 10) {
+      if (ImGui::MenuItem(format("All.. ({})", items.size()).c_str()))
         mpv->commandv("script-message-to", "implay", "command-palette", "playlist", nullptr);
     }
     ImGui::EndMenu();

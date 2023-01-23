@@ -16,8 +16,8 @@ class ContextMenu : public View {
  private:
   void drawAudioDeviceList();
   void drawTracklist(const char *type, const char *prop);
-  void drawChapterlist();
-  void drawPlaylist();
+  void drawChapterlist(std::vector<Mpv::ChapterItem> items);
+  void drawPlaylist(std::vector<Mpv::PlayItem> items);
   void drawProfilelist();
 
   Config *config;
