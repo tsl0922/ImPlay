@@ -21,6 +21,7 @@ class Player : public Views::View {
 
   bool init(OptionParser &parser);
   void draw() override;
+  void drawLogo();
   void render(int w, int h);
   std::atomic_bool &renderGui() { return renderGui_; }
   void shutdown();
@@ -43,7 +44,7 @@ class Player : public Views::View {
   const char *title;
   std::atomic_bool renderGui_ = true;
   bool fileOpen = false;
-  ImTextureID iconTexture = nullptr;
+  ImTextureID logoTexture = nullptr;
 
   static void translateMod(std::vector<std::string> &keys, int mods) {
     if (mods & GLFW_MOD_CONTROL) keys.emplace_back("Ctrl");

@@ -23,7 +23,7 @@ Player::Player(Config* config, Dispatch* dispatch, GLFWwindow* window, Mpv* mpv,
 Player::~Player() { delete cmd; }
 
 bool Player::init(OptionParser& parser) {
-  iconTexture = ImGui::LoadTexture("icon.png");
+  logoTexture = ImGui::LoadTexture("icon.png");
 
   mpv->option("config", "yes");
   mpv->option("osc", "yes");
@@ -52,22 +52,26 @@ bool Player::init(OptionParser& parser) {
 }
 
 void Player::draw() {
-  if (iconTexture != nullptr && !mpv->forceWindow() && !fileOpen) {
-    const ImGuiViewport* viewport = ImGui::GetMainViewport();
-    ImGuiWindowFlags flags = ImGuiWindowFlags_NoNav | ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoInputs |
-                             ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoFocusOnAppearing;
-    const float imageWidth = std::min(viewport->WorkSize.x, viewport->WorkSize.y) * 0.2f;
-    const ImVec2 imageSize(imageWidth, imageWidth);
-    ImGui::SetNextWindowSize(imageSize * 1.5f, ImGuiCond_Always);
-    ImGui::SetNextWindowPos(viewport->GetCenter(), ImGuiCond_Always, ImVec2(0.5f, 0.5f));
-    ImGui::PushStyleColor(ImGuiCol_WindowShadow, ImVec4(0, 0, 0, 0));
-    ImGui::Begin("Logo", nullptr, flags);
-    ImGui::SetCursorPos((ImGui::GetWindowSize() - imageSize) * 0.5f);
-    ImGui::Image(iconTexture, imageSize);
-    ImGui::End();
-    ImGui::PopStyleColor();
-  }
+  drawLogo();
   cmd->draw();
+}
+
+void Player::drawLogo() {
+  if (logoTexture == nullptr || mpv->forceWindow() || fileOpen) return;
+
+  const ImGuiViewport* viewport = ImGui::GetMainViewport();
+  ImGuiWindowFlags flags = ImGuiWindowFlags_NoNav | ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoInputs |
+                           ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoFocusOnAppearing;
+  const float imageWidth = std::min(viewport->WorkSize.x, viewport->WorkSize.y) * 0.2f;
+  const ImVec2 imageSize(imageWidth, imageWidth);
+  ImGui::SetNextWindowSize(imageSize * 1.5f, ImGuiCond_Always);
+  ImGui::SetNextWindowPos(viewport->GetCenter(), ImGuiCond_Always, ImVec2(0.5f, 0.5f));
+  ImGui::PushStyleColor(ImGuiCol_WindowShadow, ImVec4(0, 0, 0, 0));
+  ImGui::Begin("Logo", nullptr, flags);
+  ImGui::SetCursorPos((ImGui::GetWindowSize() - imageSize) * 0.5f);
+  ImGui::Image(logoTexture, imageSize);
+  ImGui::End();
+  ImGui::PopStyleColor();
 }
 
 void Player::render(int w, int h) {
