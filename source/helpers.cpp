@@ -15,6 +15,10 @@
 #ifdef _WIN32
 #include <windows.h>
 #include <shlobj.h>
+#elif defined(__APPLE__)
+#include <limits.h>
+#include <sysdir.h>
+#include <glob.h>
 #endif
 #include "helpers.h"
 #include <imgui_impl_opengl3_loader.h>
@@ -99,12 +103,12 @@ bool ImPlay::OptionParser::check(std::string key, std::string value) {
 
 int ImPlay::openUri(const char* uri) {
 #ifdef __APPLE__
-  return system(format("open {}", uri).c_str());
+  return system(format("open '{}'", uri).c_str());
 #elif defined(_WIN32) || defined(__CYGWIN__)
   return ShellExecute(0, 0, uri, 0, 0, SW_SHOW) > (HINSTANCE)32 ? 0 : 1;
 #else
   char command[256];
-  return system(format("xdg-open {}", uri).c_str());
+  return system(format("xdg-open '{}'", uri).c_str());
 #endif
 }
 
@@ -115,6 +119,17 @@ const char* ImPlay::datadir(const char* subdir) {
   if (SUCCEEDED(SHGetKnownFolderPath(FOLDERID_RoamingAppData, KF_FLAG_CREATE, nullptr, &dir))) {
     wcstombs(dataDir, dir, 256);
     CoTaskMemFree(dir);
+  }
+#elif defined(__APPLE__)
+  char path[PATH_MAX];
+  auto state = sysdir_start_search_path_enumeration(SYSDIR_DIRECTORY_APPLICATION_SUPPORT, SYSDIR_DOMAIN_MASK_USER);
+  while ((state = sysdir_get_next_search_path_enumeration(state, path)) != 0) {
+    glob_t g;
+    if (glob(path, GLOB_TILDE, nullptr, &g) == 0) {
+      strncpy(dataDir, g.gl_pathv[0], 256);
+      globfree(&g);
+    }
+    break;
   }
 #else
   char* home = getenv("HOME");
