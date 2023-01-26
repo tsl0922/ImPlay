@@ -76,13 +76,14 @@ void Player::drawLogo() {
 
 void Player::render(int w, int h) {
   glfwMakeContextCurrent(window);
-
   glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
   glClear(GL_COLOR_BUFFER_BIT);
 
   if (hasFile() || mpv->forceWindow()) mpv->render(w, h);
 
-  if (renderGui_) {
+  bool renderGui = renderGui_;
+
+  if (renderGui) {
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();
@@ -94,7 +95,7 @@ void Player::render(int w, int h) {
   glfwSwapBuffers(window);
   glfwMakeContextCurrent(nullptr);
 
-  if (renderGui_ && ImGui::GetIO().ConfigFlags & ImGuiConfigFlags_ViewportsEnable) {
+  if (renderGui && ImGui::GetIO().ConfigFlags & ImGuiConfigFlags_ViewportsEnable) {
     dispatch->sync(
         [](void* data) {
           ImGui::UpdatePlatformWindows();

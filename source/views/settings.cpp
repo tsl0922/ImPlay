@@ -60,6 +60,8 @@ void Settings::drawButtons() {
   if (same) ImGui::EndDisabled();
 
   if (!same && apply) {
+    if (data.Font != config->Data.Font || data.Interface.Scale != config->Data.Interface.Scale)
+      config->FontReload = true;
     config->Data = data;
     for (auto &fn : appliers) fn();
     config->save();
@@ -132,10 +134,8 @@ void Settings::drawInterfaceTab() {
     }
     ImGui::Text("Scale");
     ImGui::Indent();
-    if (ImGui::Combo("##Scale", &s_current, s_items, IM_ARRAYSIZE(s_items))) {
+    if (ImGui::Combo("##Scale", &s_current, s_items, IM_ARRAYSIZE(s_items)))
       data.Interface.Scale = s_to_value(s_items[s_current]);
-      appliers.push_back([&]() { data.Font.Reload = true; });
-    }
     ImGui::Unindent();
     ImGui::EndTabItem();
   }
@@ -149,26 +149,18 @@ void Settings::drawFontTab() {
     ImGui::SameLine();
     ImGui::HelpMarker("An embedded font will be used if not specified.");
     ImGui::Indent();
-    if (ImGui::InputText("##Path", fontPath, IM_ARRAYSIZE(fontPath))) {
-      appliers.push_back([&]() {
-        data.Font.Path = fontPath;
-        data.Font.Reload = true;
-      });
-    }
+    if (ImGui::InputText("##Path", fontPath, IM_ARRAYSIZE(fontPath))) data.Font.Path = fontPath;
     ImGui::SameLine();
     if (ImGui::Button(ICON_FA_FOLDER_OPEN)) {
       openFile({{"Font Files", "ttf,ttc,otf"}}, [&](const char *path) {
         strncpy(fontPath, path, IM_ARRAYSIZE(fontPath));
-        appliers.push_back([&]() {
-          data.Font.Path = path;
-          data.Font.Reload = true;
-        });
+        data.Font.Path = path;
       });
     }
     ImGui::Unindent();
     ImGui::Text("Size");
     ImGui::Indent();
-    if (ImGui::SliderInt("##Size", &data.Font.Size, 8, 72)) appliers.push_back([&]() { data.Font.Reload = true; });
+    ImGui::SliderInt("##Size", &data.Font.Size, 8, 72);
     ImGui::Unindent();
     ImGui::Text("Glyph Ranges");
     ImGui::SameLine();

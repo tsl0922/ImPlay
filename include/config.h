@@ -26,7 +26,6 @@ struct ConfigData {
     bool operator==(const Window_&) const = default;
   } Window;
   struct Font_ {
-    bool Reload = false;
     std::string Path;
     int Size = 13;
     int GlyphRange = 0;
@@ -61,6 +60,7 @@ class Config {
   const ImWchar* buildGlyphRanges();
 
   ConfigData Data;
+  bool FontReload = false;
 
  private:
   inipp::Ini<char> ini;

@@ -83,9 +83,9 @@ bool Window::run(OptionParser& parser) {
         wantRender = false;
       }
 
-      if (config.Data.Font.Reload) {
+      if (config.FontReload) {
         loadFonts();
-        config.Data.Font.Reload = false;
+        config.FontReload = false;
         glfwMakeContextCurrent(window);
         ImGui_ImplOpenGL3_DestroyFontsTexture();
         ImGui_ImplOpenGL3_CreateFontsTexture();
@@ -189,7 +189,7 @@ void Window::initGLFW(const char* title) {
   glfwSetWindowContentScaleCallback(window, [](GLFWwindow* window, float x, float y) {
     auto win = static_cast<Window*>(glfwGetWindowUserPointer(window));
     win->config.Data.Interface.Scale = std::max(x, y);
-    win->config.Data.Font.Reload = true;
+    win->config.FontReload = true;
   });
   glfwSetWindowCloseCallback(window, [](GLFWwindow* window) {
     auto win = static_cast<Window*>(glfwGetWindowUserPointer(window));
