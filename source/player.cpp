@@ -31,7 +31,7 @@ bool Player::init(OptionParser& parser) {
   mpv->option("input-vo-keyboard", "yes");
   mpv->option("osd-playing-msg", "${media-title}");
   mpv->option("screenshot-directory", "~~desktop/");
-  if (!config->UseConfig) mpv->option("config-dir", datadir());
+  if (!config->Data.Mpv.UseConfig) mpv->option("config-dir", datadir());
 
   for (const auto& [key, value] : parser.options) {
     if (int err = mpv->option(key.c_str(), value.c_str()); err < 0) {
@@ -104,7 +104,7 @@ void Player::render(int w, int h) {
   }
 }
 
-void Player::shutdown() { mpv->command(config->WatchLater ? "quit-watch-later" : "quit"); }
+void Player::shutdown() { mpv->command(config->Data.Mpv.WatchLater ? "quit-watch-later" : "quit"); }
 
 void Player::onCursorEvent(double x, double y) {
   std::string xs = std::to_string((int)x);

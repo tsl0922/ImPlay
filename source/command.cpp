@@ -29,7 +29,6 @@ Command::~Command() {
 }
 
 void Command::init() {
-  setTheme(config->Theme.c_str());
   debug->init();
 }
 
@@ -88,7 +87,7 @@ void Command::execute(int n_args, const char **args_) {
       {"command-palette", [&](int n, const char **args) { openCommandPalette(n, args); }},
       {"theme",
        [&](int n, const char **args) {
-         if (n > 0) setTheme(args[0]);
+         if (n > 0) ImGui::SetTheme(args[0]);
        }},
   };
 
@@ -233,7 +232,7 @@ void Command::drawOpenURL() {
   ImGui::OpenPopup("Open URL");
 
   ImVec2 wSize = ImGui::GetMainViewport()->WorkSize;
-  ImGui::SetNextWindowSize(ImVec2(std::min(wSize.x * 0.8f, 550.0f), 6 * ImGui::GetFontSize()), ImGuiCond_Always);
+  ImGui::SetNextWindowSize(ImVec2(std::min(wSize.x * 0.8f, scaled(50)), scaled(6)), ImGuiCond_Always);
   ImGui::SetNextWindowPos(ImGui::GetMainViewport()->GetWorkCenter(), ImGuiCond_Always, ImVec2(0.5f, 0.5f));
   if (ImGui::BeginPopupModal("Open URL", &m_openURL, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove)) {
     if (ImGui::IsKeyDown(ImGuiKey_Escape)) m_openURL = false;
@@ -241,11 +240,11 @@ void Command::drawOpenURL() {
     ImGui::SetNextItemWidth(-1);
     ImGui::InputTextWithHint("##Input URL", "Input URL Here..", url, IM_ARRAYSIZE(url));
     auto style = ImGuiStyle();
-    ImGui::SetCursorPosX(ImGui::GetWindowWidth() - (10 * ImGui::GetFontSize() + 2 * style.ItemSpacing.x));
-    if (ImGui::Button("Cancel", ImVec2(5 * ImGui::GetFontSize(), 0))) m_openURL = false;
+    ImGui::SetCursorPosX(ImGui::GetWindowWidth() - (scaled(10) + 3 * style.ItemSpacing.x));
+    if (ImGui::Button("Cancel", ImVec2(scaled(5), 0))) m_openURL = false;
     ImGui::SameLine();
     if (url[0] == '\0') ImGui::BeginDisabled();
-    if (ImGui::Button("OK", ImVec2(5 * ImGui::GetFontSize(), 0))) {
+    if (ImGui::Button("OK", ImVec2(scaled(5), 0))) {
       m_openURL = false;
       mpv->commandv("loadfile", url, nullptr);
       url[0] = '\0';
@@ -253,26 +252,6 @@ void Command::drawOpenURL() {
     if (url[0] == '\0') ImGui::EndDisabled();
     ImGui::EndPopup();
   }
-}
-
-void Command::setTheme(const char *theme) {
-  ImGuiStyle style;
-  if (strcmp(theme, "dark") == 0)
-    ImGui::StyleColorsDark(&style);
-  else if (strcmp(theme, "light") == 0)
-    ImGui::StyleColorsLight(&style);
-  else if (strcmp(theme, "classic") == 0)
-    ImGui::StyleColorsClassic(&style);
-  else
-    return;
-
-  style.PopupRounding = 5.0f;
-  style.WindowRounding = 5.0f;
-  style.WindowShadowSize = 50.0f;
-  style.ScrollbarSize = 10.0f;
-  style.Colors[ImGuiCol_WindowShadow] = ImVec4(0, 0, 0, 1.0f);
-
-  ImGui::GetStyle() = style;
 }
 
 bool Command::isMediaType(std::string ext) {

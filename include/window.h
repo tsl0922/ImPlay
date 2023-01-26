@@ -26,6 +26,7 @@ class Window {
   void render();
   void requestRender();
 
+  void loadFonts();
   void initGLFW(const char *title);
   void initImGui();
   void exitGLFW();

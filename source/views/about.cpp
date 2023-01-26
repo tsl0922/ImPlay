@@ -8,7 +8,7 @@ namespace ImPlay::Views {
 void About::draw() {
   if (m_open) ImGui::OpenPopup("About");
 
-  ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(4.0f, 1.0f) * ImGui::GetFontSize());
+  ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, scaled(ImVec2(4.0f, 1.0f)));
   ImGui::SetNextWindowPos(ImGui::GetMainViewport()->GetWorkCenter(), ImGuiCond_Always, ImVec2(0.5f, 0.5f));
   if (ImGui::BeginPopupModal("About", &m_open, ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoMove)) {
     if (ImGui::IsKeyDown(ImGuiKey_Escape)) m_open = false;

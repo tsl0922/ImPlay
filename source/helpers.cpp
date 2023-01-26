@@ -27,7 +27,7 @@ void ImGui::HelpMarker(const char* desc) {
   ImGui::TextDisabled("(?)");
   if (ImGui::IsItemHovered(ImGuiHoveredFlags_DelayShort)) {
     ImGui::BeginTooltip();
-    ImGui::PushTextWrapPos(ImGui::GetFontSize() * 35.0f);
+    ImGui::PushTextWrapPos(scaled(35));
     ImGui::TextUnformatted(desc);
     ImGui::PopTextWrapPos();
     ImGui::EndTooltip();
@@ -57,6 +57,26 @@ ImTextureID ImGui::LoadTexture(const char* path, int* width, int* height) {
   if (height != nullptr) *height = h;
 
   return reinterpret_cast<ImTextureID>(static_cast<intptr_t>(texture));
+}
+
+void ImGui::SetTheme(const char* theme) {
+  ImGuiStyle style;
+  if (strcmp(theme, "dark") == 0)
+    ImGui::StyleColorsDark(&style);
+  else if (strcmp(theme, "light") == 0)
+    ImGui::StyleColorsLight(&style);
+  else if (strcmp(theme, "classic") == 0)
+    ImGui::StyleColorsClassic(&style);
+  else
+    return;
+
+  style.PopupRounding = 5.0f;
+  style.WindowRounding = 5.0f;
+  style.WindowShadowSize = 50.0f;
+  style.ScrollbarSize = 10.0f;
+  style.Colors[ImGuiCol_WindowShadow] = ImVec4(0, 0, 0, 1.0f);
+
+  ImGui::GetStyle() = style;
 }
 
 void ImPlay::OptionParser::parse(int argc, char** argv) {

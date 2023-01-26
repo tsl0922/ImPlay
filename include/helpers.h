@@ -11,9 +11,15 @@
 #include <imgui.h>
 #include <imgui_internal.h>
 
+namespace {
+float scaled(float n) { return n * ImGui::GetFontSize(); }
+ImVec2 scaled(const ImVec2& vector) { return vector * ImGui::GetFontSize(); }
+}  // namespace
+
 namespace ImGui {
 void HelpMarker(const char* desc);
 ImTextureID LoadTexture(const char* path, int* width = nullptr, int* height = nullptr);
+void SetTheme(const char* theme);
 }  // namespace ImGui
 
 namespace ImPlay {

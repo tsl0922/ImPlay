@@ -7,15 +7,43 @@
 #include <inipp.h>
 
 namespace ImPlay {
+struct ConfigData {
+  struct Interface_ {
+    std::string Theme = "light";
+    float Scale = 0;
+    bool operator==(const Interface_&) const = default;
+  } Interface;
+  struct Mpv_ {
+    bool UseConfig = false;
+    bool UseWid = false;
+    bool WatchLater = false;
+    bool operator==(const Mpv_&) const = default;
+  } Mpv;
+  struct Window_ {
+    bool Save = false;
+    int X = 0, Y = 0;
+    int W = 0, H = 0;
+    bool operator==(const Window_&) const = default;
+  } Window;
+  struct Font_ {
+    bool Reload = false;
+    std::string Path;
+    int Size = 13;
+    int GlyphRange = 0;
+    bool operator==(const Font_&) const = default;
+  } Font;
+  struct Debug_ {
+    std::string LogLevel = "no";
+    int LogLimit = 500;
+    bool operator==(const Debug_&) const = default;
+  } Debug;
+  bool operator==(const ConfigData&) const = default;
+};
+
 class Config {
  public:
   Config();
   ~Config() = default;
-
-  void load();
-  void save();
-
-  const ImWchar* buildGlyphRanges();
 
   enum GlyphRange_ {
     GlyphRange_Default = 0,
@@ -27,28 +55,12 @@ class Config {
     GlyphRange_Vietnamese = 1 << 5,
   };
 
-  // interface
-  std::string Theme = "light";
-  float Scale = 0;
+  void load();
+  void save();
 
-  // font
-  std::string FontPath;
-  int FontSize = 13;
-  int GlyphRange = GlyphRange_Default;
+  const ImWchar* buildGlyphRanges();
 
-  // mpv
-  bool UseConfig = false;
-  bool UseWid = false;
-  bool WatchLater = false;
-
-  // window
-  bool WinSave = false;
-  int WinX = 0, WinY = 0;
-  int WinW = 0, WinH = 0;
-
-  // log
-  std::string LogLevel = "no";
-  int LogLimit = 500;
+  ConfigData Data;
 
  private:
   inipp::Ini<char> ini;

@@ -15,7 +15,7 @@ Debug::Debug(Config* config, Mpv* mpv) : View() {
 
 Debug::~Debug() { delete console; }
 
-void Debug::init() { console->init(config->LogLevel.c_str(), config->LogLimit); }
+void Debug::init() { console->init(config->Data.Debug.LogLevel.c_str(), config->Data.Debug.LogLimit); }
 
 void Debug::show() {
   m_open = true;
@@ -396,9 +396,9 @@ void Debug::Console::draw() {
     ImGui::EndPopup();
   }
 
-  Filter.Draw("Filter##log", 8 * ImGui::GetFontSize());
+  Filter.Draw("Filter##log", scaled(8));
   ImGui::SameLine();
-  ImGui::SetNextItemWidth(3 * ImGui::GetFontSize());
+  ImGui::SetNextItemWidth(scaled(3));
   ImGui::InputInt("Limit", &LogLimit, 0);
   ImGui::SameLine();
   ImGui::Text("(%d/%d)", Items.Size, LogLimit);

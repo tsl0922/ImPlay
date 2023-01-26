@@ -40,7 +40,6 @@ class Command : public Views::View {
   void openCommandPalette(int n, const char **args);
 
   void drawOpenURL();
-  void setTheme(const char *theme);
   bool isMediaType(std::string ext);
 
   Config *config = nullptr;

@@ -64,8 +64,6 @@ void ContextMenu::draw() {
       ImGui::Separator();
       if (ImGui::MenuItem("A-B Loop", "l", false, playing)) mpv->command("ab-loop");
       if (ImGui::MenuItem("File Loop", "L", false, playing)) mpv->command("cycle-values loop-file inf no");
-      ImGui::Separator();
-      if (ImGui::MenuItemEx("Show Progress", ICON_FA_SPINNER, "o", false, playing)) mpv->command("show-progress");
       ImGui::EndMenu();
     }
     drawPlaylist(playlist);
@@ -175,6 +173,7 @@ void ContextMenu::draw() {
       if (ImGui::MenuItemEx("Window Border", ICON_FA_BORDER_NONE)) mpv->command("cycle border");
       if (ImGui::MenuItemEx("Window Dragging", ICON_FA_HAND_POINTER)) mpv->command("cycle window-dragging");
       if (ImGui::MenuItemEx("Window Ontop", ICON_FA_ARROW_UP, "T")) mpv->command("cycle ontop");
+      if (ImGui::MenuItemEx("Show Progress", ICON_FA_SPINNER, "o", false, playing)) mpv->command("show-progress");
       if (ImGui::MenuItem("OSC visibility", "DEL")) mpv->command("script-binding osc/visibility");
       ImGui::Separator();
       drawProfilelist();
@@ -183,8 +182,8 @@ void ContextMenu::draw() {
         for (int i = 0; i < IM_ARRAYSIZE(themes); i++) {
           std::string title = tolower(themes[i]);
           title[0] = std::toupper(title[0]);
-          if (ImGui::MenuItem(title.c_str(), nullptr, config->Theme == themes[i])) {
-            config->Theme = themes[i];
+          if (ImGui::MenuItem(title.c_str(), nullptr, config->Data.Interface.Theme == themes[i])) {
+            config->Data.Interface.Theme = themes[i];
             mpv->commandv("script-message-to", "implay", "theme", themes[i], nullptr);
             config->save();
           }
@@ -215,6 +214,7 @@ void ContextMenu::draw() {
         mpv->commandv("script-message-to", "implay", "open", nullptr);
       if (ImGui::MenuItemEx("Open Folder..", ICON_FA_FOLDER_PLUS))
         mpv->commandv("script-message-to", "implay", "open-folder", nullptr);
+      ImGui::Separator();
       if (ImGui::MenuItemEx("Open URL..", ICON_FA_LINK))
         mpv->commandv("script-message-to", "implay", "open-url", nullptr);
       if (ImGui::MenuItemEx("Open Clipboard", ICON_FA_CLIPBOARD))
@@ -227,7 +227,7 @@ void ContextMenu::draw() {
       ImGui::EndMenu();
     }
     if (ImGui::MenuItemEx("Quit", ICON_FA_WINDOW_CLOSE, "q"))
-      mpv->command(config->WatchLater ? "quit-watch-later" : "quit");
+      mpv->command(config->Data.Mpv.WatchLater ? "quit-watch-later" : "quit");
     ImGui::EndPopup();
   }
 }

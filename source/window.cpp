@@ -35,7 +35,7 @@ Window::Window() {
 
 #ifdef _WIN32
   HWND hwnd = glfwGetWin32Window(window);
-  int64_t wid = config.UseWid ? static_cast<uint32_t>((intptr_t)hwnd) : 0;
+  int64_t wid = config.Data.Mpv.UseWid ? static_cast<uint32_t>((intptr_t)hwnd) : 0;
   mpv = new Mpv(wid);
 #else
   mpv = new Mpv();
@@ -82,6 +82,16 @@ bool Window::run(OptionParser& parser) {
         renderCond.wait_for(lk, timeout, [&]() { return wantRender; });
         wantRender = false;
       }
+
+      if (config.Data.Font.Reload) {
+        loadFonts();
+        config.Data.Font.Reload = false;
+        glfwMakeContextCurrent(window);
+        ImGui_ImplOpenGL3_DestroyFontsTexture();
+        ImGui_ImplOpenGL3_CreateFontsTexture();
+        glfwMakeContextCurrent(nullptr);
+      }
+
       player->render(width, height);
     }
     shutdown = true;
@@ -112,9 +122,9 @@ bool Window::run(OptionParser& parser) {
 
   renderThread.join();
 
-  if (config.WinSave) {
-    glfwGetWindowPos(window, &config.WinX, &config.WinY);
-    glfwGetWindowSize(window, &config.WinW, &config.WinH);
+  if (config.Data.Window.Save) {
+    glfwGetWindowPos(window, &config.Data.Window.X, &config.Data.Window.Y);
+    glfwGetWindowSize(window, &config.Data.Window.W, &config.Data.Window.H);
     config.save();
   }
 
@@ -150,11 +160,11 @@ void Window::initGLFW(const char* title) {
   height = std::max((int)(mode->height * 0.4), 400);
   int posX = (mode->width - width) / 2;
   int posY = (mode->height - height) / 2;
-  if (config.WinSave) {
-    if (config.WinW > 0) width = config.WinW;
-    if (config.WinH > 0) height = config.WinH;
-    if (config.WinX >= 0) posX = config.WinX;
-    if (config.WinY >= 0) posY = config.WinY;
+  if (config.Data.Window.Save) {
+    if (config.Data.Window.W > 0) width = config.Data.Window.W;
+    if (config.Data.Window.H > 0) height = config.Data.Window.H;
+    if (config.Data.Window.X >= 0) posX = config.Data.Window.X;
+    if (config.Data.Window.Y >= 0) posY = config.Data.Window.Y;
   }
 
   window = glfwCreateWindow(width, height, title, nullptr, nullptr);
@@ -175,6 +185,11 @@ void Window::initGLFW(const char* title) {
     win->width = w;
     win->height = h;
     glViewport(0, 0, w, h);
+  });
+  glfwSetWindowContentScaleCallback(window, [](GLFWwindow* window, float x, float y) {
+    auto win = static_cast<Window*>(glfwGetWindowUserPointer(window));
+    win->config.Data.Interface.Scale = std::max(x, y);
+    win->config.Data.Font.Reload = true;
   });
   glfwSetWindowCloseCallback(window, [](GLFWwindow* window) {
     auto win = static_cast<Window*>(glfwGetWindowUserPointer(window));
@@ -229,28 +244,24 @@ void Window::initGLFW(const char* title) {
   });
 }
 
-void Window::initImGui() {
-  IMGUI_CHECKVERSION();
-  ImGui::CreateContext();
-
-  float scale = config.Scale;
-  if (scale == 0) glfwGetWindowContentScale(window, &scale, nullptr);
+void Window::loadFonts() {
+  float scale = config.Data.Interface.Scale;
+  if (scale == 0) {
 #ifdef __APPLE__
-  float fontSize = config.FontSize;
+    scale = 1.0f;
 #else
-  float fontSize = std::floor(config.FontSize * scale);
+    float xscale, yscale;
+    glfwGetWindowContentScale(window, &xscale, &yscale);
+    scale = std::max(xscale, yscale);
 #endif
+  }
+  float fontSize = std::floor(config.Data.Font.Size * scale);
   float iconSize = fontSize - 2;
-
   ImGuiIO& io = ImGui::GetIO();
-  io.IniFilename = nullptr;
-  io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
-  io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
-  io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
   io.DisplayFramebufferScale = ImVec2(scale, scale);
 
-  ImGuiStyle& style = ImGui::GetStyle();
-  style.ScaleAllSizes(scale);
+  ImGui::SetTheme(config.Data.Interface.Theme.c_str());
+  ImGui::GetStyle().ScaleAllSizes(scale);
 
   io.Fonts->Clear();
 
@@ -262,12 +273,25 @@ void Window::initImGui() {
   const ImWchar* unifontRange = config.buildGlyphRanges();
   io.Fonts->AddFontFromMemoryCompressedTTF(font_awesome_compressed_data, font_awesome_compressed_size, iconSize, &cfg,
                                            fontAwesomeRange);
-  if (config.FontPath.empty())
+  if (config.Data.Font.Path.empty())
     io.Fonts->AddFontFromMemoryCompressedTTF(unifont_compressed_data, unifont_compressed_size, 0, &cfg, unifontRange);
   else
-    io.Fonts->AddFontFromFileTTF(config.FontPath.c_str(), 0, &cfg, unifontRange);
+    io.Fonts->AddFontFromFileTTF(config.Data.Font.Path.c_str(), 0, &cfg, unifontRange);
 
   io.Fonts->Build();
+}
+
+void Window::initImGui() {
+  IMGUI_CHECKVERSION();
+  ImGui::CreateContext();
+
+  ImGuiIO& io = ImGui::GetIO();
+  io.IniFilename = nullptr;
+  io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
+  io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
+  io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
+
+  loadFonts();
 
   glfwMakeContextCurrent(window);
   ImGui_ImplGlfw_InitForOpenGL(window, true);
