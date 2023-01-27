@@ -38,7 +38,6 @@ void Settings::draw() {
     ImGui::Separator();
     ImGui::Spacing();
     drawButtons();
-
     ImGui::EndPopup();
   }
 }

@@ -15,6 +15,7 @@ Command::Command(Config *config, GLFWwindow *window, Mpv *mpv) : View() {
 
   about = new Views::About();
   debug = new Views::Debug(config, mpv);
+  quick = new Views::Quick(config, mpv);
   settings = new Views::Settings(config, mpv);
   contextMenu = new Views::ContextMenu(config, mpv);
   commandPalette = new Views::CommandPalette(mpv);
@@ -23,14 +24,13 @@ Command::Command(Config *config, GLFWwindow *window, Mpv *mpv) : View() {
 Command::~Command() {
   delete about;
   delete debug;
+  delete quick;
   delete settings;
   delete contextMenu;
   delete commandPalette;
 }
 
-void Command::init() {
-  debug->init();
-}
+void Command::init() { debug->init(); }
 
 void Command::draw() {
   ImGuiIO &io = ImGui::GetIO();
@@ -41,6 +41,7 @@ void Command::draw() {
 
   about->draw();
   debug->draw();
+  quick->draw();
   settings->draw();
   contextMenu->draw();
   commandPalette->draw();
@@ -72,6 +73,7 @@ void Command::execute(int n_args, const char **args_) {
        [&](int n, const char **args) {
          if (n > 0) mpv->loadConfig(args[0]);
        }},
+      {"quickview", [&](int n, const char **args) { quick->show(); }},
       {"playlist-add-files",
        [&](int n, const char **args) {
          openMediaFiles([&](std::u8string path, int i) { mpv->commandv("loadfile", path.c_str(), "append", nullptr); });

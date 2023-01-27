@@ -91,9 +91,9 @@ void ContextMenu::draw() {
         if (ImGui::MenuItem("0°")) mpv->command("set video-rotate 0");
         ImGui::EndMenu();
       }
-      if (ImGui::BeginMenuEx("Zoom", ICON_FA_GLASSES)) {
-        if (ImGui::MenuItemEx("Zoom In", ICON_FA_MINUS_CIRCLE)) mpv->command("add window-scale -0.1");
-        if (ImGui::MenuItemEx("Zoom Out", ICON_FA_PLUS_CIRCLE)) mpv->command("add window-scale 0.1");
+      if (ImGui::BeginMenuEx("Scale", ICON_FA_GLASSES)) {
+        if (ImGui::MenuItemEx("Scale In", ICON_FA_MINUS_CIRCLE)) mpv->command("add window-scale -0.1");
+        if (ImGui::MenuItemEx("Scale Out", ICON_FA_PLUS_CIRCLE)) mpv->command("add window-scale 0.1");
         if (ImGui::MenuItem("Reset")) mpv->command("set window-scale 0");
         ImGui::Separator();
         if (ImGui::MenuItem("1:4 Quarter")) mpv->command("set window-scale 0.25");
@@ -144,7 +144,7 @@ void ContextMenu::draw() {
       }
       ImGui::Separator();
       if (ImGui::MenuItem("HW Decoding", "Ctrl+h")) mpv->command("cycle-values hwdec auto no");
-      if (ImGui::MenuItem("Toggle Deinterlace", "d")) mpv->command("cycle deinterlace");
+      if (ImGui::MenuItem("Deinterlace", "d")) mpv->command("cycle deinterlace");
       ImGui::EndMenu();
     }
     if (ImGui::BeginMenuEx("Subtitle", ICON_FA_FONT)) {
@@ -165,6 +165,8 @@ void ContextMenu::draw() {
     }
     ImGui::Separator();
     if (ImGui::MenuItemEx("Fullscreen", ICON_FA_EXPAND, "f")) mpv->command("cycle fullscreen");
+    if (ImGui::MenuItemEx("Quick Panel", ICON_FA_COGS))
+      mpv->commandv("script-message-to", "implay", "quickview", nullptr);
     if (ImGui::MenuItemEx("Command Palette", ICON_FA_SEARCH, "Ctrl+Shift+p"))
       mpv->commandv("script-message-to", "implay", "command-palette", nullptr);
     ImGui::Separator();
@@ -253,12 +255,10 @@ void ContextMenu::drawTracklist(const char *type, const char *prop) {
                [type](const auto &track) { return track.type == type; });
   if (ImGui::BeginMenuEx("Tracks", ICON_FA_LIST, !list.empty())) {
     for (auto &track : list) {
-      if (track.type == type) {
-        auto title = track.title.empty() ? format("Track {}", track.id) : track.title;
-        if (!track.lang.empty()) title += format(" [{}]", track.lang);
-        if (ImGui::MenuItemEx(title.c_str(), nullptr, nullptr, track.selected))
-          mpv->property<int64_t, MPV_FORMAT_INT64>(prop, track.id);
-      }
+      auto title = track.title.empty() ? format("Track {}", track.id) : track.title;
+      if (!track.lang.empty()) title += format(" [{}]", track.lang);
+      if (ImGui::MenuItemEx(title.c_str(), nullptr, nullptr, track.selected))
+        mpv->property<int64_t, MPV_FORMAT_INT64>(prop, track.id);
     }
     ImGui::EndMenu();
   }

@@ -70,6 +70,7 @@ void ImGui::SetTheme(const char* theme) {
   else
     return;
 
+  style.FrameRounding = 5.0f;
   style.PopupRounding = 5.0f;
   style.WindowRounding = 5.0f;
   style.WindowShadowSize = 50.0f;

@@ -9,6 +9,7 @@
 #include "views/view.h"
 #include "views/about.h"
 #include "views/debug.h"
+#include "views/quick.h"
 #include "views/settings.h"
 #include "views/context_menu.h"
 #include "views/command_palette.h"
@@ -49,6 +50,7 @@ class Command : public Views::View {
 
   Views::About *about;
   Views::Debug *debug;
+  Views::Quick *quick;
   Views::Settings *settings;
   Views::ContextMenu *contextMenu;
   Views::CommandPalette *commandPalette;

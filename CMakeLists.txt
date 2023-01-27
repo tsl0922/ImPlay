@@ -79,6 +79,7 @@ set(SOURCE_FILES
     source/views/context_menu.cpp
     source/views/debug.cpp
     source/views/about.cpp
+    source/views/quick.cpp
     source/views/settings.cpp
     source/helpers.cpp
     source/command.cpp
