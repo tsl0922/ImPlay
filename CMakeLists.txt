@@ -53,7 +53,7 @@ if(WIN32 AND USE_MPV_WIN_BUILD)
     set(MPV_LIBRARY_DIRS ${MPV_DEV_DIR})
     set(MPV_LIBRARIES mpv)
 else()
-    pkg_search_module(MPV REQUIRED mpv)
+    pkg_search_module(MPV REQUIRED mpv>=0.29.0)
 endif()
 
 if(USE_PATCHED_GLFW)
