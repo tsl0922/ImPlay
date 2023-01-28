@@ -51,7 +51,7 @@ void ContextMenu::draw() {
       if (ImGui::MenuItemEx("Previous Media", ICON_FA_ARROW_LEFT, "<", false, playlist.size() > 1))
         mpv->command("playlist-prev");
       if (ImGui::MenuItemEx("Playlist", ICON_FA_LIST, nullptr, false, playlist.size() > 0))
-        mpv->commandv("script-message-to", "implay", "command-palette", "playlist", nullptr);
+        mpv->command("script-message-to implay command-palette playlist");
       if (ImGui::MenuItem("Playlist Loop", nullptr, false, playlist.size() > 0))
         mpv->command("cycle-values loop-playlist inf no");
       ImGui::Separator();
@@ -60,7 +60,7 @@ void ContextMenu::draw() {
       if (ImGui::MenuItemEx("Previous Chapter", ICON_FA_ARROW_LEFT, nullptr, false, chapterlist.size() > 1))
         mpv->command("add chapter -1");
       if (ImGui::MenuItemEx("Chapters", ICON_FA_LIST, nullptr, false, chapterlist.size() > 0))
-        mpv->commandv("script-message-to", "implay", "command-palette", "chapters", nullptr);
+        mpv->command("script-message-to implay command-palette chapters");
       ImGui::Separator();
       if (ImGui::MenuItem("A-B Loop", "l", false, playing)) mpv->command("ab-loop");
       if (ImGui::MenuItem("File Loop", "L", false, playing)) mpv->command("cycle-values loop-file inf no");
@@ -80,6 +80,8 @@ void ContextMenu::draw() {
       ImGui::Separator();
       if (ImGui::MenuItem("Delay +0.1", "Ctrl +")) mpv->command("add audio-delay 0.1");
       if (ImGui::MenuItem("Delay -0.1", "Ctrl -")) mpv->command("add audio-delay -0.1");
+      ImGui::Separator();
+      if (ImGui::MenuItem("Control Panel")) mpv->command("script-message-to implay quickview audio");
       ImGui::EndMenu();
     }
     if (ImGui::BeginMenuEx("Video", ICON_FA_VIDEO)) {
@@ -145,12 +147,14 @@ void ContextMenu::draw() {
       ImGui::Separator();
       if (ImGui::MenuItem("HW Decoding", "Ctrl+h")) mpv->command("cycle-values hwdec auto no");
       if (ImGui::MenuItem("Deinterlace", "d")) mpv->command("cycle deinterlace");
+      ImGui::Separator();
+      if (ImGui::MenuItem("Control Panel")) mpv->command("script-message-to implay quickview video");
       ImGui::EndMenu();
     }
     if (ImGui::BeginMenuEx("Subtitle", ICON_FA_FONT)) {
       drawTracklist("sub", "sid");
       if (ImGui::MenuItemEx("Load..", ICON_FA_FOLDER_OPEN))
-        mpv->commandv("script-message-to", "implay", "load-sub", nullptr);
+        mpv->command("script-message-to implay load-sub");
       if (ImGui::MenuItem("Show/Hide", "v")) mpv->command("cycle sub-visibility");
       ImGui::Separator();
       if (ImGui::MenuItem("Move Up", "r")) mpv->command("add sub-pos -1");
@@ -161,14 +165,16 @@ void ContextMenu::draw() {
       ImGui::Separator();
       if (ImGui::MenuItem("Scale +0.1", "F")) mpv->command("add sub-scale 0.1");
       if (ImGui::MenuItem("Scale -0.1", "G")) mpv->command("add sub-scale -0.1");
+      ImGui::Separator();
+      if (ImGui::MenuItem("Control Panel")) mpv->command("script-message-to implay quickview subtitle");
       ImGui::EndMenu();
     }
     ImGui::Separator();
     if (ImGui::MenuItemEx("Fullscreen", ICON_FA_EXPAND, "f")) mpv->command("cycle fullscreen");
     if (ImGui::MenuItemEx("Quick Panel", ICON_FA_COGS))
-      mpv->commandv("script-message-to", "implay", "quickview", nullptr);
+      mpv->command("script-message-to implay quickview");
     if (ImGui::MenuItemEx("Command Palette", ICON_FA_SEARCH, "Ctrl+Shift+p"))
-      mpv->commandv("script-message-to", "implay", "command-palette", nullptr);
+      mpv->command("script-message-to implay command-palette");
     ImGui::Separator();
     if (ImGui::BeginMenuEx("Tools", ICON_FA_TOOLS)) {
       if (ImGui::MenuItemEx("Screenshot", ICON_FA_FILE_IMAGE, "s")) mpv->command("async screenshot");
@@ -200,32 +206,32 @@ void ContextMenu::draw() {
         ImGui::EndMenu();
       }
       ImGui::Separator();
-      if (ImGui::MenuItem("Metrics & Debug")) mpv->commandv("script-message-to", "implay", "metrics", nullptr);
+      if (ImGui::MenuItem("Metrics & Debug")) mpv->command("script-message-to implay metrics");
       if (ImGui::MenuItem("Open Config Dir")) openUri(datadir());
       ImGui::EndMenu();
     }
     if (ImGui::BeginMenuEx("Help", ICON_FA_QUESTION_CIRCLE)) {
       if (ImGui::MenuItemEx("About", ICON_FA_INFO_CIRCLE))
-        mpv->commandv("script-message-to", "implay", "about", nullptr);
-      if (ImGui::MenuItemEx("Settings", ICON_FA_COG)) mpv->commandv("script-message-to", "implay", "settings", nullptr);
+        mpv->command("script-message-to implay about");
+      if (ImGui::MenuItemEx("Settings", ICON_FA_COG)) mpv->command("script-message-to implay settings");
       ImGui::EndMenu();
     }
     ImGui::Separator();
     if (ImGui::BeginMenuEx("Open", ICON_FA_FOLDER_OPEN)) {
       if (ImGui::MenuItemEx("Open Files..", ICON_FA_FILE))
-        mpv->commandv("script-message-to", "implay", "open", nullptr);
+        mpv->command("script-message-to implay open");
       if (ImGui::MenuItemEx("Open Folder..", ICON_FA_FOLDER_PLUS))
-        mpv->commandv("script-message-to", "implay", "open-folder", nullptr);
+        mpv->command("script-message-to implay open-folder");
       ImGui::Separator();
       if (ImGui::MenuItemEx("Open URL..", ICON_FA_LINK))
-        mpv->commandv("script-message-to", "implay", "open-url", nullptr);
+        mpv->command("script-message-to implay open-url");
       if (ImGui::MenuItemEx("Open Clipboard", ICON_FA_CLIPBOARD))
-        mpv->commandv("script-message-to", "implay", "open-clipboard", nullptr);
+        mpv->command("script-message-to implay open-clipboard");
       ImGui::Separator();
       if (ImGui::MenuItemEx("Open DVD/Blu-ray Folder..", ICON_FA_FOLDER_OPEN))
-        mpv->commandv("script-message-to", "implay", "open-disk", nullptr);
+        mpv->command("script-message-to implay open-disk");
       if (ImGui::MenuItemEx("Open DVD/Blu-ray ISO Image..", ICON_FA_COMPACT_DISC))
-        mpv->commandv("script-message-to", "implay", "open-iso", nullptr);
+        mpv->command("script-message-to implay open-iso");
       ImGui::EndMenu();
     }
     if (ImGui::MenuItemEx("Quit", ICON_FA_WINDOW_CLOSE, "q"))
@@ -270,6 +276,8 @@ void ContextMenu::drawChapterlist(std::vector<Mpv::ChapterItem> items) {
     if (ImGui::MenuItemEx("Next", ICON_FA_ARROW_RIGHT)) mpv->command("add chapter 1");
     if (ImGui::MenuItemEx("Previous", ICON_FA_ARROW_LEFT)) mpv->command("add chapter -1");
     ImGui::Separator();
+    if (ImGui::MenuItem("Control Panel")) mpv->command("script-message-to implay quickview chapters");
+    ImGui::Separator();
     int i = 0;
     for (auto &chapter : items) {
       if (i == 10) break;
@@ -282,7 +290,7 @@ void ContextMenu::drawChapterlist(std::vector<Mpv::ChapterItem> items) {
     }
     if (items.size() > 10) {
       if (ImGui::MenuItem(format("All.. ({})", items.size()).c_str()))
-        mpv->commandv("script-message-to", "implay", "command-palette", "chapters", nullptr);
+        mpv->command("script-message-to implay command-palette chapters");
     }
     ImGui::EndMenu();
   }
@@ -295,13 +303,15 @@ void ContextMenu::drawPlaylist(std::vector<Mpv::PlayItem> items) {
     if (ImGui::MenuItemEx("Previous", ICON_FA_ARROW_LEFT, "<", false, items.size() > 1)) mpv->command("playlist-prev");
     ImGui::Separator();
     if (ImGui::MenuItemEx("Add Files..", ICON_FA_FILE_UPLOAD))
-      mpv->commandv("script-message-to", "implay", "playlist-add-files", nullptr);
+      mpv->command("script-message-to implay playlist-add-files");
     if (ImGui::MenuItemEx("Add Folder..", ICON_FA_FOLDER_PLUS))
-      mpv->commandv("script-message-to", "implay", "playlist-add-folder", nullptr);
+      mpv->command("script-message-to implay playlist-add-folder");
     ImGui::Separator();
     if (ImGui::MenuItem("Clear")) mpv->command("playlist-clear");
     if (ImGui::MenuItem("Shuffle")) mpv->command("playlist-shuffle");
     if (ImGui::MenuItem("Loop", "L")) mpv->command("cycle-values loop-playlist inf no");
+    ImGui::Separator();
+    if (ImGui::MenuItem("Control Panel")) mpv->command("script-message-to implay quickview playlist");
     ImGui::Separator();
     int i = 0;
     for (auto &item : items) {
@@ -315,7 +325,7 @@ void ContextMenu::drawPlaylist(std::vector<Mpv::PlayItem> items) {
     }
     if (items.size() > 10) {
       if (ImGui::MenuItem(format("All.. ({})", items.size()).c_str()))
-        mpv->commandv("script-message-to", "implay", "command-palette", "playlist", nullptr);
+        mpv->command("script-message-to implay command-palette playlist");
     }
     ImGui::EndMenu();
   }

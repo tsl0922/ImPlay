@@ -96,7 +96,7 @@ void Quick::drawPlaylistTabContent() {
           mpv->commandv("playlist-move", std::to_string(item.id).c_str(), std::to_string(items.size()).c_str(),
                         nullptr);
         ImGui::Separator();
-        if (ImGui::MenuItem("Add Files")) mpv->commandv("script-message-to", "implay", "playlist-add-files", nullptr);
+        if (ImGui::MenuItem("Add Files")) mpv->command("script-message-to implay playlist-add-files");
         if (ImGui::MenuItem("Add Folders"))
           mpv->commandv("script-message-to", "implay", "playlist-add-folder", nullptr);
         ImGui::Separator();
@@ -114,7 +114,7 @@ void Quick::drawPlaylistTabContent() {
   ImGui::Spacing();
 
   if (ImGui::Button(ICON_FA_SEARCH))
-    mpv->commandv("script-message-to", "implay", "command-palette", "playlist", nullptr);
+    mpv->command("script-message-to implay command-palette playlist");
   ImGui::SameLine();
   if (ImGui::Button(ICON_FA_SYNC)) mpv->command("cycle-values loop-playlist inf no");
   if (ImGui::IsItemHovered(ImGuiHoveredFlags_DelayNormal)) ImGui::SetTooltip("Loop");
@@ -123,10 +123,10 @@ void Quick::drawPlaylistTabContent() {
   if (ImGui::IsItemHovered(ImGuiHoveredFlags_DelayNormal)) ImGui::SetTooltip("Shuffle");
   auto iconSize = ImGui::CalcTextSize(ICON_FA_PLUS);
   ImGui::SameLine(ImGui::GetWindowWidth() - 3 * (iconSize.x + 2 * style.FramePadding.x + style.ItemSpacing.x));
-  if (ImGui::Button(ICON_FA_PLUS)) mpv->commandv("script-message-to", "implay", "playlist-add-files", nullptr);
+  if (ImGui::Button(ICON_FA_PLUS)) mpv->command("script-message-to implay playlist-add-files");
   if (ImGui::IsItemHovered(ImGuiHoveredFlags_DelayNormal)) ImGui::SetTooltip("Add Files");
   ImGui::SameLine();
-  if (ImGui::Button(ICON_FA_FOLDER_PLUS)) mpv->commandv("script-message-to", "implay", "playlist-add-folder", nullptr);
+  if (ImGui::Button(ICON_FA_FOLDER_PLUS)) mpv->command("script-message-to implay playlist-add-folder");
   if (ImGui::IsItemHovered(ImGuiHoveredFlags_DelayNormal)) ImGui::SetTooltip("Add Folder");
   ImGui::SameLine();
   if (ImGui::Button(ICON_FA_TRASH_ALT)) mpv->command("playlist-clear");
@@ -280,7 +280,7 @@ void Quick::drawSubtitleTabContent() {
   auto style = ImGui::GetStyle();
   auto iconSize = ImGui::CalcTextSize(ICON_FA_PLUS);
   ImGui::SameLine(ImGui::GetWindowWidth() - (iconSize.x + 2 * style.FramePadding.x));
-  if (ImGui::Button(ICON_FA_PLUS)) mpv->commandv("script-message-to", "implay", "load-sub", nullptr);
+  if (ImGui::Button(ICON_FA_PLUS)) mpv->command("script-message-to implay load-sub");
   if (ImGui::IsItemHovered(ImGuiHoveredFlags_DelayNormal)) ImGui::SetTooltip("Load External Subtitles..");
   ImGui::Separator();
   ImGui::Spacing();
