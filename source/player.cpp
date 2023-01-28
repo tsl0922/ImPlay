@@ -231,9 +231,9 @@ void Player::initMpv() {
 
   mpv->observeProperty("window-scale", MPV_FORMAT_DOUBLE, [this](void* data) {
     double scale = static_cast<double>(*(double*)data);
-    int w, h;
-    glfwGetWindowSize(window, &w, &h);
-    glfwSetWindowSize(window, (int)(w * scale), (int)(h * scale));
+    int w = (int)mpv->property<int64_t, MPV_FORMAT_INT64>("dwidth");
+    int h = (int)mpv->property<int64_t, MPV_FORMAT_INT64>("dheight");
+    if (w > 0 && h > 0) glfwSetWindowSize(window, (int)(w * scale), (int)(h * scale));
   });
 
   mpv->observeProperty("fullscreen", MPV_FORMAT_FLAG, [this](void* data) {
