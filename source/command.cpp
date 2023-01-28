@@ -73,7 +73,7 @@ void Command::execute(int n_args, const char **args_) {
        [&](int n, const char **args) {
          if (n > 0) mpv->loadConfig(args[0]);
        }},
-      {"quickview", [&](int n, const char **args) { quick->show(); }},
+      {"quickview", [&](int n, const char **args) { openQuickview(n > 0 ? args[0] : nullptr); }},
       {"playlist-add-files",
        [&](int n, const char **args) {
          openMediaFiles([&](std::u8string path, int i) { mpv->commandv("loadfile", path.c_str(), "append", nullptr); });
@@ -227,6 +227,11 @@ void Command::openCommandPalette(int n, const char **args) {
   }
   commandPalette->items() = items;
   commandPalette->show();
+}
+
+void Command::openQuickview(const char *tab) {
+  if (tab != nullptr) quick->setTab(tab);
+  quick->show();
 }
 
 void Command::drawOpenURL() {

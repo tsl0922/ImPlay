@@ -39,6 +39,7 @@ class Command : public Views::View {
   void openBluray(const char *path);
 
   void openCommandPalette(int n, const char **args);
+  void openQuickview(const char* tab);
 
   void drawOpenURL();
   bool isMediaType(std::string ext);

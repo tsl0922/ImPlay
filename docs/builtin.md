@@ -25,11 +25,17 @@ For example, run `script-message-to implay command-palette playlist` will show c
 - `load-conf <path>`: load mpv.conf, path should be absolute
 - `playlist-add-files`: show the playlist add files dialog
 - `playlist-add-folder`: show the playlist add folder dialog
-- `command-palette <args>..`: the args can be:
+- `command-palette <args>..`: show command palette, args can be:
   - `bindings`: show input bindings
   - `playlist`: show playlist
   - `chapters`: show chapters
   - `tracks <audio|video|sub>`: show tracks
+- `quickview <tab>`: show quick panel, tab can be:
+  - `playlist`
+  - `chapters`
+  - `video`
+  - `audio`
+  - `subtitle`
 - `metrics`: show Metrics & Debug window
 - `settings`: show Settings window
 - `about`: show About window

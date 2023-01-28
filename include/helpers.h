@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: GPL-2.0-only
 
 #pragma once
+#include <algorithm>
 #include <string>
 #include <map>
 #include <vector>
@@ -44,6 +45,11 @@ inline std::string toupper(std::string s) {
   std::string str = s;
   std::transform(str.begin(), str.end(), str.begin(), ::toupper);
   return str;
+}
+
+inline bool iequals(std::string a, std::string b) {
+  return std::equal(a.begin(), a.end(), b.begin(), b.end(),
+                    [](char a, char b) { return ::tolower(a) == ::tolower(b); });
 }
 
 inline std::string trim(std::string s) {
