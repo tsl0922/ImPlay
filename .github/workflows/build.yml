@@ -115,6 +115,7 @@ jobs:
           prerelease: true
           name: Continuous build
           body: |
+            ![GitHub release (by tag)](https://img.shields.io/github/downloads/tsl0922/ImPlay/continuous/total?label=Downloads)
             # Install
             ## Windows
             - MSI

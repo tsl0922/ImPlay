@@ -19,6 +19,7 @@ jobs:
           commit: ${{ github.sha }}
           artifacts: "ImPlay-linux/*,ImPlay-macOS/*,ImPlay-win64/*"
           body: |
+            ![GitHub release (by tag)](https://img.shields.io/github/downloads/tsl0922/ImPlay/${{github.ref_name}}/total?label=Downloads)
             # Install
             ## Windows
             - MSI
