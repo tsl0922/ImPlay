@@ -32,6 +32,7 @@ class Quick : public View {
     bool child;
   };
 
+  void iconButton(const char *icon, const char* cmd, const char *tooltip = nullptr, bool sameline = true);
   void addTab(const char *name, std::function<void()> draw, bool child = false) { tabs.push_back({name, draw, child}); }
 
   Config *config;
