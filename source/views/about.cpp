@@ -12,33 +12,22 @@ void About::draw() {
   ImGui::SetNextWindowPos(ImGui::GetMainViewport()->GetWorkCenter(), ImGuiCond_Always, ImVec2(0.5f, 0.5f));
   if (ImGui::BeginPopupModal("About", &m_open, ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoMove)) {
     if (ImGui::IsKeyDown(ImGuiKey_Escape)) m_open = false;
-    textCentered("ImPlay");
+    ImGui::TextCentered("ImPlay");
 #ifdef APP_VERSION
-    ImGui::PushStyleColor(ImGuiCol_Text, ImGui::GetStyle().Colors[ImGuiCol_TextDisabled]);
-    textCentered(APP_VERSION);
-    ImGui::PopStyleColor();
+    ImGui::TextCentered(APP_VERSION, true);
 #endif
     ImGui::Spacing();
-    textCentered("A Cross-Platform Desktop Media Player");
+    ImGui::TextCentered("A Cross-Platform Desktop Media Player");
     ImGui::NewLine();
-    ImGui::PushStyleColor(ImGuiCol_Text, ImGui::GetStyle().Colors[ImGuiCol_ButtonActive]);
-    textCentered("https://github.com/tsl0922/ImPlay");
-    if (ImGui::IsItemClicked()) openUri("https://github.com/tsl0922/ImPlay");
-    ImGui::PopStyleColor();
+    const char *link = "https://github.com/tsl0922/ImPlay";
+    ImGui::HalignCenter(link);
+    ImGui::Hyperlink(nullptr, link);
     ImGui::Spacing();
-    textCentered("Copyright (C) 2022 tsl0922");
+    ImGui::TextCentered("Copyright (C) 2022 tsl0922");
     ImGui::Spacing();
-    ImGui::PushStyleColor(ImGuiCol_Text, ImGui::GetStyle().Colors[ImGuiCol_TextDisabled]);
-    textCentered("GPL-2.0 License");
-    ImGui::PopStyleColor();
+    ImGui::TextCentered("GPL-2.0 License", true);
     ImGui::EndPopup();
   }
   ImGui::PopStyleVar();
-}
-
-void About::textCentered(const char* text) {
-  auto size = ImGui::CalcTextSize(text);
-  ImGui::SetCursorPosX((ImGui::GetWindowWidth() - size.x) * 0.5f);
-  ImGui::Text("%s", text);
 }
 }  // namespace ImPlay::Views

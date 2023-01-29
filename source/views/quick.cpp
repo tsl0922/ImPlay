@@ -50,9 +50,7 @@ void Quick::draw() {
     }
     ImGui::End();
   }
-  ImGui::PopStyleVar();
-  ImGui::PopStyleVar();
-  ImGui::PopStyleVar();
+  ImGui::PopStyleVar(3);
 }
 
 void Quick::drawTracks(const char *type, const char *prop) {

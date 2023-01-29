@@ -23,6 +23,27 @@
 #include "helpers.h"
 #include <imgui_impl_opengl3_loader.h>
 
+void ImGui::HalignCenter(const char* text) {
+  ImGui::SetCursorPosX((ImGui::GetWindowWidth() - ImGui::CalcTextSize(text).x) * 0.5f);
+}
+
+void ImGui::TextCentered(const char* text, bool disabled) {
+  ImGui::HalignCenter(text);
+  if (disabled)
+    ImGui::TextDisabled("%s", text);
+  else
+    ImGui::Text("%s", text);
+}
+
+void ImGui::Hyperlink(const char* label, const char* uri) {
+  auto style = ImGui::GetStyle();
+  ImGui::PushStyleColor(ImGuiCol_Text, style.Colors[ImGuiCol_ButtonActive]);
+  ImGui::Text("%s", label ? label : uri);
+  if (ImGui::IsItemHovered()) ImGui::SetMouseCursor(ImGuiMouseCursor_Hand);
+  if (ImGui::IsItemClicked()) ImPlay::openUri("https://github.com/tsl0922/ImPlay");
+  ImGui::PopStyleColor();
+}
+
 void ImGui::HelpMarker(const char* desc) {
   ImGui::TextDisabled("(?)");
   if (ImGui::IsItemHovered(ImGuiHoveredFlags_DelayShort)) {
