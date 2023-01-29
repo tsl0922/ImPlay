@@ -81,7 +81,7 @@ void ContextMenu::draw() {
       if (ImGui::MenuItem("Delay +0.1", "Ctrl +")) mpv->command("add audio-delay 0.1");
       if (ImGui::MenuItem("Delay -0.1", "Ctrl -")) mpv->command("add audio-delay -0.1");
       ImGui::Separator();
-      if (ImGui::MenuItem("Control Panel")) mpv->command("script-message-to implay quickview audio");
+      if (ImGui::MenuItem("Quick Settings")) mpv->command("script-message-to implay quickview audio");
       ImGui::EndMenu();
     }
     if (ImGui::BeginMenuEx("Video", ICON_FA_VIDEO)) {
@@ -148,7 +148,7 @@ void ContextMenu::draw() {
       if (ImGui::MenuItem("HW Decoding", "Ctrl+h")) mpv->command("cycle-values hwdec auto no");
       if (ImGui::MenuItem("Deinterlace", "d")) mpv->command("cycle deinterlace");
       ImGui::Separator();
-      if (ImGui::MenuItem("Control Panel")) mpv->command("script-message-to implay quickview video");
+      if (ImGui::MenuItem("Quick Settings")) mpv->command("script-message-to implay quickview video");
       ImGui::EndMenu();
     }
     if (ImGui::BeginMenuEx("Subtitle", ICON_FA_FONT)) {
@@ -165,12 +165,12 @@ void ContextMenu::draw() {
       if (ImGui::MenuItem("Scale +0.1", "F")) mpv->command("add sub-scale 0.1");
       if (ImGui::MenuItem("Scale -0.1", "G")) mpv->command("add sub-scale -0.1");
       ImGui::Separator();
-      if (ImGui::MenuItem("Control Panel")) mpv->command("script-message-to implay quickview subtitle");
+      if (ImGui::MenuItem("Quick Settings")) mpv->command("script-message-to implay quickview subtitle");
       ImGui::EndMenu();
     }
     ImGui::Separator();
     if (ImGui::MenuItemEx("Fullscreen", ICON_FA_EXPAND, "f")) mpv->command("cycle fullscreen");
-    if (ImGui::MenuItemEx("Quick Panel", ICON_FA_COGS)) mpv->command("script-message-to implay quickview");
+    if (ImGui::MenuItemEx("Quick Settings", ICON_FA_COGS)) mpv->command("script-message-to implay quickview");
     if (ImGui::MenuItemEx("Command Palette", ICON_FA_SEARCH, "Ctrl+Shift+p"))
       mpv->command("script-message-to implay command-palette");
     ImGui::Separator();
@@ -271,7 +271,7 @@ void ContextMenu::drawChapterlist(std::vector<Mpv::ChapterItem> items) {
     if (ImGui::MenuItemEx("Next", ICON_FA_ARROW_RIGHT)) mpv->command("add chapter 1");
     if (ImGui::MenuItemEx("Previous", ICON_FA_ARROW_LEFT)) mpv->command("add chapter -1");
     ImGui::Separator();
-    if (ImGui::MenuItem("Control Panel")) mpv->command("script-message-to implay quickview chapters");
+    if (ImGui::MenuItem("Quick Settings")) mpv->command("script-message-to implay quickview chapters");
     ImGui::Separator();
     int i = 0;
     for (auto &chapter : items) {
@@ -306,7 +306,7 @@ void ContextMenu::drawPlaylist(std::vector<Mpv::PlayItem> items) {
     if (ImGui::MenuItem("Shuffle")) mpv->command("playlist-shuffle");
     if (ImGui::MenuItem("Loop", "L")) mpv->command("cycle-values loop-playlist inf no");
     ImGui::Separator();
-    if (ImGui::MenuItem("Control Panel")) mpv->command("script-message-to implay quickview playlist");
+    if (ImGui::MenuItem("Quick Settings")) mpv->command("script-message-to implay quickview playlist");
     ImGui::Separator();
     int i = 0;
     for (auto &item : items) {
