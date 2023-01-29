@@ -56,14 +56,25 @@ void Quick::draw() {
 }
 
 void Quick::drawTracks(const char *type, const char *prop) {
+  auto style = ImGui::GetStyle();
+  auto iconSize = ImGui::CalcTextSize(ICON_FA_PLUS);
   ImGui::Text("Tracks");
+  ImGui::SameLine(ImGui::GetWindowWidth() - (iconSize.x + 2 * style.FramePadding.x));
+  if (ImGui::Button(ICON_FA_BAN)) mpv->commandv("cycle-values", prop, "no", "auto", nullptr);
+  if (ImGui::IsItemHovered(ImGuiHoveredFlags_DelayNormal)) ImGui::SetTooltip("Disable %s Track", type);
   if (ImGui::BeginListBox("##tracks", ImVec2(-FLT_MIN, 3 * ImGui::GetTextLineHeightWithSpacing()))) {
     auto items = mpv->trackList();
+    if (items.empty()) ImGui::TextDisabled("<Empty>");
     for (auto &item : items) {
       if (item.type != type) continue;
       auto title = item.title.empty() ? format("Track {}", item.id) : item.title;
       if (!item.lang.empty()) title += format(" [{}]", item.lang);
-      if (ImGui::Selectable(title.c_str(), item.selected)) mpv->property<int64_t, MPV_FORMAT_INT64>(prop, item.id);
+      ImGui::PushID(item.id);
+      if (ImGui::Selectable("", item.selected)) mpv->property(prop, std::to_string(item.id).c_str());
+      ImGui::SameLine();
+      ImGui::TextColored(item.selected ? style.Colors[ImGuiCol_ButtonActive] : style.Colors[ImGuiCol_Text], "%s",
+                         title.c_str());
+      ImGui::PopID();
     }
     ImGui::EndListBox();
   }
@@ -76,6 +87,7 @@ void Quick::drawPlaylistTabContent() {
   auto bottom = ImGui::GetFrameHeightWithSpacing() + style.ItemSpacing.y;
   if (ImGui::BeginListBox("##playlist", ImVec2(-FLT_MIN, -bottom))) {
     static int selected = pos;
+    if (items.empty()) ImGui::TextDisabled("<Empty>");
     for (auto &item : items) {
       std::string title = item.title;
       if (title.empty() && !item.filename.empty()) title = item.filename;
@@ -113,8 +125,7 @@ void Quick::drawPlaylistTabContent() {
   }
   ImGui::Spacing();
 
-  if (ImGui::Button(ICON_FA_SEARCH))
-    mpv->command("script-message-to implay command-palette playlist");
+  if (ImGui::Button(ICON_FA_SEARCH)) mpv->command("script-message-to implay command-palette playlist");
   ImGui::SameLine();
   if (ImGui::Button(ICON_FA_SYNC)) mpv->command("cycle-values loop-playlist inf no");
   if (ImGui::IsItemHovered(ImGuiHoveredFlags_DelayNormal)) ImGui::SetTooltip("Loop");
@@ -138,6 +149,7 @@ void Quick::drawChaptersTabContent() {
   auto style = ImGui::GetStyle();
   auto pos = mpv->property<int64_t, MPV_FORMAT_INT64>("chapter");
   if (ImGui::BeginListBox("##chapters", ImVec2(-FLT_MIN, -FLT_MIN))) {
+    if (items.empty()) ImGui::TextDisabled("<Empty>");
     for (auto &item : items) {
       auto title = item.title.empty() ? format("Chapter {}", item.id + 1) : item.title;
       auto time = format("{:%H:%M:%S}", std::chrono::duration<int>((int)item.time));

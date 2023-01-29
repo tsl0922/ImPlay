@@ -153,8 +153,7 @@ void ContextMenu::draw() {
     }
     if (ImGui::BeginMenuEx("Subtitle", ICON_FA_FONT)) {
       drawTracklist("sub", "sid");
-      if (ImGui::MenuItemEx("Load..", ICON_FA_FOLDER_OPEN))
-        mpv->command("script-message-to implay load-sub");
+      if (ImGui::MenuItemEx("Load..", ICON_FA_FOLDER_OPEN)) mpv->command("script-message-to implay load-sub");
       if (ImGui::MenuItem("Show/Hide", "v")) mpv->command("cycle sub-visibility");
       ImGui::Separator();
       if (ImGui::MenuItem("Move Up", "r")) mpv->command("add sub-pos -1");
@@ -171,8 +170,7 @@ void ContextMenu::draw() {
     }
     ImGui::Separator();
     if (ImGui::MenuItemEx("Fullscreen", ICON_FA_EXPAND, "f")) mpv->command("cycle fullscreen");
-    if (ImGui::MenuItemEx("Quick Panel", ICON_FA_COGS))
-      mpv->command("script-message-to implay quickview");
+    if (ImGui::MenuItemEx("Quick Panel", ICON_FA_COGS)) mpv->command("script-message-to implay quickview");
     if (ImGui::MenuItemEx("Command Palette", ICON_FA_SEARCH, "Ctrl+Shift+p"))
       mpv->command("script-message-to implay command-palette");
     ImGui::Separator();
@@ -211,20 +209,16 @@ void ContextMenu::draw() {
       ImGui::EndMenu();
     }
     if (ImGui::BeginMenuEx("Help", ICON_FA_QUESTION_CIRCLE)) {
-      if (ImGui::MenuItemEx("About", ICON_FA_INFO_CIRCLE))
-        mpv->command("script-message-to implay about");
+      if (ImGui::MenuItemEx("About", ICON_FA_INFO_CIRCLE)) mpv->command("script-message-to implay about");
       if (ImGui::MenuItemEx("Settings", ICON_FA_COG)) mpv->command("script-message-to implay settings");
       ImGui::EndMenu();
     }
     ImGui::Separator();
     if (ImGui::BeginMenuEx("Open", ICON_FA_FOLDER_OPEN)) {
-      if (ImGui::MenuItemEx("Open Files..", ICON_FA_FILE))
-        mpv->command("script-message-to implay open");
-      if (ImGui::MenuItemEx("Open Folder..", ICON_FA_FOLDER_PLUS))
-        mpv->command("script-message-to implay open-folder");
+      if (ImGui::MenuItemEx("Open Files..", ICON_FA_FILE)) mpv->command("script-message-to implay open");
+      if (ImGui::MenuItemEx("Open Folder..", ICON_FA_FOLDER_PLUS)) mpv->command("script-message-to implay open-folder");
       ImGui::Separator();
-      if (ImGui::MenuItemEx("Open URL..", ICON_FA_LINK))
-        mpv->command("script-message-to implay open-url");
+      if (ImGui::MenuItemEx("Open URL..", ICON_FA_LINK)) mpv->command("script-message-to implay open-url");
       if (ImGui::MenuItemEx("Open Clipboard", ICON_FA_CLIPBOARD))
         mpv->command("script-message-to implay open-clipboard");
       ImGui::Separator();
@@ -255,15 +249,16 @@ void ContextMenu::drawAudioDeviceList() {
 }
 
 void ContextMenu::drawTracklist(const char *type, const char *prop) {
-  auto tracklist = mpv->trackList();
-  std::vector<Mpv::TrackItem> list;
-  std::copy_if(tracklist.begin(), tracklist.end(), std::back_inserter(list),
-               [type](const auto &track) { return track.type == type; });
-  if (ImGui::BeginMenuEx("Tracks", ICON_FA_LIST, !list.empty())) {
-    for (auto &track : list) {
+  auto items = mpv->trackList();
+  auto value = mpv->property(prop);
+  if (ImGui::BeginMenuEx("Tracks", ICON_FA_LIST)) {
+    if (ImGui::MenuItem("Disable", nullptr, strcmp(value, "no") == 0))
+      mpv->commandv("cycle-values", prop, "no", "auto", nullptr);
+    for (auto &track : items) {
+      if (track.type != type) continue;
       auto title = track.title.empty() ? format("Track {}", track.id) : track.title;
       if (!track.lang.empty()) title += format(" [{}]", track.lang);
-      if (ImGui::MenuItemEx(title.c_str(), nullptr, nullptr, track.selected))
+      if (ImGui::MenuItem(title.c_str(), nullptr, track.selected))
         mpv->property<int64_t, MPV_FORMAT_INT64>(prop, track.id);
     }
     ImGui::EndMenu();
@@ -283,7 +278,7 @@ void ContextMenu::drawChapterlist(std::vector<Mpv::ChapterItem> items) {
       if (i == 10) break;
       auto title = chapter.title.empty() ? format("Chapter {}", chapter.id + 1) : chapter.title;
       title = format("{} [{:%H:%M:%S}]", title, std::chrono::duration<int>((int)chapter.time));
-      if (ImGui::MenuItemEx(title.c_str(), nullptr, nullptr, chapter.id == pos)) {
+      if (ImGui::MenuItem(title.c_str(), nullptr, chapter.id == pos)) {
         mpv->commandv("seek", std::to_string(chapter.time).c_str(), "absolute", nullptr);
       }
       i++;
