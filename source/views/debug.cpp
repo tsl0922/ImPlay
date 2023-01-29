@@ -49,8 +49,7 @@ void Debug::drawHeader() {
   ImGui::Text("%s", version);
   auto vSize = ImGui::CalcTextSize(format("ImGui {}", ImGui::GetVersion()).c_str());
   auto mSize = ImGui::CalcTextSize(format("FPS: %.2f", io.Framerate).c_str());
-  ImGui::SameLine(ImGui::GetWindowWidth() -
-                  (vSize.x + mSize.x + 4 * style.ItemInnerSpacing.x + 3 * style.ItemSpacing.x));
+  ImGui::SameLine(ImGui::GetContentRegionAvail().x - (vSize.x + mSize.x + 2 * style.FramePadding.x));
   ImGui::Text("ImGui %s", ImGui::GetVersion());
   if (ImGui::IsItemClicked(ImGuiMouseButton_Left)) m_demo = !m_demo;
   ImGui::SameLine();
@@ -90,7 +89,7 @@ void Debug::drawBindings() {
       ImGui::SameLine();
       ImGui::Text("%s", title.c_str());
 
-      ImGui::SameLine(ImGui::GetWindowWidth() * 0.75f);
+      ImGui::SameLine(ImGui::GetContentRegionAvail().x * 0.75f);
       ImGui::BeginDisabled();
       ImGui::Button(binding.key.c_str());
       ImGui::EndDisabled();
@@ -271,7 +270,7 @@ void Debug::drawPropNode(const char* name, mpv_node& node, int depth) {
     }
     ImGui::SameLine();
     ImGui::BulletText("%s", title);
-    ImGui::SameLine(ImGui::GetWindowWidth() * 0.5f);
+    ImGui::SameLine(ImGui::GetContentRegionAvail().x * 0.5f);
     ImGui::TextColored(color, "%s", value.c_str());
     ImGui::PopStyleVar();
     ImGui::PopID();

@@ -46,7 +46,7 @@ void Settings::drawButtons() {
   bool apply = false;
   bool same = data == config->Data;
 
-  ImGui::SetCursorPosX(ImGui::GetWindowWidth() - (scaled(15) + 3 * ImGuiStyle().ItemSpacing.x));
+  ImGui::SetCursorPosX(ImGui::GetContentRegionAvail().x - (scaled(15) + 3 * ImGuiStyle().ItemSpacing.x));
   if (ImGui::Button("OK", ImVec2(scaled(5), 0))) {
     apply = true;
     m_open = false;

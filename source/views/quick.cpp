@@ -63,7 +63,7 @@ void Quick::drawTracks(const char *type, const char *prop) {
   auto style = ImGui::GetStyle();
   auto iconSize = ImGui::CalcTextSize(ICON_FA_PLUS);
   ImGui::Text("Tracks");
-  ImGui::SameLine(ImGui::GetWindowWidth() - (iconSize.x + 2 * style.FramePadding.x));
+  ImGui::SameLine(ImGui::GetContentRegionAvail().x - (iconSize.x + 2 * style.FramePadding.x));
   if (ImGui::Button(ICON_FA_BAN)) mpv->commandv("cycle-values", prop, "no", "auto", nullptr);
   if (ImGui::IsItemHovered(ImGuiHoveredFlags_DelayNormal)) ImGui::SetTooltip("Disable %s Track", type);
   if (ImGui::BeginListBox("##tracks", ImVec2(-FLT_MIN, 3 * ImGui::GetTextLineHeightWithSpacing()))) {
@@ -92,7 +92,7 @@ void Quick::drawPlaylistTabContent() {
   iconButton(ICON_FA_SYNC, "cycle-values loop-playlist inf no", "Loop");
   iconButton(ICON_FA_RANDOM, "playlist-shuffle", "Shuffle");
   auto iconSize = ImGui::CalcTextSize(ICON_FA_PLUS);
-  ImGui::SameLine(ImGui::GetWindowWidth() - 3 * (iconSize.x + 2 * style.FramePadding.x + style.ItemSpacing.x));
+  ImGui::SameLine(ImGui::GetContentRegionAvail().x - 3 * (iconSize.x + style.FramePadding.x + style.ItemSpacing.x));
   iconButton(ICON_FA_PLUS, "script-message-to implay playlist-add-files", "Add Files", false);
   iconButton(ICON_FA_FOLDER_PLUS, "script-message-to implay playlist-add-folder", "Add Folder");
   iconButton(ICON_FA_TRASH_ALT, "playlist-clear", "Clear");
@@ -170,7 +170,7 @@ void Quick::drawChaptersTabContent() {
         mpv->commandv("seek", std::to_string(item.time).c_str(), "absolute", nullptr);
       ImGui::SameLine();
       ImGui::TextColored(color, "%s", title.c_str());
-      ImGui::SameLine(ImGui::GetWindowWidth() - ImGui::CalcTextSize(time.c_str()).x - 2 * style.ItemSpacing.x);
+      ImGui::SameLine(ImGui::GetContentRegionAvail().x - ImGui::CalcTextSize(time.c_str()).x - 2 * style.ItemSpacing.x);
       ImGui::TextColored(color, "%s", time.c_str());
       ImGui::PopID();
     }
@@ -285,7 +285,7 @@ void Quick::drawSubtitleTabContent() {
   iconButton(ICON_FA_EYE_SLASH, "cycle sub-visibility", "Show/Hide Subtitle");
   auto style = ImGui::GetStyle();
   auto iconSize = ImGui::CalcTextSize(ICON_FA_PLUS);
-  ImGui::SameLine(ImGui::GetWindowWidth() - (iconSize.x + 2 * style.FramePadding.x));
+  ImGui::SameLine(ImGui::GetContentRegionAvail().x - (iconSize.x + 2 * style.FramePadding.x));
   iconButton(ICON_FA_PLUS, "script-message-to implay load-sub", "Load External Subtitles..", false);
   ImGui::Separator();
   ImGui::Spacing();
