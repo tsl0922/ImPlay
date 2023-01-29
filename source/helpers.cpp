@@ -35,6 +35,19 @@ void ImGui::TextCentered(const char* text, bool disabled) {
     ImGui::Text("%s", text);
 }
 
+void ImGui::TextEllipsis(const char* text, float maxWidth) {
+  if (maxWidth == 0) maxWidth = ImGui::GetContentRegionAvail().x;
+  ImGuiStyle style = ImGui::GetStyle();
+  ImGuiWindow* window = ImGui::GetCurrentWindow();
+  ImVec2 textSize = ImGui::CalcTextSize(text);
+  ImVec2 min = ImGui::GetCursorScreenPos();
+  ImVec2 max = min + ImVec2(maxWidth - style.FramePadding.x, textSize.y);
+  ImRect textRect(min, max);
+  ImGui::ItemSize(textRect);
+  if (ImGui::ItemAdd(textRect, window->GetID(text)))
+    ImGui::RenderTextEllipsis(ImGui::GetWindowDrawList(), min, max, max.x, max.x, text, nullptr, &textSize);
+}
+
 void ImGui::Hyperlink(const char* label, const char* uri) {
   auto style = ImGui::GetStyle();
   ImGui::PushStyleColor(ImGuiCol_Text, style.Colors[ImGuiCol_ButtonActive]);

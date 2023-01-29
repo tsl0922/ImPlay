@@ -138,8 +138,9 @@ void Quick::drawPlaylistTabContent() {
         ImGui::EndPopup();
       }
       ImGui::SameLine();
-      ImGui::TextColored(item.id == pos ? style.Colors[ImGuiCol_ButtonActive] : style.Colors[ImGuiCol_Text], "%s",
-                         title.c_str());
+      ImGui::PushStyleColor(ImGuiCol_Text, item.id == pos ? style.Colors[ImGuiCol_ButtonActive] : style.Colors[ImGuiCol_Text]);
+      ImGui::TextEllipsis(title.c_str());
+      ImGui::PopStyleColor();
       ImGui::PopID();
     }
     if (ImGui::BeginPopupContextWindow(nullptr, ImGuiPopupFlags_MouseButtonRight | ImGuiPopupFlags_NoOpenOverItems)) {

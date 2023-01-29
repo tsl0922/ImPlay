@@ -20,6 +20,7 @@ ImVec2 scaled(const ImVec2& vector) { return vector * ImGui::GetFontSize(); }
 namespace ImGui {
 void HalignCenter(const char* text);
 void TextCentered(const char* text, bool disabled = false);
+void TextEllipsis(const char* text, float maxWidth = 0);
 void Hyperlink(const char* label, const char* uri);
 void HelpMarker(const char* desc);
 ImTextureID LoadTexture(const char* path, int* width = nullptr, int* height = nullptr);

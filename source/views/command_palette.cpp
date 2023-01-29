@@ -68,7 +68,7 @@ void CommandPalette::drawInput() {
 
 void CommandPalette::drawList(float width) {
   ImGui::BeginChild("##command_matches", ImVec2(0, 0), false, ImGuiWindowFlags_NavFlattened);
-  long maxWidth = 0;
+  float maxWidth = 0;
   for (const auto& match : matches) {
     auto width = ImGui::CalcTextSize(match.label.c_str()).x;
     if (width > maxWidth) maxWidth = width;
@@ -79,8 +79,8 @@ void CommandPalette::drawList(float width) {
     std::string title = match.title;
     if (title.empty()) title = match.tooltip;
     ImVec2 contentAvail = ImGui::GetContentRegionAvail();
-    long lWidth = contentAvail.x;
-    auto rWidth = maxWidth + 2 * style.ItemSpacing.x + 2 * style.ItemInnerSpacing.x;
+    float lWidth = contentAvail.x;
+    auto rWidth = maxWidth + 2 * style.ItemInnerSpacing.x + style.ItemSpacing.x;
     if (rWidth > 0) lWidth -= rWidth;
 
     ImGui::PushID(&match);
@@ -90,14 +90,7 @@ void CommandPalette::drawList(float width) {
       ImGui::SetTooltip("%s", match.tooltip.c_str());
     ImGui::SameLine();
 
-    ImVec2 textSize = ImGui::CalcTextSize(title.c_str());
-    ImVec2 min = ImGui::GetCursorScreenPos() + style.FramePadding;
-    ImVec2 max = min + ImVec2(contentAvail.x - rWidth - 2 * style.ItemSpacing.x, textSize.y + style.FramePadding.y);
-    ImRect textRect(min, max);
-    ImGui::ItemSize(textRect);
-    if (ImGui::ItemAdd(textRect, window->GetID(title.data(), title.data() + title.size())))
-      ImGui::RenderTextEllipsis(ImGui::GetWindowDrawList(), min, max, max.x, max.x, title.data(),
-                                title.data() + title.size(), &textSize);
+    ImGui::TextEllipsis(title.c_str(), contentAvail.x - rWidth - style.ItemSpacing.x);
 
     if (!match.label.empty()) {
       ImGui::SameLine(contentAvail.x - rWidth);
