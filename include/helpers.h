@@ -2,6 +2,8 @@
 // SPDX-License-Identifier: GPL-2.0-only
 
 #pragma once
+#include <codecvt>
+#include <locale>
 #include <algorithm>
 #include <string>
 #include <map>
@@ -13,8 +15,14 @@
 #include <imgui_internal.h>
 
 namespace {
-float scaled(float n) { return n * ImGui::GetFontSize(); }
-ImVec2 scaled(const ImVec2& vector) { return vector * ImGui::GetFontSize(); }
+inline float scaled(float n) { return n * ImGui::GetFontSize(); }
+inline ImVec2 scaled(const ImVec2& vector) { return vector * ImGui::GetFontSize(); }
+inline std::wstring UTF8ToWide(const std::string& str) {
+  return std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>, wchar_t>().from_bytes(str);
+}
+inline std::string WideToUTF8(const std::wstring& str) {
+  return std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>, wchar_t>().to_bytes(str);
+}
 }  // namespace
 
 namespace ImGui {
@@ -36,8 +44,9 @@ struct OptionParser {
   bool check(std::string key, std::string value);
 };
 
-int openUri(const char* uri);
-const char* datadir(const char* subdir = "implay");
+int openUrl(std::string url);
+void revealInFolder(std::string path);
+std::string datadir(std::string subdir = "implay");
 
 inline std::string tolower(std::string s) {
   std::string str = s;

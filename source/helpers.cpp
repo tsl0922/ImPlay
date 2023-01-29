@@ -2,12 +2,11 @@
 // SPDX-License-Identifier: GPL-2.0-only
 
 #include <algorithm>
-#include <codecvt>
-#include <locale>
 #include <cstdlib>
 #include <cctype>
 #include <cstring>
 #include <string>
+#include <filesystem>
 #include <fmt/format.h>
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
@@ -53,7 +52,7 @@ void ImGui::Hyperlink(const char* label, const char* uri) {
   ImGui::PushStyleColor(ImGuiCol_Text, style.Colors[ImGuiCol_ButtonActive]);
   ImGui::Text("%s", label ? label : uri);
   if (ImGui::IsItemHovered()) ImGui::SetMouseCursor(ImGuiMouseCursor_Hand);
-  if (ImGui::IsItemClicked()) ImPlay::openUri("https://github.com/tsl0922/ImPlay");
+  if (ImGui::IsItemClicked()) ImPlay::openUrl("https://github.com/tsl0922/ImPlay");
   ImGui::PopStyleColor();
 }
 
@@ -120,7 +119,7 @@ void ImPlay::OptionParser::parse(int argc, char** argv) {
   int wideArgc;
   wchar_t** wideArgv = CommandLineToArgvW(GetCommandLineW(), &wideArgc);
   for (int i = 1; i < wideArgc; i++) {
-    std::string arg = std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>, wchar_t>().to_bytes(wideArgv[i]);
+    std::string arg = WideToUTF8(wideArgv[i]);
 #else
   for (int i = 1; i < argc; i++) {
     std::string arg = argv[i];
@@ -156,23 +155,37 @@ bool ImPlay::OptionParser::check(std::string key, std::string value) {
   return it != options.end() && it->second == value;
 }
 
-int ImPlay::openUri(const char* uri) {
+int ImPlay::openUrl(std::string url) {
 #ifdef __APPLE__
-  return system(format("open '{}'", uri).c_str());
+  return system(format("open '{}'", url).c_str());
 #elif defined(_WIN32) || defined(__CYGWIN__)
-  return ShellExecute(0, 0, uri, 0, 0, SW_SHOW) > (HINSTANCE)32 ? 0 : 1;
+  return ShellExecuteW(0, 0, UTF8ToWide(url).c_str(), 0, 0, SW_SHOW) > (HINSTANCE)32 ? 0 : 1;
 #else
   char command[256];
-  return system(format("xdg-open '{}'", uri).c_str());
+  return system(format("xdg-open '{}'", url).c_str());
 #endif
 }
 
-const char* ImPlay::datadir(const char* subdir) {
-  static char dataDir[256] = {0};
+void ImPlay::revealInFolder(std::string path) {
+#ifdef __APPLE__
+  system(format("open -R '{}'", path).c_str());
+#elif defined(_WIN32) || defined(__CYGWIN__)
+  std::string arg = format("/select,\"{}\"", path);
+  ShellExecuteW(0, 0, L"explorer", UTF8ToWide(arg).c_str(), 0, SW_SHOW);
+#else
+  auto fp = std::filesystem::path(path);
+  auto status = std::filesystem::status(fp);
+  auto target = std::filesystem::is_directory(status) ? path : fp.parent_path().string();
+  system(format("xdg-open '{}'", target).c_str());
+#endif
+}
+
+std::string ImPlay::datadir(std::string subdir) {
+  std::string dataDir;
 #ifdef _WIN32
   wchar_t* dir = nullptr;
   if (SUCCEEDED(SHGetKnownFolderPath(FOLDERID_RoamingAppData, KF_FLAG_CREATE, nullptr, &dir))) {
-    wcstombs(dataDir, dir, 256);
+    dataDir = WideToUTF8(dir);
     CoTaskMemFree(dir);
   }
 #elif defined(__APPLE__)
@@ -181,7 +194,7 @@ const char* ImPlay::datadir(const char* subdir) {
   while ((state = sysdir_get_next_search_path_enumeration(state, path)) != 0) {
     glob_t g;
     if (glob(path, GLOB_TILDE, nullptr, &g) == 0) {
-      strncpy(dataDir, g.gl_pathv[0], 256);
+      dataDir = g.gl_pathv[0];
       globfree(&g);
     }
     break;
@@ -189,16 +202,14 @@ const char* ImPlay::datadir(const char* subdir) {
 #else
   char* home = getenv("HOME");
   char* xdg_dir = getenv("XDG_CONFIG_HOME");
-  if (xdg_dir != nullptr) {
-    strncpy(dataDir, xdg_dir, 256);
-  } else if (home != nullptr) {
-    strncpy(dataDir, home, 256);
-    strncat(dataDir, "/.config", 9);
-  }
+  if (xdg_dir != nullptr)
+    dataDir = xdg_dir;
+  else if (home != nullptr)
+    dataDir = format("{}/.config", home);
 #endif
-  if (dataDir[0] != '\0' && subdir != nullptr && subdir[0] != '\0') {
-    strncat(dataDir, "/", 2);
-    strncat(dataDir, subdir, 20);
+  if (!subdir.empty()) {
+    if (!dataDir.empty()) dataDir += std::filesystem::path::preferred_separator;
+    dataDir += subdir;
   }
-  return &dataDir[0];
+  return dataDir;
 }

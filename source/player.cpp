@@ -31,7 +31,7 @@ bool Player::init(OptionParser& parser) {
   mpv->option("input-vo-keyboard", "yes");
   mpv->option("osd-playing-msg", "${media-title}");
   mpv->option("screenshot-directory", "~~desktop/");
-  if (!config->Data.Mpv.UseConfig) mpv->option("config-dir", datadir());
+  if (!config->Data.Mpv.UseConfig) mpv->option("config-dir", datadir().c_str());
 
   for (const auto& [key, value] : parser.options) {
     if (int err = mpv->option(key.c_str(), value.c_str()); err < 0) {

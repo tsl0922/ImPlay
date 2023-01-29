@@ -205,7 +205,7 @@ void ContextMenu::draw() {
       }
       ImGui::Separator();
       if (ImGui::MenuItem("Metrics & Debug")) mpv->command("script-message-to implay metrics");
-      if (ImGui::MenuItem("Open Config Dir")) openUri(datadir());
+      if (ImGui::MenuItem("Open Config Dir")) openUrl(datadir());
       ImGui::EndMenu();
     }
     if (ImGui::BeginMenuEx("Help", ICON_FA_QUESTION_CIRCLE)) {

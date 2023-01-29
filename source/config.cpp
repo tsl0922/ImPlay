@@ -8,8 +8,8 @@
 
 namespace ImPlay {
 Config::Config() {
-  const char* dataDir = datadir();
-  if (dataDir[0] != '\0') {
+  auto dataDir = datadir();
+  if (!dataDir.empty()) {
     std::filesystem::create_directories(dataDir);
     configFile = format("{}/implay.conf", dataDir);
   } else

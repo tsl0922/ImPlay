@@ -56,7 +56,7 @@ void Quick::draw() {
 void Quick::iconButton(const char *icon, const char *cmd, const char *tooltip, bool sameline) {
   if (sameline) ImGui::SameLine();
   if (ImGui::Button(format("{}##{}", icon, cmd).c_str())) mpv->command(cmd);
-  if (tooltip && ImGui::IsItemHovered(ImGuiHoveredFlags_DelayNormal)) ImGui::SetTooltip(tooltip);
+  if (tooltip && ImGui::IsItemHovered(ImGuiHoveredFlags_DelayNormal)) ImGui::SetTooltip("%s", tooltip);
 }
 
 void Quick::drawTracks(const char *type, const char *prop) {
@@ -101,8 +101,9 @@ void Quick::drawPlaylistTabContent() {
   if (ImGui::BeginListBox("##playlist", ImVec2(-FLT_MIN, -FLT_MIN))) {
     auto items = mpv->playlist();
     static int selected = pos;
-    auto drawContextmenu = [&](int id) {
-      bool enabled = id >= 0;
+    auto drawContextmenu = [&](Mpv::PlayItem *item = nullptr) {
+      bool enabled = item != nullptr;
+      int id = enabled ? item->id : -1;
       if (ImGui::MenuItem("Play", nullptr, nullptr, enabled))
         mpv->property<int64_t, MPV_FORMAT_INT64>("playlist-pos", id);
       if (ImGui::MenuItem("Play Next", nullptr, nullptr, enabled))
@@ -114,6 +115,9 @@ void Quick::drawPlaylistTabContent() {
         mpv->commandv("playlist-move", std::to_string(id).c_str(), std::to_string(items.size()).c_str(), nullptr);
       if (ImGui::MenuItem("Remove", nullptr, nullptr, enabled))
         mpv->commandv("playlist-remove", std::to_string(id).c_str(), nullptr);
+      ImGui::Separator();
+      if (ImGui::MenuItem("Copy Path", nullptr, nullptr, enabled)) ImGui::SetClipboardText(item->path.c_str());
+      if (ImGui::MenuItem("Reveal in Folder", nullptr, nullptr, enabled)) revealInFolder(item->path);
       ImGui::Separator();
       if (ImGui::MenuItem("Search")) mpv->command("script-message-to implay command-palette playlist");
       if (ImGui::MenuItem("Shuffle")) mpv->command("playlist-shuffle");
@@ -134,7 +138,7 @@ void Quick::drawPlaylistTabContent() {
         mpv->property<int64_t, MPV_FORMAT_INT64>("playlist-pos", item.id);
       if (ImGui::IsItemHovered(ImGuiHoveredFlags_DelayNormal)) ImGui::SetTooltip("%s", title.c_str());
       if (ImGui::BeginPopupContextItem()) {
-        drawContextmenu(item.id);
+        drawContextmenu(&item);
         ImGui::EndPopup();
       }
       ImGui::SameLine();
@@ -144,7 +148,7 @@ void Quick::drawPlaylistTabContent() {
       ImGui::PopID();
     }
     if (ImGui::BeginPopupContextWindow(nullptr, ImGuiPopupFlags_MouseButtonRight | ImGuiPopupFlags_NoOpenOverItems)) {
-      drawContextmenu(-1);
+      drawContextmenu();
       ImGui::EndPopup();
     }
     ImGui::EndListBox();
