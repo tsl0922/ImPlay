@@ -119,7 +119,7 @@ void ContextMenu::draw() {
         if (ImGui::MenuItem("Reset", "Alt+BS")) mpv->command("set video-zoom 0; set video-pan-x 0 ; set video-pan-y 0");
         ImGui::EndMenu();
       }
-      if (ImGui::BeginMenu("Aspect")) {
+      if (ImGui::BeginMenu("Aspect Ratio")) {
         if (ImGui::MenuItem("16:9")) mpv->command("set video-aspect 16:9");
         if (ImGui::MenuItem("4:3")) mpv->command("set video-aspect 4:3");
         if (ImGui::MenuItem("2.35:1")) mpv->command("set video-aspect 2.35:1");

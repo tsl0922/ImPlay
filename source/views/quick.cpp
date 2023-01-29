@@ -84,8 +84,27 @@ void Quick::drawPlaylistTabContent() {
   auto items = mpv->playlist();
   auto style = ImGui::GetStyle();
   auto pos = mpv->property<int64_t, MPV_FORMAT_INT64>("playlist-pos");
-  auto bottom = ImGui::GetFrameHeightWithSpacing() + style.ItemSpacing.y;
-  if (ImGui::BeginListBox("##playlist", ImVec2(-FLT_MIN, -bottom))) {
+
+  if (ImGui::Button(ICON_FA_SEARCH)) mpv->command("script-message-to implay command-palette playlist");
+  ImGui::SameLine();
+  if (ImGui::Button(ICON_FA_SYNC)) mpv->command("cycle-values loop-playlist inf no");
+  if (ImGui::IsItemHovered(ImGuiHoveredFlags_DelayNormal)) ImGui::SetTooltip("Loop");
+  ImGui::SameLine();
+  if (ImGui::Button(ICON_FA_RANDOM)) mpv->command("playlist-shuffle");
+  if (ImGui::IsItemHovered(ImGuiHoveredFlags_DelayNormal)) ImGui::SetTooltip("Shuffle");
+  auto iconSize = ImGui::CalcTextSize(ICON_FA_PLUS);
+  ImGui::SameLine(ImGui::GetWindowWidth() - 3 * (iconSize.x + 2 * style.FramePadding.x + style.ItemSpacing.x));
+  if (ImGui::Button(ICON_FA_PLUS)) mpv->command("script-message-to implay playlist-add-files");
+  if (ImGui::IsItemHovered(ImGuiHoveredFlags_DelayNormal)) ImGui::SetTooltip("Add Files");
+  ImGui::SameLine();
+  if (ImGui::Button(ICON_FA_FOLDER_PLUS)) mpv->command("script-message-to implay playlist-add-folder");
+  if (ImGui::IsItemHovered(ImGuiHoveredFlags_DelayNormal)) ImGui::SetTooltip("Add Folder");
+  ImGui::SameLine();
+  if (ImGui::Button(ICON_FA_TRASH_ALT)) mpv->command("playlist-clear");
+  if (ImGui::IsItemHovered(ImGuiHoveredFlags_DelayNormal)) ImGui::SetTooltip("Clear");
+  ImGui::Separator();
+
+  if (ImGui::BeginListBox("##playlist", ImVec2(-FLT_MIN, -FLT_MIN))) {
     static int selected = pos;
     if (items.empty()) ImGui::TextDisabled("<Empty>");
     for (auto &item : items) {
@@ -123,25 +142,6 @@ void Quick::drawPlaylistTabContent() {
     }
     ImGui::EndListBox();
   }
-  ImGui::Spacing();
-
-  if (ImGui::Button(ICON_FA_SEARCH)) mpv->command("script-message-to implay command-palette playlist");
-  ImGui::SameLine();
-  if (ImGui::Button(ICON_FA_SYNC)) mpv->command("cycle-values loop-playlist inf no");
-  if (ImGui::IsItemHovered(ImGuiHoveredFlags_DelayNormal)) ImGui::SetTooltip("Loop");
-  ImGui::SameLine();
-  if (ImGui::Button(ICON_FA_RANDOM)) mpv->command("playlist-shuffle");
-  if (ImGui::IsItemHovered(ImGuiHoveredFlags_DelayNormal)) ImGui::SetTooltip("Shuffle");
-  auto iconSize = ImGui::CalcTextSize(ICON_FA_PLUS);
-  ImGui::SameLine(ImGui::GetWindowWidth() - 3 * (iconSize.x + 2 * style.FramePadding.x + style.ItemSpacing.x));
-  if (ImGui::Button(ICON_FA_PLUS)) mpv->command("script-message-to implay playlist-add-files");
-  if (ImGui::IsItemHovered(ImGuiHoveredFlags_DelayNormal)) ImGui::SetTooltip("Add Files");
-  ImGui::SameLine();
-  if (ImGui::Button(ICON_FA_FOLDER_PLUS)) mpv->command("script-message-to implay playlist-add-folder");
-  if (ImGui::IsItemHovered(ImGuiHoveredFlags_DelayNormal)) ImGui::SetTooltip("Add Folder");
-  ImGui::SameLine();
-  if (ImGui::Button(ICON_FA_TRASH_ALT)) mpv->command("playlist-clear");
-  if (ImGui::IsItemHovered(ImGuiHoveredFlags_DelayNormal)) ImGui::SetTooltip("Clear");
 }
 
 void Quick::drawChaptersTabContent() {
@@ -236,9 +236,12 @@ void Quick::drawVideoTabContent() {
   if (ImGui::Button("HW Decoding")) mpv->command("cycle-values hwdec auto no");
   ImGui::SameLine();
   if (ImGui::Button("Deinterlace")) mpv->command("cycle deinterlace");
-  ImGui::Spacing();
+  ImGui::NewLine();
+  ImGui::Separator();
+  ImGui::NewLine();
 
   ImGui::Text("Equalizer");
+  ImGui::Spacing();
   static int equalizer[5] = {0};
   const char *eq[] = {"brightness", "contrast", "saturation", "gamma", "hue"};
   for (int i = 0; i < IM_ARRAYSIZE(equalizer); i++) {
