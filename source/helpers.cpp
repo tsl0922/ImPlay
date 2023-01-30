@@ -47,12 +47,12 @@ void ImGui::TextEllipsis(const char* text, float maxWidth) {
     ImGui::RenderTextEllipsis(ImGui::GetWindowDrawList(), min, max, max.x, max.x, text, nullptr, &textSize);
 }
 
-void ImGui::Hyperlink(const char* label, const char* uri) {
+void ImGui::Hyperlink(const char* label, const char* url) {
   auto style = ImGui::GetStyle();
   ImGui::PushStyleColor(ImGuiCol_Text, style.Colors[ImGuiCol_ButtonActive]);
-  ImGui::Text("%s", label ? label : uri);
+  ImGui::Text("%s", label ? label : url);
   if (ImGui::IsItemHovered()) ImGui::SetMouseCursor(ImGuiMouseCursor_Hand);
-  if (ImGui::IsItemClicked()) ImPlay::openUrl("https://github.com/tsl0922/ImPlay");
+  if (ImGui::IsItemClicked()) ImPlay::openUrl(url);
   ImGui::PopStyleColor();
 }
 
