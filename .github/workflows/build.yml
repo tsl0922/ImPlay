@@ -82,12 +82,13 @@ jobs:
             mingw-w64-x86_64-gcc
             mingw-w64-x86_64-cmake
             mingw-w64-x86_64-freetype
+            mingw-w64-x86_64-angleproject
           update: true
       - name: Build ImPlay
         shell: msys2 {0}
         run: |
           mkdir build && cd build
-          cmake -DCMAKE_BUILD_TYPE=RELEASE ..
+          cmake -DCMAKE_BUILD_TYPE=RELEASE -DUSE_OPENGL_ES2=ON ..
           cmake --build . --target package
       - uses: actions/upload-artifact@v3
         with:
