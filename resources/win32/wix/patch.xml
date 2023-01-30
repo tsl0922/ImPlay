@@ -16,6 +16,7 @@
         <!-- File Types -->
         <RegistryValue Root="HKLM" Key="Software\Clients\Media\ImPlay\Capabilities\FileAssociations" Name=".ac3" Value="ImPlay.ac3" Type="string" />
         <RegistryValue Root="HKCR" Key="Applications\ImPlay.exe\SupportedTypes" Name=".ac3" Value="" Type="string" />
+        <RegistryValue Root="HKCR" Key=".ac3\OpenWithProgids" Name="ImPlay.ac3" Value="" Type="string" />
         <ProgId Id="ImPlay.ac3" Description="AC-3 Audio" Icon="CM_FP_ImPlay.exe">
             <Extension Id="ac3">
                 <Verb Id="open" TargetFile="CM_FP_ImPlay.exe" Argument="&quot;%1&quot;" />
@@ -23,6 +24,7 @@
         </ProgId>
         <RegistryValue Root="HKLM" Key="Software\Clients\Media\ImPlay\Capabilities\FileAssociations" Name=".a52" Value="ImPlay.a52" Type="string" />
         <RegistryValue Root="HKCR" Key="Applications\ImPlay.exe\SupportedTypes" Name=".a52" Value="" Type="string" />
+        <RegistryValue Root="HKCR" Key=".a52\OpenWithProgids" Name="ImPlay.a52" Value="" Type="string" />
         <ProgId Id="ImPlay.a52" Description="AC-3 Audio" Icon="CM_FP_ImPlay.exe">
             <Extension Id="a52">
                 <Verb Id="open" TargetFile="CM_FP_ImPlay.exe" Argument="&quot;%1&quot;" />
@@ -30,6 +32,7 @@
         </ProgId>
         <RegistryValue Root="HKLM" Key="Software\Clients\Media\ImPlay\Capabilities\FileAssociations" Name=".eac3" Value="ImPlay.eac3" Type="string" />
         <RegistryValue Root="HKCR" Key="Applications\ImPlay.exe\SupportedTypes" Name=".eac3" Value="" Type="string" />
+        <RegistryValue Root="HKCR" Key=".eac3\OpenWithProgids" Name="ImPlay.eac3" Value="" Type="string" />
         <ProgId Id="ImPlay.eac3" Description="E-AC-3 Audio" Icon="CM_FP_ImPlay.exe">
             <Extension Id="eac3">
                 <Verb Id="open" TargetFile="CM_FP_ImPlay.exe" Argument="&quot;%1&quot;" />
@@ -37,6 +40,7 @@
         </ProgId>
         <RegistryValue Root="HKLM" Key="Software\Clients\Media\ImPlay\Capabilities\FileAssociations" Name=".mlp" Value="ImPlay.mlp" Type="string" />
         <RegistryValue Root="HKCR" Key="Applications\ImPlay.exe\SupportedTypes" Name=".mlp" Value="" Type="string" />
+        <RegistryValue Root="HKCR" Key=".mlp\OpenWithProgids" Name="ImPlay.mlp" Value="" Type="string" />
         <ProgId Id="ImPlay.mlp" Description="MLP Audio" Icon="CM_FP_ImPlay.exe">
             <Extension Id="mlp">
                 <Verb Id="open" TargetFile="CM_FP_ImPlay.exe" Argument="&quot;%1&quot;" />
@@ -44,6 +48,7 @@
         </ProgId>
         <RegistryValue Root="HKLM" Key="Software\Clients\Media\ImPlay\Capabilities\FileAssociations" Name=".dts" Value="ImPlay.dts" Type="string" />
         <RegistryValue Root="HKCR" Key="Applications\ImPlay.exe\SupportedTypes" Name=".dts" Value="" Type="string" />
+        <RegistryValue Root="HKCR" Key=".dts\OpenWithProgids" Name="ImPlay.dts" Value="" Type="string" />
         <ProgId Id="ImPlay.dts" Description="DTS Audio" Icon="CM_FP_ImPlay.exe">
             <Extension Id="dts">
                 <Verb Id="open" TargetFile="CM_FP_ImPlay.exe" Argument="&quot;%1&quot;" />
@@ -51,6 +56,7 @@
         </ProgId>
         <RegistryValue Root="HKLM" Key="Software\Clients\Media\ImPlay\Capabilities\FileAssociations" Name=".dts-hd" Value="ImPlay.dts-hd" Type="string" />
         <RegistryValue Root="HKCR" Key="Applications\ImPlay.exe\SupportedTypes" Name=".dts-hd" Value="" Type="string" />
+        <RegistryValue Root="HKCR" Key=".dts-hd\OpenWithProgids" Name="ImPlay.dts-hd" Value="" Type="string" />
         <ProgId Id="ImPlay.dts-hd" Description="DTS-HD Audio" Icon="CM_FP_ImPlay.exe">
             <Extension Id="dts-hd">
                 <Verb Id="open" TargetFile="CM_FP_ImPlay.exe" Argument="&quot;%1&quot;" />
@@ -58,6 +64,7 @@
         </ProgId>
         <RegistryValue Root="HKLM" Key="Software\Clients\Media\ImPlay\Capabilities\FileAssociations" Name=".dtshd" Value="ImPlay.dtshd" Type="string" />
         <RegistryValue Root="HKCR" Key="Applications\ImPlay.exe\SupportedTypes" Name=".dtshd" Value="" Type="string" />
+        <RegistryValue Root="HKCR" Key=".dtshd\OpenWithProgids" Name="ImPlay.dtshd" Value="" Type="string" />
         <ProgId Id="ImPlay.dtshd" Description="DTS-HD Audio" Icon="CM_FP_ImPlay.exe">
             <Extension Id="dtshd">
                 <Verb Id="open" TargetFile="CM_FP_ImPlay.exe" Argument="&quot;%1&quot;" />
@@ -65,6 +72,7 @@
         </ProgId>
         <RegistryValue Root="HKLM" Key="Software\Clients\Media\ImPlay\Capabilities\FileAssociations" Name=".true-hd" Value="ImPlay.true-hd" Type="string" />
         <RegistryValue Root="HKCR" Key="Applications\ImPlay.exe\SupportedTypes" Name=".true-hd" Value="" Type="string" />
+        <RegistryValue Root="HKCR" Key=".true-hd\OpenWithProgids" Name="ImPlay.true-hd" Value="" Type="string" />
         <ProgId Id="ImPlay.true-hd" Description="TrueHD Audio" Icon="CM_FP_ImPlay.exe">
             <Extension Id="true-hd">
                 <Verb Id="open" TargetFile="CM_FP_ImPlay.exe" Argument="&quot;%1&quot;" />
@@ -72,6 +80,7 @@
         </ProgId>
         <RegistryValue Root="HKLM" Key="Software\Clients\Media\ImPlay\Capabilities\FileAssociations" Name=".thd" Value="ImPlay.thd" Type="string" />
         <RegistryValue Root="HKCR" Key="Applications\ImPlay.exe\SupportedTypes" Name=".thd" Value="" Type="string" />
+        <RegistryValue Root="HKCR" Key=".thd\OpenWithProgids" Name="ImPlay.thd" Value="" Type="string" />
         <ProgId Id="ImPlay.thd" Description="TrueHD Audio" Icon="CM_FP_ImPlay.exe">
             <Extension Id="thd">
                 <Verb Id="open" TargetFile="CM_FP_ImPlay.exe" Argument="&quot;%1&quot;" />
@@ -79,6 +88,7 @@
         </ProgId>
         <RegistryValue Root="HKLM" Key="Software\Clients\Media\ImPlay\Capabilities\FileAssociations" Name=".truehd" Value="ImPlay.truehd" Type="string" />
         <RegistryValue Root="HKCR" Key="Applications\ImPlay.exe\SupportedTypes" Name=".truehd" Value="" Type="string" />
+        <RegistryValue Root="HKCR" Key=".truehd\OpenWithProgids" Name="ImPlay.truehd" Value="" Type="string" />
         <ProgId Id="ImPlay.truehd" Description="TrueHD Audio" Icon="CM_FP_ImPlay.exe">
             <Extension Id="truehd">
                 <Verb Id="open" TargetFile="CM_FP_ImPlay.exe" Argument="&quot;%1&quot;" />
@@ -86,6 +96,7 @@
         </ProgId>
         <RegistryValue Root="HKLM" Key="Software\Clients\Media\ImPlay\Capabilities\FileAssociations" Name=".thd+ac3" Value="ImPlay.thd+ac3" Type="string" />
         <RegistryValue Root="HKCR" Key="Applications\ImPlay.exe\SupportedTypes" Name=".thd+ac3" Value="" Type="string" />
+        <RegistryValue Root="HKCR" Key=".thd+ac3\OpenWithProgids" Name="ImPlay.thd+ac3" Value="" Type="string" />
         <ProgId Id="ImPlay.thd+ac3" Description="TrueHD Audio" Icon="CM_FP_ImPlay.exe">
             <Extension Id="thd+ac3">
                 <Verb Id="open" TargetFile="CM_FP_ImPlay.exe" Argument="&quot;%1&quot;" />
@@ -93,6 +104,7 @@
         </ProgId>
         <RegistryValue Root="HKLM" Key="Software\Clients\Media\ImPlay\Capabilities\FileAssociations" Name=".tta" Value="ImPlay.tta" Type="string" />
         <RegistryValue Root="HKCR" Key="Applications\ImPlay.exe\SupportedTypes" Name=".tta" Value="" Type="string" />
+        <RegistryValue Root="HKCR" Key=".tta\OpenWithProgids" Name="ImPlay.tta" Value="" Type="string" />
         <ProgId Id="ImPlay.tta" Description="True Audio" Icon="CM_FP_ImPlay.exe">
             <Extension Id="tta">
                 <Verb Id="open" TargetFile="CM_FP_ImPlay.exe" Argument="&quot;%1&quot;" />
@@ -100,6 +112,7 @@
         </ProgId>
         <RegistryValue Root="HKLM" Key="Software\Clients\Media\ImPlay\Capabilities\FileAssociations" Name=".pcm" Value="ImPlay.pcm" Type="string" />
         <RegistryValue Root="HKCR" Key="Applications\ImPlay.exe\SupportedTypes" Name=".pcm" Value="" Type="string" />
+        <RegistryValue Root="HKCR" Key=".pcm\OpenWithProgids" Name="ImPlay.pcm" Value="" Type="string" />
         <ProgId Id="ImPlay.pcm" Description="PCM Audio" Icon="CM_FP_ImPlay.exe">
             <Extension Id="pcm">
                 <Verb Id="open" TargetFile="CM_FP_ImPlay.exe" Argument="&quot;%1&quot;" />
@@ -107,6 +120,7 @@
         </ProgId>
         <RegistryValue Root="HKLM" Key="Software\Clients\Media\ImPlay\Capabilities\FileAssociations" Name=".wav" Value="ImPlay.wav" Type="string" />
         <RegistryValue Root="HKCR" Key="Applications\ImPlay.exe\SupportedTypes" Name=".wav" Value="" Type="string" />
+        <RegistryValue Root="HKCR" Key=".wav\OpenWithProgids" Name="ImPlay.wav" Value="" Type="string" />
         <ProgId Id="ImPlay.wav" Description="Wave Audio" Icon="CM_FP_ImPlay.exe">
             <Extension Id="wav">
                 <Verb Id="open" TargetFile="CM_FP_ImPlay.exe" Argument="&quot;%1&quot;" />
@@ -114,6 +128,7 @@
         </ProgId>
         <RegistryValue Root="HKLM" Key="Software\Clients\Media\ImPlay\Capabilities\FileAssociations" Name=".aiff" Value="ImPlay.aiff" Type="string" />
         <RegistryValue Root="HKCR" Key="Applications\ImPlay.exe\SupportedTypes" Name=".aiff" Value="" Type="string" />
+        <RegistryValue Root="HKCR" Key=".aiff\OpenWithProgids" Name="ImPlay.aiff" Value="" Type="string" />
         <ProgId Id="ImPlay.aiff" Description="AIFF Audio" Icon="CM_FP_ImPlay.exe">
             <Extension Id="aiff">
                 <Verb Id="open" TargetFile="CM_FP_ImPlay.exe" Argument="&quot;%1&quot;" />
@@ -121,6 +136,7 @@
         </ProgId>
         <RegistryValue Root="HKLM" Key="Software\Clients\Media\ImPlay\Capabilities\FileAssociations" Name=".aif" Value="ImPlay.aif" Type="string" />
         <RegistryValue Root="HKCR" Key="Applications\ImPlay.exe\SupportedTypes" Name=".aif" Value="" Type="string" />
+        <RegistryValue Root="HKCR" Key=".aif\OpenWithProgids" Name="ImPlay.aif" Value="" Type="string" />
         <ProgId Id="ImPlay.aif" Description="AIFF Audio" Icon="CM_FP_ImPlay.exe">
             <Extension Id="aif">
                 <Verb Id="open" TargetFile="CM_FP_ImPlay.exe" Argument="&quot;%1&quot;" />
@@ -128,6 +144,7 @@
         </ProgId>
         <RegistryValue Root="HKLM" Key="Software\Clients\Media\ImPlay\Capabilities\FileAssociations" Name=".aifc" Value="ImPlay.aifc" Type="string" />
         <RegistryValue Root="HKCR" Key="Applications\ImPlay.exe\SupportedTypes" Name=".aifc" Value="" Type="string" />
+        <RegistryValue Root="HKCR" Key=".aifc\OpenWithProgids" Name="ImPlay.aifc" Value="" Type="string" />
         <ProgId Id="ImPlay.aifc" Description="AIFF Audio" Icon="CM_FP_ImPlay.exe">
             <Extension Id="aifc">
                 <Verb Id="open" TargetFile="CM_FP_ImPlay.exe" Argument="&quot;%1&quot;" />
@@ -135,6 +152,7 @@
         </ProgId>
         <RegistryValue Root="HKLM" Key="Software\Clients\Media\ImPlay\Capabilities\FileAssociations" Name=".amr" Value="ImPlay.amr" Type="string" />
         <RegistryValue Root="HKCR" Key="Applications\ImPlay.exe\SupportedTypes" Name=".amr" Value="" Type="string" />
+        <RegistryValue Root="HKCR" Key=".amr\OpenWithProgids" Name="ImPlay.amr" Value="" Type="string" />
         <ProgId Id="ImPlay.amr" Description="AMR Audio" Icon="CM_FP_ImPlay.exe">
             <Extension Id="amr">
                 <Verb Id="open" TargetFile="CM_FP_ImPlay.exe" Argument="&quot;%1&quot;" />
@@ -142,6 +160,7 @@
         </ProgId>
         <RegistryValue Root="HKLM" Key="Software\Clients\Media\ImPlay\Capabilities\FileAssociations" Name=".awb" Value="ImPlay.awb" Type="string" />
         <RegistryValue Root="HKCR" Key="Applications\ImPlay.exe\SupportedTypes" Name=".awb" Value="" Type="string" />
+        <RegistryValue Root="HKCR" Key=".awb\OpenWithProgids" Name="ImPlay.awb" Value="" Type="string" />
         <ProgId Id="ImPlay.awb" Description="AMR-WB Audio" Icon="CM_FP_ImPlay.exe">
             <Extension Id="awb">
                 <Verb Id="open" TargetFile="CM_FP_ImPlay.exe" Argument="&quot;%1&quot;" />
@@ -149,6 +168,7 @@
         </ProgId>
         <RegistryValue Root="HKLM" Key="Software\Clients\Media\ImPlay\Capabilities\FileAssociations" Name=".au" Value="ImPlay.au" Type="string" />
         <RegistryValue Root="HKCR" Key="Applications\ImPlay.exe\SupportedTypes" Name=".au" Value="" Type="string" />
+        <RegistryValue Root="HKCR" Key=".au\OpenWithProgids" Name="ImPlay.au" Value="" Type="string" />
         <ProgId Id="ImPlay.au" Description="AU Audio" Icon="CM_FP_ImPlay.exe">
             <Extension Id="au">
                 <Verb Id="open" TargetFile="CM_FP_ImPlay.exe" Argument="&quot;%1&quot;" />
@@ -156,6 +176,7 @@
         </ProgId>
         <RegistryValue Root="HKLM" Key="Software\Clients\Media\ImPlay\Capabilities\FileAssociations" Name=".snd" Value="ImPlay.snd" Type="string" />
         <RegistryValue Root="HKCR" Key="Applications\ImPlay.exe\SupportedTypes" Name=".snd" Value="" Type="string" />
+        <RegistryValue Root="HKCR" Key=".snd\OpenWithProgids" Name="ImPlay.snd" Value="" Type="string" />
         <ProgId Id="ImPlay.snd" Description="AU Audio" Icon="CM_FP_ImPlay.exe">
             <Extension Id="snd">
                 <Verb Id="open" TargetFile="CM_FP_ImPlay.exe" Argument="&quot;%1&quot;" />
@@ -163,6 +184,7 @@
         </ProgId>
         <RegistryValue Root="HKLM" Key="Software\Clients\Media\ImPlay\Capabilities\FileAssociations" Name=".lpcm" Value="ImPlay.lpcm" Type="string" />
         <RegistryValue Root="HKCR" Key="Applications\ImPlay.exe\SupportedTypes" Name=".lpcm" Value="" Type="string" />
+        <RegistryValue Root="HKCR" Key=".lpcm\OpenWithProgids" Name="ImPlay.lpcm" Value="" Type="string" />
         <ProgId Id="ImPlay.lpcm" Description="Linear PCM Audio" Icon="CM_FP_ImPlay.exe">
             <Extension Id="lpcm">
                 <Verb Id="open" TargetFile="CM_FP_ImPlay.exe" Argument="&quot;%1&quot;" />
@@ -170,6 +192,7 @@
         </ProgId>
         <RegistryValue Root="HKLM" Key="Software\Clients\Media\ImPlay\Capabilities\FileAssociations" Name=".yuv" Value="ImPlay.yuv" Type="string" />
         <RegistryValue Root="HKCR" Key="Applications\ImPlay.exe\SupportedTypes" Name=".yuv" Value="" Type="string" />
+        <RegistryValue Root="HKCR" Key=".yuv\OpenWithProgids" Name="ImPlay.yuv" Value="" Type="string" />
         <ProgId Id="ImPlay.yuv" Description="Raw YUV Video" Icon="CM_FP_ImPlay.exe">
             <Extension Id="yuv">
                 <Verb Id="open" TargetFile="CM_FP_ImPlay.exe" Argument="&quot;%1&quot;" />
@@ -177,6 +200,7 @@
         </ProgId>
         <RegistryValue Root="HKLM" Key="Software\Clients\Media\ImPlay\Capabilities\FileAssociations" Name=".y4m" Value="ImPlay.y4m" Type="string" />
         <RegistryValue Root="HKCR" Key="Applications\ImPlay.exe\SupportedTypes" Name=".y4m" Value="" Type="string" />
+        <RegistryValue Root="HKCR" Key=".y4m\OpenWithProgids" Name="ImPlay.y4m" Value="" Type="string" />
         <ProgId Id="ImPlay.y4m" Description="YUV4MPEG2 Video" Icon="CM_FP_ImPlay.exe">
             <Extension Id="y4m">
                 <Verb Id="open" TargetFile="CM_FP_ImPlay.exe" Argument="&quot;%1&quot;" />
@@ -184,6 +208,7 @@
         </ProgId>
         <RegistryValue Root="HKLM" Key="Software\Clients\Media\ImPlay\Capabilities\FileAssociations" Name=".ape" Value="ImPlay.ape" Type="string" />
         <RegistryValue Root="HKCR" Key="Applications\ImPlay.exe\SupportedTypes" Name=".ape" Value="" Type="string" />
+        <RegistryValue Root="HKCR" Key=".ape\OpenWithProgids" Name="ImPlay.ape" Value="" Type="string" />
         <ProgId Id="ImPlay.ape" Description="Monkey's Audio" Icon="CM_FP_ImPlay.exe">
             <Extension Id="ape">
                 <Verb Id="open" TargetFile="CM_FP_ImPlay.exe" Argument="&quot;%1&quot;" />
@@ -191,6 +216,7 @@
         </ProgId>
         <RegistryValue Root="HKLM" Key="Software\Clients\Media\ImPlay\Capabilities\FileAssociations" Name=".wv" Value="ImPlay.wv" Type="string" />
         <RegistryValue Root="HKCR" Key="Applications\ImPlay.exe\SupportedTypes" Name=".wv" Value="" Type="string" />
+        <RegistryValue Root="HKCR" Key=".wv\OpenWithProgids" Name="ImPlay.wv" Value="" Type="string" />
         <ProgId Id="ImPlay.wv" Description="WavPack Audio" Icon="CM_FP_ImPlay.exe">
             <Extension Id="wv">
                 <Verb Id="open" TargetFile="CM_FP_ImPlay.exe" Argument="&quot;%1&quot;" />
@@ -198,6 +224,7 @@
         </ProgId>
         <RegistryValue Root="HKLM" Key="Software\Clients\Media\ImPlay\Capabilities\FileAssociations" Name=".shn" Value="ImPlay.shn" Type="string" />
         <RegistryValue Root="HKCR" Key="Applications\ImPlay.exe\SupportedTypes" Name=".shn" Value="" Type="string" />
+        <RegistryValue Root="HKCR" Key=".shn\OpenWithProgids" Name="ImPlay.shn" Value="" Type="string" />
         <ProgId Id="ImPlay.shn" Description="Shorten Audio" Icon="CM_FP_ImPlay.exe">
             <Extension Id="shn">
                 <Verb Id="open" TargetFile="CM_FP_ImPlay.exe" Argument="&quot;%1&quot;" />
@@ -205,6 +232,7 @@
         </ProgId>
         <RegistryValue Root="HKLM" Key="Software\Clients\Media\ImPlay\Capabilities\FileAssociations" Name=".m2ts" Value="ImPlay.m2ts" Type="string" />
         <RegistryValue Root="HKCR" Key="Applications\ImPlay.exe\SupportedTypes" Name=".m2ts" Value="" Type="string" />
+        <RegistryValue Root="HKCR" Key=".m2ts\OpenWithProgids" Name="ImPlay.m2ts" Value="" Type="string" />
         <ProgId Id="ImPlay.m2ts" Description="MPEG-2 Transport Stream" Icon="CM_FP_ImPlay.exe">
             <Extension Id="m2ts">
                 <Verb Id="open" TargetFile="CM_FP_ImPlay.exe" Argument="&quot;%1&quot;" />
@@ -212,6 +240,7 @@
         </ProgId>
         <RegistryValue Root="HKLM" Key="Software\Clients\Media\ImPlay\Capabilities\FileAssociations" Name=".m2t" Value="ImPlay.m2t" Type="string" />
         <RegistryValue Root="HKCR" Key="Applications\ImPlay.exe\SupportedTypes" Name=".m2t" Value="" Type="string" />
+        <RegistryValue Root="HKCR" Key=".m2t\OpenWithProgids" Name="ImPlay.m2t" Value="" Type="string" />
         <ProgId Id="ImPlay.m2t" Description="MPEG-2 Transport Stream" Icon="CM_FP_ImPlay.exe">
             <Extension Id="m2t">
                 <Verb Id="open" TargetFile="CM_FP_ImPlay.exe" Argument="&quot;%1&quot;" />
@@ -219,6 +248,7 @@
         </ProgId>
         <RegistryValue Root="HKLM" Key="Software\Clients\Media\ImPlay\Capabilities\FileAssociations" Name=".mts" Value="ImPlay.mts" Type="string" />
         <RegistryValue Root="HKCR" Key="Applications\ImPlay.exe\SupportedTypes" Name=".mts" Value="" Type="string" />
+        <RegistryValue Root="HKCR" Key=".mts\OpenWithProgids" Name="ImPlay.mts" Value="" Type="string" />
         <ProgId Id="ImPlay.mts" Description="MPEG-2 Transport Stream" Icon="CM_FP_ImPlay.exe">
             <Extension Id="mts">
                 <Verb Id="open" TargetFile="CM_FP_ImPlay.exe" Argument="&quot;%1&quot;" />
@@ -226,6 +256,7 @@
         </ProgId>
         <RegistryValue Root="HKLM" Key="Software\Clients\Media\ImPlay\Capabilities\FileAssociations" Name=".mtv" Value="ImPlay.mtv" Type="string" />
         <RegistryValue Root="HKCR" Key="Applications\ImPlay.exe\SupportedTypes" Name=".mtv" Value="" Type="string" />
+        <RegistryValue Root="HKCR" Key=".mtv\OpenWithProgids" Name="ImPlay.mtv" Value="" Type="string" />
         <ProgId Id="ImPlay.mtv" Description="MPEG-2 Transport Stream" Icon="CM_FP_ImPlay.exe">
             <Extension Id="mtv">
                 <Verb Id="open" TargetFile="CM_FP_ImPlay.exe" Argument="&quot;%1&quot;" />
@@ -233,6 +264,7 @@
         </ProgId>
         <RegistryValue Root="HKLM" Key="Software\Clients\Media\ImPlay\Capabilities\FileAssociations" Name=".ts" Value="ImPlay.ts" Type="string" />
         <RegistryValue Root="HKCR" Key="Applications\ImPlay.exe\SupportedTypes" Name=".ts" Value="" Type="string" />
+        <RegistryValue Root="HKCR" Key=".ts\OpenWithProgids" Name="ImPlay.ts" Value="" Type="string" />
         <ProgId Id="ImPlay.ts" Description="MPEG-2 Transport Stream" Icon="CM_FP_ImPlay.exe">
             <Extension Id="ts">
                 <Verb Id="open" TargetFile="CM_FP_ImPlay.exe" Argument="&quot;%1&quot;" />
@@ -240,6 +272,7 @@
         </ProgId>
         <RegistryValue Root="HKLM" Key="Software\Clients\Media\ImPlay\Capabilities\FileAssociations" Name=".tsv" Value="ImPlay.tsv" Type="string" />
         <RegistryValue Root="HKCR" Key="Applications\ImPlay.exe\SupportedTypes" Name=".tsv" Value="" Type="string" />
+        <RegistryValue Root="HKCR" Key=".tsv\OpenWithProgids" Name="ImPlay.tsv" Value="" Type="string" />
         <ProgId Id="ImPlay.tsv" Description="MPEG-2 Transport Stream" Icon="CM_FP_ImPlay.exe">
             <Extension Id="tsv">
                 <Verb Id="open" TargetFile="CM_FP_ImPlay.exe" Argument="&quot;%1&quot;" />
@@ -247,6 +280,7 @@
         </ProgId>
         <RegistryValue Root="HKLM" Key="Software\Clients\Media\ImPlay\Capabilities\FileAssociations" Name=".tsa" Value="ImPlay.tsa" Type="string" />
         <RegistryValue Root="HKCR" Key="Applications\ImPlay.exe\SupportedTypes" Name=".tsa" Value="" Type="string" />
+        <RegistryValue Root="HKCR" Key=".tsa\OpenWithProgids" Name="ImPlay.tsa" Value="" Type="string" />
         <ProgId Id="ImPlay.tsa" Description="MPEG-2 Transport Stream" Icon="CM_FP_ImPlay.exe">
             <Extension Id="tsa">
                 <Verb Id="open" TargetFile="CM_FP_ImPlay.exe" Argument="&quot;%1&quot;" />
@@ -254,6 +288,7 @@
         </ProgId>
         <RegistryValue Root="HKLM" Key="Software\Clients\Media\ImPlay\Capabilities\FileAssociations" Name=".tts" Value="ImPlay.tts" Type="string" />
         <RegistryValue Root="HKCR" Key="Applications\ImPlay.exe\SupportedTypes" Name=".tts" Value="" Type="string" />
+        <RegistryValue Root="HKCR" Key=".tts\OpenWithProgids" Name="ImPlay.tts" Value="" Type="string" />
         <ProgId Id="ImPlay.tts" Description="MPEG-2 Transport Stream" Icon="CM_FP_ImPlay.exe">
             <Extension Id="tts">
                 <Verb Id="open" TargetFile="CM_FP_ImPlay.exe" Argument="&quot;%1&quot;" />
@@ -261,6 +296,7 @@
         </ProgId>
         <RegistryValue Root="HKLM" Key="Software\Clients\Media\ImPlay\Capabilities\FileAssociations" Name=".trp" Value="ImPlay.trp" Type="string" />
         <RegistryValue Root="HKCR" Key="Applications\ImPlay.exe\SupportedTypes" Name=".trp" Value="" Type="string" />
+        <RegistryValue Root="HKCR" Key=".trp\OpenWithProgids" Name="ImPlay.trp" Value="" Type="string" />
         <ProgId Id="ImPlay.trp" Description="MPEG-2 Transport Stream" Icon="CM_FP_ImPlay.exe">
             <Extension Id="trp">
                 <Verb Id="open" TargetFile="CM_FP_ImPlay.exe" Argument="&quot;%1&quot;" />
@@ -268,6 +304,7 @@
         </ProgId>
         <RegistryValue Root="HKLM" Key="Software\Clients\Media\ImPlay\Capabilities\FileAssociations" Name=".adts" Value="ImPlay.adts" Type="string" />
         <RegistryValue Root="HKCR" Key="Applications\ImPlay.exe\SupportedTypes" Name=".adts" Value="" Type="string" />
+        <RegistryValue Root="HKCR" Key=".adts\OpenWithProgids" Name="ImPlay.adts" Value="" Type="string" />
         <ProgId Id="ImPlay.adts" Description="ADTS Audio" Icon="CM_FP_ImPlay.exe">
             <Extension Id="adts">
                 <Verb Id="open" TargetFile="CM_FP_ImPlay.exe" Argument="&quot;%1&quot;" />
@@ -275,6 +312,7 @@
         </ProgId>
         <RegistryValue Root="HKLM" Key="Software\Clients\Media\ImPlay\Capabilities\FileAssociations" Name=".adt" Value="ImPlay.adt" Type="string" />
         <RegistryValue Root="HKCR" Key="Applications\ImPlay.exe\SupportedTypes" Name=".adt" Value="" Type="string" />
+        <RegistryValue Root="HKCR" Key=".adt\OpenWithProgids" Name="ImPlay.adt" Value="" Type="string" />
         <ProgId Id="ImPlay.adt" Description="ADTS Audio" Icon="CM_FP_ImPlay.exe">
             <Extension Id="adt">
                 <Verb Id="open" TargetFile="CM_FP_ImPlay.exe" Argument="&quot;%1&quot;" />
@@ -282,6 +320,7 @@
         </ProgId>
         <RegistryValue Root="HKLM" Key="Software\Clients\Media\ImPlay\Capabilities\FileAssociations" Name=".mpa" Value="ImPlay.mpa" Type="string" />
         <RegistryValue Root="HKCR" Key="Applications\ImPlay.exe\SupportedTypes" Name=".mpa" Value="" Type="string" />
+        <RegistryValue Root="HKCR" Key=".mpa\OpenWithProgids" Name="ImPlay.mpa" Value="" Type="string" />
         <ProgId Id="ImPlay.mpa" Description="MPEG Audio" Icon="CM_FP_ImPlay.exe">
             <Extension Id="mpa">
                 <Verb Id="open" TargetFile="CM_FP_ImPlay.exe" Argument="&quot;%1&quot;" />
@@ -289,6 +328,7 @@
         </ProgId>
         <RegistryValue Root="HKLM" Key="Software\Clients\Media\ImPlay\Capabilities\FileAssociations" Name=".m1a" Value="ImPlay.m1a" Type="string" />
         <RegistryValue Root="HKCR" Key="Applications\ImPlay.exe\SupportedTypes" Name=".m1a" Value="" Type="string" />
+        <RegistryValue Root="HKCR" Key=".m1a\OpenWithProgids" Name="ImPlay.m1a" Value="" Type="string" />
         <ProgId Id="ImPlay.m1a" Description="MPEG Audio" Icon="CM_FP_ImPlay.exe">
             <Extension Id="m1a">
                 <Verb Id="open" TargetFile="CM_FP_ImPlay.exe" Argument="&quot;%1&quot;" />
@@ -296,6 +336,7 @@
         </ProgId>
         <RegistryValue Root="HKLM" Key="Software\Clients\Media\ImPlay\Capabilities\FileAssociations" Name=".m2a" Value="ImPlay.m2a" Type="string" />
         <RegistryValue Root="HKCR" Key="Applications\ImPlay.exe\SupportedTypes" Name=".m2a" Value="" Type="string" />
+        <RegistryValue Root="HKCR" Key=".m2a\OpenWithProgids" Name="ImPlay.m2a" Value="" Type="string" />
         <ProgId Id="ImPlay.m2a" Description="MPEG Audio" Icon="CM_FP_ImPlay.exe">
             <Extension Id="m2a">
                 <Verb Id="open" TargetFile="CM_FP_ImPlay.exe" Argument="&quot;%1&quot;" />
@@ -303,6 +344,7 @@
         </ProgId>
         <RegistryValue Root="HKLM" Key="Software\Clients\Media\ImPlay\Capabilities\FileAssociations" Name=".mp1" Value="ImPlay.mp1" Type="string" />
         <RegistryValue Root="HKCR" Key="Applications\ImPlay.exe\SupportedTypes" Name=".mp1" Value="" Type="string" />
+        <RegistryValue Root="HKCR" Key=".mp1\OpenWithProgids" Name="ImPlay.mp1" Value="" Type="string" />
         <ProgId Id="ImPlay.mp1" Description="MPEG Audio" Icon="CM_FP_ImPlay.exe">
             <Extension Id="mp1">
                 <Verb Id="open" TargetFile="CM_FP_ImPlay.exe" Argument="&quot;%1&quot;" />
@@ -310,6 +352,7 @@
         </ProgId>
         <RegistryValue Root="HKLM" Key="Software\Clients\Media\ImPlay\Capabilities\FileAssociations" Name=".mp2" Value="ImPlay.mp2" Type="string" />
         <RegistryValue Root="HKCR" Key="Applications\ImPlay.exe\SupportedTypes" Name=".mp2" Value="" Type="string" />
+        <RegistryValue Root="HKCR" Key=".mp2\OpenWithProgids" Name="ImPlay.mp2" Value="" Type="string" />
         <ProgId Id="ImPlay.mp2" Description="MPEG Audio" Icon="CM_FP_ImPlay.exe">
             <Extension Id="mp2">
                 <Verb Id="open" TargetFile="CM_FP_ImPlay.exe" Argument="&quot;%1&quot;" />
@@ -317,6 +360,7 @@
         </ProgId>
         <RegistryValue Root="HKLM" Key="Software\Clients\Media\ImPlay\Capabilities\FileAssociations" Name=".mp3" Value="ImPlay.mp3" Type="string" />
         <RegistryValue Root="HKCR" Key="Applications\ImPlay.exe\SupportedTypes" Name=".mp3" Value="" Type="string" />
+        <RegistryValue Root="HKCR" Key=".mp3\OpenWithProgids" Name="ImPlay.mp3" Value="" Type="string" />
         <ProgId Id="ImPlay.mp3" Description="MP3 Audio" Icon="CM_FP_ImPlay.exe">
             <Extension Id="mp3">
                 <Verb Id="open" TargetFile="CM_FP_ImPlay.exe" Argument="&quot;%1&quot;" />
@@ -324,6 +368,7 @@
         </ProgId>
         <RegistryValue Root="HKLM" Key="Software\Clients\Media\ImPlay\Capabilities\FileAssociations" Name=".mpeg" Value="ImPlay.mpeg" Type="string" />
         <RegistryValue Root="HKCR" Key="Applications\ImPlay.exe\SupportedTypes" Name=".mpeg" Value="" Type="string" />
+        <RegistryValue Root="HKCR" Key=".mpeg\OpenWithProgids" Name="ImPlay.mpeg" Value="" Type="string" />
         <ProgId Id="ImPlay.mpeg" Description="MPEG Video" Icon="CM_FP_ImPlay.exe">
             <Extension Id="mpeg">
                 <Verb Id="open" TargetFile="CM_FP_ImPlay.exe" Argument="&quot;%1&quot;" />
@@ -331,6 +376,7 @@
         </ProgId>
         <RegistryValue Root="HKLM" Key="Software\Clients\Media\ImPlay\Capabilities\FileAssociations" Name=".mpg" Value="ImPlay.mpg" Type="string" />
         <RegistryValue Root="HKCR" Key="Applications\ImPlay.exe\SupportedTypes" Name=".mpg" Value="" Type="string" />
+        <RegistryValue Root="HKCR" Key=".mpg\OpenWithProgids" Name="ImPlay.mpg" Value="" Type="string" />
         <ProgId Id="ImPlay.mpg" Description="MPEG Video" Icon="CM_FP_ImPlay.exe">
             <Extension Id="mpg">
                 <Verb Id="open" TargetFile="CM_FP_ImPlay.exe" Argument="&quot;%1&quot;" />
@@ -338,6 +384,7 @@
         </ProgId>
         <RegistryValue Root="HKLM" Key="Software\Clients\Media\ImPlay\Capabilities\FileAssociations" Name=".mpe" Value="ImPlay.mpe" Type="string" />
         <RegistryValue Root="HKCR" Key="Applications\ImPlay.exe\SupportedTypes" Name=".mpe" Value="" Type="string" />
+        <RegistryValue Root="HKCR" Key=".mpe\OpenWithProgids" Name="ImPlay.mpe" Value="" Type="string" />
         <ProgId Id="ImPlay.mpe" Description="MPEG Video" Icon="CM_FP_ImPlay.exe">
             <Extension Id="mpe">
                 <Verb Id="open" TargetFile="CM_FP_ImPlay.exe" Argument="&quot;%1&quot;" />
@@ -345,6 +392,7 @@
         </ProgId>
         <RegistryValue Root="HKLM" Key="Software\Clients\Media\ImPlay\Capabilities\FileAssociations" Name=".mpeg2" Value="ImPlay.mpeg2" Type="string" />
         <RegistryValue Root="HKCR" Key="Applications\ImPlay.exe\SupportedTypes" Name=".mpeg2" Value="" Type="string" />
+        <RegistryValue Root="HKCR" Key=".mpeg2\OpenWithProgids" Name="ImPlay.mpeg2" Value="" Type="string" />
         <ProgId Id="ImPlay.mpeg2" Description="MPEG Video" Icon="CM_FP_ImPlay.exe">
             <Extension Id="mpeg2">
                 <Verb Id="open" TargetFile="CM_FP_ImPlay.exe" Argument="&quot;%1&quot;" />
@@ -352,6 +400,7 @@
         </ProgId>
         <RegistryValue Root="HKLM" Key="Software\Clients\Media\ImPlay\Capabilities\FileAssociations" Name=".m1v" Value="ImPlay.m1v" Type="string" />
         <RegistryValue Root="HKCR" Key="Applications\ImPlay.exe\SupportedTypes" Name=".m1v" Value="" Type="string" />
+        <RegistryValue Root="HKCR" Key=".m1v\OpenWithProgids" Name="ImPlay.m1v" Value="" Type="string" />
         <ProgId Id="ImPlay.m1v" Description="MPEG Video" Icon="CM_FP_ImPlay.exe">
             <Extension Id="m1v">
                 <Verb Id="open" TargetFile="CM_FP_ImPlay.exe" Argument="&quot;%1&quot;" />
@@ -359,6 +408,7 @@
         </ProgId>
         <RegistryValue Root="HKLM" Key="Software\Clients\Media\ImPlay\Capabilities\FileAssociations" Name=".m2v" Value="ImPlay.m2v" Type="string" />
         <RegistryValue Root="HKCR" Key="Applications\ImPlay.exe\SupportedTypes" Name=".m2v" Value="" Type="string" />
+        <RegistryValue Root="HKCR" Key=".m2v\OpenWithProgids" Name="ImPlay.m2v" Value="" Type="string" />
         <ProgId Id="ImPlay.m2v" Description="MPEG Video" Icon="CM_FP_ImPlay.exe">
             <Extension Id="m2v">
                 <Verb Id="open" TargetFile="CM_FP_ImPlay.exe" Argument="&quot;%1&quot;" />
@@ -366,6 +416,7 @@
         </ProgId>
         <RegistryValue Root="HKLM" Key="Software\Clients\Media\ImPlay\Capabilities\FileAssociations" Name=".mp2v" Value="ImPlay.mp2v" Type="string" />
         <RegistryValue Root="HKCR" Key="Applications\ImPlay.exe\SupportedTypes" Name=".mp2v" Value="" Type="string" />
+        <RegistryValue Root="HKCR" Key=".mp2v\OpenWithProgids" Name="ImPlay.mp2v" Value="" Type="string" />
         <ProgId Id="ImPlay.mp2v" Description="MPEG Video" Icon="CM_FP_ImPlay.exe">
             <Extension Id="mp2v">
                 <Verb Id="open" TargetFile="CM_FP_ImPlay.exe" Argument="&quot;%1&quot;" />
@@ -373,6 +424,7 @@
         </ProgId>
         <RegistryValue Root="HKLM" Key="Software\Clients\Media\ImPlay\Capabilities\FileAssociations" Name=".mpv" Value="ImPlay.mpv" Type="string" />
         <RegistryValue Root="HKCR" Key="Applications\ImPlay.exe\SupportedTypes" Name=".mpv" Value="" Type="string" />
+        <RegistryValue Root="HKCR" Key=".mpv\OpenWithProgids" Name="ImPlay.mpv" Value="" Type="string" />
         <ProgId Id="ImPlay.mpv" Description="MPEG Video" Icon="CM_FP_ImPlay.exe">
             <Extension Id="mpv">
                 <Verb Id="open" TargetFile="CM_FP_ImPlay.exe" Argument="&quot;%1&quot;" />
@@ -380,6 +432,7 @@
         </ProgId>
         <RegistryValue Root="HKLM" Key="Software\Clients\Media\ImPlay\Capabilities\FileAssociations" Name=".mpv2" Value="ImPlay.mpv2" Type="string" />
         <RegistryValue Root="HKCR" Key="Applications\ImPlay.exe\SupportedTypes" Name=".mpv2" Value="" Type="string" />
+        <RegistryValue Root="HKCR" Key=".mpv2\OpenWithProgids" Name="ImPlay.mpv2" Value="" Type="string" />
         <ProgId Id="ImPlay.mpv2" Description="MPEG Video" Icon="CM_FP_ImPlay.exe">
             <Extension Id="mpv2">
                 <Verb Id="open" TargetFile="CM_FP_ImPlay.exe" Argument="&quot;%1&quot;" />
@@ -387,6 +440,7 @@
         </ProgId>
         <RegistryValue Root="HKLM" Key="Software\Clients\Media\ImPlay\Capabilities\FileAssociations" Name=".mod" Value="ImPlay.mod" Type="string" />
         <RegistryValue Root="HKCR" Key="Applications\ImPlay.exe\SupportedTypes" Name=".mod" Value="" Type="string" />
+        <RegistryValue Root="HKCR" Key=".mod\OpenWithProgids" Name="ImPlay.mod" Value="" Type="string" />
         <ProgId Id="ImPlay.mod" Description="MPEG Video" Icon="CM_FP_ImPlay.exe">
             <Extension Id="mod">
                 <Verb Id="open" TargetFile="CM_FP_ImPlay.exe" Argument="&quot;%1&quot;" />
@@ -394,6 +448,7 @@
         </ProgId>
         <RegistryValue Root="HKLM" Key="Software\Clients\Media\ImPlay\Capabilities\FileAssociations" Name=".tod" Value="ImPlay.tod" Type="string" />
         <RegistryValue Root="HKCR" Key="Applications\ImPlay.exe\SupportedTypes" Name=".tod" Value="" Type="string" />
+        <RegistryValue Root="HKCR" Key=".tod\OpenWithProgids" Name="ImPlay.tod" Value="" Type="string" />
         <ProgId Id="ImPlay.tod" Description="MPEG Video" Icon="CM_FP_ImPlay.exe">
             <Extension Id="tod">
                 <Verb Id="open" TargetFile="CM_FP_ImPlay.exe" Argument="&quot;%1&quot;" />
@@ -401,6 +456,7 @@
         </ProgId>
         <RegistryValue Root="HKLM" Key="Software\Clients\Media\ImPlay\Capabilities\FileAssociations" Name=".vob" Value="ImPlay.vob" Type="string" />
         <RegistryValue Root="HKCR" Key="Applications\ImPlay.exe\SupportedTypes" Name=".vob" Value="" Type="string" />
+        <RegistryValue Root="HKCR" Key=".vob\OpenWithProgids" Name="ImPlay.vob" Value="" Type="string" />
         <ProgId Id="ImPlay.vob" Description="Video Object" Icon="CM_FP_ImPlay.exe">
             <Extension Id="vob">
                 <Verb Id="open" TargetFile="CM_FP_ImPlay.exe" Argument="&quot;%1&quot;" />
@@ -408,6 +464,7 @@
         </ProgId>
         <RegistryValue Root="HKLM" Key="Software\Clients\Media\ImPlay\Capabilities\FileAssociations" Name=".vro" Value="ImPlay.vro" Type="string" />
         <RegistryValue Root="HKCR" Key="Applications\ImPlay.exe\SupportedTypes" Name=".vro" Value="" Type="string" />
+        <RegistryValue Root="HKCR" Key=".vro\OpenWithProgids" Name="ImPlay.vro" Value="" Type="string" />
         <ProgId Id="ImPlay.vro" Description="Video Object" Icon="CM_FP_ImPlay.exe">
             <Extension Id="vro">
                 <Verb Id="open" TargetFile="CM_FP_ImPlay.exe" Argument="&quot;%1&quot;" />
@@ -415,6 +472,7 @@
         </ProgId>
         <RegistryValue Root="HKLM" Key="Software\Clients\Media\ImPlay\Capabilities\FileAssociations" Name=".evob" Value="ImPlay.evob" Type="string" />
         <RegistryValue Root="HKCR" Key="Applications\ImPlay.exe\SupportedTypes" Name=".evob" Value="" Type="string" />
+        <RegistryValue Root="HKCR" Key=".evob\OpenWithProgids" Name="ImPlay.evob" Value="" Type="string" />
         <ProgId Id="ImPlay.evob" Description="Enhanced VOB" Icon="CM_FP_ImPlay.exe">
             <Extension Id="evob">
                 <Verb Id="open" TargetFile="CM_FP_ImPlay.exe" Argument="&quot;%1&quot;" />
@@ -422,6 +480,7 @@
         </ProgId>
         <RegistryValue Root="HKLM" Key="Software\Clients\Media\ImPlay\Capabilities\FileAssociations" Name=".evo" Value="ImPlay.evo" Type="string" />
         <RegistryValue Root="HKCR" Key="Applications\ImPlay.exe\SupportedTypes" Name=".evo" Value="" Type="string" />
+        <RegistryValue Root="HKCR" Key=".evo\OpenWithProgids" Name="ImPlay.evo" Value="" Type="string" />
         <ProgId Id="ImPlay.evo" Description="Enhanced VOB" Icon="CM_FP_ImPlay.exe">
             <Extension Id="evo">
                 <Verb Id="open" TargetFile="CM_FP_ImPlay.exe" Argument="&quot;%1&quot;" />
@@ -429,6 +488,7 @@
         </ProgId>
         <RegistryValue Root="HKLM" Key="Software\Clients\Media\ImPlay\Capabilities\FileAssociations" Name=".mpeg4" Value="ImPlay.mpeg4" Type="string" />
         <RegistryValue Root="HKCR" Key="Applications\ImPlay.exe\SupportedTypes" Name=".mpeg4" Value="" Type="string" />
+        <RegistryValue Root="HKCR" Key=".mpeg4\OpenWithProgids" Name="ImPlay.mpeg4" Value="" Type="string" />
         <ProgId Id="ImPlay.mpeg4" Description="MPEG-4 Video" Icon="CM_FP_ImPlay.exe">
             <Extension Id="mpeg4">
                 <Verb Id="open" TargetFile="CM_FP_ImPlay.exe" Argument="&quot;%1&quot;" />
@@ -436,6 +496,7 @@
         </ProgId>
         <RegistryValue Root="HKLM" Key="Software\Clients\Media\ImPlay\Capabilities\FileAssociations" Name=".m4v" Value="ImPlay.m4v" Type="string" />
         <RegistryValue Root="HKCR" Key="Applications\ImPlay.exe\SupportedTypes" Name=".m4v" Value="" Type="string" />
+        <RegistryValue Root="HKCR" Key=".m4v\OpenWithProgids" Name="ImPlay.m4v" Value="" Type="string" />
         <ProgId Id="ImPlay.m4v" Description="MPEG-4 Video" Icon="CM_FP_ImPlay.exe">
             <Extension Id="m4v">
                 <Verb Id="open" TargetFile="CM_FP_ImPlay.exe" Argument="&quot;%1&quot;" />
@@ -443,6 +504,7 @@
         </ProgId>
         <RegistryValue Root="HKLM" Key="Software\Clients\Media\ImPlay\Capabilities\FileAssociations" Name=".mp4" Value="ImPlay.mp4" Type="string" />
         <RegistryValue Root="HKCR" Key="Applications\ImPlay.exe\SupportedTypes" Name=".mp4" Value="" Type="string" />
+        <RegistryValue Root="HKCR" Key=".mp4\OpenWithProgids" Name="ImPlay.mp4" Value="" Type="string" />
         <ProgId Id="ImPlay.mp4" Description="MPEG-4 Video" Icon="CM_FP_ImPlay.exe">
             <Extension Id="mp4">
                 <Verb Id="open" TargetFile="CM_FP_ImPlay.exe" Argument="&quot;%1&quot;" />
@@ -450,6 +512,7 @@
         </ProgId>
         <RegistryValue Root="HKLM" Key="Software\Clients\Media\ImPlay\Capabilities\FileAssociations" Name=".mp4v" Value="ImPlay.mp4v" Type="string" />
         <RegistryValue Root="HKCR" Key="Applications\ImPlay.exe\SupportedTypes" Name=".mp4v" Value="" Type="string" />
+        <RegistryValue Root="HKCR" Key=".mp4v\OpenWithProgids" Name="ImPlay.mp4v" Value="" Type="string" />
         <ProgId Id="ImPlay.mp4v" Description="MPEG-4 Video" Icon="CM_FP_ImPlay.exe">
             <Extension Id="mp4v">
                 <Verb Id="open" TargetFile="CM_FP_ImPlay.exe" Argument="&quot;%1&quot;" />
@@ -457,6 +520,7 @@
         </ProgId>
         <RegistryValue Root="HKLM" Key="Software\Clients\Media\ImPlay\Capabilities\FileAssociations" Name=".mpg4" Value="ImPlay.mpg4" Type="string" />
         <RegistryValue Root="HKCR" Key="Applications\ImPlay.exe\SupportedTypes" Name=".mpg4" Value="" Type="string" />
+        <RegistryValue Root="HKCR" Key=".mpg4\OpenWithProgids" Name="ImPlay.mpg4" Value="" Type="string" />
         <ProgId Id="ImPlay.mpg4" Description="MPEG-4 Video" Icon="CM_FP_ImPlay.exe">
             <Extension Id="mpg4">
                 <Verb Id="open" TargetFile="CM_FP_ImPlay.exe" Argument="&quot;%1&quot;" />
@@ -464,6 +528,7 @@
         </ProgId>
         <RegistryValue Root="HKLM" Key="Software\Clients\Media\ImPlay\Capabilities\FileAssociations" Name=".m4a" Value="ImPlay.m4a" Type="string" />
         <RegistryValue Root="HKCR" Key="Applications\ImPlay.exe\SupportedTypes" Name=".m4a" Value="" Type="string" />
+        <RegistryValue Root="HKCR" Key=".m4a\OpenWithProgids" Name="ImPlay.m4a" Value="" Type="string" />
         <ProgId Id="ImPlay.m4a" Description="MPEG-4 Audio" Icon="CM_FP_ImPlay.exe">
             <Extension Id="m4a">
                 <Verb Id="open" TargetFile="CM_FP_ImPlay.exe" Argument="&quot;%1&quot;" />
@@ -471,6 +536,7 @@
         </ProgId>
         <RegistryValue Root="HKLM" Key="Software\Clients\Media\ImPlay\Capabilities\FileAssociations" Name=".aac" Value="ImPlay.aac" Type="string" />
         <RegistryValue Root="HKCR" Key="Applications\ImPlay.exe\SupportedTypes" Name=".aac" Value="" Type="string" />
+        <RegistryValue Root="HKCR" Key=".aac\OpenWithProgids" Name="ImPlay.aac" Value="" Type="string" />
         <ProgId Id="ImPlay.aac" Description="Raw AAC Audio" Icon="CM_FP_ImPlay.exe">
             <Extension Id="aac">
                 <Verb Id="open" TargetFile="CM_FP_ImPlay.exe" Argument="&quot;%1&quot;" />
@@ -478,6 +544,7 @@
         </ProgId>
         <RegistryValue Root="HKLM" Key="Software\Clients\Media\ImPlay\Capabilities\FileAssociations" Name=".h264" Value="ImPlay.h264" Type="string" />
         <RegistryValue Root="HKCR" Key="Applications\ImPlay.exe\SupportedTypes" Name=".h264" Value="" Type="string" />
+        <RegistryValue Root="HKCR" Key=".h264\OpenWithProgids" Name="ImPlay.h264" Value="" Type="string" />
         <ProgId Id="ImPlay.h264" Description="Raw H264/AVC Video" Icon="CM_FP_ImPlay.exe">
             <Extension Id="h264">
                 <Verb Id="open" TargetFile="CM_FP_ImPlay.exe" Argument="&quot;%1&quot;" />
@@ -485,6 +552,7 @@
         </ProgId>
         <RegistryValue Root="HKLM" Key="Software\Clients\Media\ImPlay\Capabilities\FileAssociations" Name=".avc" Value="ImPlay.avc" Type="string" />
         <RegistryValue Root="HKCR" Key="Applications\ImPlay.exe\SupportedTypes" Name=".avc" Value="" Type="string" />
+        <RegistryValue Root="HKCR" Key=".avc\OpenWithProgids" Name="ImPlay.avc" Value="" Type="string" />
         <ProgId Id="ImPlay.avc" Description="Raw H264/AVC Video" Icon="CM_FP_ImPlay.exe">
             <Extension Id="avc">
                 <Verb Id="open" TargetFile="CM_FP_ImPlay.exe" Argument="&quot;%1&quot;" />
@@ -492,6 +560,7 @@
         </ProgId>
         <RegistryValue Root="HKLM" Key="Software\Clients\Media\ImPlay\Capabilities\FileAssociations" Name=".x264" Value="ImPlay.x264" Type="string" />
         <RegistryValue Root="HKCR" Key="Applications\ImPlay.exe\SupportedTypes" Name=".x264" Value="" Type="string" />
+        <RegistryValue Root="HKCR" Key=".x264\OpenWithProgids" Name="ImPlay.x264" Value="" Type="string" />
         <ProgId Id="ImPlay.x264" Description="Raw H264/AVC Video" Icon="CM_FP_ImPlay.exe">
             <Extension Id="x264">
                 <Verb Id="open" TargetFile="CM_FP_ImPlay.exe" Argument="&quot;%1&quot;" />
@@ -499,6 +568,7 @@
         </ProgId>
         <RegistryValue Root="HKLM" Key="Software\Clients\Media\ImPlay\Capabilities\FileAssociations" Name=".264" Value="ImPlay.264" Type="string" />
         <RegistryValue Root="HKCR" Key="Applications\ImPlay.exe\SupportedTypes" Name=".264" Value="" Type="string" />
+        <RegistryValue Root="HKCR" Key=".264\OpenWithProgids" Name="ImPlay.264" Value="" Type="string" />
         <ProgId Id="ImPlay.264" Description="Raw H264/AVC Video" Icon="CM_FP_ImPlay.exe">
             <Extension Id="264">
                 <Verb Id="open" TargetFile="CM_FP_ImPlay.exe" Argument="&quot;%1&quot;" />
@@ -506,6 +576,7 @@
         </ProgId>
         <RegistryValue Root="HKLM" Key="Software\Clients\Media\ImPlay\Capabilities\FileAssociations" Name=".hevc" Value="ImPlay.hevc" Type="string" />
         <RegistryValue Root="HKCR" Key="Applications\ImPlay.exe\SupportedTypes" Name=".hevc" Value="" Type="string" />
+        <RegistryValue Root="HKCR" Key=".hevc\OpenWithProgids" Name="ImPlay.hevc" Value="" Type="string" />
         <ProgId Id="ImPlay.hevc" Description="Raw H265/HEVC Video" Icon="CM_FP_ImPlay.exe">
             <Extension Id="hevc">
                 <Verb Id="open" TargetFile="CM_FP_ImPlay.exe" Argument="&quot;%1&quot;" />
@@ -513,6 +584,7 @@
         </ProgId>
         <RegistryValue Root="HKLM" Key="Software\Clients\Media\ImPlay\Capabilities\FileAssociations" Name=".h265" Value="ImPlay.h265" Type="string" />
         <RegistryValue Root="HKCR" Key="Applications\ImPlay.exe\SupportedTypes" Name=".h265" Value="" Type="string" />
+        <RegistryValue Root="HKCR" Key=".h265\OpenWithProgids" Name="ImPlay.h265" Value="" Type="string" />
         <ProgId Id="ImPlay.h265" Description="Raw H265/HEVC Video" Icon="CM_FP_ImPlay.exe">
             <Extension Id="h265">
                 <Verb Id="open" TargetFile="CM_FP_ImPlay.exe" Argument="&quot;%1&quot;" />
@@ -520,6 +592,7 @@
         </ProgId>
         <RegistryValue Root="HKLM" Key="Software\Clients\Media\ImPlay\Capabilities\FileAssociations" Name=".x265" Value="ImPlay.x265" Type="string" />
         <RegistryValue Root="HKCR" Key="Applications\ImPlay.exe\SupportedTypes" Name=".x265" Value="" Type="string" />
+        <RegistryValue Root="HKCR" Key=".x265\OpenWithProgids" Name="ImPlay.x265" Value="" Type="string" />
         <ProgId Id="ImPlay.x265" Description="Raw H265/HEVC Video" Icon="CM_FP_ImPlay.exe">
             <Extension Id="x265">
                 <Verb Id="open" TargetFile="CM_FP_ImPlay.exe" Argument="&quot;%1&quot;" />
@@ -527,6 +600,7 @@
         </ProgId>
         <RegistryValue Root="HKLM" Key="Software\Clients\Media\ImPlay\Capabilities\FileAssociations" Name=".265" Value="ImPlay.265" Type="string" />
         <RegistryValue Root="HKCR" Key="Applications\ImPlay.exe\SupportedTypes" Name=".265" Value="" Type="string" />
+        <RegistryValue Root="HKCR" Key=".265\OpenWithProgids" Name="ImPlay.265" Value="" Type="string" />
         <ProgId Id="ImPlay.265" Description="Raw H265/HEVC Video" Icon="CM_FP_ImPlay.exe">
             <Extension Id="265">
                 <Verb Id="open" TargetFile="CM_FP_ImPlay.exe" Argument="&quot;%1&quot;" />
@@ -534,6 +608,7 @@
         </ProgId>
         <RegistryValue Root="HKLM" Key="Software\Clients\Media\ImPlay\Capabilities\FileAssociations" Name=".flac" Value="ImPlay.flac" Type="string" />
         <RegistryValue Root="HKCR" Key="Applications\ImPlay.exe\SupportedTypes" Name=".flac" Value="" Type="string" />
+        <RegistryValue Root="HKCR" Key=".flac\OpenWithProgids" Name="ImPlay.flac" Value="" Type="string" />
         <ProgId Id="ImPlay.flac" Description="FLAC Audio" Icon="CM_FP_ImPlay.exe">
             <Extension Id="flac">
                 <Verb Id="open" TargetFile="CM_FP_ImPlay.exe" Argument="&quot;%1&quot;" />
@@ -541,6 +616,7 @@
         </ProgId>
         <RegistryValue Root="HKLM" Key="Software\Clients\Media\ImPlay\Capabilities\FileAssociations" Name=".oga" Value="ImPlay.oga" Type="string" />
         <RegistryValue Root="HKCR" Key="Applications\ImPlay.exe\SupportedTypes" Name=".oga" Value="" Type="string" />
+        <RegistryValue Root="HKCR" Key=".oga\OpenWithProgids" Name="ImPlay.oga" Value="" Type="string" />
         <ProgId Id="ImPlay.oga" Description="Ogg Audio" Icon="CM_FP_ImPlay.exe">
             <Extension Id="oga">
                 <Verb Id="open" TargetFile="CM_FP_ImPlay.exe" Argument="&quot;%1&quot;" />
@@ -548,6 +624,7 @@
         </ProgId>
         <RegistryValue Root="HKLM" Key="Software\Clients\Media\ImPlay\Capabilities\FileAssociations" Name=".ogg" Value="ImPlay.ogg" Type="string" />
         <RegistryValue Root="HKCR" Key="Applications\ImPlay.exe\SupportedTypes" Name=".ogg" Value="" Type="string" />
+        <RegistryValue Root="HKCR" Key=".ogg\OpenWithProgids" Name="ImPlay.ogg" Value="" Type="string" />
         <ProgId Id="ImPlay.ogg" Description="Ogg Audio" Icon="CM_FP_ImPlay.exe">
             <Extension Id="ogg">
                 <Verb Id="open" TargetFile="CM_FP_ImPlay.exe" Argument="&quot;%1&quot;" />
@@ -555,6 +632,7 @@
         </ProgId>
         <RegistryValue Root="HKLM" Key="Software\Clients\Media\ImPlay\Capabilities\FileAssociations" Name=".opus" Value="ImPlay.opus" Type="string" />
         <RegistryValue Root="HKCR" Key="Applications\ImPlay.exe\SupportedTypes" Name=".opus" Value="" Type="string" />
+        <RegistryValue Root="HKCR" Key=".opus\OpenWithProgids" Name="ImPlay.opus" Value="" Type="string" />
         <ProgId Id="ImPlay.opus" Description="Opus Audio" Icon="CM_FP_ImPlay.exe">
             <Extension Id="opus">
                 <Verb Id="open" TargetFile="CM_FP_ImPlay.exe" Argument="&quot;%1&quot;" />
@@ -562,6 +640,7 @@
         </ProgId>
         <RegistryValue Root="HKLM" Key="Software\Clients\Media\ImPlay\Capabilities\FileAssociations" Name=".spx" Value="ImPlay.spx" Type="string" />
         <RegistryValue Root="HKCR" Key="Applications\ImPlay.exe\SupportedTypes" Name=".spx" Value="" Type="string" />
+        <RegistryValue Root="HKCR" Key=".spx\OpenWithProgids" Name="ImPlay.spx" Value="" Type="string" />
         <ProgId Id="ImPlay.spx" Description="Speex Audio" Icon="CM_FP_ImPlay.exe">
             <Extension Id="spx">
                 <Verb Id="open" TargetFile="CM_FP_ImPlay.exe" Argument="&quot;%1&quot;" />
@@ -569,6 +648,7 @@
         </ProgId>
         <RegistryValue Root="HKLM" Key="Software\Clients\Media\ImPlay\Capabilities\FileAssociations" Name=".ogv" Value="ImPlay.ogv" Type="string" />
         <RegistryValue Root="HKCR" Key="Applications\ImPlay.exe\SupportedTypes" Name=".ogv" Value="" Type="string" />
+        <RegistryValue Root="HKCR" Key=".ogv\OpenWithProgids" Name="ImPlay.ogv" Value="" Type="string" />
         <ProgId Id="ImPlay.ogv" Description="Ogg Video" Icon="CM_FP_ImPlay.exe">
             <Extension Id="ogv">
                 <Verb Id="open" TargetFile="CM_FP_ImPlay.exe" Argument="&quot;%1&quot;" />
@@ -576,6 +656,7 @@
         </ProgId>
         <RegistryValue Root="HKLM" Key="Software\Clients\Media\ImPlay\Capabilities\FileAssociations" Name=".ogm" Value="ImPlay.ogm" Type="string" />
         <RegistryValue Root="HKCR" Key="Applications\ImPlay.exe\SupportedTypes" Name=".ogm" Value="" Type="string" />
+        <RegistryValue Root="HKCR" Key=".ogm\OpenWithProgids" Name="ImPlay.ogm" Value="" Type="string" />
         <ProgId Id="ImPlay.ogm" Description="Ogg Video" Icon="CM_FP_ImPlay.exe">
             <Extension Id="ogm">
                 <Verb Id="open" TargetFile="CM_FP_ImPlay.exe" Argument="&quot;%1&quot;" />
@@ -583,6 +664,7 @@
         </ProgId>
         <RegistryValue Root="HKLM" Key="Software\Clients\Media\ImPlay\Capabilities\FileAssociations" Name=".ogx" Value="ImPlay.ogx" Type="string" />
         <RegistryValue Root="HKCR" Key="Applications\ImPlay.exe\SupportedTypes" Name=".ogx" Value="" Type="string" />
+        <RegistryValue Root="HKCR" Key=".ogx\OpenWithProgids" Name="ImPlay.ogx" Value="" Type="string" />
         <ProgId Id="ImPlay.ogx" Description="Ogg Video" Icon="CM_FP_ImPlay.exe">
             <Extension Id="ogx">
                 <Verb Id="open" TargetFile="CM_FP_ImPlay.exe" Argument="&quot;%1&quot;" />
@@ -590,6 +672,7 @@
         </ProgId>
         <RegistryValue Root="HKLM" Key="Software\Clients\Media\ImPlay\Capabilities\FileAssociations" Name=".mkv" Value="ImPlay.mkv" Type="string" />
         <RegistryValue Root="HKCR" Key="Applications\ImPlay.exe\SupportedTypes" Name=".mkv" Value="" Type="string" />
+        <RegistryValue Root="HKCR" Key=".mkv\OpenWithProgids" Name="ImPlay.mkv" Value="" Type="string" />
         <ProgId Id="ImPlay.mkv" Description="Matroska Video" Icon="CM_FP_ImPlay.exe">
             <Extension Id="mkv">
                 <Verb Id="open" TargetFile="CM_FP_ImPlay.exe" Argument="&quot;%1&quot;" />
@@ -597,6 +680,7 @@
         </ProgId>
         <RegistryValue Root="HKLM" Key="Software\Clients\Media\ImPlay\Capabilities\FileAssociations" Name=".mk3d" Value="ImPlay.mk3d" Type="string" />
         <RegistryValue Root="HKCR" Key="Applications\ImPlay.exe\SupportedTypes" Name=".mk3d" Value="" Type="string" />
+        <RegistryValue Root="HKCR" Key=".mk3d\OpenWithProgids" Name="ImPlay.mk3d" Value="" Type="string" />
         <ProgId Id="ImPlay.mk3d" Description="Matroska 3D Video" Icon="CM_FP_ImPlay.exe">
             <Extension Id="mk3d">
                 <Verb Id="open" TargetFile="CM_FP_ImPlay.exe" Argument="&quot;%1&quot;" />
@@ -604,6 +688,7 @@
         </ProgId>
         <RegistryValue Root="HKLM" Key="Software\Clients\Media\ImPlay\Capabilities\FileAssociations" Name=".mka" Value="ImPlay.mka" Type="string" />
         <RegistryValue Root="HKCR" Key="Applications\ImPlay.exe\SupportedTypes" Name=".mka" Value="" Type="string" />
+        <RegistryValue Root="HKCR" Key=".mka\OpenWithProgids" Name="ImPlay.mka" Value="" Type="string" />
         <ProgId Id="ImPlay.mka" Description="Matroska Audio" Icon="CM_FP_ImPlay.exe">
             <Extension Id="mka">
                 <Verb Id="open" TargetFile="CM_FP_ImPlay.exe" Argument="&quot;%1&quot;" />
@@ -611,6 +696,7 @@
         </ProgId>
         <RegistryValue Root="HKLM" Key="Software\Clients\Media\ImPlay\Capabilities\FileAssociations" Name=".webm" Value="ImPlay.webm" Type="string" />
         <RegistryValue Root="HKCR" Key="Applications\ImPlay.exe\SupportedTypes" Name=".webm" Value="" Type="string" />
+        <RegistryValue Root="HKCR" Key=".webm\OpenWithProgids" Name="ImPlay.webm" Value="" Type="string" />
         <ProgId Id="ImPlay.webm" Description="WebM Video" Icon="CM_FP_ImPlay.exe">
             <Extension Id="webm">
                 <Verb Id="open" TargetFile="CM_FP_ImPlay.exe" Argument="&quot;%1&quot;" />
@@ -618,6 +704,7 @@
         </ProgId>
         <RegistryValue Root="HKLM" Key="Software\Clients\Media\ImPlay\Capabilities\FileAssociations" Name=".weba" Value="ImPlay.weba" Type="string" />
         <RegistryValue Root="HKCR" Key="Applications\ImPlay.exe\SupportedTypes" Name=".weba" Value="" Type="string" />
+        <RegistryValue Root="HKCR" Key=".weba\OpenWithProgids" Name="ImPlay.weba" Value="" Type="string" />
         <ProgId Id="ImPlay.weba" Description="WebM Audio" Icon="CM_FP_ImPlay.exe">
             <Extension Id="weba">
                 <Verb Id="open" TargetFile="CM_FP_ImPlay.exe" Argument="&quot;%1&quot;" />
@@ -625,6 +712,7 @@
         </ProgId>
         <RegistryValue Root="HKLM" Key="Software\Clients\Media\ImPlay\Capabilities\FileAssociations" Name=".avi" Value="ImPlay.avi" Type="string" />
         <RegistryValue Root="HKCR" Key="Applications\ImPlay.exe\SupportedTypes" Name=".avi" Value="" Type="string" />
+        <RegistryValue Root="HKCR" Key=".avi\OpenWithProgids" Name="ImPlay.avi" Value="" Type="string" />
         <ProgId Id="ImPlay.avi" Description="Video Clip" Icon="CM_FP_ImPlay.exe">
             <Extension Id="avi">
                 <Verb Id="open" TargetFile="CM_FP_ImPlay.exe" Argument="&quot;%1&quot;" />
@@ -632,6 +720,7 @@
         </ProgId>
         <RegistryValue Root="HKLM" Key="Software\Clients\Media\ImPlay\Capabilities\FileAssociations" Name=".vfw" Value="ImPlay.vfw" Type="string" />
         <RegistryValue Root="HKCR" Key="Applications\ImPlay.exe\SupportedTypes" Name=".vfw" Value="" Type="string" />
+        <RegistryValue Root="HKCR" Key=".vfw\OpenWithProgids" Name="ImPlay.vfw" Value="" Type="string" />
         <ProgId Id="ImPlay.vfw" Description="Video Clip" Icon="CM_FP_ImPlay.exe">
             <Extension Id="vfw">
                 <Verb Id="open" TargetFile="CM_FP_ImPlay.exe" Argument="&quot;%1&quot;" />
@@ -639,6 +728,7 @@
         </ProgId>
         <RegistryValue Root="HKLM" Key="Software\Clients\Media\ImPlay\Capabilities\FileAssociations" Name=".divx" Value="ImPlay.divx" Type="string" />
         <RegistryValue Root="HKCR" Key="Applications\ImPlay.exe\SupportedTypes" Name=".divx" Value="" Type="string" />
+        <RegistryValue Root="HKCR" Key=".divx\OpenWithProgids" Name="ImPlay.divx" Value="" Type="string" />
         <ProgId Id="ImPlay.divx" Description="DivX Video" Icon="CM_FP_ImPlay.exe">
             <Extension Id="divx">
                 <Verb Id="open" TargetFile="CM_FP_ImPlay.exe" Argument="&quot;%1&quot;" />
@@ -646,6 +736,7 @@
         </ProgId>
         <RegistryValue Root="HKLM" Key="Software\Clients\Media\ImPlay\Capabilities\FileAssociations" Name=".3iv" Value="ImPlay.3iv" Type="string" />
         <RegistryValue Root="HKCR" Key="Applications\ImPlay.exe\SupportedTypes" Name=".3iv" Value="" Type="string" />
+        <RegistryValue Root="HKCR" Key=".3iv\OpenWithProgids" Name="ImPlay.3iv" Value="" Type="string" />
         <ProgId Id="ImPlay.3iv" Description="3ivx Video" Icon="CM_FP_ImPlay.exe">
             <Extension Id="3iv">
                 <Verb Id="open" TargetFile="CM_FP_ImPlay.exe" Argument="&quot;%1&quot;" />
@@ -653,6 +744,7 @@
         </ProgId>
         <RegistryValue Root="HKLM" Key="Software\Clients\Media\ImPlay\Capabilities\FileAssociations" Name=".xvid" Value="ImPlay.xvid" Type="string" />
         <RegistryValue Root="HKCR" Key="Applications\ImPlay.exe\SupportedTypes" Name=".xvid" Value="" Type="string" />
+        <RegistryValue Root="HKCR" Key=".xvid\OpenWithProgids" Name="ImPlay.xvid" Value="" Type="string" />
         <ProgId Id="ImPlay.xvid" Description="XVID Video" Icon="CM_FP_ImPlay.exe">
             <Extension Id="xvid">
                 <Verb Id="open" TargetFile="CM_FP_ImPlay.exe" Argument="&quot;%1&quot;" />
@@ -660,6 +752,7 @@
         </ProgId>
         <RegistryValue Root="HKLM" Key="Software\Clients\Media\ImPlay\Capabilities\FileAssociations" Name=".nut" Value="ImPlay.nut" Type="string" />
         <RegistryValue Root="HKCR" Key="Applications\ImPlay.exe\SupportedTypes" Name=".nut" Value="" Type="string" />
+        <RegistryValue Root="HKCR" Key=".nut\OpenWithProgids" Name="ImPlay.nut" Value="" Type="string" />
         <ProgId Id="ImPlay.nut" Description="NUT Video" Icon="CM_FP_ImPlay.exe">
             <Extension Id="nut">
                 <Verb Id="open" TargetFile="CM_FP_ImPlay.exe" Argument="&quot;%1&quot;" />
@@ -667,6 +760,7 @@
         </ProgId>
         <RegistryValue Root="HKLM" Key="Software\Clients\Media\ImPlay\Capabilities\FileAssociations" Name=".flic" Value="ImPlay.flic" Type="string" />
         <RegistryValue Root="HKCR" Key="Applications\ImPlay.exe\SupportedTypes" Name=".flic" Value="" Type="string" />
+        <RegistryValue Root="HKCR" Key=".flic\OpenWithProgids" Name="ImPlay.flic" Value="" Type="string" />
         <ProgId Id="ImPlay.flic" Description="FLIC Video" Icon="CM_FP_ImPlay.exe">
             <Extension Id="flic">
                 <Verb Id="open" TargetFile="CM_FP_ImPlay.exe" Argument="&quot;%1&quot;" />
@@ -674,6 +768,7 @@
         </ProgId>
         <RegistryValue Root="HKLM" Key="Software\Clients\Media\ImPlay\Capabilities\FileAssociations" Name=".fli" Value="ImPlay.fli" Type="string" />
         <RegistryValue Root="HKCR" Key="Applications\ImPlay.exe\SupportedTypes" Name=".fli" Value="" Type="string" />
+        <RegistryValue Root="HKCR" Key=".fli\OpenWithProgids" Name="ImPlay.fli" Value="" Type="string" />
         <ProgId Id="ImPlay.fli" Description="FLIC Video" Icon="CM_FP_ImPlay.exe">
             <Extension Id="fli">
                 <Verb Id="open" TargetFile="CM_FP_ImPlay.exe" Argument="&quot;%1&quot;" />
@@ -681,6 +776,7 @@
         </ProgId>
         <RegistryValue Root="HKLM" Key="Software\Clients\Media\ImPlay\Capabilities\FileAssociations" Name=".flc" Value="ImPlay.flc" Type="string" />
         <RegistryValue Root="HKCR" Key="Applications\ImPlay.exe\SupportedTypes" Name=".flc" Value="" Type="string" />
+        <RegistryValue Root="HKCR" Key=".flc\OpenWithProgids" Name="ImPlay.flc" Value="" Type="string" />
         <ProgId Id="ImPlay.flc" Description="FLIC Video" Icon="CM_FP_ImPlay.exe">
             <Extension Id="flc">
                 <Verb Id="open" TargetFile="CM_FP_ImPlay.exe" Argument="&quot;%1&quot;" />
@@ -688,6 +784,7 @@
         </ProgId>
         <RegistryValue Root="HKLM" Key="Software\Clients\Media\ImPlay\Capabilities\FileAssociations" Name=".nsv" Value="ImPlay.nsv" Type="string" />
         <RegistryValue Root="HKCR" Key="Applications\ImPlay.exe\SupportedTypes" Name=".nsv" Value="" Type="string" />
+        <RegistryValue Root="HKCR" Key=".nsv\OpenWithProgids" Name="ImPlay.nsv" Value="" Type="string" />
         <ProgId Id="ImPlay.nsv" Description="Nullsoft Streaming Video" Icon="CM_FP_ImPlay.exe">
             <Extension Id="nsv">
                 <Verb Id="open" TargetFile="CM_FP_ImPlay.exe" Argument="&quot;%1&quot;" />
@@ -695,6 +792,7 @@
         </ProgId>
         <RegistryValue Root="HKLM" Key="Software\Clients\Media\ImPlay\Capabilities\FileAssociations" Name=".gxf" Value="ImPlay.gxf" Type="string" />
         <RegistryValue Root="HKCR" Key="Applications\ImPlay.exe\SupportedTypes" Name=".gxf" Value="" Type="string" />
+        <RegistryValue Root="HKCR" Key=".gxf\OpenWithProgids" Name="ImPlay.gxf" Value="" Type="string" />
         <ProgId Id="ImPlay.gxf" Description="General Exchange Format" Icon="CM_FP_ImPlay.exe">
             <Extension Id="gxf">
                 <Verb Id="open" TargetFile="CM_FP_ImPlay.exe" Argument="&quot;%1&quot;" />
@@ -702,6 +800,7 @@
         </ProgId>
         <RegistryValue Root="HKLM" Key="Software\Clients\Media\ImPlay\Capabilities\FileAssociations" Name=".mxf" Value="ImPlay.mxf" Type="string" />
         <RegistryValue Root="HKCR" Key="Applications\ImPlay.exe\SupportedTypes" Name=".mxf" Value="" Type="string" />
+        <RegistryValue Root="HKCR" Key=".mxf\OpenWithProgids" Name="ImPlay.mxf" Value="" Type="string" />
         <ProgId Id="ImPlay.mxf" Description="Material Exchange Format" Icon="CM_FP_ImPlay.exe">
             <Extension Id="mxf">
                 <Verb Id="open" TargetFile="CM_FP_ImPlay.exe" Argument="&quot;%1&quot;" />
@@ -709,6 +808,7 @@
         </ProgId>
         <RegistryValue Root="HKLM" Key="Software\Clients\Media\ImPlay\Capabilities\FileAssociations" Name=".wma" Value="ImPlay.wma" Type="string" />
         <RegistryValue Root="HKCR" Key="Applications\ImPlay.exe\SupportedTypes" Name=".wma" Value="" Type="string" />
+        <RegistryValue Root="HKCR" Key=".wma\OpenWithProgids" Name="ImPlay.wma" Value="" Type="string" />
         <ProgId Id="ImPlay.wma" Description="Windows Media Audio" Icon="CM_FP_ImPlay.exe">
             <Extension Id="wma">
                 <Verb Id="open" TargetFile="CM_FP_ImPlay.exe" Argument="&quot;%1&quot;" />
@@ -716,6 +816,7 @@
         </ProgId>
         <RegistryValue Root="HKLM" Key="Software\Clients\Media\ImPlay\Capabilities\FileAssociations" Name=".wm" Value="ImPlay.wm" Type="string" />
         <RegistryValue Root="HKCR" Key="Applications\ImPlay.exe\SupportedTypes" Name=".wm" Value="" Type="string" />
+        <RegistryValue Root="HKCR" Key=".wm\OpenWithProgids" Name="ImPlay.wm" Value="" Type="string" />
         <ProgId Id="ImPlay.wm" Description="Windows Media Video" Icon="CM_FP_ImPlay.exe">
             <Extension Id="wm">
                 <Verb Id="open" TargetFile="CM_FP_ImPlay.exe" Argument="&quot;%1&quot;" />
@@ -723,6 +824,7 @@
         </ProgId>
         <RegistryValue Root="HKLM" Key="Software\Clients\Media\ImPlay\Capabilities\FileAssociations" Name=".wmv" Value="ImPlay.wmv" Type="string" />
         <RegistryValue Root="HKCR" Key="Applications\ImPlay.exe\SupportedTypes" Name=".wmv" Value="" Type="string" />
+        <RegistryValue Root="HKCR" Key=".wmv\OpenWithProgids" Name="ImPlay.wmv" Value="" Type="string" />
         <ProgId Id="ImPlay.wmv" Description="Windows Media Video" Icon="CM_FP_ImPlay.exe">
             <Extension Id="wmv">
                 <Verb Id="open" TargetFile="CM_FP_ImPlay.exe" Argument="&quot;%1&quot;" />
@@ -730,6 +832,7 @@
         </ProgId>
         <RegistryValue Root="HKLM" Key="Software\Clients\Media\ImPlay\Capabilities\FileAssociations" Name=".asf" Value="ImPlay.asf" Type="string" />
         <RegistryValue Root="HKCR" Key="Applications\ImPlay.exe\SupportedTypes" Name=".asf" Value="" Type="string" />
+        <RegistryValue Root="HKCR" Key=".asf\OpenWithProgids" Name="ImPlay.asf" Value="" Type="string" />
         <ProgId Id="ImPlay.asf" Description="Windows Media Video" Icon="CM_FP_ImPlay.exe">
             <Extension Id="asf">
                 <Verb Id="open" TargetFile="CM_FP_ImPlay.exe" Argument="&quot;%1&quot;" />
@@ -737,6 +840,7 @@
         </ProgId>
         <RegistryValue Root="HKLM" Key="Software\Clients\Media\ImPlay\Capabilities\FileAssociations" Name=".dvr-ms" Value="ImPlay.dvr-ms" Type="string" />
         <RegistryValue Root="HKCR" Key="Applications\ImPlay.exe\SupportedTypes" Name=".dvr-ms" Value="" Type="string" />
+        <RegistryValue Root="HKCR" Key=".dvr-ms\OpenWithProgids" Name="ImPlay.dvr-ms" Value="" Type="string" />
         <ProgId Id="ImPlay.dvr-ms" Description="Microsoft Recorded TV Show" Icon="CM_FP_ImPlay.exe">
             <Extension Id="dvr-ms">
                 <Verb Id="open" TargetFile="CM_FP_ImPlay.exe" Argument="&quot;%1&quot;" />
@@ -744,6 +848,7 @@
         </ProgId>
         <RegistryValue Root="HKLM" Key="Software\Clients\Media\ImPlay\Capabilities\FileAssociations" Name=".dvr" Value="ImPlay.dvr" Type="string" />
         <RegistryValue Root="HKCR" Key="Applications\ImPlay.exe\SupportedTypes" Name=".dvr" Value="" Type="string" />
+        <RegistryValue Root="HKCR" Key=".dvr\OpenWithProgids" Name="ImPlay.dvr" Value="" Type="string" />
         <ProgId Id="ImPlay.dvr" Description="Microsoft Recorded TV Show" Icon="CM_FP_ImPlay.exe">
             <Extension Id="dvr">
                 <Verb Id="open" TargetFile="CM_FP_ImPlay.exe" Argument="&quot;%1&quot;" />
@@ -751,6 +856,7 @@
         </ProgId>
         <RegistryValue Root="HKLM" Key="Software\Clients\Media\ImPlay\Capabilities\FileAssociations" Name=".wtv" Value="ImPlay.wtv" Type="string" />
         <RegistryValue Root="HKCR" Key="Applications\ImPlay.exe\SupportedTypes" Name=".wtv" Value="" Type="string" />
+        <RegistryValue Root="HKCR" Key=".wtv\OpenWithProgids" Name="ImPlay.wtv" Value="" Type="string" />
         <ProgId Id="ImPlay.wtv" Description="Windows Recorded TV Show" Icon="CM_FP_ImPlay.exe">
             <Extension Id="wtv">
                 <Verb Id="open" TargetFile="CM_FP_ImPlay.exe" Argument="&quot;%1&quot;" />
@@ -758,6 +864,7 @@
         </ProgId>
         <RegistryValue Root="HKLM" Key="Software\Clients\Media\ImPlay\Capabilities\FileAssociations" Name=".dv" Value="ImPlay.dv" Type="string" />
         <RegistryValue Root="HKCR" Key="Applications\ImPlay.exe\SupportedTypes" Name=".dv" Value="" Type="string" />
+        <RegistryValue Root="HKCR" Key=".dv\OpenWithProgids" Name="ImPlay.dv" Value="" Type="string" />
         <ProgId Id="ImPlay.dv" Description="DV Video" Icon="CM_FP_ImPlay.exe">
             <Extension Id="dv">
                 <Verb Id="open" TargetFile="CM_FP_ImPlay.exe" Argument="&quot;%1&quot;" />
@@ -765,6 +872,7 @@
         </ProgId>
         <RegistryValue Root="HKLM" Key="Software\Clients\Media\ImPlay\Capabilities\FileAssociations" Name=".hdv" Value="ImPlay.hdv" Type="string" />
         <RegistryValue Root="HKCR" Key="Applications\ImPlay.exe\SupportedTypes" Name=".hdv" Value="" Type="string" />
+        <RegistryValue Root="HKCR" Key=".hdv\OpenWithProgids" Name="ImPlay.hdv" Value="" Type="string" />
         <ProgId Id="ImPlay.hdv" Description="DV Video" Icon="CM_FP_ImPlay.exe">
             <Extension Id="hdv">
                 <Verb Id="open" TargetFile="CM_FP_ImPlay.exe" Argument="&quot;%1&quot;" />
@@ -772,6 +880,7 @@
         </ProgId>
         <RegistryValue Root="HKLM" Key="Software\Clients\Media\ImPlay\Capabilities\FileAssociations" Name=".flv" Value="ImPlay.flv" Type="string" />
         <RegistryValue Root="HKCR" Key="Applications\ImPlay.exe\SupportedTypes" Name=".flv" Value="" Type="string" />
+        <RegistryValue Root="HKCR" Key=".flv\OpenWithProgids" Name="ImPlay.flv" Value="" Type="string" />
         <ProgId Id="ImPlay.flv" Description="Flash Video" Icon="CM_FP_ImPlay.exe">
             <Extension Id="flv">
                 <Verb Id="open" TargetFile="CM_FP_ImPlay.exe" Argument="&quot;%1&quot;" />
@@ -779,6 +888,7 @@
         </ProgId>
         <RegistryValue Root="HKLM" Key="Software\Clients\Media\ImPlay\Capabilities\FileAssociations" Name=".f4v" Value="ImPlay.f4v" Type="string" />
         <RegistryValue Root="HKCR" Key="Applications\ImPlay.exe\SupportedTypes" Name=".f4v" Value="" Type="string" />
+        <RegistryValue Root="HKCR" Key=".f4v\OpenWithProgids" Name="ImPlay.f4v" Value="" Type="string" />
         <ProgId Id="ImPlay.f4v" Description="Flash Video" Icon="CM_FP_ImPlay.exe">
             <Extension Id="f4v">
                 <Verb Id="open" TargetFile="CM_FP_ImPlay.exe" Argument="&quot;%1&quot;" />
@@ -786,6 +896,7 @@
         </ProgId>
         <RegistryValue Root="HKLM" Key="Software\Clients\Media\ImPlay\Capabilities\FileAssociations" Name=".f4a" Value="ImPlay.f4a" Type="string" />
         <RegistryValue Root="HKCR" Key="Applications\ImPlay.exe\SupportedTypes" Name=".f4a" Value="" Type="string" />
+        <RegistryValue Root="HKCR" Key=".f4a\OpenWithProgids" Name="ImPlay.f4a" Value="" Type="string" />
         <ProgId Id="ImPlay.f4a" Description="Flash Audio" Icon="CM_FP_ImPlay.exe">
             <Extension Id="f4a">
                 <Verb Id="open" TargetFile="CM_FP_ImPlay.exe" Argument="&quot;%1&quot;" />
@@ -793,6 +904,7 @@
         </ProgId>
         <RegistryValue Root="HKLM" Key="Software\Clients\Media\ImPlay\Capabilities\FileAssociations" Name=".qt" Value="ImPlay.qt" Type="string" />
         <RegistryValue Root="HKCR" Key="Applications\ImPlay.exe\SupportedTypes" Name=".qt" Value="" Type="string" />
+        <RegistryValue Root="HKCR" Key=".qt\OpenWithProgids" Name="ImPlay.qt" Value="" Type="string" />
         <ProgId Id="ImPlay.qt" Description="QuickTime Video" Icon="CM_FP_ImPlay.exe">
             <Extension Id="qt">
                 <Verb Id="open" TargetFile="CM_FP_ImPlay.exe" Argument="&quot;%1&quot;" />
@@ -800,6 +912,7 @@
         </ProgId>
         <RegistryValue Root="HKLM" Key="Software\Clients\Media\ImPlay\Capabilities\FileAssociations" Name=".mov" Value="ImPlay.mov" Type="string" />
         <RegistryValue Root="HKCR" Key="Applications\ImPlay.exe\SupportedTypes" Name=".mov" Value="" Type="string" />
+        <RegistryValue Root="HKCR" Key=".mov\OpenWithProgids" Name="ImPlay.mov" Value="" Type="string" />
         <ProgId Id="ImPlay.mov" Description="QuickTime Video" Icon="CM_FP_ImPlay.exe">
             <Extension Id="mov">
                 <Verb Id="open" TargetFile="CM_FP_ImPlay.exe" Argument="&quot;%1&quot;" />
@@ -807,6 +920,7 @@
         </ProgId>
         <RegistryValue Root="HKLM" Key="Software\Clients\Media\ImPlay\Capabilities\FileAssociations" Name=".hdmov" Value="ImPlay.hdmov" Type="string" />
         <RegistryValue Root="HKCR" Key="Applications\ImPlay.exe\SupportedTypes" Name=".hdmov" Value="" Type="string" />
+        <RegistryValue Root="HKCR" Key=".hdmov\OpenWithProgids" Name="ImPlay.hdmov" Value="" Type="string" />
         <ProgId Id="ImPlay.hdmov" Description="QuickTime HD Video" Icon="CM_FP_ImPlay.exe">
             <Extension Id="hdmov">
                 <Verb Id="open" TargetFile="CM_FP_ImPlay.exe" Argument="&quot;%1&quot;" />
@@ -814,6 +928,7 @@
         </ProgId>
         <RegistryValue Root="HKLM" Key="Software\Clients\Media\ImPlay\Capabilities\FileAssociations" Name=".rm" Value="ImPlay.rm" Type="string" />
         <RegistryValue Root="HKCR" Key="Applications\ImPlay.exe\SupportedTypes" Name=".rm" Value="" Type="string" />
+        <RegistryValue Root="HKCR" Key=".rm\OpenWithProgids" Name="ImPlay.rm" Value="" Type="string" />
         <ProgId Id="ImPlay.rm" Description="Real Media Video" Icon="CM_FP_ImPlay.exe">
             <Extension Id="rm">
                 <Verb Id="open" TargetFile="CM_FP_ImPlay.exe" Argument="&quot;%1&quot;" />
@@ -821,6 +936,7 @@
         </ProgId>
         <RegistryValue Root="HKLM" Key="Software\Clients\Media\ImPlay\Capabilities\FileAssociations" Name=".rmvb" Value="ImPlay.rmvb" Type="string" />
         <RegistryValue Root="HKCR" Key="Applications\ImPlay.exe\SupportedTypes" Name=".rmvb" Value="" Type="string" />
+        <RegistryValue Root="HKCR" Key=".rmvb\OpenWithProgids" Name="ImPlay.rmvb" Value="" Type="string" />
         <ProgId Id="ImPlay.rmvb" Description="Real Media Video" Icon="CM_FP_ImPlay.exe">
             <Extension Id="rmvb">
                 <Verb Id="open" TargetFile="CM_FP_ImPlay.exe" Argument="&quot;%1&quot;" />
@@ -828,6 +944,7 @@
         </ProgId>
         <RegistryValue Root="HKLM" Key="Software\Clients\Media\ImPlay\Capabilities\FileAssociations" Name=".ra" Value="ImPlay.ra" Type="string" />
         <RegistryValue Root="HKCR" Key="Applications\ImPlay.exe\SupportedTypes" Name=".ra" Value="" Type="string" />
+        <RegistryValue Root="HKCR" Key=".ra\OpenWithProgids" Name="ImPlay.ra" Value="" Type="string" />
         <ProgId Id="ImPlay.ra" Description="Real Media Audio" Icon="CM_FP_ImPlay.exe">
             <Extension Id="ra">
                 <Verb Id="open" TargetFile="CM_FP_ImPlay.exe" Argument="&quot;%1&quot;" />
@@ -835,6 +952,7 @@
         </ProgId>
         <RegistryValue Root="HKLM" Key="Software\Clients\Media\ImPlay\Capabilities\FileAssociations" Name=".ram" Value="ImPlay.ram" Type="string" />
         <RegistryValue Root="HKCR" Key="Applications\ImPlay.exe\SupportedTypes" Name=".ram" Value="" Type="string" />
+        <RegistryValue Root="HKCR" Key=".ram\OpenWithProgids" Name="ImPlay.ram" Value="" Type="string" />
         <ProgId Id="ImPlay.ram" Description="Real Media Audio" Icon="CM_FP_ImPlay.exe">
             <Extension Id="ram">
                 <Verb Id="open" TargetFile="CM_FP_ImPlay.exe" Argument="&quot;%1&quot;" />
@@ -842,6 +960,7 @@
         </ProgId>
         <RegistryValue Root="HKLM" Key="Software\Clients\Media\ImPlay\Capabilities\FileAssociations" Name=".3ga" Value="ImPlay.3ga" Type="string" />
         <RegistryValue Root="HKCR" Key="Applications\ImPlay.exe\SupportedTypes" Name=".3ga" Value="" Type="string" />
+        <RegistryValue Root="HKCR" Key=".3ga\OpenWithProgids" Name="ImPlay.3ga" Value="" Type="string" />
         <ProgId Id="ImPlay.3ga" Description="3GPP Audio" Icon="CM_FP_ImPlay.exe">
             <Extension Id="3ga">
                 <Verb Id="open" TargetFile="CM_FP_ImPlay.exe" Argument="&quot;%1&quot;" />
@@ -849,6 +968,7 @@
         </ProgId>
         <RegistryValue Root="HKLM" Key="Software\Clients\Media\ImPlay\Capabilities\FileAssociations" Name=".3ga2" Value="ImPlay.3ga2" Type="string" />
         <RegistryValue Root="HKCR" Key="Applications\ImPlay.exe\SupportedTypes" Name=".3ga2" Value="" Type="string" />
+        <RegistryValue Root="HKCR" Key=".3ga2\OpenWithProgids" Name="ImPlay.3ga2" Value="" Type="string" />
         <ProgId Id="ImPlay.3ga2" Description="3GPP Audio" Icon="CM_FP_ImPlay.exe">
             <Extension Id="3ga2">
                 <Verb Id="open" TargetFile="CM_FP_ImPlay.exe" Argument="&quot;%1&quot;" />
@@ -856,6 +976,7 @@
         </ProgId>
         <RegistryValue Root="HKLM" Key="Software\Clients\Media\ImPlay\Capabilities\FileAssociations" Name=".3gpp" Value="ImPlay.3gpp" Type="string" />
         <RegistryValue Root="HKCR" Key="Applications\ImPlay.exe\SupportedTypes" Name=".3gpp" Value="" Type="string" />
+        <RegistryValue Root="HKCR" Key=".3gpp\OpenWithProgids" Name="ImPlay.3gpp" Value="" Type="string" />
         <ProgId Id="ImPlay.3gpp" Description="3GPP Video" Icon="CM_FP_ImPlay.exe">
             <Extension Id="3gpp">
                 <Verb Id="open" TargetFile="CM_FP_ImPlay.exe" Argument="&quot;%1&quot;" />
@@ -863,6 +984,7 @@
         </ProgId>
         <RegistryValue Root="HKLM" Key="Software\Clients\Media\ImPlay\Capabilities\FileAssociations" Name=".3gp" Value="ImPlay.3gp" Type="string" />
         <RegistryValue Root="HKCR" Key="Applications\ImPlay.exe\SupportedTypes" Name=".3gp" Value="" Type="string" />
+        <RegistryValue Root="HKCR" Key=".3gp\OpenWithProgids" Name="ImPlay.3gp" Value="" Type="string" />
         <ProgId Id="ImPlay.3gp" Description="3GPP Video" Icon="CM_FP_ImPlay.exe">
             <Extension Id="3gp">
                 <Verb Id="open" TargetFile="CM_FP_ImPlay.exe" Argument="&quot;%1&quot;" />
@@ -870,6 +992,7 @@
         </ProgId>
         <RegistryValue Root="HKLM" Key="Software\Clients\Media\ImPlay\Capabilities\FileAssociations" Name=".3gp2" Value="ImPlay.3gp2" Type="string" />
         <RegistryValue Root="HKCR" Key="Applications\ImPlay.exe\SupportedTypes" Name=".3gp2" Value="" Type="string" />
+        <RegistryValue Root="HKCR" Key=".3gp2\OpenWithProgids" Name="ImPlay.3gp2" Value="" Type="string" />
         <ProgId Id="ImPlay.3gp2" Description="3GPP Video" Icon="CM_FP_ImPlay.exe">
             <Extension Id="3gp2">
                 <Verb Id="open" TargetFile="CM_FP_ImPlay.exe" Argument="&quot;%1&quot;" />
@@ -877,6 +1000,7 @@
         </ProgId>
         <RegistryValue Root="HKLM" Key="Software\Clients\Media\ImPlay\Capabilities\FileAssociations" Name=".3g2" Value="ImPlay.3g2" Type="string" />
         <RegistryValue Root="HKCR" Key="Applications\ImPlay.exe\SupportedTypes" Name=".3g2" Value="" Type="string" />
+        <RegistryValue Root="HKCR" Key=".3g2\OpenWithProgids" Name="ImPlay.3g2" Value="" Type="string" />
         <ProgId Id="ImPlay.3g2" Description="3GPP Video" Icon="CM_FP_ImPlay.exe">
             <Extension Id="3g2">
                 <Verb Id="open" TargetFile="CM_FP_ImPlay.exe" Argument="&quot;%1&quot;" />
@@ -884,6 +1008,7 @@
         </ProgId>
         <RegistryValue Root="HKLM" Key="Software\Clients\Media\ImPlay\Capabilities\FileAssociations" Name=".ay" Value="ImPlay.ay" Type="string" />
         <RegistryValue Root="HKCR" Key="Applications\ImPlay.exe\SupportedTypes" Name=".ay" Value="" Type="string" />
+        <RegistryValue Root="HKCR" Key=".ay\OpenWithProgids" Name="ImPlay.ay" Value="" Type="string" />
         <ProgId Id="ImPlay.ay" Description="AY Audio" Icon="CM_FP_ImPlay.exe">
             <Extension Id="ay">
                 <Verb Id="open" TargetFile="CM_FP_ImPlay.exe" Argument="&quot;%1&quot;" />
@@ -891,6 +1016,7 @@
         </ProgId>
         <RegistryValue Root="HKLM" Key="Software\Clients\Media\ImPlay\Capabilities\FileAssociations" Name=".gbs" Value="ImPlay.gbs" Type="string" />
         <RegistryValue Root="HKCR" Key="Applications\ImPlay.exe\SupportedTypes" Name=".gbs" Value="" Type="string" />
+        <RegistryValue Root="HKCR" Key=".gbs\OpenWithProgids" Name="ImPlay.gbs" Value="" Type="string" />
         <ProgId Id="ImPlay.gbs" Description="GBS Audio" Icon="CM_FP_ImPlay.exe">
             <Extension Id="gbs">
                 <Verb Id="open" TargetFile="CM_FP_ImPlay.exe" Argument="&quot;%1&quot;" />
@@ -898,6 +1024,7 @@
         </ProgId>
         <RegistryValue Root="HKLM" Key="Software\Clients\Media\ImPlay\Capabilities\FileAssociations" Name=".gym" Value="ImPlay.gym" Type="string" />
         <RegistryValue Root="HKCR" Key="Applications\ImPlay.exe\SupportedTypes" Name=".gym" Value="" Type="string" />
+        <RegistryValue Root="HKCR" Key=".gym\OpenWithProgids" Name="ImPlay.gym" Value="" Type="string" />
         <ProgId Id="ImPlay.gym" Description="GYM Audio" Icon="CM_FP_ImPlay.exe">
             <Extension Id="gym">
                 <Verb Id="open" TargetFile="CM_FP_ImPlay.exe" Argument="&quot;%1&quot;" />
@@ -905,6 +1032,7 @@
         </ProgId>
         <RegistryValue Root="HKLM" Key="Software\Clients\Media\ImPlay\Capabilities\FileAssociations" Name=".hes" Value="ImPlay.hes" Type="string" />
         <RegistryValue Root="HKCR" Key="Applications\ImPlay.exe\SupportedTypes" Name=".hes" Value="" Type="string" />
+        <RegistryValue Root="HKCR" Key=".hes\OpenWithProgids" Name="ImPlay.hes" Value="" Type="string" />
         <ProgId Id="ImPlay.hes" Description="HES Audio" Icon="CM_FP_ImPlay.exe">
             <Extension Id="hes">
                 <Verb Id="open" TargetFile="CM_FP_ImPlay.exe" Argument="&quot;%1&quot;" />
@@ -912,6 +1040,7 @@
         </ProgId>
         <RegistryValue Root="HKLM" Key="Software\Clients\Media\ImPlay\Capabilities\FileAssociations" Name=".kss" Value="ImPlay.kss" Type="string" />
         <RegistryValue Root="HKCR" Key="Applications\ImPlay.exe\SupportedTypes" Name=".kss" Value="" Type="string" />
+        <RegistryValue Root="HKCR" Key=".kss\OpenWithProgids" Name="ImPlay.kss" Value="" Type="string" />
         <ProgId Id="ImPlay.kss" Description="KSS Audio" Icon="CM_FP_ImPlay.exe">
             <Extension Id="kss">
                 <Verb Id="open" TargetFile="CM_FP_ImPlay.exe" Argument="&quot;%1&quot;" />
@@ -919,6 +1048,7 @@
         </ProgId>
         <RegistryValue Root="HKLM" Key="Software\Clients\Media\ImPlay\Capabilities\FileAssociations" Name=".nsf" Value="ImPlay.nsf" Type="string" />
         <RegistryValue Root="HKCR" Key="Applications\ImPlay.exe\SupportedTypes" Name=".nsf" Value="" Type="string" />
+        <RegistryValue Root="HKCR" Key=".nsf\OpenWithProgids" Name="ImPlay.nsf" Value="" Type="string" />
         <ProgId Id="ImPlay.nsf" Description="NSF Audio" Icon="CM_FP_ImPlay.exe">
             <Extension Id="nsf">
                 <Verb Id="open" TargetFile="CM_FP_ImPlay.exe" Argument="&quot;%1&quot;" />
@@ -926,6 +1056,7 @@
         </ProgId>
         <RegistryValue Root="HKLM" Key="Software\Clients\Media\ImPlay\Capabilities\FileAssociations" Name=".nsfe" Value="ImPlay.nsfe" Type="string" />
         <RegistryValue Root="HKCR" Key="Applications\ImPlay.exe\SupportedTypes" Name=".nsfe" Value="" Type="string" />
+        <RegistryValue Root="HKCR" Key=".nsfe\OpenWithProgids" Name="ImPlay.nsfe" Value="" Type="string" />
         <ProgId Id="ImPlay.nsfe" Description="NSFE Audio" Icon="CM_FP_ImPlay.exe">
             <Extension Id="nsfe">
                 <Verb Id="open" TargetFile="CM_FP_ImPlay.exe" Argument="&quot;%1&quot;" />
@@ -933,6 +1064,7 @@
         </ProgId>
         <RegistryValue Root="HKLM" Key="Software\Clients\Media\ImPlay\Capabilities\FileAssociations" Name=".sap" Value="ImPlay.sap" Type="string" />
         <RegistryValue Root="HKCR" Key="Applications\ImPlay.exe\SupportedTypes" Name=".sap" Value="" Type="string" />
+        <RegistryValue Root="HKCR" Key=".sap\OpenWithProgids" Name="ImPlay.sap" Value="" Type="string" />
         <ProgId Id="ImPlay.sap" Description="SAP Audio" Icon="CM_FP_ImPlay.exe">
             <Extension Id="sap">
                 <Verb Id="open" TargetFile="CM_FP_ImPlay.exe" Argument="&quot;%1&quot;" />
@@ -940,6 +1072,7 @@
         </ProgId>
         <RegistryValue Root="HKLM" Key="Software\Clients\Media\ImPlay\Capabilities\FileAssociations" Name=".spc" Value="ImPlay.spc" Type="string" />
         <RegistryValue Root="HKCR" Key="Applications\ImPlay.exe\SupportedTypes" Name=".spc" Value="" Type="string" />
+        <RegistryValue Root="HKCR" Key=".spc\OpenWithProgids" Name="ImPlay.spc" Value="" Type="string" />
         <ProgId Id="ImPlay.spc" Description="SPC Audio" Icon="CM_FP_ImPlay.exe">
             <Extension Id="spc">
                 <Verb Id="open" TargetFile="CM_FP_ImPlay.exe" Argument="&quot;%1&quot;" />
@@ -947,6 +1080,7 @@
         </ProgId>
         <RegistryValue Root="HKLM" Key="Software\Clients\Media\ImPlay\Capabilities\FileAssociations" Name=".vgm" Value="ImPlay.vgm" Type="string" />
         <RegistryValue Root="HKCR" Key="Applications\ImPlay.exe\SupportedTypes" Name=".vgm" Value="" Type="string" />
+        <RegistryValue Root="HKCR" Key=".vgm\OpenWithProgids" Name="ImPlay.vgm" Value="" Type="string" />
         <ProgId Id="ImPlay.vgm" Description="VGM Audio" Icon="CM_FP_ImPlay.exe">
             <Extension Id="vgm">
                 <Verb Id="open" TargetFile="CM_FP_ImPlay.exe" Argument="&quot;%1&quot;" />
@@ -954,6 +1088,7 @@
         </ProgId>
         <RegistryValue Root="HKLM" Key="Software\Clients\Media\ImPlay\Capabilities\FileAssociations" Name=".vgz" Value="ImPlay.vgz" Type="string" />
         <RegistryValue Root="HKCR" Key="Applications\ImPlay.exe\SupportedTypes" Name=".vgz" Value="" Type="string" />
+        <RegistryValue Root="HKCR" Key=".vgz\OpenWithProgids" Name="ImPlay.vgz" Value="" Type="string" />
         <ProgId Id="ImPlay.vgz" Description="VGZ Audio" Icon="CM_FP_ImPlay.exe">
             <Extension Id="vgz">
                 <Verb Id="open" TargetFile="CM_FP_ImPlay.exe" Argument="&quot;%1&quot;" />
@@ -961,6 +1096,7 @@
         </ProgId>
         <RegistryValue Root="HKLM" Key="Software\Clients\Media\ImPlay\Capabilities\FileAssociations" Name=".m3u" Value="ImPlay.m3u" Type="string" />
         <RegistryValue Root="HKCR" Key="Applications\ImPlay.exe\SupportedTypes" Name=".m3u" Value="" Type="string" />
+        <RegistryValue Root="HKCR" Key=".m3u\OpenWithProgids" Name="ImPlay.m3u" Value="" Type="string" />
         <ProgId Id="ImPlay.m3u" Description="M3U Playlist" Icon="CM_FP_ImPlay.exe">
             <Extension Id="m3u">
                 <Verb Id="open" TargetFile="CM_FP_ImPlay.exe" Argument="&quot;%1&quot;" />
@@ -968,6 +1104,7 @@
         </ProgId>
         <RegistryValue Root="HKLM" Key="Software\Clients\Media\ImPlay\Capabilities\FileAssociations" Name=".m3u8" Value="ImPlay.m3u8" Type="string" />
         <RegistryValue Root="HKCR" Key="Applications\ImPlay.exe\SupportedTypes" Name=".m3u8" Value="" Type="string" />
+        <RegistryValue Root="HKCR" Key=".m3u8\OpenWithProgids" Name="ImPlay.m3u8" Value="" Type="string" />
         <ProgId Id="ImPlay.m3u8" Description="M3U Playlist" Icon="CM_FP_ImPlay.exe">
             <Extension Id="m3u8">
                 <Verb Id="open" TargetFile="CM_FP_ImPlay.exe" Argument="&quot;%1&quot;" />
@@ -975,6 +1112,7 @@
         </ProgId>
         <RegistryValue Root="HKLM" Key="Software\Clients\Media\ImPlay\Capabilities\FileAssociations" Name=".pls" Value="ImPlay.pls" Type="string" />
         <RegistryValue Root="HKCR" Key="Applications\ImPlay.exe\SupportedTypes" Name=".pls" Value="" Type="string" />
+        <RegistryValue Root="HKCR" Key=".pls\OpenWithProgids" Name="ImPlay.pls" Value="" Type="string" />
         <ProgId Id="ImPlay.pls" Description="PLS Playlist" Icon="CM_FP_ImPlay.exe">
             <Extension Id="pls">
                 <Verb Id="open" TargetFile="CM_FP_ImPlay.exe" Argument="&quot;%1&quot;" />
@@ -982,6 +1120,7 @@
         </ProgId>
         <RegistryValue Root="HKLM" Key="Software\Clients\Media\ImPlay\Capabilities\FileAssociations" Name=".cue" Value="ImPlay.cue" Type="string" />
         <RegistryValue Root="HKCR" Key="Applications\ImPlay.exe\SupportedTypes" Name=".cue" Value="" Type="string" />
+        <RegistryValue Root="HKCR" Key=".cue\OpenWithProgids" Name="ImPlay.cue" Value="" Type="string" />
         <ProgId Id="ImPlay.cue" Description="CUE Sheet" Icon="CM_FP_ImPlay.exe">
             <Extension Id="cue">
                 <Verb Id="open" TargetFile="CM_FP_ImPlay.exe" Argument="&quot;%1&quot;" />
