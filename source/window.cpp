@@ -8,8 +8,9 @@
 #include <fonts/fontawesome.h>
 #include <fonts/unifont.h>
 #define GL_SILENCE_DEPRECATION
-#if defined(IMGUI_IMPL_OPENGL_ES2)
+#ifdef IMGUI_IMPL_OPENGL_ES2
 #include <GLES2/gl2.h>
+#include <EGL/egl.h>
 #endif
 #include <GLFW/glfw3.h>
 #ifdef _WIN32
@@ -143,7 +144,13 @@ void Window::initGLFW(const char* title) {
   glfwSetErrorCallback([](int error, const char* desc) { print("GLFW Error [{}]: {}\n", error, desc); });
   if (!glfwInit()) throw std::runtime_error("Failed to initialize GLFW!");
 
-#if defined(__APPLE__)
+#ifdef IMGUI_IMPL_OPENGL_ES2
+  eglGetDisplay(EGL_DEFAULT_DISPLAY);
+  glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 2);
+  glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
+  glfwWindowHint(GLFW_CONTEXT_CREATION_API, GLFW_EGL_CONTEXT_API);
+  glfwWindowHint(GLFW_CLIENT_API, GLFW_OPENGL_ES_API);
+#elif defined(__APPLE__)
   glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
   glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
   glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
@@ -295,7 +302,10 @@ void Window::initImGui() {
 
   glfwMakeContextCurrent(window);
   ImGui_ImplGlfw_InitForOpenGL(window, true);
-#if defined(__APPLE__)
+#ifdef IMGUI_IMPL_OPENGL_ES2
+  print("Using OpenGL ES 2.0\n");
+  ImGui_ImplOpenGL3_Init("#version 100");
+#elif defined(__APPLE__)
   ImGui_ImplOpenGL3_Init("#version 150");
 #else
   ImGui_ImplOpenGL3_Init("#version 130");

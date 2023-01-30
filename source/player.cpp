@@ -100,6 +100,7 @@ void Player::render(int w, int h) {
         [](void* data) {
           ImGui::UpdatePlatformWindows();
           ImGui::RenderPlatformWindowsDefault();
+          glfwMakeContextCurrent(nullptr);
         },
         nullptr);
   }
