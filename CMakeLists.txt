@@ -26,7 +26,7 @@ set(CMAKE_CXX_STANDARD 20)
 
 option(USE_MPV_WIN_BUILD "Use Prebuilt static mpv dll for Windows" ON)
 option(USE_PATCHED_GLFW "Use patched GLFW to support additional features" ON)
-option(USE_OPENGL_ES2 "Compile with OpenGL ES2 backend with ANGLE" OFF)
+option(USE_OPENGL_ES2 "Compile with OpenGL ES 2.0 backend" OFF)
 
 include(ExternalProject)
 if (${CMAKE_VERSION} VERSION_GREATER_EQUAL "3.14.0")
@@ -61,7 +61,14 @@ if(USE_PATCHED_GLFW)
     add_subdirectory(third_party/glfw)
     set(GLFW_LIBRARIES glfw)
 else()
-    pkg_search_module(GLFW REQUIRED glfw3)
+    pkg_search_module(GLFW REQUIRED glfw3 GLOBAL)
+endif()
+
+if(USE_OPENGL_ES2)
+    add_subdirectory(third_party/glad)
+    set(OPENGL_LIBRARIES glad)
+else()
+    find_package(OpenGL REQUIRED GLOBAL)
 endif()
 
 set(LIBROMFS_PROJECT_NAME ${PROJECT_NAME})
@@ -91,24 +98,8 @@ set(SOURCE_FILES
     source/window.cpp
     source/main.cpp
 )
-set(INCLUDE_DIRS include ${MPV_INCLUDE_DIRS} ${GLFW_INCLUDE_DIRS})
-set(LINK_LIBS fmt json inipp nfd imgui ${MPV_LIBRARIES} ${GLFW_LIBRARIES} ${LIBROMFS_LIBRARY})
-
-if(USE_OPENGL_ES2)
-    include(FindPackageHandleStandardArgs)
-    find_path(OPENGLES2_INCLUDE_DIR NAMES GLES2/gl2.h)
-    find_library(OPENGLES2_LIB NAMES GLESv2)
-    find_package_handle_standard_args(OPENGLES2 REQUIRED_VARS OPENGLES2_LIB OPENGLES2_INCLUDE_DIR)
-    mark_as_advanced(OPENGLES2_INCLUDE_DIR OPENGLES2_LIB)
-
-    find_path(EGL_INCLUDE_DIR NAMES EGL/egl.h)
-    find_library(EGL_LIB NAMES EGL)
-    find_package_handle_standard_args(EGL REQUIRED_VARS EGL_LIB EGL_INCLUDE_DIR)
-    mark_as_advanced(EGL_INCLUDE_DIR EGL_LIB)
-
-    list(APPEND LINK_LIBS ${OPENGLES2_LIB} ${EGL_LIB})
-    list(APPEND INCLUDE_DIRS ${OPENGLES2_INCLUDE_DIR} ${EGL_INCLUDE_DIR})
-endif()
+set(INCLUDE_DIRS include ${MPV_INCLUDE_DIRS} ${GLFW_INCLUDE_DIRS} ${OPENGL_INCLUDE_DIR})
+set(LINK_LIBS fmt json inipp nfd imgui ${MPV_LIBRARIES} ${GLFW_LIBRARIES} ${OPENGL_LIBRARIES} ${LIBROMFS_LIBRARY})
 
 if(WIN32)
     configure_file(${PROJECT_SOURCE_DIR}/resources/win32/app.rc.in ${PROJECT_BINARY_DIR}/app.rc @ONLY)

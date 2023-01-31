@@ -20,11 +20,6 @@
 #include <glob.h>
 #endif
 #include "helpers.h"
-#ifdef IMGUI_IMPL_OPENGL_ES2
-#include <GLES2/gl2.h>
-#else
-#include <imgui_impl_opengl3_loader.h>
-#endif
 
 void ImGui::HalignCenter(const char* text) {
   ImGui::SetCursorPosX((ImGui::GetWindowWidth() - ImGui::CalcTextSize(text).x) * 0.5f);

@@ -10,7 +10,6 @@
 #define GL_SILENCE_DEPRECATION
 #ifdef IMGUI_IMPL_OPENGL_ES2
 #include <GLES2/gl2.h>
-#include <EGL/egl.h>
 #endif
 #include <GLFW/glfw3.h>
 #ifdef _WIN32
@@ -145,7 +144,6 @@ void Window::initGLFW(const char* title) {
   if (!glfwInit()) throw std::runtime_error("Failed to initialize GLFW!");
 
 #ifdef IMGUI_IMPL_OPENGL_ES2
-  eglGetDisplay(EGL_DEFAULT_DISPLAY);
   glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 2);
   glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
   glfwWindowHint(GLFW_CONTEXT_CREATION_API, GLFW_EGL_CONTEXT_API);
@@ -178,9 +176,12 @@ void Window::initGLFW(const char* title) {
   if (window == nullptr) throw std::runtime_error("Failed to create window!");
   glfwSetWindowSizeLimits(window, 640, 480, GLFW_DONT_CARE, GLFW_DONT_CARE);
   glfwSetWindowPos(window, posX, posY);
-
   glfwSetWindowUserPointer(window, this);
+
   glfwMakeContextCurrent(window);
+#ifdef IMGUI_IMPL_OPENGL_ES2
+  if (!gladLoadGLES2(glfwGetProcAddress)) throw std::runtime_error("Failed to load GLES 2!");
+#endif
   glfwSwapInterval(1);
   glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
   glClear(GL_COLOR_BUFFER_BIT);
@@ -303,7 +304,6 @@ void Window::initImGui() {
   glfwMakeContextCurrent(window);
   ImGui_ImplGlfw_InitForOpenGL(window, true);
 #ifdef IMGUI_IMPL_OPENGL_ES2
-  print("Using OpenGL ES 2.0\n");
   ImGui_ImplOpenGL3_Init("#version 100");
 #elif defined(__APPLE__)
   ImGui_ImplOpenGL3_Init("#version 150");

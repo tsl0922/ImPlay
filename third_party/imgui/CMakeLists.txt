@@ -4,7 +4,6 @@ project(imgui)
 set(CMAKE_CXX_STANDARD 17)
 
 find_package(Freetype REQUIRED)
-find_package(OpenGL REQUIRED)
 
 add_library(imgui OBJECT
     source/imgui.cpp
@@ -21,6 +20,6 @@ add_library(imgui OBJECT
 
 target_include_directories(imgui PUBLIC include ${FREETYPE_INCLUDE_DIRS} ${GLFW_INCLUDE_DIRS})
 target_link_libraries(imgui PUBLIC ${FREETYPE_LIBRARIES} ${GLFW_LIBRARIES} ${OPENGL_LIBRARIES})
-if (USE_OPENGL_ES2)
+if(USE_OPENGL_ES2)
     target_compile_definitions(imgui PRIVATE IMGUI_IMPL_OPENGL_ES2)
 endif()
