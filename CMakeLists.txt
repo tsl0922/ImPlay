@@ -160,6 +160,21 @@ if(WIN32)
                 $<TARGET_FILE_DIR:ImPlay>
         )
     endif()
+    if(USE_OPENGL_ES2)
+        ExternalProject_Add(electron_bin
+            URL https://github.com/electron/electron/releases/download/v22.1.0/electron-v22.1.0-win32-x64.zip
+            UPDATE_COMMAND ""
+            CONFIGURE_COMMAND ""
+            BUILD_COMMAND ${CMAKE_COMMAND} -E copy <SOURCE_DIR>/libEGL.dll <BINARY_DIR>
+                  COMMAND ${CMAKE_COMMAND} -E copy <SOURCE_DIR>/libGLESv2.dll <BINARY_DIR>
+            INSTALL_COMMAND ""
+        )
+        add_dependencies(${PROJECT_NAME} electron_bin)
+        ExternalProject_Get_property(electron_bin BINARY_DIR)
+        set(ELECTRON_BIN_DIR ${BINARY_DIR})
+        install(FILES ${ELECTRON_BIN_DIR}/libEGL.dll DESTINATION .)
+        install(FILES ${ELECTRON_BIN_DIR}/libGLESv2.dll DESTINATION .)
+    endif()
     
     install(CODE [[
     file(GET_RUNTIME_DEPENDENCIES
@@ -228,6 +243,10 @@ elseif(CMAKE_SYSTEM_NAME STREQUAL "Linux")
     install(TARGETS ${PROJECT_NAME} RUNTIME DESTINATION bin)
 else()
     set(CPACK_GENERATOR TGZ)
+endif()
+
+if(USE_OPENGL_ES2)
+    set(CPACK_PACKAGE_FILE_NAME "${CPACK_PACKAGE_FILE_NAME}-GLES2")
 endif()
 
 set(CPACK_PACKAGE_NAME "${PROJECT_NAME}")

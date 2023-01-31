@@ -109,7 +109,6 @@ jobs:
             mingw-w64-x86_64-gcc
             mingw-w64-x86_64-cmake
             mingw-w64-x86_64-freetype
-            mingw-w64-x86_64-angleproject
           update: true
       - name: Build ImPlay
         shell: msys2 {0}
@@ -138,7 +137,7 @@ jobs:
         with:
           commit: ${{ github.sha }}
           tag: continuous
-          artifacts: "ImPlay-linux/*,ImPlay-macOS/*,ImPlay-win64/*"
+          artifacts: "ImPlay-linux/*,ImPlay-macOS/*,ImPlay-win64*/*"
           allowUpdates: true
           prerelease: true
           name: Continuous build

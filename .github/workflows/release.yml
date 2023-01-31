@@ -17,7 +17,7 @@ jobs:
       - uses: ncipollo/release-action@v1
         with:
           commit: ${{ github.sha }}
-          artifacts: "ImPlay-linux/*,ImPlay-macOS/*,ImPlay-win64/*"
+          artifacts: "ImPlay-linux/*,ImPlay-macOS/*,ImPlay-win64*/*"
           body: |
             # Install
             ## Windows
