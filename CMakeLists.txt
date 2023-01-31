@@ -39,12 +39,12 @@ endif()
 find_package(PkgConfig REQUIRED)
 if(WIN32 AND USE_MPV_WIN_BUILD)
     ExternalProject_Add(mpv_dev
-        URL https://github.com/shinchiro/mpv-winbuild-cmake/releases/download/20230107/mpv-dev-x86_64-20230107-git-33e73f4.7z
+        URL https://github.com/shinchiro/mpv-winbuild-cmake/releases/download/20230131/mpv-dev-x86_64-20230131-git-9659555.7z
         UPDATE_COMMAND ""
         CONFIGURE_COMMAND ""
-        BUILD_COMMAND ${CMAKE_COMMAND} -E copy_directory <SOURCE_DIR>/include <BINARY_DIR>/include/mpv
+        BUILD_COMMAND ${CMAKE_COMMAND} -E copy_directory <SOURCE_DIR>/include <BINARY_DIR>/include
               COMMAND ${CMAKE_COMMAND} -E copy <SOURCE_DIR>/libmpv.dll.a <BINARY_DIR>
-              COMMAND ${CMAKE_COMMAND} -E copy <SOURCE_DIR>/mpv-2.dll <BINARY_DIR>/libmpv-2.dll
+              COMMAND ${CMAKE_COMMAND} -E copy <SOURCE_DIR>/libmpv-2.dll <BINARY_DIR>
         INSTALL_COMMAND ""
     )
     ExternalProject_Get_property(mpv_dev BINARY_DIR)
@@ -137,7 +137,7 @@ endif()
 
 if(WIN32)
     ExternalProject_Add(mpv_bin
-        URL https://github.com/shinchiro/mpv-winbuild-cmake/releases/download/20230107/mpv-x86_64-20230107-git-33e73f4.7z
+        URL https://github.com/shinchiro/mpv-winbuild-cmake/releases/download/20230131/mpv-x86_64-20230131-git-9659555.7z
         UPDATE_COMMAND ""
         CONFIGURE_COMMAND ""
         BUILD_COMMAND ${CMAKE_COMMAND} -E copy <SOURCE_DIR>/mpv.com <BINARY_DIR>
