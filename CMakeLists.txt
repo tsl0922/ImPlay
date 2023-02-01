@@ -40,12 +40,14 @@ find_package(PkgConfig REQUIRED)
 if(WIN32 AND USE_MPV_WIN_BUILD)
   ExternalProject_Add(mpv_dev
     URL https://github.com/shinchiro/mpv-winbuild-cmake/releases/download/20230131/mpv-dev-x86_64-20230131-git-9659555.7z
+    URL_HASH SHA1=c9c4c43d8e2295f85024fb65d2f1fa2aba812f78
+    DOWNLOAD_NO_PROGRESS ON
     UPDATE_COMMAND ""
     CONFIGURE_COMMAND ""
-    BUILD_COMMAND ${CMAKE_COMMAND} -E copy_directory <SOURCE_DIR>/include <BINARY_DIR>/include
-          COMMAND ${CMAKE_COMMAND} -E copy <SOURCE_DIR>/libmpv.dll.a <BINARY_DIR>
-          COMMAND ${CMAKE_COMMAND} -E copy <SOURCE_DIR>/libmpv-2.dll <BINARY_DIR>
-    INSTALL_COMMAND ""
+    BUILD_COMMAND ""
+    INSTALL_COMMAND ${CMAKE_COMMAND} -E copy_directory <SOURCE_DIR>/include <BINARY_DIR>/include
+            COMMAND ${CMAKE_COMMAND} -E copy <SOURCE_DIR>/libmpv.dll.a <BINARY_DIR>
+            COMMAND ${CMAKE_COMMAND} -E copy <SOURCE_DIR>/libmpv-2.dll ${CMAKE_BINARY_DIR}
   )
   ExternalProject_Get_property(mpv_dev BINARY_DIR)
   set(MPV_DEV_DIR ${BINARY_DIR})
@@ -121,51 +123,46 @@ endif()
 if(WIN32)
   ExternalProject_Add(mpv_bin
     URL https://github.com/shinchiro/mpv-winbuild-cmake/releases/download/20230131/mpv-x86_64-20230131-git-9659555.7z
+    URL_HASH SHA1=c71aabeed4f554bade824a4353c6a85e299bb681
+    DOWNLOAD_NO_PROGRESS ON
     UPDATE_COMMAND ""
     CONFIGURE_COMMAND ""
-    BUILD_COMMAND ${CMAKE_COMMAND} -E copy <SOURCE_DIR>/mpv.com <BINARY_DIR>
-    INSTALL_COMMAND ""
+    BUILD_COMMAND ""
+    INSTALL_COMMAND ${CMAKE_COMMAND} -E copy <SOURCE_DIR>/mpv.com ${CMAKE_BINARY_DIR}/ImPlay.com
   )
   ExternalProject_Add(yt_dlp
     URL https://github.com/yt-dlp/yt-dlp/releases/download/2023.01.06/yt-dlp.exe
+    URL_HASH SHA1=adf872bcb1755ccb3e1d273e9bbe145540ac897d
+    DOWNLOAD_NO_PROGRESS ON
     DOWNLOAD_NO_EXTRACT ON
     UPDATE_COMMAND ""
     CONFIGURE_COMMAND ""
     BUILD_COMMAND ""
-    INSTALL_COMMAND ""
+    INSTALL_COMMAND ${CMAKE_COMMAND} -E copy <DOWNLOAD_DIR>/yt-dlp.exe ${CMAKE_BINARY_DIR}
   )
   add_dependencies(${PROJECT_NAME} mpv_bin yt_dlp)
-  ExternalProject_Get_property(mpv_bin BINARY_DIR)
-  set(MPV_BIN_DIR ${BINARY_DIR})
-  ExternalProject_Get_property(yt_dlp DOWNLOAD_DIR)
-  set(YT_DLP_BIN ${DOWNLOAD_DIR}/yt-dlp.exe)
 
   target_link_options(${PROJECT_NAME} PRIVATE -mwindows)
   install(TARGETS ${PROJECT_NAME} RUNTIME DESTINATION .)
-  install(FILES ${MPV_BIN_DIR}/mpv.com DESTINATION . RENAME ImPlay.com)
-  install(FILES ${YT_DLP_BIN} DESTINATION .)
+  install(FILES ${CMAKE_BINARY_DIR}/ImPlay.com DESTINATION .)
+  install(FILES ${CMAKE_BINARY_DIR}/yt-dlp.exe DESTINATION .)
   if(USE_MPV_WIN_BUILD)
     add_dependencies(${PROJECT_NAME} mpv_dev)
-    add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-      COMMAND ${CMAKE_COMMAND} -E copy_if_different
-        ${MPV_DEV_DIR}/libmpv-2.dll
-        $<TARGET_FILE_DIR:ImPlay>
-    )
   endif()
   if(USE_OPENGL_ES2)
     ExternalProject_Add(electron_bin
       URL https://github.com/electron/electron/releases/download/v22.1.0/electron-v22.1.0-win32-x64.zip
+      URL_HASH SHA1=8ef676e72849b32cc246d31ed6329cadae8740c0
+      DOWNLOAD_NO_PROGRESS ON
       UPDATE_COMMAND ""
       CONFIGURE_COMMAND ""
-      BUILD_COMMAND ${CMAKE_COMMAND} -E copy <SOURCE_DIR>/libEGL.dll <BINARY_DIR>
-            COMMAND ${CMAKE_COMMAND} -E copy <SOURCE_DIR>/libGLESv2.dll <BINARY_DIR>
-      INSTALL_COMMAND ""
+      BUILD_COMMAND ""
+      INSTALL_COMMAND ${CMAKE_COMMAND} -E copy <SOURCE_DIR>/libEGL.dll ${CMAKE_BINARY_DIR}
+              COMMAND ${CMAKE_COMMAND} -E copy <SOURCE_DIR>/libGLESv2.dll ${CMAKE_BINARY_DIR}
     )
     add_dependencies(${PROJECT_NAME} electron_bin)
-    ExternalProject_Get_property(electron_bin BINARY_DIR)
-    set(ELECTRON_BIN_DIR ${BINARY_DIR})
-    install(FILES ${ELECTRON_BIN_DIR}/libEGL.dll DESTINATION .)
-    install(FILES ${ELECTRON_BIN_DIR}/libGLESv2.dll DESTINATION .)
+    install(FILES ${CMAKE_BINARY_DIR}/libEGL.dll DESTINATION .)
+    install(FILES ${CMAKE_BINARY_DIR}/libGLESv2.dll DESTINATION .)
   endif()
   
   install(CODE [[file(GET_RUNTIME_DEPENDENCIES
