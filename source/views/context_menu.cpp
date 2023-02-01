@@ -184,7 +184,7 @@ void ContextMenu::draw() {
       ImGui::Separator();
       drawProfilelist();
       if (ImGui::BeginMenuEx("Theme", ICON_FA_PALETTE)) {
-        const char *themes[] = {"dark", "light", "classic"};
+        const char *themes[] = {"dracula", "dark", "light", "classic"};
         for (int i = 0; i < IM_ARRAYSIZE(themes); i++) {
           std::string title = tolower(themes[i]);
           title[0] = std::toupper(title[0]);

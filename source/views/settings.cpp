@@ -106,7 +106,7 @@ void Settings::drawGeneralTab() {
 
 void Settings::drawInterfaceTab() {
   if (ImGui::BeginTabItem("Interface")) {
-    const char *t_items[] = {"Dark", "Light", "Classic"};
+    const char *t_items[] = {"Dracula", "Dark", "Light", "Classic"};
     static int t_current;
     for (int i = 0; i < IM_ARRAYSIZE(t_items); i++) {
       if (tolower(t_items[i]) == data.Interface.Theme) t_current = i;

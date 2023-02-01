@@ -45,7 +45,7 @@ void Quick::draw() {
         }
       }
       auto color = ImGui::GetStyleColorVec4(ImGuiCol_Tab);
-      if (pin) color = ImGui::GetStyleColorVec4(ImGuiCol_ButtonActive);
+      if (pin) color = ImGui::GetStyleColorVec4(ImGuiCol_CheckMark);
       ImGui::PushStyleColor(ImGuiCol_Tab, color);
       if (ImGui::TabItemButton(ICON_FA_THUMBTACK)) pin = !pin;
       ImGui::PopStyleColor();
@@ -70,7 +70,7 @@ void Quick::drawTracks(const char *type, const char *prop) {
   ImGui::SameLine(ImGui::GetContentRegionAvail().x - (iconSize.x + 2 * style.FramePadding.x));
   auto color = ImGui::GetStyleColorVec4(ImGuiCol_Button);
   const char *state = mpv->property(prop);
-  if (state && iequals(state, "no")) color = ImGui::GetStyleColorVec4(ImGuiCol_ButtonActive);
+  if (state && iequals(state, "no")) color = ImGui::GetStyleColorVec4(ImGuiCol_CheckMark);
   ImGui::PushStyleColor(ImGuiCol_Button, color);
   if (ImGui::Button(ICON_FA_BAN)) mpv->commandv("cycle-values", prop, "no", "auto", nullptr);
   ImGui::PopStyleColor();
@@ -85,7 +85,7 @@ void Quick::drawTracks(const char *type, const char *prop) {
       ImGui::PushID(item.id);
       if (ImGui::Selectable("", item.selected)) mpv->property(prop, std::to_string(item.id).c_str());
       ImGui::SameLine();
-      ImGui::TextColored(item.selected ? style.Colors[ImGuiCol_ButtonActive] : style.Colors[ImGuiCol_Text], "%s",
+      ImGui::TextColored(item.selected ? style.Colors[ImGuiCol_CheckMark] : style.Colors[ImGuiCol_Text], "%s",
                          title.c_str());
       ImGui::PopID();
     }
@@ -151,7 +151,7 @@ void Quick::drawPlaylistTabContent() {
         ImGui::EndPopup();
       }
       ImGui::SameLine();
-      ImGui::PushStyleColor(ImGuiCol_Text, item.id == pos ? style.Colors[ImGuiCol_ButtonActive] : style.Colors[ImGuiCol_Text]);
+      ImGui::PushStyleColor(ImGuiCol_Text, item.id == pos ? style.Colors[ImGuiCol_CheckMark] : style.Colors[ImGuiCol_Text]);
       ImGui::TextEllipsis(title.c_str());
       ImGui::PopStyleColor();
       ImGui::PopID();
@@ -173,7 +173,7 @@ void Quick::drawChaptersTabContent() {
     for (auto &item : items) {
       auto title = item.title.empty() ? format("Chapter {}", item.id + 1) : item.title;
       auto time = format("{:%H:%M:%S}", std::chrono::duration<int>((int)item.time));
-      auto color = item.id == pos ? style.Colors[ImGuiCol_ButtonActive] : style.Colors[ImGuiCol_Text];
+      auto color = item.id == pos ? style.Colors[ImGuiCol_CheckMark] : style.Colors[ImGuiCol_Text];
       ImGui::PushID(item.id);
       if (ImGui::Selectable("", item.id == pos))
         mpv->commandv("seek", std::to_string(item.time).c_str(), "absolute", nullptr);
@@ -282,7 +282,7 @@ void Quick::drawAudioTabContent() {
     mpv->commandv("set", "volume", std::to_string(volume).c_str(), nullptr);
   bool mute = mpv->property<int, MPV_FORMAT_FLAG>("mute");
   ImVec4 color = ImGui::GetStyleColorVec4(ImGuiCol_Button);
-  if (mute) color = ImGui::GetStyleColorVec4(ImGuiCol_ButtonActive);
+  if (mute) color = ImGui::GetStyleColorVec4(ImGuiCol_CheckMark);
   ImGui::PushStyleColor(ImGuiCol_Button, color);
   iconButton(ICON_FA_VOLUME_MUTE, "cycle mute", "Mute");
   ImGui::PopStyleColor();

@@ -42,6 +42,7 @@ void Hyperlink(const char* label, const char* url);
 void HelpMarker(const char* desc);
 ImTextureID LoadTexture(const char* path, int* width = nullptr, int* height = nullptr);
 void SetTheme(const char* theme);
+void StyleColorsDracula(ImGuiStyle* dst);
 }  // namespace ImGui
 
 namespace ImPlay {
