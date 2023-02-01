@@ -242,7 +242,13 @@ void Quick::drawVideoTabContent() {
 
   ImGui::Text("Equalizer");
   ImGui::Spacing();
-  static int equalizer[5] = {0};
+  static int equalizer[5] = {
+      (int)mpv->property<int64_t, MPV_FORMAT_INT64>("brightness"),
+      (int)mpv->property<int64_t, MPV_FORMAT_INT64>("contrast"),
+      (int)mpv->property<int64_t, MPV_FORMAT_INT64>("saturation"),
+      (int)mpv->property<int64_t, MPV_FORMAT_INT64>("gamma"),
+      (int)mpv->property<int64_t, MPV_FORMAT_INT64>("hue"),
+  };
   const char *eq[] = {"brightness", "contrast", "saturation", "gamma", "hue"};
   for (int i = 0; i < IM_ARRAYSIZE(equalizer); i++) {
     if (ImGui::Button(format("{}##{}", ICON_FA_UNDO, eq[i]).c_str())) {
@@ -262,14 +268,14 @@ void Quick::drawAudioTabContent() {
   ImGui::Spacing();
 
   ImGui::Text("Volume");
-  static int volume = 100;
+  static int volume = (int)mpv->property<int64_t, MPV_FORMAT_INT64>("volume");
   if (ImGui::SliderInt("##Volume", &volume, 0, 200, "%d%%"))
     mpv->commandv("set", "volume", std::to_string(volume).c_str(), nullptr);
   iconButton(ICON_FA_VOLUME_MUTE, "cycle mute", "Mute");
   ImGui::Spacing();
 
   ImGui::Text("Delay");
-  static float delay = 0;
+  static float delay = (float)mpv->property<double, MPV_FORMAT_DOUBLE>("audio-delay");
   if (ImGui::SliderFloat("##Delay", &delay, -10, 10, "%.1fs"))
     mpv->commandv("set", "audio-delay", format("{:.1f}", delay).c_str(), nullptr);
   iconButton(ICON_FA_UNDO, "set audio-delay 0", "Reset");
@@ -291,14 +297,14 @@ void Quick::drawSubtitleTabContent() {
   ImGui::Spacing();
 
   ImGui::Text("Scale");
-  static float scale = 1;
+  static float scale = (float)mpv->property<double, MPV_FORMAT_DOUBLE>("sub-scale");;
   if (ImGui::SliderFloat("##Scale", &scale, 0, 4, "%.1f"))
     mpv->commandv("set", "sub-scale", format("{:.1f}", scale).c_str(), nullptr);
   iconButton(ICON_FA_UNDO, "set sub-scale 1", "Reset");
   ImGui::Spacing();
 
   ImGui::Text("Delay");
-  static float delay = 0;
+  static float delay = (float)mpv->property<double, MPV_FORMAT_DOUBLE>("sub-delay");;;
   if (ImGui::SliderFloat("##Delay", &delay, -10, 10, "%.1fs"))
     mpv->commandv("set", "sub-delay", format("{:.1f}", delay).c_str(), nullptr);
   iconButton(ICON_FA_UNDO, "set sub-delay 0", "Reset");

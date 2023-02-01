@@ -29,6 +29,7 @@ void Config::load() {
   inipp::get_value(ini.sections["mpv"], "config", Data.Mpv.UseConfig);
   inipp::get_value(ini.sections["mpv"], "wid", Data.Mpv.UseWid);
   inipp::get_value(ini.sections["mpv"], "watch-later", Data.Mpv.WatchLater);
+  inipp::get_value(ini.sections["mpv"], "volume", Data.Mpv.Volume);
   inipp::get_value(ini.sections["window"], "save", Data.Window.Save);
   inipp::get_value(ini.sections["window"], "x", Data.Window.X);
   inipp::get_value(ini.sections["window"], "y", Data.Window.Y);
@@ -47,6 +48,7 @@ void Config::save() {
   ini.sections["mpv"]["config"] = format("{}", Data.Mpv.UseConfig);
   ini.sections["mpv"]["wid"] = format("{}", Data.Mpv.UseWid);
   ini.sections["mpv"]["watch-later"] = format("{}", Data.Mpv.WatchLater);
+  ini.sections["mpv"]["volume"] = std::to_string(Data.Mpv.Volume);
   ini.sections["window"]["save"] = format("{}", Data.Window.Save);
   ini.sections["window"]["x"] = std::to_string(Data.Window.X);
   ini.sections["window"]["y"] = std::to_string(Data.Window.Y);

@@ -125,8 +125,9 @@ bool Window::run(OptionParser& parser) {
   if (config.Data.Window.Save) {
     glfwGetWindowPos(window, &config.Data.Window.X, &config.Data.Window.Y);
     glfwGetWindowSize(window, &config.Data.Window.W, &config.Data.Window.H);
-    config.save();
   }
+  config.Data.Mpv.Volume = mpv->property<int64_t, MPV_FORMAT_INT64>("volume");
+  config.save();
 
   return true;
 }

@@ -44,6 +44,8 @@ bool Player::init(OptionParser& parser) {
   mpv->init();
   initMpv();
 
+  mpv->property<int64_t, MPV_FORMAT_INT64>("volume", config->Data.Mpv.Volume);
+
   for (auto& path : parser.paths) mpv->commandv("loadfile", path.c_str(), "append-play", nullptr);
 
   mpv->command("keybind MBTN_RIGHT ignore");

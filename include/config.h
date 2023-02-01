@@ -17,6 +17,7 @@ struct ConfigData {
     bool UseConfig = false;
     bool UseWid = false;
     bool WatchLater = false;
+    int Volume = 100;
     bool operator==(const Mpv_&) const = default;
   } Mpv;
   struct Window_ {
