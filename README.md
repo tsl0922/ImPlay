@@ -38,7 +38,7 @@ ImPlay aims to be mpv compatible, which means almost all mpv features from the [
 # Installation
 
 - Binary version: download from the [Releases](https://github.com/tsl0922/ImPlay/releases) page
-- Build from source, reference: [build](.github/workflows/build.yml) workflow
+- Build from source: check the [Compiling](docs/compiling.md) document
 
 # Screenshots
 ### Context Menu
