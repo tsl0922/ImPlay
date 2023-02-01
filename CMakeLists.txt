@@ -208,13 +208,11 @@ elseif (APPLE)
     set(MACOSX_BUNDLE_COPYRIGHT "Copyright © 2022 tsl0922. All rights reserved." )
 
     set_target_properties(${PROJECT_NAME} PROPERTIES
+        BUILD_RPATH "@executable_path/../Frameworks"
+        INSTALL_RPATH "@executable_path/../Frameworks"
+        MACOSX_RPATH TRUE
         MACOSX_BUNDLE TRUE
         MACOSX_BUNDLE_INFO_PLIST ${PROJECT_SOURCE_DIR}/resources/macos/Info.plist.in
-    )
-    add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-        COMMAND ${CMAKE_INSTALL_NAME_TOOL} -add_rpath
-            "@executable_path/../Frameworks/"
-            $<TARGET_FILE:ImPlay>
     )
     
     target_sources(${PROJECT_NAME} PRIVATE ${PROJECT_SOURCE_DIR}/resources/macos/AppIcon.icns)
@@ -224,10 +222,15 @@ elseif (APPLE)
 
     install(TARGETS ${PROJECT_NAME} BUNDLE DESTINATION .)
     
-    set(APPS "\${CMAKE_INSTALL_PREFIX}/${PROJECT_NAME}.app")
-    set(DIRS ${CMAKE_BINARY_DIR})
+    set(APP "\${CMAKE_INSTALL_PREFIX}/${PROJECT_NAME}.app")
+    set(DIRS "/usr/local/lib" "/lib" "/usr/lib")
+    file(GLOB_RECURSE LIBS "${APP}/Contents/MacOS/*.dylib")
     install(CODE "include(BundleUtilities)
-        fixup_bundle(\"${APPS}\" \"\" \"${DIRS}\" IGNORE_ITEM Python)"
+        fixup_bundle(\"${APP}\" \"${LIBS}\" \"${DIRS}\" IGNORE_ITEM Python)
+        execute_process(COMMAND ${CMAKE_INSTALL_NAME_TOOL} -add_rpath
+            \"@executable_path/../Frameworks/\"
+            \"${APP}/Contents/MacOS/${PROJECT_NAME}\"
+        )"
     )
     
     set(CPACK_GENERATOR DragNDrop)
