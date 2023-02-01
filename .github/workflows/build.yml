@@ -10,14 +10,7 @@ on:
 jobs:
   linux:
     runs-on: ubuntu-20.04
-    strategy:
-      matrix:
-        include:
-          - suffix: "-GLES2"
-            with_gles2: ON
-          - suffix: ""
-            with_gles2: OFF
-    name: Ubuntu${{ matrix.suffix }}
+    name: Ubuntu
     steps:
       - uses: actions/checkout@v3
         with:
@@ -35,10 +28,7 @@ jobs:
           CXX: g++-10
         run: |
           mkdir build && cd build
-          cmake -DCMAKE_BUILD_TYPE=RELEASE \
-            -DCMAKE_INSTALL_PREFIX:PATH=/usr \
-            -DUSE_OPENGL_ES2=${{ matrix.with_gles2 }} \
-            ..
+          cmake -DCMAKE_BUILD_TYPE=RELEASE -DCMAKE_INSTALL_PREFIX:PATH=/usr ..
           cmake --build . --target package
           make install DESTDIR=AppDir
           curl -LO https://github.com/linuxdeploy/linuxdeploy/releases/download/continuous/linuxdeploy-x86_64.AppImage
@@ -51,20 +41,13 @@ jobs:
           mv ImPlay-*.AppImage ImPlay-linux64.AppImage
       - uses: actions/upload-artifact@v3
         with:
-          name: ImPlay-linux${{ matrix.suffix }}
+          name: ImPlay-linux
           path: |
             build/ImPlay-*.AppImage
             build/ImPlay-*.deb
   macos:
     runs-on: macos-11
-    strategy:
-      matrix:
-        include:
-          - suffix: "-GLES2"
-            with_gles2: ON
-          - suffix: ""
-            with_gles2: OFF
-    name: macOS${{ matrix.suffix }}
+    name: macOS
     steps:
       - uses: actions/checkout@v3
         with:
@@ -79,22 +62,15 @@ jobs:
       - name: Build ImPlay
         run: |
           mkdir build && cd build
-          cmake -DCMAKE_BUILD_TYPE=RELEASE -DUSE_OPENGL_ES2=${{ matrix.with_gles2 }} ..
+          cmake -DCMAKE_BUILD_TYPE=RELEASE ..
           cmake --build . --target package
       - uses: actions/upload-artifact@v3
         with:
-          name: ImPlay-macOS${{ matrix.suffix }}
+          name: ImPlay-macOS
           path: build/ImPlay-*.dmg
   win:
     runs-on: windows-2019
-    strategy:
-      matrix:
-        include:
-          - suffix: "-GLES2"
-            with_gles2: ON
-          - suffix: ""
-            with_gles2: OFF
-    name: Windows${{ matrix.suffix }}
+    name: Windows
     steps:
       - uses: actions/checkout@v3
         with:
@@ -114,11 +90,11 @@ jobs:
         shell: msys2 {0}
         run: |
           mkdir build && cd build
-          cmake -DCMAKE_BUILD_TYPE=RELEASE -DUSE_OPENGL_ES2=${{ matrix.with_gles2 }} ..
+          cmake -DCMAKE_BUILD_TYPE=RELEASE -DUSE_OPENGL_ES2=ON ..
           cmake --build . --target package
       - uses: actions/upload-artifact@v3
         with:
-          name: ImPlay-win64${{ matrix.suffix }}
+          name: ImPlay-win64
           path: |
             build/ImPlay-*.msi
             build/ImPlay-*.zip
@@ -137,7 +113,7 @@ jobs:
         with:
           commit: ${{ github.sha }}
           tag: continuous
-          artifacts: "ImPlay-linux/*,ImPlay-macOS/*,ImPlay-win64*/*"
+          artifacts: "ImPlay-*/*"
           allowUpdates: true
           prerelease: true
           name: Continuous build
