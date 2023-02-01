@@ -44,7 +44,11 @@ void Quick::draw() {
           ImGui::EndTabItem();
         }
       }
+      auto color = ImGui::GetStyleColorVec4(ImGuiCol_Tab);
+      if (pin) color = ImGui::GetStyleColorVec4(ImGuiCol_ButtonActive);
+      ImGui::PushStyleColor(ImGuiCol_Tab, color);
       if (ImGui::TabItemButton(ICON_FA_THUMBTACK)) pin = !pin;
+      ImGui::PopStyleColor();
       if (ImGui::TabItemButton(ICON_FA_TIMES)) m_open = false;
       ImGui::EndTabBar();
     }
@@ -64,7 +68,12 @@ void Quick::drawTracks(const char *type, const char *prop) {
   auto iconSize = ImGui::CalcTextSize(ICON_FA_PLUS);
   ImGui::Text("Tracks");
   ImGui::SameLine(ImGui::GetContentRegionAvail().x - (iconSize.x + 2 * style.FramePadding.x));
+  auto color = ImGui::GetStyleColorVec4(ImGuiCol_Button);
+  const char *state = mpv->property(prop);
+  if (state && iequals(state, "no")) color = ImGui::GetStyleColorVec4(ImGuiCol_ButtonActive);
+  ImGui::PushStyleColor(ImGuiCol_Button, color);
   if (ImGui::Button(ICON_FA_BAN)) mpv->commandv("cycle-values", prop, "no", "auto", nullptr);
+  ImGui::PopStyleColor();
   if (ImGui::IsItemHovered(ImGuiHoveredFlags_DelayNormal)) ImGui::SetTooltip("Disable %s Track", type);
   if (ImGui::BeginListBox("##tracks", ImVec2(-FLT_MIN, 3 * ImGui::GetTextLineHeightWithSpacing()))) {
     auto items = mpv->trackList();
@@ -271,7 +280,12 @@ void Quick::drawAudioTabContent() {
   static int volume = (int)mpv->property<int64_t, MPV_FORMAT_INT64>("volume");
   if (ImGui::SliderInt("##Volume", &volume, 0, 200, "%d%%"))
     mpv->commandv("set", "volume", std::to_string(volume).c_str(), nullptr);
+  bool mute = mpv->property<int, MPV_FORMAT_FLAG>("mute");
+  ImVec4 color = ImGui::GetStyleColorVec4(ImGuiCol_Button);
+  if (mute) color = ImGui::GetStyleColorVec4(ImGuiCol_ButtonActive);
+  ImGui::PushStyleColor(ImGuiCol_Button, color);
   iconButton(ICON_FA_VOLUME_MUTE, "cycle mute", "Mute");
+  ImGui::PopStyleColor();
   ImGui::Spacing();
 
   ImGui::Text("Delay");
