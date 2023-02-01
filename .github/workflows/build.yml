@@ -118,6 +118,7 @@ jobs:
           prerelease: true
           name: Continuous build
           body: |
+            > WARNING: This is the DEV version, may contains bugs or unfinished features, [Stable version](https://github.com/tsl0922/ImPlay/releases/latest). 
             # Install
             ## Windows
             - MSI
