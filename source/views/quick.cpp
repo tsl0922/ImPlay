@@ -259,6 +259,8 @@ void Quick::drawVideoTabContent() {
       (int)mpv->property<int64_t, MPV_FORMAT_INT64>("gamma"),
       (int)mpv->property<int64_t, MPV_FORMAT_INT64>("hue"),
   };
+  ImGui::SetCursorPosX(ImGui::GetCursorPosX() + scaled(1));
+  ImGui::BeginGroup();
   for (int i = 0; i < IM_ARRAYSIZE(equalizer); i++) {
     if (ImGui::Button(format("{}##{}", ICON_FA_UNDO, eq[i]).c_str())) {
       equalizer[i] = 0;
@@ -270,6 +272,7 @@ void Quick::drawVideoTabContent() {
     if (ImGui::SliderInt(label.c_str(), &equalizer[i], -100, 100))
       mpv->commandv("set", eq[i], std::to_string(equalizer[i]).c_str(), nullptr);
   }
+  ImGui::EndGroup();
 }
 
 void Quick::drawAudioTabContent() {
