@@ -49,9 +49,9 @@ ImPlay aims to be mpv compatible, which means almost all mpv features from the [
 
 ![screenshot](screenshot/2.jpg)
 
-### Metrics & Debug
+### Quick Settings & Debug
 
-![screenshot](screenshot/3.png)
+![screenshot](screenshot/3.jpg)
 
 # Credits
 
