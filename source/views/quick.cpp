@@ -242,14 +242,14 @@ void Quick::drawVideoTabContent() {
 
   ImGui::Text("Equalizer");
   ImGui::Spacing();
-  static int equalizer[5] = {
+  const char *eq[] = {"brightness", "contrast", "saturation", "gamma", "hue"};
+  static int equalizer[IM_ARRAYSIZE(eq)] = {
       (int)mpv->property<int64_t, MPV_FORMAT_INT64>("brightness"),
       (int)mpv->property<int64_t, MPV_FORMAT_INT64>("contrast"),
       (int)mpv->property<int64_t, MPV_FORMAT_INT64>("saturation"),
       (int)mpv->property<int64_t, MPV_FORMAT_INT64>("gamma"),
       (int)mpv->property<int64_t, MPV_FORMAT_INT64>("hue"),
   };
-  const char *eq[] = {"brightness", "contrast", "saturation", "gamma", "hue"};
   for (int i = 0; i < IM_ARRAYSIZE(equalizer); i++) {
     if (ImGui::Button(format("{}##{}", ICON_FA_UNDO, eq[i]).c_str())) {
       equalizer[i] = 0;
@@ -279,6 +279,46 @@ void Quick::drawAudioTabContent() {
   if (ImGui::SliderFloat("##Delay", &delay, -10, 10, "%.1fs"))
     mpv->commandv("set", "audio-delay", format("{:.1f}", delay).c_str(), nullptr);
   iconButton(ICON_FA_UNDO, "set audio-delay 0", "Reset");
+  ImGui::NewLine();
+  ImGui::Separator();
+  ImGui::NewLine();
+
+  ImGui::Text("Equalizer");
+  ImGui::Spacing();
+  const char *const preset[] = {
+      "Flat",        "Classical",  "Club",       "Dance", "Full bass", "Full bass and treble",
+      "Full treble", "Headphones", "Large Hall", "Live",  "Party",     "Pop",
+      "Reggae",      "Rock",       "Ska",        "Soft",  "Soft rock", "Techno",
+  };
+  const char *freq[] = {"21", "62", "125", "250", "500", "1k", "2k", "4k", "8k", "16k"};
+  static int gain[IM_ARRAYSIZE(freq)] = {0};
+  float spacing = scaled(2);
+  ImVec2 size = ImVec2(scaled(0.8f), scaled(10));
+  ImGui::SetCursorPosX(ImGui::GetCursorPosX() + scaled(1));
+  ImGui::BeginGroup();
+  for (int i = 0; i < IM_ARRAYSIZE(preset); i++) {
+    ImGui::Button(preset[i]);
+    if (i != 4 && i != 7 && i != 13) ImGui::SameLine();
+  }
+  ImGui::Button("Disable");
+  ImGui::EndGroup();
+  ImGui::Spacing();
+  ImGui::SetCursorPosX(ImGui::GetCursorPosX() + scaled(1));
+  ImGui::BeginGroup();
+  for (int i = 0; i < IM_ARRAYSIZE(freq); i++) {
+    std::string label = format("##{}", freq[i]);
+    ImGui::VSliderInt(label.c_str(), size, &gain[i], -12, 12, "");
+    if (ImGui::IsItemHovered()) ImGui::SetTooltip("%ddB", gain[i]);
+    if (i < IM_ARRAYSIZE(freq) - 1) ImGui::SameLine(0, spacing);
+  }
+  float start = ImGui::GetCursorPosX();
+  for (int i = 0; i < IM_ARRAYSIZE(freq); i++) {
+    auto tsize = ImGui::CalcTextSize(freq[i]);
+    ImGui::SetCursorPosX(start + i * (spacing + size.x) + (size.x - tsize.x) / 2);
+    ImGui::Text("%s", freq[i]);
+    ImGui::SameLine();
+  }
+  ImGui::EndGroup();
 }
 
 void Quick::drawSubtitleTabContent() {
