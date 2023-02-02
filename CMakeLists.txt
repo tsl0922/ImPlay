@@ -26,6 +26,7 @@ set(CMAKE_CXX_STANDARD 20)
 
 option(USE_MPV_WIN_BUILD "Use Prebuilt static mpv dll on Windows" ON)
 option(USE_PATCHED_GLFW "Use patched GLFW to support additional features" ON)
+option(USE_XDG_PORTAL "Use xdg-desktop-portal for file dialogs on Linux" OFF)
 option(USE_OPENGL_ES2 "Compile with OpenGL ES 2.0 backend" OFF)
 
 include(ExternalProject)
@@ -66,12 +67,14 @@ if(USE_PATCHED_GLFW)
 else()
   pkg_search_module(GLFW REQUIRED glfw3)
 endif()
-
 if(USE_OPENGL_ES2)
   add_subdirectory(third_party/glad)
   set(OPENGL_LIBRARIES glad)
 else()
   find_package(OpenGL REQUIRED)
+endif()
+if(USE_XDG_PORTAL)
+  set(NFD_PORTAL ON CACHE BOOL "Use xdg-desktop-portal for file dialogs on Linux" FORCE)
 endif()
 
 set(LIBROMFS_PROJECT_NAME ${PROJECT_NAME})
