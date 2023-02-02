@@ -65,7 +65,7 @@ void ImGui::HelpMarker(const char* desc) {
   ImGui::TextDisabled("(?)");
   if (ImGui::IsItemHovered(ImGuiHoveredFlags_DelayShort)) {
     ImGui::BeginTooltip();
-    ImGui::PushTextWrapPos(scaled(35));
+    ImGui::PushTextWrapPos(35 * ImGui::GetFontSize());
     ImGui::TextUnformatted(desc);
     ImGui::PopTextWrapPos();
     ImGui::EndTooltip();

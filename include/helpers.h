@@ -16,16 +16,28 @@
 #include <imgui.h>
 #include <imgui_internal.h>
 
-namespace {
+namespace ImPlay {
+struct OptionParser {
+  std::map<std::string, std::string> options;
+  std::vector<std::string> paths;
+
+  void parse(int argc, char** argv);
+  bool check(std::string key, std::string value);
+};
+
 inline float scaled(float n) { return n * ImGui::GetFontSize(); }
 inline ImVec2 scaled(const ImVec2& vector) { return vector * ImGui::GetFontSize(); }
-inline std::wstring UTF8ToWide(const std::string& str) {
-  return std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>, wchar_t>().from_bytes(str);
-}
-inline std::string WideToUTF8(const std::wstring& str) {
-  return std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>, wchar_t>().to_bytes(str);
-}
-}  // namespace
+
+bool openFile(std::vector<std::pair<std::string, std::string>> filters, std::function<void(std::string)> callback);
+bool openFiles(std::vector<std::pair<std::string, std::string>> filters,
+               std::function<void(std::string, int)> callback);
+bool openFolder(std::function<void(std::string)> callback);
+
+int openUrl(std::string url);
+void revealInFolder(std::string path);
+
+std::string datadir(std::string subdir = "implay");
+}  // namespace ImPlay
 
 namespace ImGui {
 void HalignCenter(const char* text);
@@ -39,25 +51,13 @@ void StyleColorsSpectrum(ImGuiStyle* dst);
 void StyleColorsDracula(ImGuiStyle* dst);
 }  // namespace ImGui
 
-namespace ImPlay {
-struct OptionParser {
-  std::map<std::string, std::string> options;
-  std::vector<std::string> paths;
-
-  void parse(int argc, char** argv);
-  bool check(std::string key, std::string value);
-};
-
-bool openFile(std::vector<std::pair<std::string, std::string>> filters, std::function<void(std::string)> callback);
-bool openFiles(std::vector<std::pair<std::string, std::string>> filters,
-               std::function<void(std::string, int)> callback);
-bool openFolder(std::function<void(std::string)> callback);
-
-int openUrl(std::string url);
-void revealInFolder(std::string path);
-
-std::string datadir(std::string subdir = "implay");
-
+namespace {
+inline std::wstring UTF8ToWide(const std::string& str) {
+  return std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>, wchar_t>().from_bytes(str);
+}
+inline std::string WideToUTF8(const std::wstring& str) {
+  return std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>, wchar_t>().to_bytes(str);
+}
 inline std::string tolower(std::string s) {
   std::string str = s;
   std::transform(str.begin(), str.end(), str.begin(), ::tolower);
@@ -96,4 +96,4 @@ inline void print(std::string_view format, T... args) {
 inline std::string join(std::vector<std::string> v, std::string_view sep) {
   return fmt::format("{}", fmt::join(v, sep));
 }
-}  // namespace ImPlay
+}  // namespace
