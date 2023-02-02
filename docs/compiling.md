@@ -7,7 +7,7 @@
 ```
 sudo apt-get install -y build-essential cmake git pkg-config \
     libx11-dev libxrandr-dev libxinerama-dev libxcursor-dev libxi-dev \
-    mesa-common-dev libgtk-3-dev libfreetype-dev libmpv-dev
+    libgtk-3-dev libglfw3-dev libfreetype6-dev libmpv-dev
 git clone https://github.com/tsl0922/ImPlay.git
 mkdir build && cd build
 cmake -DCMAKE_BUILD_TYPE=RELEASE ..

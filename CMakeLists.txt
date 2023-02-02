@@ -25,7 +25,7 @@ project(ImPlay VERSION "${SEM_VER}")
 set(CMAKE_CXX_STANDARD 20)
 
 option(USE_MPV_WIN_BUILD "Use Prebuilt static mpv dll on Windows" ON)
-option(USE_PATCHED_GLFW "Use patched GLFW to support additional features" ON)
+option(USE_PATCHED_GLFW "Use patched GLFW to support additional features" OFF)
 option(USE_XDG_PORTAL "Use xdg-desktop-portal for file dialogs on Linux" OFF)
 option(USE_OPENGL_ES2 "Compile with OpenGL ES 2.0 backend" OFF)
 
