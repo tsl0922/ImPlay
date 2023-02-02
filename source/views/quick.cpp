@@ -1,7 +1,7 @@
 #include <algorithm>
 #include <fonts/fontawesome.h>
-#include "views/quick.h"
 #include "helpers.h"
+#include "views/quick.h"
 
 namespace ImPlay::Views {
 Quick::Quick(Config *config, Mpv *mpv) : View() {

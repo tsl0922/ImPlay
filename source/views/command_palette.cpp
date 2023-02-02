@@ -3,8 +3,8 @@
 
 #include <algorithm>
 #include <cstring>
-#include "views/command_palette.h"
 #include "helpers.h"
+#include "views/command_palette.h"
 
 namespace ImPlay::Views {
 CommandPalette::CommandPalette(Mpv* mpv) : View() { this->mpv = mpv; }

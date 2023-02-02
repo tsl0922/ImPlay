@@ -4,8 +4,8 @@
 #include <algorithm>
 #include <string>
 #include <fonts/fontawesome.h>
-#include "views/settings.h"
 #include "helpers.h"
+#include "views/settings.h"
 
 namespace ImPlay::Views {
 Settings::Settings(Config *config, Mpv *mpv) : View() {

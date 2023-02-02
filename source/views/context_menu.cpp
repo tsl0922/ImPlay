@@ -2,8 +2,8 @@
 // SPDX-License-Identifier: GPL-2.0-only
 
 #include <fonts/fontawesome.h>
-#include "views/context_menu.h"
 #include "helpers.h"
+#include "views/context_menu.h"
 
 namespace ImPlay::Views {
 ContextMenu::ContextMenu(Config *config, Mpv *mpv) : View() {

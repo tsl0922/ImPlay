@@ -2,17 +2,24 @@
 // SPDX-License-Identifier: GPL-2.0-only
 
 #pragma once
-#include <GLFW/glfw3.h>
 #include <string>
 #include <vector>
 #include <array>
 #include <atomic>
 #include <mutex>
 #include <condition_variable>
+#ifdef _WIN32
+#define GLFW_EXPOSE_NATIVE_WIN32
+#elif defined(__APPLE__)
+#define GLFW_EXPOSE_NATIVE_COCOA
+#else
+#define GLFW_EXPOSE_NATIVE_X11
+#endif
+#include <GLFW/glfw3.h>
+#include <GLFW/glfw3native.h>
 #include "player.h"
 #include "config.h"
 #include "dispatch.h"
-#include "helpers.h"
 
 namespace ImPlay {
 class Window {

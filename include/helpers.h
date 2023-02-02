@@ -13,15 +13,6 @@
 #include <fmt/color.h>
 #include <imgui.h>
 #include <imgui_internal.h>
-#ifdef IMGUI_IMPL_OPENGL_ES2
-#include <GLES2/gl2.h>
-#else
-#ifdef __APPLE__
-#include <OpenGL/gl.h>
-#else
-#include <GL/gl.h>
-#endif
-#endif
 
 namespace {
 inline float scaled(float n) { return n * ImGui::GetFontSize(); }

@@ -7,22 +7,15 @@
 #include <imgui_impl_opengl3.h>
 #include <fonts/fontawesome.h>
 #include <fonts/unifont.h>
-#define GL_SILENCE_DEPRECATION
-#ifdef IMGUI_IMPL_OPENGL_ES2
-#include <GLES2/gl2.h>
-#endif
-#include <GLFW/glfw3.h>
-#ifdef _WIN32
-#define GLFW_EXPOSE_NATIVE_WIN32
-#elif defined(__APPLE__)
-#define GLFW_EXPOSE_NATIVE_COCOA
-#else
-#define GLFW_EXPOSE_NATIVE_X11
-#endif
-#include <GLFW/glfw3native.h>
 #include <algorithm>
 #include <stdexcept>
 #include <thread>
+#ifdef IMGUI_IMPL_OPENGL_ES2
+#include <GLES2/gl2.h>
+#else
+#include <GL/gl.h>
+#endif
+#include "helpers.h"
 #include "window.h"
 
 namespace ImPlay {
@@ -182,6 +175,8 @@ void Window::initGLFW(const char* title) {
   glfwMakeContextCurrent(window);
 #ifdef IMGUI_IMPL_OPENGL_ES2
   if (!gladLoadGLES2(glfwGetProcAddress)) throw std::runtime_error("Failed to load GLES 2!");
+#else
+  if (!gladLoadGL(glfwGetProcAddress)) throw std::runtime_error("Failed to load GL!");
 #endif
   glfwSwapInterval(1);
   glClearColor(0.0f, 0.0f, 0.0f, 0.0f);

@@ -1,6 +1,10 @@
 cmake_minimum_required(VERSION 3.13)
 project(glad)
 
-add_library(glad OBJECT src/gles2.c)
+if(USE_OPENGL_ES2)
+  add_library(glad OBJECT src/gles2.c)
+else()
+  add_library(glad OBJECT src/gl.c)
+endif()
 
 target_include_directories(glad PUBLIC include)

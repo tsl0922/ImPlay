@@ -2,9 +2,9 @@
 // SPDX-License-Identifier: GPL-2.0-only
 
 #include <map>
+#include "helpers.h"
 #include "views/debug.h"
 #include "mpv.h"
-#include "helpers.h"
 
 namespace ImPlay::Views {
 Debug::Debug(Config* config, Mpv* mpv) : View() {

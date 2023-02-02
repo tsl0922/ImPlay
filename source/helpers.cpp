@@ -19,6 +19,11 @@
 #include <sysdir.h>
 #include <glob.h>
 #endif
+#ifdef IMGUI_IMPL_OPENGL_ES2
+#include <GLES2/gl2.h>
+#else
+#include <GL/gl.h>
+#endif
 #include "helpers.h"
 
 void ImGui::HalignCenter(const char* text) {

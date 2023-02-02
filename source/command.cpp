@@ -4,8 +4,8 @@
 #include <map>
 #include <algorithm>
 #include <filesystem>
-#include "command.h"
 #include "helpers.h"
+#include "command.h"
 
 namespace ImPlay {
 Command::Command(Config *config, GLFWwindow *window, Mpv *mpv) : View() {

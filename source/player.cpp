@@ -6,8 +6,13 @@
 #include <imgui_internal.h>
 #include <imgui_impl_glfw.h>
 #include <imgui_impl_opengl3.h>
-#include "player.h"
+#ifdef IMGUI_IMPL_OPENGL_ES2
+#include <GLES2/gl2.h>
+#else
+#include <GL/gl.h>
+#endif
 #include "helpers.h"
+#include "player.h"
 
 namespace ImPlay {
 Player::Player(Config* config, Dispatch* dispatch, GLFWwindow* window, Mpv* mpv, const char* title) : Views::View() {
