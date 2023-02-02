@@ -24,7 +24,7 @@ project(ImPlay VERSION "${SEM_VER}")
 
 set(CMAKE_CXX_STANDARD 20)
 
-option(USE_MPV_WIN_BUILD "Use Prebuilt static mpv dll for Windows" ON)
+option(USE_MPV_WIN_BUILD "Use Prebuilt static mpv dll on Windows" ON)
 option(USE_PATCHED_GLFW "Use patched GLFW to support additional features" ON)
 option(USE_OPENGL_ES2 "Compile with OpenGL ES 2.0 backend" OFF)
 
@@ -36,6 +36,7 @@ if (${CMAKE_VERSION} VERSION_GREATER_EQUAL "3.24.0")
   cmake_policy(SET CMP0135 NEW)
 endif()
 
+find_package(Threads REQUIRED)
 find_package(PkgConfig REQUIRED)
 if(WIN32 AND USE_MPV_WIN_BUILD)
   ExternalProject_Add(mpv_dev
@@ -63,14 +64,14 @@ if(USE_PATCHED_GLFW)
   add_subdirectory(third_party/glfw)
   set(GLFW_LIBRARIES glfw)
 else()
-  pkg_search_module(GLFW REQUIRED glfw3 GLOBAL)
+  pkg_search_module(GLFW REQUIRED glfw3)
 endif()
 
 if(USE_OPENGL_ES2)
   add_subdirectory(third_party/glad)
   set(OPENGL_LIBRARIES glad)
 else()
-  find_package(OpenGL REQUIRED GLOBAL)
+  find_package(OpenGL REQUIRED)
 endif()
 
 set(LIBROMFS_PROJECT_NAME ${PROJECT_NAME})
@@ -101,7 +102,7 @@ set(SOURCE_FILES
   source/main.cpp
 )
 set(INCLUDE_DIRS include ${MPV_INCLUDE_DIRS} ${GLFW_INCLUDE_DIRS} ${OPENGL_INCLUDE_DIR})
-set(LINK_LIBS fmt json inipp nfd imgui ${MPV_LIBRARIES} ${GLFW_LIBRARIES} ${OPENGL_LIBRARIES} ${LIBROMFS_LIBRARY})
+set(LINK_LIBS fmt json inipp nfd imgui ${CMAKE_THREAD_LIBS_INIT} ${MPV_LIBRARIES} ${GLFW_LIBRARIES} ${OPENGL_LIBRARIES} ${LIBROMFS_LIBRARY})
 
 if(WIN32)
   configure_file(${PROJECT_SOURCE_DIR}/resources/win32/app.rc.in ${PROJECT_BINARY_DIR}/app.rc @ONLY)

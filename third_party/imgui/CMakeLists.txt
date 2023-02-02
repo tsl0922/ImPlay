@@ -19,7 +19,8 @@ add_library(imgui OBJECT
 )
 
 target_include_directories(imgui PUBLIC include ${FREETYPE_INCLUDE_DIRS} ${GLFW_INCLUDE_DIRS})
-target_link_libraries(imgui PUBLIC ${FREETYPE_LIBRARIES} ${GLFW_LIBRARIES} ${OPENGL_LIBRARIES})
+target_link_libraries(imgui PUBLIC ${CMAKE_DL_LIBS} ${FREETYPE_LIBRARIES} ${GLFW_LIBRARIES})
 if(USE_OPENGL_ES2)
   target_compile_definitions(imgui PRIVATE IMGUI_IMPL_OPENGL_ES2)
+  target_link_libraries(imgui PUBLIC ${OPENGL_LIBRARIES})
 endif()
