@@ -6,73 +6,37 @@
 
 namespace ImPlay::Views {
 void View::openFile(std::vector<nfdu8filteritem_t> filters, std::function<void(nfdu8char_t*)> callback) {
-  if (NFD::Init() != NFD_OKAY) {
-    print("NFD Init Error: {}\n", NFD::GetError());
-    return;
-  }
+  if (NFD::Init() != NFD_OKAY) return;
   nfdchar_t* outPath;
-  auto result = NFD::OpenDialog(outPath, filters.data(), filters.size());
-  switch (result) {
-    case NFD_OKAY:
-      callback(outPath);
-      NFD::FreePath(outPath);
-      break;
-    case NFD_ERROR:
-      print("NFD Error: {}\n", NFD::GetError());
-      break;
-    case NFD_CANCEL:
-    default:
-      break;
+  if (NFD::OpenDialog(outPath, filters.data(), filters.size()) == NFD_OKAY) {
+    callback(outPath);
+    NFD::FreePath(outPath);
   }
   NFD::Quit();
 }
 
 void View::openFiles(std::vector<nfdu8filteritem_t> filters, std::function<void(nfdu8char_t*, int)> callback) {
-  if (NFD::Init() != NFD_OKAY) {
-    print("NFD Init Error: {}\n", NFD::GetError());
-    return;
-  }
+  if (NFD::Init() != NFD_OKAY) return;
   const nfdpathset_t* outPaths;
-  nfdpathsetsize_t numPaths;
-  auto result = NFD::OpenDialogMultiple(outPaths, filters.data(), filters.size());
-  switch (result) {
-    case NFD_OKAY:
-      NFD::PathSet::Count(outPaths, numPaths);
-      for (auto i = 0; i < numPaths; i++) {
-        nfdchar_t* path;
-        NFD::PathSet::GetPath(outPaths, i, path);
-        callback(path, i);
-      }
-      NFD::PathSet::Free(outPaths);
-      break;
-    case NFD_ERROR:
-      print("NFD Error: {}\n", NFD::GetError());
-      break;
-    case NFD_CANCEL:
-    default:
-      break;
+  if (NFD::OpenDialogMultiple(outPaths, filters.data(), filters.size()) == NFD_OKAY) {
+    nfdpathsetsize_t numPaths;
+    NFD::PathSet::Count(outPaths, numPaths);
+    for (auto i = 0; i < numPaths; i++) {
+      nfdchar_t* path;
+      NFD::PathSet::GetPath(outPaths, i, path);
+      callback(path, i);
+    }
+    NFD::PathSet::Free(outPaths);
   }
   NFD::Quit();
 }
 
 void View::openFolder(std::function<void(nfdu8char_t*)> callback) {
-  if (NFD::Init() != NFD_OKAY) {
-    print("NFD Init Error: {}\n", NFD::GetError());
-    return;
-  }
+  if (NFD::Init() != NFD_OKAY) return;
   nfdchar_t* outPath;
-  auto result = NFD::PickFolder(outPath);
-  switch (result) {
-    case NFD_OKAY:
-      callback(outPath);
-      NFD::FreePath(outPath);
-      break;
-    case NFD_ERROR:
-      print("NFD Error: {}\n", NFD::GetError());
-      break;
-    case NFD_CANCEL:
-    default:
-      return;
+  if (NFD::PickFolder(outPath) == NFD_OKAY) {
+    callback(outPath);
+    NFD::FreePath(outPath);
   }
   NFD::Quit();
 }

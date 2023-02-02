@@ -4,6 +4,7 @@
 #include <map>
 #include <algorithm>
 #include <filesystem>
+#include <nfd.hpp>
 #include "helpers.h"
 #include "command.h"
 
@@ -30,7 +31,13 @@ Command::~Command() {
   delete commandPalette;
 }
 
-void Command::init() { debug->init(); }
+void Command::init() {
+  debug->init();
+  if (NFD::Init() != NFD_OKAY)
+    messageBox("Warning", "Failed to init NFD, opening files/folders from gui may not work properly.");
+  else
+    NFD::Quit();
+}
 
 void Command::draw() {
   ImGuiIO &io = ImGui::GetIO();
@@ -46,6 +53,7 @@ void Command::draw() {
   contextMenu->draw();
   commandPalette->draw();
   drawOpenURL();
+  drawDialog();
 }
 
 void Command::execute(int n_args, const char **args_) {
@@ -239,7 +247,7 @@ void Command::drawOpenURL() {
   ImGui::OpenPopup("Open URL");
 
   ImVec2 wSize = ImGui::GetMainViewport()->WorkSize;
-  ImGui::SetNextWindowSize(ImVec2(std::min(wSize.x * 0.8f, scaled(50)), scaled(6)), ImGuiCond_Always);
+  ImGui::SetNextWindowSize(ImVec2(std::min(wSize.x * 0.8f, scaled(50)), 0), ImGuiCond_Always);
   ImGui::SetNextWindowPos(ImGui::GetMainViewport()->GetWorkCenter(), ImGuiCond_Always, ImVec2(0.5f, 0.5f));
   if (ImGui::BeginPopupModal("Open URL", &m_openURL, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove)) {
     if (ImGui::IsKeyDown(ImGuiKey_Escape)) m_openURL = false;
@@ -250,8 +258,10 @@ void Command::drawOpenURL() {
                                  ImGuiInputTextFlags_EnterReturnsTrue)) {
       if (url[0] != '\0') loadfile = true;
     }
-    auto style = ImGuiStyle();
-    ImGui::SetCursorPosX(ImGui::GetWindowWidth() - (scaled(10) + 3 * style.ItemSpacing.x));
+    ImGui::Spacing();
+    ImGui::Separator();
+    ImGui::Spacing();
+    ImGui::SetCursorPosX(ImGui::GetContentRegionAvail().x - scaled(10));
     if (ImGui::Button("Cancel", ImVec2(scaled(5), 0))) m_openURL = false;
     ImGui::SameLine();
     if (url[0] == '\0') ImGui::BeginDisabled();
@@ -264,6 +274,27 @@ void Command::drawOpenURL() {
     if (!m_openURL) url[0] = '\0';
     ImGui::EndPopup();
   }
+}
+
+void Command::drawDialog() {
+  if (m_dialog) ImGui::OpenPopup(m_dialog_title.c_str());
+  ImGui::SetNextWindowSize(ImVec2(scaled(30), 0), ImGuiCond_Always);
+  ImGui::SetNextWindowPos(ImGui::GetMainViewport()->GetWorkCenter(), ImGuiCond_Always, ImVec2(0.5f, 0.5f));
+  if (ImGui::BeginPopupModal(m_dialog_title.c_str(), &m_dialog, ImGuiWindowFlags_NoMove)) {
+    ImGui::TextWrapped("%s", m_dialog_msg.c_str());
+    ImGui::Spacing();
+    ImGui::Separator();
+    ImGui::Spacing();
+    ImGui::SetCursorPosX(ImGui::GetContentRegionAvail().x - scaled(5));
+    if (ImGui::Button("OK", ImVec2(scaled(5), 0))) m_dialog = false;
+    ImGui::EndPopup();
+  }
+}
+
+void Command::messageBox(std::string title, std::string msg) {
+  m_dialog_title = title;
+  m_dialog_msg = msg;
+  m_dialog = true;
 }
 
 bool Command::isMediaType(std::string ext) {

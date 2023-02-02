@@ -42,12 +42,17 @@ class Command : public Views::View {
   void openQuickview(const char* tab);
 
   void drawOpenURL();
+  void drawDialog();
+  void messageBox(std::string title, std::string msg);
   bool isMediaType(std::string ext);
 
   Config *config = nullptr;
   GLFWwindow *window = nullptr;
   Mpv *mpv = nullptr;
   bool m_openURL = false;
+  bool m_dialog = false;
+  std::string m_dialog_title = "Dialog";
+  std::string m_dialog_msg = "Message";
 
   Views::About *about;
   Views::Debug *debug;
