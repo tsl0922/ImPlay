@@ -2,8 +2,6 @@
 #include <functional>
 #include <vector>
 #include "view.h"
-#include "../config.h"
-#include "../mpv.h"
 
 namespace ImPlay::Views {
 class Quick : public View {
@@ -35,8 +33,6 @@ class Quick : public View {
   void iconButton(const char *icon, const char* cmd, const char *tooltip = nullptr, bool sameline = true);
   void addTab(const char *name, std::function<void()> draw, bool child = false) { tabs.push_back({name, draw, child}); }
 
-  Config *config;
-  Mpv *mpv;
   bool tabSwitched = false;
   std::string curTab = "Video";
   std::vector<Tab> tabs;

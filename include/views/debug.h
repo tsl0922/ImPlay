@@ -7,8 +7,6 @@
 #include <string>
 #include <imgui.h>
 #include "view.h"
-#include "mpv.h"
-#include "config.h"
 
 namespace ImPlay::Views {
 class Debug : public View {
@@ -64,8 +62,6 @@ class Debug : public View {
   void drawProperties(const char *title, const char *key);
   void drawPropNode(const char *name, mpv_node &node, int depth = 0);
 
-  Config *config;
-  Mpv *mpv = nullptr;
   Console *console = nullptr;
   std::string m_node = "Console";
   bool m_demo = false;

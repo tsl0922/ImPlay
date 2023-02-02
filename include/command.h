@@ -4,8 +4,6 @@
 #pragma once
 #include <functional>
 #include <GLFW/glfw3.h>
-#include "mpv.h"
-#include "config.h"
 #include "views/view.h"
 #include "views/about.h"
 #include "views/debug.h"
@@ -25,8 +23,8 @@ class Command : public Views::View {
   void execute(int n_args, const char **args_);
 
  private:
-  void openMediaFiles(std::function<void(std::u8string, int)> callback);
-  void openMediaFolder(std::function<void(std::u8string, int)> callback);
+  void openMediaFiles(std::function<void(std::string, int)> callback);
+  void openMediaFolder(std::function<void(std::string, int)> callback);
 
   void openDisk();
   void openIso();
@@ -35,8 +33,8 @@ class Command : public Views::View {
 
   void loadSubtitles();
 
-  void openDvd(const char *path);
-  void openBluray(const char *path);
+  void openDvd(std::string path);
+  void openBluray(std::string path);
 
   void openCommandPalette(int n, const char **args);
   void openQuickview(const char* tab);
@@ -46,9 +44,7 @@ class Command : public Views::View {
   void messageBox(std::string title, std::string msg);
   bool isMediaType(std::string ext);
 
-  Config *config = nullptr;
   GLFWwindow *window = nullptr;
-  Mpv *mpv = nullptr;
   bool m_openURL = false;
   bool m_dialog = false;
   std::string m_dialog_title = "Dialog";

@@ -5,9 +5,11 @@
 #include <codecvt>
 #include <locale>
 #include <algorithm>
+#include <functional>
 #include <string>
 #include <map>
 #include <vector>
+#include <utility>
 #include <fmt/format.h>
 #include <fmt/chrono.h>
 #include <fmt/color.h>
@@ -46,8 +48,14 @@ struct OptionParser {
   bool check(std::string key, std::string value);
 };
 
+bool openFile(std::vector<std::pair<std::string, std::string>> filters, std::function<void(std::string)> callback);
+bool openFiles(std::vector<std::pair<std::string, std::string>> filters,
+               std::function<void(std::string, int)> callback);
+bool openFolder(std::function<void(std::string)> callback);
+
 int openUrl(std::string url);
 void revealInFolder(std::string path);
+
 std::string datadir(std::string subdir = "implay");
 
 inline std::string tolower(std::string s) {

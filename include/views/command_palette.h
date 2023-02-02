@@ -5,7 +5,6 @@
 #include <functional>
 #include <vector>
 #include "view.h"
-#include "../mpv.h"
 
 namespace ImPlay::Views {
 class CommandPalette : public View {
@@ -17,7 +16,7 @@ class CommandPalette : public View {
     std::function<void()> callback;
   };
 
-  explicit CommandPalette(Mpv *mpv);
+  CommandPalette(Config *config, Mpv *mpv);
 
   void draw() override;
 
@@ -28,7 +27,6 @@ class CommandPalette : public View {
   void drawList(float width);
   void match(const std::string &input);
 
-  Mpv *mpv = nullptr;
   std::vector<char> buffer = std::vector<char>(1024, 0x00);
   std::vector<CommandItem> items_;
   std::vector<CommandItem> matches;

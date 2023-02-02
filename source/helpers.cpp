@@ -24,6 +24,7 @@
 #else
 #include <GL/gl.h>
 #endif
+#include <nfd.hpp>
 #include "helpers.h"
 
 void ImGui::HalignCenter(const char* text) {
@@ -275,6 +276,54 @@ bool ImPlay::OptionParser::check(std::string key, std::string value) {
   return it != options.end() && it->second == value;
 }
 
+bool ImPlay::openFile(std::vector<std::pair<std::string, std::string>> filters,
+                      std::function<void(std::string)> callback) {
+  if (NFD::Init() != NFD_OKAY) return false;
+  nfdchar_t* outPath;
+  std::vector<nfdu8filteritem_t> items;
+  for (auto& [n, s] : filters) items.emplace_back(nfdu8filteritem_t{n.c_str(), s.c_str()});
+  auto result = NFD::OpenDialog(outPath, items.data(), items.size());
+  if (result == NFD_OKAY) {
+    callback(outPath);
+    NFD::FreePath(outPath);
+  }
+  NFD::Quit();
+  return result != NFD_ERROR;
+}
+
+bool ImPlay::openFiles(std::vector<std::pair<std::string, std::string>> filters,
+                       std::function<void(std::string, int)> callback) {
+  if (NFD::Init() != NFD_OKAY) return false;
+  const nfdpathset_t* outPaths;
+  std::vector<nfdu8filteritem_t> items;
+  for (auto& [n, s] : filters) items.emplace_back(nfdu8filteritem_t{n.c_str(), s.c_str()});
+  auto result = NFD::OpenDialogMultiple(outPaths, items.data(), items.size());
+  if (result == NFD_OKAY) {
+    nfdpathsetsize_t numPaths;
+    NFD::PathSet::Count(outPaths, numPaths);
+    for (auto i = 0; i < numPaths; i++) {
+      nfdchar_t* path;
+      NFD::PathSet::GetPath(outPaths, i, path);
+      callback(path, i);
+    }
+    NFD::PathSet::Free(outPaths);
+  }
+  NFD::Quit();
+  return result != NFD_ERROR;
+}
+
+bool ImPlay::openFolder(std::function<void(std::string)> callback) {
+  if (NFD::Init() != NFD_OKAY) return false;
+  nfdchar_t* outPath;
+  auto result = NFD::PickFolder(outPath);
+  if (result == NFD_OKAY) {
+    callback(outPath);
+    NFD::FreePath(outPath);
+  }
+  NFD::Quit();
+  return result != NFD_ERROR;
+}
+
 int ImPlay::openUrl(std::string url) {
 #ifdef __APPLE__
   return system(format("open '{}'", url).c_str());
@@ -293,7 +342,7 @@ void ImPlay::revealInFolder(std::string path) {
   std::string arg = format("/select,\"{}\"", path);
   ShellExecuteW(0, 0, L"explorer", UTF8ToWide(arg).c_str(), 0, SW_SHOW);
 #else
-  auto fp = std::filesystem::path(path);
+  auto fp = std::filesystem::path(reinterpret_cast<char8_t*>(path.data()));
   auto status = std::filesystem::status(fp);
   auto target = std::filesystem::is_directory(status) ? path : fp.parent_path().string();
   system(format("xdg-open '{}'", target).c_str());

@@ -5,8 +5,6 @@
 #include <functional>
 #include <vector>
 #include "view.h"
-#include "config.h"
-#include "mpv.h"
 
 namespace ImPlay::Views {
 class Settings : public View {
@@ -21,9 +19,7 @@ class Settings : public View {
   void drawFontTab();
 
  private:
-  Config *config;
   ConfigData data;
-  Mpv *mpv;
   std::vector<std::function<void()>> appliers;
 };
 }  // namespace ImPlay::Views

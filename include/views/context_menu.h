@@ -3,8 +3,6 @@
 
 #pragma once
 #include "view.h"
-#include "../config.h"
-#include "../mpv.h"
 
 namespace ImPlay::Views {
 class ContextMenu : public View {
@@ -19,8 +17,5 @@ class ContextMenu : public View {
   void drawChapterlist(std::vector<Mpv::ChapterItem> items);
   void drawPlaylist(std::vector<Mpv::PlayItem> items);
   void drawProfilelist();
-
-  Config *config;
-  Mpv *mpv;
 };
 }  // namespace ImPlay::Views

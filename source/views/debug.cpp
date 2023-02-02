@@ -4,12 +4,9 @@
 #include <map>
 #include "helpers.h"
 #include "views/debug.h"
-#include "mpv.h"
 
 namespace ImPlay::Views {
-Debug::Debug(Config* config, Mpv* mpv) : View() {
-  this->config = config;
-  this->mpv = mpv;
+Debug::Debug(Config* config, Mpv* mpv) : View(config, mpv) {
   console = new Console(mpv);
 }
 

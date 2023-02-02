@@ -6,10 +6,7 @@
 #include "views/context_menu.h"
 
 namespace ImPlay::Views {
-ContextMenu::ContextMenu(Config *config, Mpv *mpv) : View() {
-  this->config = config;
-  this->mpv = mpv;
-}
+ContextMenu::ContextMenu(Config *config, Mpv *mpv) : View(config, mpv) {}
 
 void ContextMenu::draw() {
   if (m_open) {

@@ -9,17 +9,15 @@
 #include "command.h"
 
 namespace ImPlay {
-Command::Command(Config *config, GLFWwindow *window, Mpv *mpv) : View() {
-  this->config = config;
+Command::Command(Config *config, GLFWwindow *window, Mpv *mpv) : View(config, mpv) {
   this->window = window;
-  this->mpv = mpv;
 
   about = new Views::About();
   debug = new Views::Debug(config, mpv);
   quick = new Views::Quick(config, mpv);
   settings = new Views::Settings(config, mpv);
   contextMenu = new Views::ContextMenu(config, mpv);
-  commandPalette = new Views::CommandPalette(mpv);
+  commandPalette = new Views::CommandPalette(config, mpv);
 }
 
 Command::~Command() {
@@ -62,13 +60,13 @@ void Command::execute(int n_args, const char **args_) {
   static std::map<std::string, std::function<void(int, const char **)>> commands = {
       {"open",
        [&](int n, const char **args) {
-         openMediaFiles([&](std::u8string path, int i) {
+         openMediaFiles([&](std::string path, int i) {
            mpv->commandv("loadfile", path.c_str(), i > 0 ? "append-play" : "replace", nullptr);
          });
        }},
       {"open-folder",
        [&](int n, const char **args) {
-         openMediaFolder([&](std::u8string path, int i) {
+         openMediaFolder([&](std::string path, int i) {
            mpv->commandv("loadfile", path.c_str(), i > 0 ? "append-play" : "replace", nullptr);
          });
        }},
@@ -84,12 +82,11 @@ void Command::execute(int n_args, const char **args_) {
       {"quickview", [&](int n, const char **args) { openQuickview(n > 0 ? args[0] : nullptr); }},
       {"playlist-add-files",
        [&](int n, const char **args) {
-         openMediaFiles([&](std::u8string path, int i) { mpv->commandv("loadfile", path.c_str(), "append", nullptr); });
+         openMediaFiles([&](std::string path, int i) { mpv->commandv("loadfile", path.c_str(), "append", nullptr); });
        }},
       {"playlist-add-folder",
        [&](int n, const char **args) {
-         openMediaFolder(
-             [&](std::u8string path, int i) { mpv->commandv("loadfile", path.c_str(), "append", nullptr); });
+         openMediaFolder([&](std::string path, int i) { mpv->commandv("loadfile", path.c_str(), "append", nullptr); });
        }},
       {"about", [&](int n, const char **args) { about->show(); }},
       {"settings", [&](int n, const char **args) { settings->show(); }},
@@ -106,30 +103,30 @@ void Command::execute(int n_args, const char **args_) {
   if (it != commands.end()) it->second(n_args - 1, args_ + 1);
 }
 
-void Command::openMediaFiles(std::function<void(std::u8string, int)> callback) {
+void Command::openMediaFiles(std::function<void(std::string, int)> callback) {
   openFiles(
       {
-          {"Videos Files", format("{}", join(videoTypes, ",")).c_str()},
-          {"Audio Files", format("{}", join(audioTypes, ",")).c_str()},
-          {"Image Files", format("{}", join(imageTypes, ",")).c_str()},
+          {"Videos Files", format("{}", join(videoTypes, ","))},
+          {"Audio Files", format("{}", join(audioTypes, ","))},
+          {"Image Files", format("{}", join(imageTypes, ","))},
       },
-      [&](nfdu8char_t *path, int i) { callback(reinterpret_cast<const char8_t *>(path), i); });
+      [&](std::string path, int i) { callback(path, i); });
 }
 
-void Command::openMediaFolder(std::function<void(std::u8string, int)> callback) {
-  openFolder([&](nfdu8char_t *path) {
-    auto fp = std::filesystem::path(reinterpret_cast<char8_t *>(path));
+void Command::openMediaFolder(std::function<void(std::string, int)> callback) {
+  openFolder([&](std::string path) {
+    auto fp = std::filesystem::path(reinterpret_cast<char8_t *>(path.data()));
     int i = 0;
     for (const auto &entry : std::filesystem::recursive_directory_iterator(fp)) {
-      if (isMediaType(entry.path().extension().string())) callback(entry.path().u8string(), i);
+      if (isMediaType(entry.path().extension().string())) callback(entry.path().string(), i);
       i++;
     }
   });
 }
 
 void Command::openDisk() {
-  openFolder([&](nfdu8char_t *path) {
-    auto fp = std::filesystem::path(reinterpret_cast<char8_t *>(path));
+  openFolder([&](std::string path) {
+    auto fp = std::filesystem::path(reinterpret_cast<char8_t *>(path.data()));
     if (std::filesystem::exists(fp / u8"BDMV"))
       openBluray(path);
     else
@@ -138,8 +135,8 @@ void Command::openDisk() {
 }
 
 void Command::openIso() {
-  openFile({{"ISO Image Files", "iso"}}, [&](nfdu8char_t *path) {
-    auto fp = std::filesystem::path(reinterpret_cast<char8_t *>(path));
+  openFile({{"ISO Image Files", "iso"}}, [&](std::string path) {
+    auto fp = std::filesystem::path(reinterpret_cast<char8_t *>(path.data()));
     if ((double)std::filesystem::file_size(fp) / 1000 / 1000 / 1000 > 4.7)
       openBluray(path);
     else
@@ -148,8 +145,9 @@ void Command::openIso() {
 }
 
 void Command::loadSubtitles() {
-  openFiles({{"Subtitle Files", format("{}", join(subtitleTypes, ",")).c_str()}},
-            [&](nfdu8char_t *path, int i) { mpv->commandv("sub-add", path, i > 0 ? "auto" : "select", nullptr); });
+  openFiles({{"Subtitle Files", format("{}", join(subtitleTypes, ","))}}, [&](std::string path, int i) {
+    mpv->commandv("sub-add", path.c_str(), i > 0 ? "auto" : "select", nullptr);
+  });
 }
 
 void Command::openClipboard() {
@@ -163,13 +161,13 @@ void Command::openClipboard() {
 
 void Command::openURL() { m_openURL = true; }
 
-void Command::openDvd(const char *path) {
-  mpv->property("dvd-device", path);
+void Command::openDvd(std::string path) {
+  mpv->property("dvd-device", path.c_str());
   mpv->commandv("loadfile", "dvd://", nullptr);
 }
 
-void Command::openBluray(const char *path) {
-  mpv->property("bluray-device", path);
+void Command::openBluray(std::string path) {
+  mpv->property("bluray-device", path.c_str());
   mpv->commandv("loadfile", "bd://", nullptr);
 }
 

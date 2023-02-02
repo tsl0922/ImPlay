@@ -8,10 +8,7 @@
 #include "views/settings.h"
 
 namespace ImPlay::Views {
-Settings::Settings(Config *config, Mpv *mpv) : View() {
-  this->config = config;
-  this->mpv = mpv;
-}
+Settings::Settings(Config *config, Mpv *mpv) : View(config, mpv) {}
 
 void Settings::show() {
   data = config->Data;
@@ -151,8 +148,8 @@ void Settings::drawFontTab() {
     if (ImGui::InputText("##Path", fontPath, IM_ARRAYSIZE(fontPath))) data.Font.Path = fontPath;
     ImGui::SameLine();
     if (ImGui::Button(ICON_FA_FOLDER_OPEN)) {
-      openFile({{"Font Files", "ttf,ttc,otf"}}, [&](const char *path) {
-        strncpy(fontPath, path, IM_ARRAYSIZE(fontPath));
+      openFile({{"Font Files", "ttf,ttc,otf"}}, [&](std::string path) {
+        strncpy(fontPath, path.c_str(), IM_ARRAYSIZE(fontPath));
         data.Font.Path = path;
       });
     }

@@ -4,10 +4,7 @@
 #include "views/quick.h"
 
 namespace ImPlay::Views {
-Quick::Quick(Config *config, Mpv *mpv) : View() {
-  this->config = config;
-  this->mpv = mpv;
-
+Quick::Quick(Config *config, Mpv *mpv) : View(config, mpv) {
   addTab("Playlist", [this]() { drawPlaylistTabContent(); });
   addTab("Chapters", [this]() { drawChaptersTabContent(); });
   addTab("Video", [this]() { drawVideoTabContent(); }, true);
