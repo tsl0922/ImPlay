@@ -244,19 +244,24 @@ void Command::drawOpenURL() {
   if (ImGui::BeginPopupModal("Open URL", &m_openURL, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove)) {
     if (ImGui::IsKeyDown(ImGuiKey_Escape)) m_openURL = false;
     static char url[256] = {0};
+    bool loadfile = false;
     ImGui::SetNextItemWidth(-1);
-    ImGui::InputTextWithHint("##Input URL", "Input URL Here..", url, IM_ARRAYSIZE(url));
+    if (ImGui::InputTextWithHint("##Input URL", "Input URL Here..", url, IM_ARRAYSIZE(url),
+                                 ImGuiInputTextFlags_EnterReturnsTrue)) {
+      if (url[0] != '\0') loadfile = true;
+    }
     auto style = ImGuiStyle();
     ImGui::SetCursorPosX(ImGui::GetWindowWidth() - (scaled(10) + 3 * style.ItemSpacing.x));
     if (ImGui::Button("Cancel", ImVec2(scaled(5), 0))) m_openURL = false;
     ImGui::SameLine();
     if (url[0] == '\0') ImGui::BeginDisabled();
-    if (ImGui::Button("OK", ImVec2(scaled(5), 0))) {
+    if (ImGui::Button("OK", ImVec2(scaled(5), 0))) loadfile = true;
+    if (url[0] == '\0') ImGui::EndDisabled();
+    if (loadfile) {
       m_openURL = false;
       mpv->commandv("loadfile", url, nullptr);
-      url[0] = '\0';
     }
-    if (url[0] == '\0') ImGui::EndDisabled();
+    if (!m_openURL) url[0] = '\0';
     ImGui::EndPopup();
   }
 }
