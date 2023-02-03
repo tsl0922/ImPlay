@@ -148,7 +148,8 @@ void Quick::drawPlaylistTabContent() {
         ImGui::EndPopup();
       }
       ImGui::SameLine();
-      ImGui::PushStyleColor(ImGuiCol_Text, item.id == pos ? style.Colors[ImGuiCol_CheckMark] : style.Colors[ImGuiCol_Text]);
+      ImGui::PushStyleColor(ImGuiCol_Text,
+                            item.id == pos ? style.Colors[ImGuiCol_CheckMark] : style.Colors[ImGuiCol_Text]);
       ImGui::TextEllipsis(title.c_str());
       ImGui::PopStyleColor();
       ImGui::PopID();
@@ -186,7 +187,7 @@ void Quick::drawChaptersTabContent() {
 
 void Quick::drawVideoTabContent() {
   drawTracks("video", "vid");
-  ImGui::Spacing();
+  ImGui::NewLine();
 
   ImGui::Text("Rotate");
   const char *rotates[] = {"0", "90", "180", "270"};
@@ -196,7 +197,7 @@ void Quick::drawVideoTabContent() {
   }
   iconButton(ICON_FA_UNDO, "add video-rotate -1", "Rotate Left", false);
   iconButton(ICON_FA_REDO, "add video-rotate 1", "Rotate Right", true);
-  ImGui::Spacing();
+  ImGui::NewLine();
 
   ImGui::Text("Scale");
   const float scales[] = {0.25f, 0.5f, 0.75f, 1.0f, 1.5f, 2.0f};
@@ -207,7 +208,7 @@ void Quick::drawVideoTabContent() {
   }
   iconButton(ICON_FA_MINUS, "add window-scale -0.1", "Scale Down", false);
   iconButton(ICON_FA_PLUS, "add window-scale 0.1", "Scale Up");
-  ImGui::Spacing();
+  ImGui::NewLine();
 
   ImGui::Text("PanScan");
   iconButton(ICON_FA_SEARCH_MINUS, "add video-zoom -0.1", "Zoom In", false);
@@ -219,7 +220,7 @@ void Quick::drawVideoTabContent() {
   iconButton(ICON_FA_MINUS, "add panscan -0.1", "PanScan Decrease");
   iconButton(ICON_FA_PLUS, "add panscan 0.1", "PanScan Increase");
   iconButton(ICON_FA_UNDO, "set video-zoom 0; set panscan 0; set video-pan-x 0 ; set video-pan-y 0", "Reset");
-  ImGui::Spacing();
+  ImGui::NewLine();
 
   ImGui::Text("Aspect Ratio");
   const char *ratios[] = {"16:9", "16:10", "4:3", "2.35:1", "1.85:1", "1:1"};
@@ -236,7 +237,7 @@ void Quick::drawVideoTabContent() {
     mpv->commandv("set", "video-aspect", ratio, nullptr);
     ratio[0] = '\0';
   }
-  ImGui::Spacing();
+  ImGui::NewLine();
 
   ImGui::Text("Misc");
   if (ImGui::Button("HW Decoding")) mpv->command("cycle-values hwdec auto no");
@@ -274,7 +275,7 @@ void Quick::drawVideoTabContent() {
 
 void Quick::drawAudioTabContent() {
   drawTracks("audio", "aid");
-  ImGui::Spacing();
+  ImGui::NewLine();
 
   ImGui::Text("Volume");
   static int volume = (int)mpv->property<int64_t, MPV_FORMAT_INT64>("volume");
@@ -286,7 +287,7 @@ void Quick::drawAudioTabContent() {
   ImGui::PushStyleColor(ImGuiCol_Button, color);
   iconButton(ICON_FA_VOLUME_MUTE, "cycle mute", "Mute");
   ImGui::PopStyleColor();
-  ImGui::Spacing();
+  ImGui::NewLine();
 
   ImGui::Text("Delay");
   static float delay = (float)mpv->property<double, MPV_FORMAT_DOUBLE>("audio-delay");
@@ -298,6 +299,8 @@ void Quick::drawAudioTabContent() {
   ImGui::NewLine();
 
   ImGui::Text("Equalizer");
+  ImGui::SameLine();
+  ImGui::TextDisabled("(Unfinished)");
   ImGui::Spacing();
   const char *const preset[] = {
       "Flat",        "Classical",  "Club",       "Dance", "Full bass", "Full bass and treble",
@@ -316,7 +319,7 @@ void Quick::drawAudioTabContent() {
   }
   ImGui::Button("Disable");
   ImGui::EndGroup();
-  ImGui::Spacing();
+  ImGui::NewLine();
   ImGui::SetCursorPosX(ImGui::GetCursorPosX() + scaled(1));
   ImGui::BeginGroup();
   for (int i = 0; i < IM_ARRAYSIZE(freq); i++) {
@@ -337,7 +340,6 @@ void Quick::drawAudioTabContent() {
 
 void Quick::drawSubtitleTabContent() {
   drawTracks("sub", "sid");
-  ImGui::Spacing();
 
   iconButton(ICON_FA_ARROW_UP, "add sub-pos -1", "Move Subtitle Up", false);
   iconButton(ICON_FA_ARROW_DOWN, "add sub-pos 1", "Move Subtitle Down");
@@ -348,17 +350,17 @@ void Quick::drawSubtitleTabContent() {
   ImGui::SameLine(ImGui::GetContentRegionAvail().x - (iconSize.x + 2 * style.FramePadding.x));
   iconButton(ICON_FA_PLUS, "script-message-to implay load-sub", "Load External Subtitles..", false);
   ImGui::Separator();
-  ImGui::Spacing();
+  ImGui::NewLine();
 
   ImGui::Text("Scale");
-  static float scale = (float)mpv->property<double, MPV_FORMAT_DOUBLE>("sub-scale");;
+  static float scale = (float)mpv->property<double, MPV_FORMAT_DOUBLE>("sub-scale");
   if (ImGui::SliderFloat("##Scale", &scale, 0, 4, "%.1f"))
     mpv->commandv("set", "sub-scale", format("{:.1f}", scale).c_str(), nullptr);
   iconButton(ICON_FA_UNDO, "set sub-scale 1", "Reset");
-  ImGui::Spacing();
+  ImGui::NewLine();
 
   ImGui::Text("Delay");
-  static float delay = (float)mpv->property<double, MPV_FORMAT_DOUBLE>("sub-delay");;;
+  static float delay = (float)mpv->property<double, MPV_FORMAT_DOUBLE>("sub-delay");
   if (ImGui::SliderFloat("##Delay", &delay, -10, 10, "%.1fs"))
     mpv->commandv("set", "sub-delay", format("{:.1f}", delay).c_str(), nullptr);
   iconButton(ICON_FA_UNDO, "set sub-delay 0", "Reset");
