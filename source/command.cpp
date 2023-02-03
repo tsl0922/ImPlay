@@ -8,15 +8,14 @@
 #include "command.h"
 
 namespace ImPlay {
-Command::Command(Config *config, GLFWwindow *window, Mpv *mpv) : View(config, mpv) {
-  this->window = window;
-
+Command::Command(Config *config, Dispatch *dispatch, Mpv *mpv, GLFWwindow *window)
+    : View(config, dispatch, mpv), window(window) {
   about = new Views::About();
-  debug = new Views::Debug(config, mpv);
-  quick = new Views::Quick(config, mpv);
-  settings = new Views::Settings(config, mpv);
-  contextMenu = new Views::ContextMenu(config, mpv);
-  commandPalette = new Views::CommandPalette(config, mpv);
+  debug = new Views::Debug(config, dispatch, mpv);
+  quick = new Views::Quick(config, dispatch, mpv);
+  settings = new Views::Settings(config, dispatch, mpv);
+  contextMenu = new Views::ContextMenu(config, dispatch, mpv);
+  commandPalette = new Views::CommandPalette(config, dispatch, mpv);
 }
 
 Command::~Command() {
@@ -95,6 +94,8 @@ void Command::execute(int n_args, const char **args_) {
   auto it = commands.find(cmd);
   try {
     if (it != commands.end()) it->second(n_args - 1, args_ + 1);
+  } catch (nfd_error &e) {
+    messageBox("Error", format("NFD: {}", e.what()));
   } catch (std::exception &e) {
     messageBox("Error", format("{}: {}", cmd, e.what()));
   }

@@ -22,7 +22,7 @@ Player::Player(Config* config, Dispatch* dispatch, GLFWwindow* window, Mpv* mpv,
   this->mpv = mpv;
   this->title = title;
 
-  cmd = new Command(config, window, mpv);
+  cmd = new Command(config, dispatch, mpv, window);
 }
 
 Player::~Player() { delete cmd; }

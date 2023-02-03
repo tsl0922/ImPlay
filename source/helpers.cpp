@@ -282,7 +282,7 @@ struct NFDWrapper {
     if (init) NFD::Quit();
   }
   nfdresult_t check(nfdresult_t result) {
-    if (result == NFD_ERROR) throw std::runtime_error(std::string("NFD: ") + NFD::GetError());
+    if (result == NFD_ERROR) throw nfd_error(NFD::GetError());
     return result;
   }
   bool init = false;

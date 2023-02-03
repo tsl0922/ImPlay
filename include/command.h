@@ -15,7 +15,7 @@
 namespace ImPlay {
 class Command : public Views::View {
  public:
-  Command(Config *config, GLFWwindow *window, Mpv *mpv);
+  Command(Config *config, Dispatch *dispatch, Mpv *mpv, GLFWwindow *window);
   ~Command() override;
 
   void init();

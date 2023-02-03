@@ -8,8 +8,6 @@
 #include "views/settings.h"
 
 namespace ImPlay::Views {
-Settings::Settings(Config *config, Mpv *mpv) : View(config, mpv) {}
-
 void Settings::show() {
   data = config->Data;
   m_open = true;
@@ -150,14 +148,16 @@ void Settings::drawFontTab() {
     static std::string error;
     if (ImGui::IsWindowAppearing()) error = "";
     if (ImGui::Button(ICON_FA_FOLDER_OPEN)) {
-      try {
-        openFile({{"Font Files", "ttf,ttc,otf"}}, [&](std::string path) {
-          strncpy(fontPath, path.c_str(), IM_ARRAYSIZE(fontPath));
-          data.Font.Path = path;
-        });
-      } catch (std::exception &e) {
-        error = e.what();
-      }
+      dispatch_sync([&](void *) {
+        try {
+          openFile({{"Font Files", "ttf,ttc,otf"}}, [&](std::string path) {
+            strncpy(fontPath, path.c_str(), IM_ARRAYSIZE(fontPath));
+            data.Font.Path = path;
+          });
+        } catch (nfd_error &e) {
+          error = format("NFD: {}", e.what());
+        }
+      });
     }
     if (error != "") ImGui::TextWrapped("Error: %s", error.c_str());
     ImGui::Unindent();

@@ -30,6 +30,15 @@ struct OptionParser {
 inline float scaled(float n) { return n * ImGui::GetFontSize(); }
 inline ImVec2 scaled(const ImVec2& vector) { return vector * ImGui::GetFontSize(); }
 
+class nfd_error : public std::exception {
+ public:
+  explicit nfd_error(const std::string message) : m(message) {}
+  const char* what() const noexcept override { return m.what(); }
+
+ private:
+  std::runtime_error m;
+};
+
 void openFile(std::vector<std::pair<std::string, std::string>> filters, std::function<void(std::string)> callback);
 void openFiles(std::vector<std::pair<std::string, std::string>> filters,
                std::function<void(std::string, int)> callback);

@@ -15,9 +15,7 @@ class CommandPalette : public View {
     std::string label;
     std::function<void()> callback;
   };
-
-  CommandPalette(Config *config, Mpv *mpv);
-
+  using View::View;
   void draw() override;
 
   std::vector<CommandItem> &items() { return items_; }

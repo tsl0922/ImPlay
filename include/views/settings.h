@@ -9,7 +9,7 @@
 namespace ImPlay::Views {
 class Settings : public View {
  public:
-  Settings(Config *config, Mpv *mpv);
+  using View::View;
 
   void show() override;
   void draw() override;

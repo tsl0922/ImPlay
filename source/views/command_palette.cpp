@@ -7,8 +7,6 @@
 #include "views/command_palette.h"
 
 namespace ImPlay::Views {
-CommandPalette::CommandPalette(Config* config, Mpv* mpv) : View(config, mpv) {}
-
 void CommandPalette::draw() {
   if (items_.empty()) return;
   if (m_open) {

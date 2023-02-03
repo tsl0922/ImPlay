@@ -6,7 +6,7 @@
 namespace ImPlay::Views {
 class Quick : public View {
  public:
-  Quick(Config *config, Mpv *mpv);
+  Quick(Config *config, Dispatch *dispatch, Mpv *mpv);
 
   void draw() override;
 

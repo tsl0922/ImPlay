@@ -7,8 +7,7 @@
 namespace ImPlay::Views {
 class ContextMenu : public View {
  public:
-  ContextMenu(Config *config, Mpv *mpv);
-
+  using View::View;
   void draw() override;
 
  private:
