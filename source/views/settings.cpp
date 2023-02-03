@@ -101,17 +101,18 @@ void Settings::drawGeneralTab() {
 
 void Settings::drawInterfaceTab() {
   if (ImGui::BeginTabItem("Interface")) {
-    const char *t_items[] = {"Dracula", "Spectrum", "Dark", "Light", "Classic"};
-    static int t_current;
-    for (int i = 0; i < IM_ARRAYSIZE(t_items); i++) {
-      if (tolower(t_items[i]) == data.Interface.Theme) t_current = i;
+    auto themes = ImGui::Themes();
+    auto size = themes.size();
+    static int current;
+    for (int i = 0; i < size; i++) {
+      if (tolower(themes[i]) == data.Interface.Theme) current = i;
     }
     ImGui::Text("Theme");
     ImGui::SameLine();
     ImGui::HelpMarker("Color theme of the interface.");
     ImGui::Indent();
-    if (ImGui::Combo("##Theme", &t_current, t_items, IM_ARRAYSIZE(t_items))) {
-      data.Interface.Theme = tolower(t_items[t_current]);
+    if (ImGui::Combo("##Theme", &current, themes.data(), size)) {
+      data.Interface.Theme = tolower(themes[current]);
       appliers.push_back(
           [&]() { mpv->commandv("script-message-to", "implay", "theme", data.Interface.Theme.c_str(), nullptr); });
     }

@@ -179,13 +179,12 @@ void ContextMenu::draw() {
       ImGui::Separator();
       drawProfilelist();
       if (ImGui::BeginMenuEx("Theme", ICON_FA_PALETTE)) {
-        const char *themes[] = {"dracula", "spectrum", "dark", "light", "classic"};
-        for (int i = 0; i < IM_ARRAYSIZE(themes); i++) {
-          std::string title = tolower(themes[i]);
-          title[0] = std::toupper(title[0]);
-          if (ImGui::MenuItem(title.c_str(), nullptr, config->Data.Interface.Theme == themes[i])) {
-            config->Data.Interface.Theme = themes[i];
-            mpv->commandv("script-message-to", "implay", "theme", themes[i], nullptr);
+        auto themes = ImGui::Themes();
+        for (auto &title : themes) {
+          auto theme = tolower(title);
+          if (ImGui::MenuItem(title, nullptr, config->Data.Interface.Theme == theme)) {
+            config->Data.Interface.Theme = theme;
+            mpv->commandv("script-message-to", "implay", "theme", theme.c_str(), nullptr);
             config->save();
           }
         }
