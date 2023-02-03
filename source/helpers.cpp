@@ -24,7 +24,6 @@
 #else
 #include <GL/gl.h>
 #endif
-#include <nfd.hpp>
 #include "helpers.h"
 
 void ImGui::HalignCenter(const char* text) {
@@ -276,29 +275,41 @@ bool ImPlay::OptionParser::check(std::string key, std::string value) {
   return it != options.end() && it->second == value;
 }
 
-bool ImPlay::openFile(std::vector<std::pair<std::string, std::string>> filters,
+namespace ImPlay {
+struct NFDWrapper {
+  NFDWrapper() { init = check(NFD::Init()) == NFD_OKAY; }
+  ~NFDWrapper() {
+    if (init) NFD::Quit();
+  }
+  nfdresult_t check(nfdresult_t result) {
+    if (result == NFD_ERROR) throw std::runtime_error(std::string("NFD: ") + NFD::GetError());
+    return result;
+  }
+  bool init = false;
+};
+}  // namespace ImPlay
+
+void ImPlay::openFile(std::vector<std::pair<std::string, std::string>> filters,
                       std::function<void(std::string)> callback) {
-  if (NFD::Init() != NFD_OKAY) return false;
+  ImPlay::NFDWrapper w;
   nfdchar_t* outPath;
   std::vector<nfdu8filteritem_t> items;
   for (auto& [n, s] : filters) items.emplace_back(nfdu8filteritem_t{n.c_str(), s.c_str()});
   auto result = NFD::OpenDialog(outPath, items.data(), items.size());
-  if (result == NFD_OKAY) {
+  if (w.check(result) == NFD_OKAY) {
     callback(outPath);
     NFD::FreePath(outPath);
   }
-  NFD::Quit();
-  return result != NFD_ERROR;
 }
 
-bool ImPlay::openFiles(std::vector<std::pair<std::string, std::string>> filters,
+void ImPlay::openFiles(std::vector<std::pair<std::string, std::string>> filters,
                        std::function<void(std::string, int)> callback) {
-  if (NFD::Init() != NFD_OKAY) return false;
+  ImPlay::NFDWrapper w;
   const nfdpathset_t* outPaths;
   std::vector<nfdu8filteritem_t> items;
   for (auto& [n, s] : filters) items.emplace_back(nfdu8filteritem_t{n.c_str(), s.c_str()});
   auto result = NFD::OpenDialogMultiple(outPaths, items.data(), items.size());
-  if (result == NFD_OKAY) {
+  if (w.check(result) == NFD_OKAY) {
     nfdpathsetsize_t numPaths;
     NFD::PathSet::Count(outPaths, numPaths);
     for (auto i = 0; i < numPaths; i++) {
@@ -308,20 +319,16 @@ bool ImPlay::openFiles(std::vector<std::pair<std::string, std::string>> filters,
     }
     NFD::PathSet::Free(outPaths);
   }
-  NFD::Quit();
-  return result != NFD_ERROR;
 }
 
-bool ImPlay::openFolder(std::function<void(std::string)> callback) {
-  if (NFD::Init() != NFD_OKAY) return false;
+void ImPlay::openFolder(std::function<void(std::string)> callback) {
+  ImPlay::NFDWrapper w;
   nfdchar_t* outPath;
   auto result = NFD::PickFolder(outPath);
-  if (result == NFD_OKAY) {
+  if (w.check(result) == NFD_OKAY) {
     callback(outPath);
     NFD::FreePath(outPath);
   }
-  NFD::Quit();
-  return result != NFD_ERROR;
 }
 
 int ImPlay::openUrl(std::string url) {

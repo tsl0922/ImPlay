@@ -15,7 +15,7 @@
 #include "player.h"
 
 namespace ImPlay {
-Player::Player(Config* config, Dispatch* dispatch, GLFWwindow* window, Mpv* mpv, const char* title) : Views::View() {
+Player::Player(Config* config, Dispatch* dispatch, GLFWwindow* window, Mpv* mpv, const char* title) {
   this->config = config;
   this->dispatch = dispatch;
   this->window = window;
@@ -58,11 +58,6 @@ bool Player::init(OptionParser& parser) {
   return true;
 }
 
-void Player::draw() {
-  drawLogo();
-  cmd->draw();
-}
-
 void Player::drawLogo() {
   if (logoTexture == nullptr || mpv->forceWindow() || fileOpen) return;
 
@@ -94,7 +89,8 @@ void Player::render(int w, int h) {
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();
-    draw();
+    drawLogo();
+    cmd->draw();
     ImGui::Render();
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
   }

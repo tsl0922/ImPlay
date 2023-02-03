@@ -134,7 +134,8 @@ void Window::requestRender() {
 }
 
 void Window::initGLFW(const char* title) {
-  glfwSetErrorCallback([](int error, const char* desc) { print("GLFW Error [{}]: {}\n", error, desc); });
+  glfwSetErrorCallback(
+      [](int error, const char* desc) { fmt::print(fg(fmt::color::red), "GLFW [{}]: {}\n", error, desc); });
   if (!glfwInit()) throw std::runtime_error("Failed to initialize GLFW!");
 
 #ifdef IMGUI_IMPL_OPENGL_ES2

@@ -147,12 +147,19 @@ void Settings::drawFontTab() {
     ImGui::Indent();
     if (ImGui::InputText("##Path", fontPath, IM_ARRAYSIZE(fontPath))) data.Font.Path = fontPath;
     ImGui::SameLine();
+    static std::string error;
+    if (ImGui::IsWindowAppearing()) error = "";
     if (ImGui::Button(ICON_FA_FOLDER_OPEN)) {
-      openFile({{"Font Files", "ttf,ttc,otf"}}, [&](std::string path) {
-        strncpy(fontPath, path.c_str(), IM_ARRAYSIZE(fontPath));
-        data.Font.Path = path;
-      });
+      try {
+        openFile({{"Font Files", "ttf,ttc,otf"}}, [&](std::string path) {
+          strncpy(fontPath, path.c_str(), IM_ARRAYSIZE(fontPath));
+          data.Font.Path = path;
+        });
+      } catch (std::exception &e) {
+        error = e.what();
+      }
     }
+    if (error != "") ImGui::TextWrapped("Error: %s", error.c_str());
     ImGui::Unindent();
     ImGui::Text("Size");
     ImGui::Indent();

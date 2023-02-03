@@ -4,7 +4,6 @@
 #include <map>
 #include <algorithm>
 #include <filesystem>
-#include <nfd.hpp>
 #include "helpers.h"
 #include "command.h"
 
@@ -29,13 +28,7 @@ Command::~Command() {
   delete commandPalette;
 }
 
-void Command::init() {
-  debug->init();
-  if (NFD::Init() != NFD_OKAY)
-    messageBox("Warning", "Failed to init NFD, opening files/folders from gui may not work properly.");
-  else
-    NFD::Quit();
-}
+void Command::init() { debug->init(); }
 
 void Command::draw() {
   ImGuiIO &io = ImGui::GetIO();
@@ -100,7 +93,11 @@ void Command::execute(int n_args, const char **args_) {
 
   const char *cmd = args_[0];
   auto it = commands.find(cmd);
-  if (it != commands.end()) it->second(n_args - 1, args_ + 1);
+  try {
+    if (it != commands.end()) it->second(n_args - 1, args_ + 1);
+  } catch (std::exception &e) {
+    messageBox("Error", format("{}: {}", cmd, e.what()));
+  }
 }
 
 void Command::openMediaFiles(std::function<void(std::string, int)> callback) {

@@ -11,16 +11,14 @@
 #include "command.h"
 #include "dispatch.h"
 #include "helpers.h"
-#include "views/view.h"
 
 namespace ImPlay {
-class Player : public Views::View {
+class Player {
  public:
   Player(Config *config, Dispatch *dispatch, GLFWwindow *window, Mpv *mpv, const char *title);
-  ~Player() override;
+  ~Player();
 
   bool init(OptionParser &parser);
-  void draw() override;
   void drawLogo();
   void render(int w, int h);
   std::atomic_bool &renderGui() { return renderGui_; }

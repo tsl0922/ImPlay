@@ -9,12 +9,14 @@
 #include <string>
 #include <map>
 #include <vector>
+#include <stdexcept>
 #include <utility>
 #include <fmt/format.h>
 #include <fmt/chrono.h>
 #include <fmt/color.h>
 #include <imgui.h>
 #include <imgui_internal.h>
+#include <nfd.hpp>
 
 namespace ImPlay {
 struct OptionParser {
@@ -28,10 +30,10 @@ struct OptionParser {
 inline float scaled(float n) { return n * ImGui::GetFontSize(); }
 inline ImVec2 scaled(const ImVec2& vector) { return vector * ImGui::GetFontSize(); }
 
-bool openFile(std::vector<std::pair<std::string, std::string>> filters, std::function<void(std::string)> callback);
-bool openFiles(std::vector<std::pair<std::string, std::string>> filters,
+void openFile(std::vector<std::pair<std::string, std::string>> filters, std::function<void(std::string)> callback);
+void openFiles(std::vector<std::pair<std::string, std::string>> filters,
                std::function<void(std::string, int)> callback);
-bool openFolder(std::function<void(std::string)> callback);
+void openFolder(std::function<void(std::string)> callback);
 
 int openUrl(std::string url);
 void revealInFolder(std::string path);

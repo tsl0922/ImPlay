@@ -67,9 +67,14 @@ int main(int argc, char* argv[]) {
     return 0;
   }
 
-  if (parser.options.contains("o") || parser.check("video", "no") || parser.check("vid", "no"))
-    return run_headless(parser);
+  try {
+    if (parser.options.contains("o") || parser.check("video", "no") || parser.check("vid", "no"))
+      return run_headless(parser);
 
-  ImPlay::Window window;
-  return window.run(parser);
+    ImPlay::Window window;
+    return window.run(parser);
+  } catch (const std::exception& e) {
+    fmt::print(fg(fmt::color::red), "Error: {}\n", e.what());
+    return 1;
+  }
 }
