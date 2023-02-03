@@ -22,6 +22,9 @@ class Command : public Views::View {
   void draw() override;
   void execute(int n_args, const char **args_);
 
+  bool isMediaFile(std::string file);
+  bool isSubtitleFile(std::string file);
+
  private:
   void openMediaFiles(std::function<void(std::string, int)> callback);
   void openMediaFolder(std::function<void(std::string, int)> callback);
@@ -42,7 +45,6 @@ class Command : public Views::View {
   void drawOpenURL();
   void drawDialog();
   void messageBox(std::string title, std::string msg);
-  bool isMediaType(std::string ext);
 
   GLFWwindow *window = nullptr;
   bool m_openURL = false;

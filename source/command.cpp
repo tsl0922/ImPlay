@@ -116,7 +116,7 @@ void Command::openMediaFolder(std::function<void(std::string, int)> callback) {
     auto fp = std::filesystem::path(reinterpret_cast<char8_t *>(path.data()));
     int i = 0;
     for (const auto &entry : std::filesystem::recursive_directory_iterator(fp)) {
-      if (isMediaType(entry.path().extension().string())) callback(entry.path().string(), i);
+      if (isMediaFile(entry.path().string())) callback(entry.path().string(), i);
       i++;
     }
   });
@@ -293,12 +293,21 @@ void Command::messageBox(std::string title, std::string msg) {
   m_dialog = true;
 }
 
-bool Command::isMediaType(std::string ext) {
+bool Command::isMediaFile(std::string file) {
+  auto ext = std::filesystem::path(file).extension().string();
   if (ext.empty()) return false;
   if (ext[0] == '.') ext = ext.substr(1);
   if (std::find(videoTypes.begin(), videoTypes.end(), ext) != videoTypes.end()) return true;
   if (std::find(audioTypes.begin(), audioTypes.end(), ext) != audioTypes.end()) return true;
   if (std::find(imageTypes.begin(), imageTypes.end(), ext) != imageTypes.end()) return true;
+  return false;
+}
+
+bool Command::isSubtitleFile(std::string file) {
+  auto ext = std::filesystem::path(file).extension().string();
+  if (ext.empty()) return false;
+  if (ext[0] == '.') ext = ext.substr(1);
+  if (std::find(subtitleTypes.begin(), subtitleTypes.end(), ext) != subtitleTypes.end()) return true;
   return false;
 }
 }  // namespace ImPlay
