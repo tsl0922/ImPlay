@@ -24,6 +24,8 @@ ImPlay aims to be mpv compatible, which means almost all mpv features from the [
 - Graphical User Interface
   - Context Menu with most commonly used commands
   - Command Palette to quickly search commands and keys
+  - Quick Settings View with convenient controls
+  - Visual Audio / Video Equalizer Settings
   - Open Dialog for Media Files / Folders
   - Open URL / Path from Clipboard
   - Open DVD / Blu-ray Folder and ISO Image

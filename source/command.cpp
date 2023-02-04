@@ -12,7 +12,7 @@ Command::Command(Config *config, Dispatch *dispatch, Mpv *mpv, GLFWwindow *windo
     : View(config, dispatch, mpv), window(window) {
   about = new Views::About();
   debug = new Views::Debug(config, dispatch, mpv);
-  quick = new Views::Quick(config, dispatch, mpv);
+  quickview = new Views::Quickview(config, dispatch, mpv);
   settings = new Views::Settings(config, dispatch, mpv);
   contextMenu = new Views::ContextMenu(config, dispatch, mpv);
   commandPalette = new Views::CommandPalette(config, dispatch, mpv);
@@ -21,7 +21,7 @@ Command::Command(Config *config, Dispatch *dispatch, Mpv *mpv, GLFWwindow *windo
 Command::~Command() {
   delete about;
   delete debug;
-  delete quick;
+  delete quickview;
   delete settings;
   delete contextMenu;
   delete commandPalette;
@@ -38,7 +38,7 @@ void Command::draw() {
 
   about->draw();
   debug->draw();
-  quick->draw();
+  quickview->draw();
   settings->draw();
   contextMenu->draw();
   commandPalette->draw();
@@ -234,8 +234,8 @@ void Command::openCommandPalette(int n, const char **args) {
 }
 
 void Command::openQuickview(const char *tab) {
-  if (tab != nullptr) quick->setTab(tab);
-  quick->show();
+  if (tab != nullptr) quickview->setTab(tab);
+  quickview->show();
 }
 
 void Command::drawOpenURL() {
