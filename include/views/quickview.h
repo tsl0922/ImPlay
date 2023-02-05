@@ -37,7 +37,7 @@ class Quickview : public View {
   void drawSubtitleTabContent();
 
   void drawAudioEq();
-  void applyAudioEq();
+  void applyAudioEq(bool osd = true);
   void toggleAudioEq();
   void selectAudioEq(int index);
   void setAudioEqValue(int freqIndex, float gain);

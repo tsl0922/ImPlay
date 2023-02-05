@@ -10,6 +10,11 @@ Quickview::Quickview(Config *config, Dispatch *dispatch, Mpv *mpv) : View(config
   addTab("Video", [this]() { drawVideoTabContent(); }, true);
   addTab("Audio", [this]() { drawAudioTabContent(); }, true);
   addTab("Subtitle", [this]() { drawSubtitleTabContent(); }, true);
+
+  mpv->observeEvent(MPV_EVENT_FILE_LOADED, [this](void *data) {
+    updateAudioEqChannels();
+    applyAudioEq(false);
+  });
 }
 
 void Quickview::draw() {
@@ -386,21 +391,20 @@ void Quickview::drawAudioEq() {
   if (!audioEqEnabled) ImGui::EndDisabled();
 }
 
-void Quickview::applyAudioEq() {
+void Quickview::applyAudioEq(bool osd) {
+  std::string message = "Audio Equalizer: Disabled";
+  mpv->command("no-osd af remove @aeq");
   if (audioEqEnabled) {
     if (audioEqIndex < 0) return;
     auto equalizer = audioEqPresets[audioEqIndex];
-    mpv->command("af remove @aeq");
     mpv->commandv("af", "add", equalizer.toFilter("@aeq", audioEqChannels).c_str(), nullptr);
-    mpv->commandv("show-text", format("Audio Equalizer: {}", equalizer.name).c_str(), nullptr);
-  } else {
-    mpv->command("af remove @aeq; show-text \"Audio Equalizer: Disabled\"");
+    message = format("Audio Equalizer: {}", equalizer.name);
   }
+  if (osd) mpv->commandv("show-text", message.c_str(), nullptr);
 }
 
 void Quickview::toggleAudioEq() {
   audioEqEnabled = !audioEqEnabled;
-  updateAudioEqChannels();
   applyAudioEq();
 }
 
@@ -423,11 +427,11 @@ void Quickview::updateAudioEqChannels() {
     for (int i = 0; i < node.u.list->num; i++) {
       if (strcmp(node.u.list->keys[i], "channel-count") == 0) {
         audioEqChannels = node.u.list->values[i].u.int64;
-        return;
+        break;
       }
     }
   }
-  audioEqChannels = 2;
+  mpv_free_node_contents(&node);
 }
 
 std::string Quickview::AudioEqItem::toFilter(const char *name, int channels) {
