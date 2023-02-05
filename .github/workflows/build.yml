@@ -38,7 +38,7 @@ jobs:
           cp ../resources/icon.png implay.png
           DEPLOY_GTK_VERSION=3 ./linuxdeploy-x86_64.AppImage --appdir AppDir --plugin gtk --output appimage \
             --desktop-file implay.desktop --icon-file implay.png
-          mv ImPlay-*.AppImage ImPlay-linux64.AppImage
+          mv ImPlay*.AppImage $(echo ImPlay-*.deb | sed 's/deb/AppImage/')
       - uses: actions/upload-artifact@v3
         with:
           name: ImPlay-linux
@@ -105,6 +105,10 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - uses: actions/download-artifact@v3
+      - run: |
+          for f in ImPlay-*/*; do
+            mv "$f" "${f/ImPlay-*-/ImPlay-dev-}"
+          done
       - uses: rickstaa/action-create-tag@v1
         with:
           tag: continuous
@@ -113,7 +117,7 @@ jobs:
         with:
           commit: ${{ github.sha }}
           tag: continuous
-          artifacts: "ImPlay-*/*"
+          artifacts: "ImPlay-dev-*"
           allowUpdates: true
           prerelease: true
           name: Continuous build
@@ -122,24 +126,24 @@ jobs:
             # Install
             ## Windows
             - MSI
-              - Download `ImPlay-win64.msi`
-              - Run the MSI
+              - Download the msi executable
+              - Run the MSI installer
               - Run ImPlay from Start Menu
             - Zip
-              - Download `ImPlay-win64.zip`
+              - Download the windows zip
               - Extract the zip
               - Run `ImPlay.exe`
             ## macOS
-            - Download `ImPlay-macOS.dmg`
+            - Download the dmg file
             - Double click the dmg to show it's contents
-            - Drag the application to Applications
+            - Drag ImPlay to `Applications` folder
             - Run ImPlay from Launchpad
             ## Linux
             - Debian Package
-              - Download `ImPlay-linux64.deb`
-              - Install: `sudo apt install ./ImPlay-linux64.deb`
+              - Download the deb file
+              - Install: `sudo apt install ./ImPlay-*.deb`
               - Run `ImPlay`
             - AppImage
-              - Download `ImPlay-linux64.AppImage`
-              - Run `chmod u+x ImPlay-linux64.AppImage && ./ImPlay-linux64.AppImage`
+              - Download the AppImage file
+              - Run `chmod u+x ImPlay-*.AppImage && ./ImPlay-*.AppImage`
 

@@ -22,23 +22,23 @@ jobs:
             # Install
             ## Windows
             - MSI
-              - Download `ImPlay-win64.msi`
-              - Run the MSI
+              - Download the msi executable
+              - Run the MSI installer
               - Run ImPlay from Start Menu
             - Zip
-              - Download `ImPlay-win64.zip`
+              - Download the windows zip
               - Extract the zip
               - Run `ImPlay.exe`
             ## macOS
-            - Download `ImPlay-macOS.dmg`
+            - Download the dmg file
             - Double click the dmg to show it's contents
-            - Drag the application to Applications
+            - Drag ImPlay to `Applications` folder
             - Run ImPlay from Launchpad
             ## Linux
             - Debian Package
-              - Download `ImPlay-linux64.deb`
-              - Install: `sudo apt install ./ImPlay-linux64.deb`
+              - Download the deb file
+              - Install: `sudo apt install ./ImPlay-*.deb`
               - Run `ImPlay`
             - AppImage
-              - Download `ImPlay-linux64.AppImage`
-              - Run `chmod u+x ImPlay-linux64.AppImage && ./ImPlay-linux64.AppImage`
+              - Download the AppImage file
+              - Run `chmod u+x ImPlay-*.AppImage && ./ImPlay-*.AppImage`
