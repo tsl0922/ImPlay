@@ -89,7 +89,7 @@ jobs:
         shell: msys2 {0}
         run: |
           mkdir build && cd build
-          cmake -DCMAKE_BUILD_TYPE=RELEASE -DUSE_PATCHED_GLFW=ON -DUSE_OPENGL_ES2=ON ..
+          cmake -DCMAKE_BUILD_TYPE=RELEASE -DUSE_PATCHED_GLFW=ON -DUSE_OPENGL_ES3=ON ..
           cmake --build . --target package
       - uses: actions/upload-artifact@v3
         with:
