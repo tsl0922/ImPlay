@@ -27,7 +27,7 @@ jobs:
           CXX: g++-10
         run: |
           mkdir build && cd build
-          cmake -DCMAKE_BUILD_TYPE=RELEASE -DCMAKE_INSTALL_PREFIX:PATH=/usr ..
+          cmake -DCMAKE_BUILD_TYPE=RELEASE -DCMAKE_INSTALL_PREFIX:PATH=/usr -DCREATE_PACKAGE=ON ..
           cmake --build . --target package
           make install DESTDIR=AppDir
           curl -LO https://github.com/linuxdeploy/linuxdeploy/releases/download/continuous/linuxdeploy-x86_64.AppImage
@@ -61,7 +61,7 @@ jobs:
       - name: Build ImPlay
         run: |
           mkdir build && cd build
-          cmake -DCMAKE_BUILD_TYPE=RELEASE -DUSE_PATCHED_GLFW=ON ..
+          cmake -DCMAKE_BUILD_TYPE=RELEASE -DUSE_PATCHED_GLFW=ON -DCREATE_PACKAGE=ON ..
           cmake --build . --target package
       - uses: actions/upload-artifact@v3
         with:
@@ -89,7 +89,7 @@ jobs:
         shell: msys2 {0}
         run: |
           mkdir build && cd build
-          cmake -DCMAKE_BUILD_TYPE=RELEASE -DUSE_PATCHED_GLFW=ON -DUSE_OPENGL_ES3=ON ..
+          cmake -DCMAKE_BUILD_TYPE=RELEASE -DUSE_PATCHED_GLFW=ON -DUSE_OPENGL_ES3=ON -DCREATE_PACKAGE=ON ..
           cmake --build . --target package
       - uses: actions/upload-artifact@v3
         with:
