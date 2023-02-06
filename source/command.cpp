@@ -84,6 +84,10 @@ void Command::execute(int n_args, const char **args_) {
       {"settings", [&](int n, const char **args) { settings->show(); }},
       {"metrics", [&](int n, const char **args) { debug->show(); }},
       {"command-palette", [&](int n, const char **args) { openCommandPalette(n, args); }},
+      {"show-message",
+       [&](int n, const char **args) {
+         if (n > 1) messageBox(args[0], args[1]);
+       }},
       {"theme",
        [&](int n, const char **args) {
          if (n > 0) ImGui::SetTheme(args[0]);

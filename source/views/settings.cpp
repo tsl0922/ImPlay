@@ -101,7 +101,7 @@ void Settings::drawGeneralTab() {
 
 void Settings::drawInterfaceTab() {
   if (ImGui::BeginTabItem("Interface")) {
-    ImGui::Text("GUI");
+    ImGui::Text("Gui");
     ImGui::Indent();
     ImGui::Checkbox("Enable Docking*", &data.Interface.Docking);
     ImGui::SameLine();
