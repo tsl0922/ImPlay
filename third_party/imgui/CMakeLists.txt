@@ -23,7 +23,4 @@ target_link_libraries(imgui PUBLIC ${CMAKE_DL_LIBS} ${FREETYPE_LIBRARIES} ${GLFW
 if(USE_OPENGL_ES3)
   target_compile_definitions(imgui PRIVATE IMGUI_IMPL_OPENGL_ES3)
   target_link_libraries(imgui PUBLIC ${OPENGL_LIBRARIES})
-elseif(USE_OPENGL_ES2)
-  target_compile_definitions(imgui PRIVATE IMGUI_IMPL_OPENGL_ES2)
-  target_link_libraries(imgui PUBLIC ${OPENGL_LIBRARIES})
 endif()

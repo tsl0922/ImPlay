@@ -6,9 +6,7 @@
 #include <imgui_internal.h>
 #include <imgui_impl_glfw.h>
 #include <imgui_impl_opengl3.h>
-#ifdef IMGUI_IMPL_OPENGL_ES2
-#include <GLES2/gl2.h>
-#elif defined(IMGUI_IMPL_OPENGL_ES3)
+#ifdef IMGUI_IMPL_OPENGL_ES3
 #include <GLES3/gl3.h>
 #else
 #include <GL/gl.h>

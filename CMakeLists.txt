@@ -26,8 +26,7 @@ set(CMAKE_CXX_STANDARD 20)
 
 include(CMakeDependentOption)
 
-option(USE_OPENGL_ES2 "Compile with OpenGL ES 2.0 backend" OFF)
-option(USE_OPENGL_ES3 "Compile with OpenGL ES 3.0 backend" OFF)
+option(USE_OPENGL_ES3 "Compile with OpenGL ES 3.0 loader" OFF)
 option(USE_PATCHED_GLFW "Use patched GLFW to support additional features" OFF)
 cmake_dependent_option(USE_MPV_WIN_BUILD "Use Prebuilt static mpv dll on Windows" ON "WIN32" OFF)
 cmake_dependent_option(USE_XDG_PORTAL "Use xdg-desktop-portal for file dialogs on Linux" OFF "UNIX;NOT APPLE" OFF)
@@ -118,8 +117,6 @@ target_link_libraries(${PROJECT_NAME} PRIVATE ${LINK_LIBS})
 target_compile_definitions(${PROJECT_NAME} PRIVATE APP_VERSION="${GIT_VERSION}")
 if(USE_OPENGL_ES3)
   target_compile_definitions(${PROJECT_NAME} PRIVATE IMGUI_IMPL_OPENGL_ES3)
-elseif(USE_OPENGL_ES2)
-  target_compile_definitions(${PROJECT_NAME} PRIVATE IMGUI_IMPL_OPENGL_ES2)
 endif()
 if(USE_PATCHED_GLFW)
   target_compile_definitions(${PROJECT_NAME} PRIVATE GLFW_PATCHED)
@@ -154,7 +151,7 @@ if(WIN32)
   if(USE_MPV_WIN_BUILD)
     add_dependencies(${PROJECT_NAME} mpv_dev)
   endif()
-  if(USE_OPENGL_ES2 OR USE_OPENGL_ES3)
+  if(USE_OPENGL_ES3)
     ExternalProject_Add(electron_bin
       URL https://github.com/electron/electron/releases/download/v22.1.0/electron-v22.1.0-win32-x64.zip
       URL_HASH SHA1=8ef676e72849b32cc246d31ed6329cadae8740c0

@@ -3,8 +3,6 @@ project(glad)
 
 if(USE_OPENGL_ES3)
   add_library(glad OBJECT src/gles3.c)
-elseif(USE_OPENGL_ES2)
-  add_library(glad OBJECT src/gles2.c)
 else()
   add_library(glad OBJECT src/gl.c)
 endif()

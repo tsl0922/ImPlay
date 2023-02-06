@@ -10,9 +10,7 @@
 #include <algorithm>
 #include <stdexcept>
 #include <thread>
-#ifdef IMGUI_IMPL_OPENGL_ES2
-#include <GLES2/gl2.h>
-#elif defined(IMGUI_IMPL_OPENGL_ES3)
+#ifdef IMGUI_IMPL_OPENGL_ES3
 #include <GLES3/gl3.h>
 #else
 #include <GL/gl.h>
@@ -145,11 +143,6 @@ void Window::initGLFW(const char* title) {
   glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
   glfwWindowHint(GLFW_CONTEXT_CREATION_API, GLFW_EGL_CONTEXT_API);
   glfwWindowHint(GLFW_CLIENT_API, GLFW_OPENGL_ES_API);
-#elif defined(IMGUI_IMPL_OPENGL_ES2)
-  glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 2);
-  glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
-  glfwWindowHint(GLFW_CONTEXT_CREATION_API, GLFW_EGL_CONTEXT_API);
-  glfwWindowHint(GLFW_CLIENT_API, GLFW_OPENGL_ES_API);
 #elif defined(__APPLE__)
   glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
   glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
@@ -182,7 +175,7 @@ void Window::initGLFW(const char* title) {
   glfwSetWindowUserPointer(window, this);
 
   glfwMakeContextCurrent(window);
-#if defined(IMGUI_IMPL_OPENGL_ES2) || defined(IMGUI_IMPL_OPENGL_ES3)
+#ifdef IMGUI_IMPL_OPENGL_ES3
   if (!gladLoadGLES2(glfwGetProcAddress)) throw std::runtime_error("Failed to load GLES 2!");
 #else
   if (!gladLoadGL(glfwGetProcAddress)) throw std::runtime_error("Failed to load GL!");
@@ -308,9 +301,7 @@ void Window::initImGui() {
 
   glfwMakeContextCurrent(window);
   ImGui_ImplGlfw_InitForOpenGL(window, true);
-#ifdef IMGUI_IMPL_OPENGL_ES2
-  ImGui_ImplOpenGL3_Init("#version 100");
-#elif IMGUI_IMPL_OPENGL_ES3
+#ifdef IMGUI_IMPL_OPENGL_ES3
   ImGui_ImplOpenGL3_Init("#version 300 es");
 #elif defined(__APPLE__)
   ImGui_ImplOpenGL3_Init("#version 150");
