@@ -11,6 +11,8 @@ struct ConfigData {
   struct Interface_ {
     std::string Theme = "light";
     float Scale = 0;
+    bool Docking = true;
+    bool Viewports = true;
     bool operator==(const Interface_&) const = default;
   } Interface;
   struct Mpv_ {

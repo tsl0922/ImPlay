@@ -23,6 +23,8 @@ void Config::load() {
 
   inipp::get_value(ini.sections["interface"], "theme", Data.Interface.Theme);
   inipp::get_value(ini.sections["interface"], "scale", Data.Interface.Scale);
+  inipp::get_value(ini.sections["interface"], "docking", Data.Interface.Docking);
+  inipp::get_value(ini.sections["interface"], "viewports", Data.Interface.Viewports);
   inipp::get_value(ini.sections["font"], "path", Data.Font.Path);
   inipp::get_value(ini.sections["font"], "size", Data.Font.Size);
   inipp::get_value(ini.sections["font"], "glyph-range", Data.Font.GlyphRange);
@@ -42,6 +44,8 @@ void Config::load() {
 void Config::save() {
   ini.sections["interface"]["theme"] = Data.Interface.Theme;
   ini.sections["interface"]["scale"] = format("{}", Data.Interface.Scale);
+  ini.sections["interface"]["docking"] = format("{}", Data.Interface.Docking);
+  ini.sections["interface"]["viewports"] = format("{}", Data.Interface.Viewports);
   ini.sections["font"]["path"] = Data.Font.Path;
   ini.sections["font"]["size"] = std::to_string(Data.Font.Size);
   ini.sections["font"]["glyph-range"] = std::to_string(Data.Font.GlyphRange);

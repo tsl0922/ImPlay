@@ -101,6 +101,15 @@ void Settings::drawGeneralTab() {
 
 void Settings::drawInterfaceTab() {
   if (ImGui::BeginTabItem("Interface")) {
+    ImGui::Text("GUI");
+    ImGui::Indent();
+    ImGui::Checkbox("Enable Docking*", &data.Interface.Docking);
+    ImGui::SameLine();
+    ImGui::HelpMarker("Enable ImGui's Docking feature.");
+    ImGui::Checkbox("Enable Viewports*", &data.Interface.Viewports);
+    ImGui::SameLine();
+    ImGui::HelpMarker("Enable ImGui's Multi Viewports feature.");
+    ImGui::Unindent();
     auto themes = ImGui::Themes();
     auto size = themes.size();
     static int current;

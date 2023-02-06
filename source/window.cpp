@@ -293,8 +293,8 @@ void Window::initImGui() {
   ImGuiIO& io = ImGui::GetIO();
   io.IniFilename = nullptr;
   io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
-  io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
-  io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
+  if (config.Data.Interface.Docking) io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
+  if (config.Data.Interface.Viewports) io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
 
   loadFonts();
 
