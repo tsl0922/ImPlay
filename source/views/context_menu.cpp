@@ -246,7 +246,7 @@ void ContextMenu::drawAudioDeviceList() {
 
 void ContextMenu::drawTracklist(const char *type, const char *prop) {
   auto items = mpv->trackList();
-  auto value = mpv->property(prop);
+  char *value = mpv->property(prop);
   if (ImGui::BeginMenuEx("Tracks", ICON_FA_LIST)) {
     if (ImGui::MenuItem("Disable", nullptr, strcmp(value, "no") == 0))
       mpv->commandv("cycle-values", prop, "no", "auto", nullptr);
@@ -259,6 +259,7 @@ void ContextMenu::drawTracklist(const char *type, const char *prop) {
     }
     ImGui::EndMenu();
   }
+  mpv_free(value);
 }
 
 void ContextMenu::drawChapterlist(std::vector<Mpv::ChapterItem> items) {

@@ -86,9 +86,10 @@ bool Quickview::toggleButton(bool toggle, const char *tooltip) {
 void Quickview::drawTracks(const char *type, const char *prop) {
   ImGui::Text("Tracks");
   alignRight(ICON_FA_TOGGLE_ON);
-  const char *state = mpv->property(prop);
+  char *state = mpv->property(prop);
   if (toggleButton(state && !iequals(state, "no"), "Toggle Tracks"))
     mpv->commandv("cycle-values", prop, "no", "auto", nullptr);
+  mpv_free(state);
   if (ImGui::BeginListBox("##tracks", ImVec2(-FLT_MIN, 3 * ImGui::GetTextLineHeightWithSpacing()))) {
     auto items = mpv->trackList();
     if (items.empty()) ImGui::TextDisabled("<Empty>");
