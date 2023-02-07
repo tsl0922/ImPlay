@@ -5,11 +5,11 @@
 
 namespace ImPlay::Views {
 Quickview::Quickview(Config *config, Dispatch *dispatch, Mpv *mpv) : View(config, dispatch, mpv) {
-  addTab("Playlist", [this]() { drawPlaylistTabContent(); });
-  addTab("Chapters", [this]() { drawChaptersTabContent(); });
-  addTab("Video", [this]() { drawVideoTabContent(); }, true);
-  addTab("Audio", [this]() { drawAudioTabContent(); }, true);
-  addTab("Subtitle", [this]() { drawSubtitleTabContent(); }, true);
+  addTab("playlist", "views.quickview.playlist"_i18n, [this]() { drawPlaylistTabContent(); });
+  addTab("chapters", "views.quickview.chapters"_i18n, [this]() { drawChaptersTabContent(); });
+  addTab("video", "views.quickview.video"_i18n, [this]() { drawVideoTabContent(); }, true);
+  addTab("audio", "views.quickview.audio"_i18n, [this]() { drawAudioTabContent(); }, true);
+  addTab("subtitle", "views.quickview.subtitle"_i18n, [this]() { drawSubtitleTabContent(); }, true);
 
   mpv->observeEvent(MPV_EVENT_FILE_LOADED, [this](void *data) {
     updateAudioEqChannels();
@@ -33,14 +33,14 @@ void Quickview::draw() {
     if (ImGui::IsKeyDown(ImGuiKey_Escape) || (!pin && !ImGui::IsWindowFocused(ImGuiFocusedFlags_ChildWindows)))
       m_open = false;
     if (ImGui::BeginTabBar("Quickviewview")) {
-      for (auto &[name, draw, child] : tabs) {
+      for (auto &[name, title, draw, child] : tabs) {
         ImGuiTabItemFlags flags = ImGuiTabItemFlags_None;
         if (iequals(curTab, name) && !tabSwitched) {
           flags |= ImGuiTabItemFlags_SetSelected;
           tabSwitched = true;
         }
-        if (ImGui::BeginTabItem(name, nullptr, flags)) {
-          if (child) ImGui::BeginChild(name);
+        if (ImGui::BeginTabItem(title.c_str(), nullptr, flags)) {
+          if (child) ImGui::BeginChild(name.c_str());
           draw();
           if (child) ImGui::EndChild();
           ImGui::EndTabItem();
@@ -57,15 +57,17 @@ void Quickview::draw() {
   ImGui::PopStyleVar(3);
 }
 
-void Quickview::alignRight(const char* label) {
+void Quickview::alignRight(const char *label) {
   ImGui::SameLine(ImGui::GetContentRegionAvail().x -
                   (ImGui::CalcTextSize(label).x + 2 * ImGui::GetStyle().FramePadding.x));
 }
 
-void Quickview::iconButton(const char *icon, const char *cmd, const char *tooltip, bool sameline) {
+bool Quickview::iconButton(const char *icon, const char *cmd, const char *tooltip, bool sameline) {
   if (sameline) ImGui::SameLine();
-  if (ImGui::Button(format("{}##{}", icon, cmd).c_str())) mpv->command(cmd);
+  bool ret = ImGui::Button(format("{}##{}", icon, cmd).c_str());
+  if (ret) mpv->command(cmd);
   if (tooltip && ImGui::IsItemHovered(ImGuiHoveredFlags_DelayNormal)) ImGui::SetTooltip("%s", tooltip);
+  return ret;
 }
 
 bool Quickview::toggleButton(const char *label, bool toggle, const char *tooltip, ImGuiCol col) {
@@ -83,19 +85,25 @@ bool Quickview::toggleButton(bool toggle, const char *tooltip) {
   return ret;
 }
 
+void Quickview::emptyLabel() {
+  ImGui::BeginDisabled();
+  ImGui::TextUnformatted("views.quickview.empty"_i18n);
+  ImGui::EndDisabled();
+}
+
 void Quickview::drawTracks(const char *type, const char *prop) {
-  ImGui::Text("Tracks");
+  ImGui::TextUnformatted("views.quickview.tracks"_i18n);
   alignRight(ICON_FA_TOGGLE_ON);
   char *state = mpv->property(prop);
-  if (toggleButton(state && !iequals(state, "no"), "Toggle Tracks"))
+  if (toggleButton(state && !iequals(state, "no"), "views.quickview.tracks.toggle"_i18n))
     mpv->commandv("cycle-values", prop, "no", "auto", nullptr);
   mpv_free(state);
   if (ImGui::BeginListBox("##tracks", ImVec2(-FLT_MIN, 3 * ImGui::GetTextLineHeightWithSpacing()))) {
     auto items = mpv->trackList();
-    if (items.empty()) ImGui::TextDisabled("<Empty>");
+    if (items.empty()) emptyLabel();;
     for (auto &item : items) {
       if (item.type != type) continue;
-      auto title = item.title.empty() ? format("Track {}", item.id) : item.title;
+      auto title = item.title.empty() ? format("views.quickview.tracks.item"_i18n, item.id) : item.title;
       if (!item.lang.empty()) title += format(" [{}]", item.lang);
       ImGui::PushID(item.id);
       if (ImGui::Selectable("", item.selected)) mpv->property(prop, std::to_string(item.id).c_str());
@@ -112,14 +120,17 @@ void Quickview::drawPlaylistTabContent() {
   auto style = ImGui::GetStyle();
   auto pos = mpv->property<int64_t, MPV_FORMAT_INT64>("playlist-pos");
 
-  iconButton(ICON_FA_SEARCH, "script-message-to implay command-palette playlist", nullptr, false);
-  iconButton(ICON_FA_SYNC, "cycle-values loop-playlist inf no", "Loop");
-  iconButton(ICON_FA_RANDOM, "playlist-shuffle", "Shuffle");
+  iconButton(ICON_FA_SEARCH, "script-message-to implay command-palette playlist",
+             "views.quickview.playlist.search"_i18n, false);
+  iconButton(ICON_FA_SYNC, "cycle-values loop-playlist inf no", "views.quickview.playlist.loop"_i18n);
+  iconButton(ICON_FA_RANDOM, "playlist-shuffle", "views.quickview.playlist.shuffle"_i18n);
   ImGui::SameLine(ImGui::GetContentRegionAvail().x -
                   3 * (ImGui::CalcTextSize(ICON_FA_PLUS).x + style.FramePadding.x + style.ItemSpacing.x));
-  iconButton(ICON_FA_PLUS, "script-message-to implay playlist-add-files", "Add Files", false);
-  iconButton(ICON_FA_FOLDER_PLUS, "script-message-to implay playlist-add-folder", "Add Folder");
-  iconButton(ICON_FA_TRASH_ALT, "playlist-clear", "Clear");
+  iconButton(ICON_FA_PLUS, "script-message-to implay playlist-add-files", "views.quickview.playlist.add_files"_i18n,
+             false);
+  iconButton(ICON_FA_FOLDER_PLUS, "script-message-to implay playlist-add-folder",
+             "views.quickview.playlist.add_folders"_i18n);
+  iconButton(ICON_FA_TRASH_ALT, "playlist-clear", "views.quickview.playlist.clear"_i18n);
   ImGui::Separator();
 
   if (ImGui::BeginListBox("##playlist", ImVec2(-FLT_MIN, -FLT_MIN))) {
@@ -128,34 +139,39 @@ void Quickview::drawPlaylistTabContent() {
     auto drawContextmenu = [&](Mpv::PlayItem *item = nullptr) {
       bool enabled = item != nullptr;
       int id = enabled ? item->id : -1;
-      if (ImGui::MenuItem("Play", nullptr, nullptr, enabled))
+      if (ImGui::MenuItem("views.quickview.playlist.menu.play"_i18n, nullptr, nullptr, enabled))
         mpv->property<int64_t, MPV_FORMAT_INT64>("playlist-pos", id);
-      if (ImGui::MenuItem("Play Next", nullptr, nullptr, enabled))
+      if (ImGui::MenuItem("views.quickview.playlist.menu.play_next"_i18n, nullptr, nullptr, enabled))
         mpv->commandv("playlist-move", std::to_string(id).c_str(), std::to_string(pos + 1).c_str(), nullptr);
       ImGui::Separator();
-      if (ImGui::MenuItem("Move to first", nullptr, nullptr, enabled))
+      if (ImGui::MenuItem("views.quickview.playlist.menu.move_first"_i18n, nullptr, nullptr, enabled))
         mpv->commandv("playlist-move", std::to_string(id).c_str(), "0", nullptr);
-      if (ImGui::MenuItem("Move to last", nullptr, nullptr, enabled))
+      if (ImGui::MenuItem("views.quickview.playlist.menu.move_last"_i18n, nullptr, nullptr, enabled))
         mpv->commandv("playlist-move", std::to_string(id).c_str(), std::to_string(items.size()).c_str(), nullptr);
-      if (ImGui::MenuItem("Remove", nullptr, nullptr, enabled))
+      if (ImGui::MenuItem("views.quickview.playlist.menu.remove"_i18n, nullptr, nullptr, enabled))
         mpv->commandv("playlist-remove", std::to_string(id).c_str(), nullptr);
       ImGui::Separator();
-      if (ImGui::MenuItem("Copy Path", nullptr, nullptr, enabled)) ImGui::SetClipboardText(item->path.c_str());
-      if (ImGui::MenuItem("Reveal in Folder", nullptr, nullptr, enabled)) revealInFolder(item->path);
+      if (ImGui::MenuItem("views.quickview.playlist.menu.copy_path"_i18n, nullptr, nullptr, enabled))
+        ImGui::SetClipboardText(item->path.c_str());
+      if (ImGui::MenuItem("views.quickview.playlist.menu.reveal"_i18n, nullptr, nullptr, enabled))
+        revealInFolder(item->path);
       ImGui::Separator();
-      if (ImGui::MenuItem("Search")) mpv->command("script-message-to implay command-palette playlist");
-      if (ImGui::MenuItem("Shuffle")) mpv->command("playlist-shuffle");
-      if (ImGui::MenuItem("Loop")) mpv->command("cycle-values loop-playlist inf no");
+      if (ImGui::MenuItem("views.quickview.playlist.search"_i18n))
+        mpv->command("script-message-to implay command-palette playlist");
+      if (ImGui::MenuItem("views.quickview.playlist.shuffle"_i18n)) mpv->command("playlist-shuffle");
+      if (ImGui::MenuItem("views.quickview.playlist.loop"_i18n)) mpv->command("cycle-values loop-playlist inf no");
       ImGui::Separator();
-      if (ImGui::MenuItem("Add Files")) mpv->command("script-message-to implay playlist-add-files");
-      if (ImGui::MenuItem("Add Folders")) mpv->command("script-message-to implay playlist-add-folder");
-      if (ImGui::MenuItem("Clear")) mpv->command("playlist-clear");
+      if (ImGui::MenuItem("views.quickview.playlist.add_files"_i18n))
+        mpv->command("script-message-to implay playlist-add-files");
+      if (ImGui::MenuItem("views.quickview.playlist.add_folders"_i18n))
+        mpv->command("script-message-to implay playlist-add-folder");
+      if (ImGui::MenuItem("views.quickview.playlist.clear"_i18n)) mpv->command("playlist-clear");
     };
-    if (items.empty()) ImGui::TextDisabled("<Empty>");
+    if (items.empty()) emptyLabel();
     for (auto &item : items) {
       std::string title = item.title;
       if (title.empty() && !item.filename.empty()) title = item.filename;
-      if (title.empty()) title = format("Item {}", item.id + 1);
+      if (title.empty()) title = format("views.quickview.playlist.item"_i18n, item.id + 1);
       ImGui::PushID(item.id);
       if (ImGui::Selectable("", selected == item.id)) selected = item.id;
       if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(0))
@@ -184,7 +200,7 @@ void Quickview::drawChaptersTabContent() {
   auto items = mpv->chapterList();
   auto pos = mpv->property<int64_t, MPV_FORMAT_INT64>("chapter");
   if (ImGui::BeginListBox("##chapters", ImVec2(-FLT_MIN, -FLT_MIN))) {
-    if (items.empty()) ImGui::TextDisabled("<Empty>");
+    if (items.empty()) emptyLabel();
     for (auto &item : items) {
       auto title = item.title.empty() ? format("Chapter {}", item.id + 1) : item.title;
       auto time = format("{:%H:%M:%S}", std::chrono::duration<int>((int)item.time));
@@ -206,67 +222,73 @@ void Quickview::drawVideoTabContent() {
   drawTracks("video", "vid");
   ImGui::NewLine();
 
-  ImGui::Text("Rotate");
+  ImGui::TextUnformatted("views.quickview.video.rotate"_i18n);
   const char *rotates[] = {"0", "90", "180", "270"};
   for (auto rotate : rotates) {
     if (ImGui::Button(format("{}°", rotate).c_str())) mpv->commandv("set", "video-rotate", rotate, nullptr);
     ImGui::SameLine();
   }
-  iconButton(ICON_FA_UNDO, "add video-rotate -1", "Rotate Left", false);
-  iconButton(ICON_FA_REDO, "add video-rotate 1", "Rotate Right", true);
+  iconButton(ICON_FA_UNDO, "add video-rotate -1", "views.quickview.video.rotate_left"_i18n, false);
+  iconButton(ICON_FA_REDO, "add video-rotate 1", "views.quickview.video.rotate_right"_i18n, true);
   ImGui::NewLine();
 
-  ImGui::Text("Scale");
+  ImGui::TextUnformatted("views.quickview.video.scale"_i18n);
   const float scales[] = {0.25f, 0.5f, 0.75f, 1.0f, 1.5f, 2.0f};
   for (auto scale : scales) {
     if (ImGui::Button(format("{}%", (int)(scale * 100)).c_str()))
       mpv->commandv("set", "window-scale", std::to_string(scale).c_str(), nullptr);
     ImGui::SameLine();
   }
-  iconButton(ICON_FA_MINUS, "add window-scale -0.1", "Scale Down", false);
-  iconButton(ICON_FA_PLUS, "add window-scale 0.1", "Scale Up");
+  iconButton(ICON_FA_MINUS, "add window-scale -0.1", "views.quickview.video.scale_down"_i18n, false);
+  iconButton(ICON_FA_PLUS, "add window-scale 0.1", "views.quickview.video.scale_up"_i18n);
   ImGui::NewLine();
 
-  ImGui::Text("PanScan");
-  iconButton(ICON_FA_SEARCH_MINUS, "add video-zoom -0.1", "Zoom In", false);
-  iconButton(ICON_FA_SEARCH_PLUS, "add video-zoom 0.1", "Zoom Out");
-  iconButton(ICON_FA_ARROW_LEFT, "add video-pan-x -0.1", "Move Left");
-  iconButton(ICON_FA_ARROW_RIGHT, "add video-pan-x 0.1", "Move Right");
-  iconButton(ICON_FA_ARROW_UP, "add video-pan-y -0.1", "Move Up");
-  iconButton(ICON_FA_ARROW_DOWN, "add video-pan-y 0.1", "Move Down");
-  iconButton(ICON_FA_MINUS, "add panscan -0.1", "PanScan Decrease");
-  iconButton(ICON_FA_PLUS, "add panscan 0.1", "PanScan Increase");
-  iconButton(ICON_FA_UNDO, "set video-zoom 0; set panscan 0; set video-pan-x 0 ; set video-pan-y 0", "Reset");
+  ImGui::TextUnformatted("views.quickview.video.panscan"_i18n);
+  iconButton(ICON_FA_MINUS, "add panscan -0.1", "views.quickview.video.panscan.dec"_i18n, false);
+  iconButton(ICON_FA_PLUS, "add panscan 0.1", "views.quickview.video.panscan.inc"_i18n);
+  iconButton(ICON_FA_ARROW_LEFT, "add video-pan-x -0.1", "views.quickview.video.panscan.move_left"_i18n);
+  iconButton(ICON_FA_ARROW_RIGHT, "add video-pan-x 0.1", "views.quickview.video.panscan.move_right"_i18n);
+  iconButton(ICON_FA_ARROW_UP, "add video-pan-y -0.1", "views.quickview.video.panscan.move_up"_i18n);
+  iconButton(ICON_FA_ARROW_DOWN, "add video-pan-y 0.1", "views.quickview.video.panscan.move_down"_i18n);
+  iconButton(ICON_FA_SEARCH_MINUS, "add video-zoom -0.1", "views.quickview.video.panscan.zoom_in"_i18n);
+  iconButton(ICON_FA_SEARCH_PLUS, "add video-zoom 0.1", "views.quickview.video.panscan.zoom_out"_i18n);
+  iconButton(ICON_FA_UNDO, "set video-zoom 0; set panscan 0; set video-pan-x 0 ; set video-pan-y 0",
+             "views.quickview.video.panscan.reset"_i18n);
   ImGui::NewLine();
 
-  ImGui::Text("Aspect Ratio");
+  ImGui::TextUnformatted("views.quickview.video.aspect_ratio"_i18n);
   const char *ratios[] = {"16:9", "16:10", "4:3", "2.35:1", "1.85:1", "1:1"};
   for (auto ratio : ratios) {
     if (ImGui::Button(ratio)) mpv->commandv("set", "video-aspect", ratio, nullptr);
     ImGui::SameLine();
   }
-  iconButton(ICON_FA_UNDO, "set video-aspect -1", "Reset", false);
+  iconButton(ICON_FA_UNDO, "set video-aspect -1", "views.quickview.video.aspect_ratio.reset"_i18n, false);
   ImGui::SameLine();
   static char ratio[10] = {0};
   ImGui::SetNextItemWidth(scaled(4));
-  if (ImGui::InputTextWithHint("##Aspect Ratio", "Custom", ratio, IM_ARRAYSIZE(ratio),
-                               ImGuiInputTextFlags_EnterReturnsTrue)) {
+  if (ImGui::InputTextWithHint("##Aspect Ratio", "views.quickview.video.aspect_ratio.custom"_i18n, ratio,
+                               IM_ARRAYSIZE(ratio), ImGuiInputTextFlags_EnterReturnsTrue)) {
     mpv->commandv("set", "video-aspect", ratio, nullptr);
     ratio[0] = '\0';
   }
   ImGui::NewLine();
 
-  ImGui::Text("Misc");
-  if (ImGui::Button("HW Decoding")) mpv->command("cycle-values hwdec auto no");
+  ImGui::TextUnformatted("views.quickview.video.misc"_i18n);
+  if (ImGui::Button("views.quickview.video.hw_decoding"_i18n)) mpv->command("cycle-values hwdec auto no");
   ImGui::SameLine();
-  if (ImGui::Button("Deinterlace")) mpv->command("cycle deinterlace");
+  if (ImGui::Button("views.quickview.video.deinterlace"_i18n)) mpv->command("cycle deinterlace");
   ImGui::NewLine();
   ImGui::Separator();
   ImGui::NewLine();
 
-  ImGui::Text("Equalizer");
+  ImGui::TextUnformatted("views.quickview.video.equalizer"_i18n);
   ImGui::Spacing();
-  const char *eq[] = {"brightness", "contrast", "saturation", "gamma", "hue"};
+  static const char *eq[] = {"brightness", "contrast", "saturation", "gamma", "hue"};
+  static std::vector<std::string> eq_labels = {
+      "views.quickview.video.equalizer.brightness"_i18n, "views.quickview.video.equalizer.contrast"_i18n,
+      "views.quickview.video.equalizer.saturation"_i18n, "views.quickview.video.equalizer.gamma"_i18n,
+      "views.quickview.video.equalizer.hue"_i18n,
+  };
   static int equalizer[IM_ARRAYSIZE(eq)] = {
       (int)mpv->property<int64_t, MPV_FORMAT_INT64>("brightness"),
       (int)mpv->property<int64_t, MPV_FORMAT_INT64>("contrast"),
@@ -282,9 +304,7 @@ void Quickview::drawVideoTabContent() {
       mpv->commandv("set", eq[i], "0", nullptr);
     }
     ImGui::SameLine();
-    std::string label = eq[i];
-    label[0] = std::toupper(label[0]);
-    if (ImGui::SliderInt(label.c_str(), &equalizer[i], -100, 100))
+    if (ImGui::SliderInt(eq_labels[i].c_str(), &equalizer[i], -100, 100))
       mpv->commandv("set", eq[i], std::to_string(equalizer[i]).c_str(), nullptr);
   }
   ImGui::EndGroup();
@@ -294,20 +314,20 @@ void Quickview::drawAudioTabContent() {
   drawTracks("audio", "aid");
   ImGui::NewLine();
 
-  ImGui::Text("Volume");
+  ImGui::TextUnformatted("views.quickview.audio.volume"_i18n);
   static int volume = (int)mpv->property<int64_t, MPV_FORMAT_INT64>("volume");
   if (ImGui::SliderInt("##Volume", &volume, 0, 200, "%d%%"))
     mpv->commandv("set", "volume", std::to_string(volume).c_str(), nullptr);
   ImGui::SameLine();
   bool mute = mpv->property<int, MPV_FORMAT_FLAG>("mute");
-  if (toggleButton(ICON_FA_VOLUME_MUTE, mute, "Mute")) mpv->command("cycle mute");
+  if (toggleButton(ICON_FA_VOLUME_MUTE, mute, "views.quickview.audio.mute"_i18n)) mpv->command("cycle mute");
   ImGui::NewLine();
 
-  ImGui::Text("Delay");
+  ImGui::TextUnformatted("views.quickview.audio.delay"_i18n);
   static float delay = (float)mpv->property<double, MPV_FORMAT_DOUBLE>("audio-delay");
   if (ImGui::SliderFloat("##Delay", &delay, -10, 10, "%.1fs"))
     mpv->commandv("set", "audio-delay", format("{:.1f}", delay).c_str(), nullptr);
-  iconButton(ICON_FA_UNDO, "set audio-delay 0", "Reset");
+  if (iconButton(ICON_FA_UNDO, "set audio-delay 0", "views.quickview.audio.delay.reset"_i18n)) delay = 0;
   ImGui::NewLine();
   ImGui::Separator();
   ImGui::NewLine();
@@ -318,33 +338,33 @@ void Quickview::drawAudioTabContent() {
 void Quickview::drawSubtitleTabContent() {
   drawTracks("sub", "sid");
 
-  iconButton(ICON_FA_ARROW_UP, "add sub-pos -1", "Move Subtitle Up", false);
-  iconButton(ICON_FA_ARROW_DOWN, "add sub-pos 1", "Move Subtitle Down");
-  iconButton(ICON_FA_REDO, "set sub-pos 100", "Reset Subtitle Position");
-  iconButton(ICON_FA_EYE_SLASH, "cycle sub-visibility", "Show/Hide Subtitle");
+  iconButton(ICON_FA_ARROW_UP, "add sub-pos -1", "views.quickview.subtitle.move_up"_i18n, false);
+  iconButton(ICON_FA_ARROW_DOWN, "add sub-pos 1", "views.quickview.subtitle.move_down"_i18n);
+  iconButton(ICON_FA_REDO, "set sub-pos 100", "views.quickview.subtitle.reset_pos"_i18n);
+  iconButton(ICON_FA_EYE_SLASH, "cycle sub-visibility", "views.quickview.subtitle.toggle"_i18n);
   alignRight(ICON_FA_PLUS);
-  iconButton(ICON_FA_PLUS, "script-message-to implay load-sub", "Load External Subtitles..", false);
+  iconButton(ICON_FA_PLUS, "script-message-to implay load-sub", "views.quickview.subtitle.load"_i18n, false);
   ImGui::Separator();
   ImGui::NewLine();
 
-  ImGui::Text("Scale");
+  ImGui::TextUnformatted("views.quickview.subtitle.scale"_i18n);
   static float scale = (float)mpv->property<double, MPV_FORMAT_DOUBLE>("sub-scale");
   if (ImGui::SliderFloat("##Scale", &scale, 0, 4, "%.1f"))
     mpv->commandv("set", "sub-scale", format("{:.1f}", scale).c_str(), nullptr);
-  iconButton(ICON_FA_UNDO, "set sub-scale 1", "Reset");
+  if (iconButton(ICON_FA_UNDO, "set sub-scale 1", "views.quickview.subtitle.scale.reset"_i18n)) scale = 1;
   ImGui::NewLine();
 
-  ImGui::Text("Delay");
+  ImGui::TextUnformatted("views.quickview.subtitle.delay"_i18n);
   static float delay = (float)mpv->property<double, MPV_FORMAT_DOUBLE>("sub-delay");
   if (ImGui::SliderFloat("##Delay", &delay, -10, 10, "%.1fs"))
     mpv->commandv("set", "sub-delay", format("{:.1f}", delay).c_str(), nullptr);
-  iconButton(ICON_FA_UNDO, "set sub-delay 0", "Reset");
+  if (iconButton(ICON_FA_UNDO, "set sub-delay 0", "views.quickview.subtitle.delay.reset"_i18n)) delay = 0;
 }
 
 void Quickview::drawAudioEq() {
-  ImGui::Text("Equalizer");
+  ImGui::TextUnformatted("views.quickview.audio.equalizer"_i18n);
   alignRight(ICON_FA_TOGGLE_ON);
-  if (toggleButton(audioEqEnabled, "Toggle Equalizer")) toggleAudioEq();
+  if (toggleButton(audioEqEnabled, "views.quickview.audio.equalizer.toggle"_i18n)) toggleAudioEq();
   ImGui::Spacing();
 
   ImGui::SetCursorPosX(ImGui::GetCursorPosX() + scaled(1));
@@ -356,13 +376,13 @@ void Quickview::drawAudioEq() {
   static float gain[FREQ_COUNT] = {0};
   for (int i = 0; i < pSize; i++) {
     auto item = audioEqPresets[i];
-    if (toggleButton(item.name, audioEqIndex == i)) {
+    if (toggleButton(item.name.c_str(), audioEqIndex == i)) {
       selectAudioEq(i);
       for (int j = 0; j < FREQ_COUNT; j++) gain[j] = (double)item.values[j] / 12;
     }
     lineWidth += ImGui::GetItemRectSize().x + ImGui::GetStyle().ItemSpacing.x;
     if (i < pSize - 1) {
-      if (lineWidth + ImGui::CalcTextSize(audioEqPresets[i + 1].name).x < availWidth)
+      if (lineWidth + ImGui::CalcTextSize(audioEqPresets[i + 1].name.c_str()).x < availWidth)
         ImGui::SameLine();
       else
         lineWidth = 0;
@@ -393,13 +413,13 @@ void Quickview::drawAudioEq() {
 }
 
 void Quickview::applyAudioEq(bool osd) {
-  std::string message = "Audio Equalizer: Disabled";
+  std::string message = "views.quickview.audio.equalizer.msg.disabled"_i18n;
   mpv->command("no-osd af remove @aeq");
   if (audioEqEnabled) {
     if (audioEqIndex < 0) return;
     auto equalizer = audioEqPresets[audioEqIndex];
     mpv->commandv("af", "add", equalizer.toFilter("@aeq", audioEqChannels).c_str(), nullptr);
-    message = format("Audio Equalizer: {}", equalizer.name);
+    message = format("views.quickview.audio.equalizer.msg"_i18n, equalizer.name);
   }
   if (osd) mpv->commandv("show-text", message.c_str(), nullptr);
 }

@@ -23,6 +23,8 @@ Window::Window() {
   const char* title = "ImPlay";
 
   config.load();
+  getLang() = config.Data.Interface.Lang;
+
   initGLFW(title);
   initImGui();
 

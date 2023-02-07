@@ -1,6 +1,7 @@
 #pragma once
 #include <functional>
 #include <vector>
+#include "helpers.h"
 #include "view.h"
 
 namespace ImPlay::Views {
@@ -16,15 +17,16 @@ class Quickview : public View {
   }
 
  private:
-  #define FREQ_COUNT 10
+#define FREQ_COUNT 10
   struct AudioEqItem {
-    const char *name;
+    std::string name;
     int values[FREQ_COUNT];
     std::string toFilter(const char *name, int channels = 2);
   };
 
   struct Tab {
-    const char *name;
+    std::string name;
+    std::string title;
     std::function<void()> draw;
     bool child;
   };
@@ -43,11 +45,14 @@ class Quickview : public View {
   void setAudioEqValue(int freqIndex, float gain);
   void updateAudioEqChannels();
 
-  void alignRight(const char* label);
-  void iconButton(const char *icon, const char* cmd, const char *tooltip = nullptr, bool sameline = true);
-  bool toggleButton(const char* label, bool toggle, const char *tooltip = nullptr, ImGuiCol col = ImGuiCol_Button);
+  void alignRight(const char *label);
+  bool iconButton(const char *icon, const char *cmd, const char *tooltip = nullptr, bool sameline = true);
+  bool toggleButton(const char *label, bool toggle, const char *tooltip = nullptr, ImGuiCol col = ImGuiCol_Button);
   bool toggleButton(bool toggle, const char *tooltip = nullptr);
-  void addTab(const char *name, std::function<void()> draw, bool child = false) { tabs.push_back({name, draw, child}); }
+  void emptyLabel();
+  void addTab(std::string name, std::string title, std::function<void()> draw, bool child = false) {
+    tabs.push_back({name, title, draw, child});
+  }
 
   bool tabSwitched = false;
   std::string curTab = "Video";
@@ -55,25 +60,25 @@ class Quickview : public View {
 
   const char *audioEqFreqs[FREQ_COUNT] = {"31.25", "62.5", "125", "250", "500", "1k", "2k", "4k", "8k", "16k"};
   std::vector<AudioEqItem> audioEqPresets = {
-      {"Flat", {0, 0, 0, 0, 0, 0, 0, 0, 0, 0}},
-      {"Classical", {0, 0, 0, 0, 0, 0, -41, -41, -41, -53}},
-      {"Club", {0, 0, 47, 29, 29, 29, 17, 0, 0, 0}},
-      {"Dance", {53, 41, 11, 0, 0, -29, -41, -41, 0, 0}},
-      {"Full bass", {53, 53, 53, 29, 5, -23, -47, -59, -65, -65}},
-      {"Full bass and treble", {41, 29, 0, -41, -23, 5, 47, 65, 71, 71}},
-      {"Full treble", {-53, -53, -53, -23, 11, 65, 95, 95, 95, 95}},
-      {"Headphones", {23, 65, 29, -17, -11, 5, 23, 53, 71, 83}},
-      {"Large Hall", {59, 59, 29, 29, 0, -23, -23, -23, 0, 0}},
-      {"Live", {-23, 0, 23, 29, 29, 29, 23, 11, 11, 11}},
-      {"Party", {41, 41, 0, 0, 0, 0, 0, 0, 41, 41}},
-      {"Pop", {-5, 23, 41, 47, 29, 0, -11, -11, -5, -5}},
-      {"Reggae", {0, 0, 0, -29, 0, 35, 35, 0, 0, 0}},
-      {"Rock", {47, 23, 29, -47, -17, 23, 47, 65, 65, 65}},
-      {"Ska", {-11, -23, -23, 0, 23, 29, 47, 53, 65, 53}},
-      {"Soft", {23, 5, 0, -11, 0, 23, 47, 53, 65, 71}},
-      {"Soft rock", {23, 23, 11, 0, -23, -29, -17, 0, 11, 47}},
-      {"Techno", {47, 29, 0, -29, -23, 0, 47, 53, 53, 47}},
-      {"Custom", {0, 0, 0, 0, 0, 0, 0, 0, 0, 0}},
+      {i18n("views.quickview.audio.equalizer.presets.flat"), {0, 0, 0, 0, 0, 0, 0, 0, 0, 0}},
+      {i18n("views.quickview.audio.equalizer.presets.classical"), {0, 0, 0, 0, 0, 0, -41, -41, -41, -53}},
+      {i18n("views.quickview.audio.equalizer.presets.club"), {0, 0, 47, 29, 29, 29, 17, 0, 0, 0}},
+      {i18n("views.quickview.audio.equalizer.presets.dance"), {53, 41, 11, 0, 0, -29, -41, -41, 0, 0}},
+      {i18n("views.quickview.audio.equalizer.presets.full_bass"), {53, 53, 53, 29, 5, -23, -47, -59, -65, -65}},
+      {i18n("views.quickview.audio.equalizer.presets.full_bass_and_treble"), {41, 29, 0, -41, -23, 5, 47, 65, 71, 71}},
+      {i18n("views.quickview.audio.equalizer.presets.full_treble"), {-53, -53, -53, -23, 11, 65, 95, 95, 95, 95}},
+      {i18n("views.quickview.audio.equalizer.presets.headphones"), {23, 65, 29, -17, -11, 5, 23, 53, 71, 83}},
+      {i18n("views.quickview.audio.equalizer.presets.large_hall"), {59, 59, 29, 29, 0, -23, -23, -23, 0, 0}},
+      {i18n("views.quickview.audio.equalizer.presets.live"), {-23, 0, 23, 29, 29, 29, 23, 11, 11, 11}},
+      {i18n("views.quickview.audio.equalizer.presets.party"), {41, 41, 0, 0, 0, 0, 0, 0, 41, 41}},
+      {i18n("views.quickview.audio.equalizer.presets.pop"), {-5, 23, 41, 47, 29, 0, -11, -11, -5, -5}},
+      {i18n("views.quickview.audio.equalizer.presets.reggae"), {0, 0, 0, -29, 0, 35, 35, 0, 0, 0}},
+      {i18n("views.quickview.audio.equalizer.presets.rock"), {47, 23, 29, -47, -17, 23, 47, 65, 65, 65}},
+      {i18n("views.quickview.audio.equalizer.presets.ska"), {-11, -23, -23, 0, 23, 29, 47, 53, 65, 53}},
+      {i18n("views.quickview.audio.equalizer.presets.soft"), {23, 5, 0, -11, 0, 23, 47, 53, 65, 71}},
+      {i18n("views.quickview.audio.equalizer.presets.soft_rock"), {23, 23, 11, 0, -23, -29, -17, 0, 11, 47}},
+      {i18n("views.quickview.audio.equalizer.presets.techno"), {47, 29, 0, -29, -23, 0, 47, 53, 53, 47}},
+      {i18n("views.quickview.audio.equalizer.custom"), {0, 0, 0, 0, 0, 0, 0, 0, 0, 0}},
   };
   int audioEqIndex = -1;
   int audioEqChannels = 2;

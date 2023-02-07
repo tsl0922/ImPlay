@@ -6,9 +6,7 @@
 #include "views/debug.h"
 
 namespace ImPlay::Views {
-Debug::Debug(Config* config, Dispatch *dispatch, Mpv* mpv) : View(config, dispatch, mpv) {
-  console = new Console(mpv);
-}
+Debug::Debug(Config* config, Dispatch* dispatch, Mpv* mpv) : View(config, dispatch, mpv) { console = new Console(mpv); }
 
 Debug::~Debug() { delete console; }
 
@@ -26,10 +24,10 @@ void Debug::draw() {
   ImGui::SetNextWindowSize(ImVec2(wSize.x * 0.4f, wSize.y * 0.8f), ImGuiCond_FirstUseEver);
   ImGui::SetNextWindowPos(ImVec2(wPos.x + wSize.x * 0.2f, wPos.y + wSize.y * 0.5f), ImGuiCond_FirstUseEver,
                           ImVec2(0.2f, 0.5f));
-  if (ImGui::Begin("Metrics & Debug", &m_open, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoScrollbar)) {
+  if (ImGui::Begin("views.debug.title"_i18n, &m_open, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoScrollbar)) {
     drawHeader();
-    drawProperties("Options", "options");
-    drawProperties("Properties", "property-list");
+    drawProperties("views.debug.options"_i18n, "options");
+    drawProperties("views.debug.properties"_i18n, "property-list");
     drawBindings();
     drawCommands();
     drawConsole();
@@ -53,15 +51,16 @@ void Debug::drawHeader() {
   ImGui::TextColored(style.Colors[ImGuiCol_CheckMark], "FPS: %.2f", io.Framerate);
   if (ImGui::IsItemClicked(ImGuiMouseButton_Left)) m_metrics = !m_metrics;
   mpv_free(version);
-
-  ImGui::TextWrapped("NOTE: playback may become very slow when Properties are expanded.");
+  ImGui::BeginDisabled();
+  ImGui::TextUnformatted("views.debug.hint"_i18n);
+  ImGui::EndDisabled();
   ImGui::Spacing();
 }
 
 void Debug::drawConsole() {
   ImGui::SetNextItemOpen(true, ImGuiCond_Once);
   if (m_node != "Console") ImGui::SetNextItemOpen(false, ImGuiCond_Always);
-  if (!ImGui::CollapsingHeader("Console & Logs")) return;
+  if (!ImGui::CollapsingHeader("views.debug.console"_i18n)) return;
   m_node = "Console";
   console->draw();
 }
@@ -69,7 +68,7 @@ void Debug::drawConsole() {
 void Debug::drawBindings() {
   auto bindings = mpv->bindingList();
   if (m_node != "Bindings") ImGui::SetNextItemOpen(false, ImGuiCond_Always);
-  if (!ImGui::CollapsingHeader(format("Bindings [{}]", bindings.size()).c_str())) return;
+  if (!ImGui::CollapsingHeader(format("views.debug.bindings"_i18n, bindings.size()).c_str())) return;
   m_node = "Bindings";
 
   if (ImGui::BeginListBox("input-bindings", ImVec2(-FLT_MIN, -FLT_MIN))) {
@@ -137,17 +136,17 @@ static std::vector<std::pair<std::string, std::string>> formatCommands(mpv_node&
 void Debug::drawCommands() {
   auto node = mpv->property<mpv_node, MPV_FORMAT_NODE>("command-list");
   if (m_node != "Commands") ImGui::SetNextItemOpen(false, ImGuiCond_Always);
-  if (!ImGui::CollapsingHeader(format("Commands [{}]", node.u.list->num).c_str())) {
+  if (!ImGui::CollapsingHeader(format("views.debug.commands"_i18n, node.u.list->num).c_str())) {
     mpv_free_node_contents(&node);
     return;
   }
   m_node = "Commands";
 
   static char buf[256] = "";
-  ImGui::Text("Filter:");
+  ImGui::TextUnformatted("views.debug.commands.filter"_i18n);
   ImGui::SameLine();
   ImGui::PushItemWidth(-1);
-  ImGui::InputText("Filter##commands", buf, IM_ARRAYSIZE(buf));
+  ImGui::InputText("##Filter.commands", buf, IM_ARRAYSIZE(buf));
   ImGui::PopItemWidth();
   if (ImGui::BeginListBox("command-list", ImVec2(-FLT_MIN, -FLT_MIN))) {
     auto commands = formatCommands(node);
@@ -183,7 +182,7 @@ void Debug::drawProperties(const char* title, const char* key) {
   static int format = mask;
   static char buf[256] = "";
   ImGui::AlignTextToFramePadding();
-  ImGui::Text("Format:");
+  ImGui::TextUnformatted("views.debug.properties.format"_i18n);
   ImGui::SameLine();
   ImGui::CheckboxFlags("ALL", &format, mask);
   ImGui::SameLine();
@@ -204,10 +203,10 @@ void Debug::drawProperties(const char* title, const char* key) {
   ImGui::SameLine();
   ImGui::CheckboxFlags("BYTE_ARRAY", &format, 1 << MPV_FORMAT_BYTE_ARRAY);
   ImGui::Unindent();
-  ImGui::Text("Filter:");
+  ImGui::TextUnformatted("views.debug.properties.filter"_i18n);
   ImGui::SameLine();
   ImGui::PushItemWidth(-1);
-  ImGui::InputText("Filter", buf, IM_ARRAYSIZE(buf));
+  ImGui::InputText("##Filter.properties", buf, IM_ARRAYSIZE(buf));
   ImGui::PopItemWidth();
   auto posY = ImGui::GetCursorScreenPos().y;
   if (format > 0 && ImGui::BeginListBox(key, ImVec2(-FLT_MIN, -FLT_MIN))) {
@@ -235,7 +234,7 @@ void Debug::drawPropNode(const char* name, mpv_node& node, int depth) {
     ImVec4 color = style.Colors[ImGuiCol_CheckMark];
     switch (prop.format) {
       case MPV_FORMAT_NONE:
-        value = "Invalid";
+        value = i18n("views.debug.properties.invalid");
         color = style.Colors[ImGuiCol_TextDisabled];
         break;
       case MPV_FORMAT_OSD_STRING:
@@ -260,9 +259,10 @@ void Debug::drawPropNode(const char* name, mpv_node& node, int depth) {
     ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(0, ImGui::GetStyle().ItemSpacing.y));
     ImGui::Selectable("", false);
     if (ImGui::BeginPopupContextItem(format("##menu_{}", title).c_str())) {
-      if (ImGui::MenuItem("Copy")) ImGui::SetClipboardText(format("{}={}", title, value).c_str());
-      if (ImGui::MenuItem("Copy Name")) ImGui::SetClipboardText(title);
-      if (ImGui::MenuItem("Copy value")) ImGui::SetClipboardText(value.c_str());
+      if (ImGui::MenuItem("views.debug.properties.menu.copy"_i18n))
+        ImGui::SetClipboardText(format("{}={}", title, value).c_str());
+      if (ImGui::MenuItem("views.debug.properties.menu.copy_name"_i18n)) ImGui::SetClipboardText(title);
+      if (ImGui::MenuItem("views.debug.properties.menu.copy_value"_i18n)) ImGui::SetClipboardText(value.c_str());
       ImGui::EndPopup();
     }
     ImGui::SameLine();
@@ -378,7 +378,9 @@ ImVec4 Debug::Console::LogColor(const char* level) {
 }
 
 void Debug::Console::draw() {
-  ImGui::TextWrapped("Enter 'HELP' for help, 'TAB' for completion, 'Up/Down' for history.");
+  ImGui::BeginDisabled();
+  ImGui::TextUnformatted("views.debug.console.tip"_i18n);
+  ImGui::EndDisabled();
 
   if (ImGui::BeginPopup("Log Level")) {
     const char* items[] = {"fatal", "error", "warn", "info", "v", "debug", "trace", "no"};
@@ -392,18 +394,16 @@ void Debug::Console::draw() {
     ImGui::EndPopup();
   }
 
-  Filter.Draw("Filter##log", scaled(8));
+  Filter.Draw(format("{}##log", "views.debug.console.filter"_i18n).c_str(), scaled(8));
   ImGui::SameLine();
   ImGui::SetNextItemWidth(scaled(3));
-  ImGui::InputInt("Limit", &LogLimit, 0);
+  ImGui::InputInt("views.debug.console.log.limit"_i18n, &LogLimit, 0);
   ImGui::SameLine();
   ImGui::Text("(%d/%d)", Items.Size, LogLimit);
   ImGui::SameLine();
-  if (ImGui::Button("Level")) ImGui::OpenPopup("Log Level");
+  if (ImGui::Button("views.debug.console.log.level"_i18n)) ImGui::OpenPopup("Log Level");
   ImGui::SameLine();
-  ImGui::HelpMarker(
-      "The log level and limit changed here won't be saved.\n"
-      "Update log settings in Help-Settings to control startup config.");
+  ImGui::HelpMarker("views.debug.console.log.hint"_i18n);
   ImGui::Separator();
 
   // Reserve enough left-over height for 1 separator + 1 input text
@@ -412,9 +412,9 @@ void Debug::Console::draw() {
   if (ImGui::BeginChild("ScrollingRegion", ImVec2(0, -footer_height_to_reserve), false,
                         ImGuiWindowFlags_HorizontalScrollbar)) {
     if (ImGui::BeginPopupContextWindow()) {
-      ImGui::MenuItem("Auto-scroll", nullptr, &AutoScroll);
-      if (ImGui::MenuItem("Clear")) ClearLog();
-      ImGui::MenuItem("Copy", nullptr, &copy_to_clipboard);
+      ImGui::MenuItem("views.debug.console.log.menu.auto_scroll"_i18n, nullptr, &AutoScroll);
+      if (ImGui::MenuItem("views.debug.console.log.menu.clear"_i18n)) ClearLog();
+      ImGui::MenuItem("views.debug.console.log.menu.copy"_i18n, nullptr, &copy_to_clipboard);
       ImGui::EndPopup();
     }
 
@@ -469,7 +469,8 @@ void Debug::Console::draw() {
   ImGuiInputTextFlags input_text_flags = ImGuiInputTextFlags_EnterReturnsTrue | ImGuiInputTextFlags_EscapeClearsAll |
                                          ImGuiInputTextFlags_CallbackCompletion | ImGuiInputTextFlags_CallbackHistory;
   if (ImGui::InputTextWithHint(
-          "Input", "press ENTER to execute", InputBuf, IM_ARRAYSIZE(InputBuf), input_text_flags,
+          "views.debug.console.input"_i18n, "views.debug.console.input.tip"_i18n, InputBuf, IM_ARRAYSIZE(InputBuf),
+          input_text_flags,
           [](ImGuiInputTextCallbackData* data) {
             Console* console = (Console*)data->UserData;
             return console->TextEditCallback(data);

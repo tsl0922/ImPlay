@@ -9,6 +9,7 @@
 namespace ImPlay {
 struct ConfigData {
   struct Interface_ {
+    std::string Lang = "en-US";
     std::string Theme = "light";
     float Scale = 0;
     bool Docking = true;

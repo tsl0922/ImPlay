@@ -27,6 +27,31 @@ struct OptionParser {
   bool check(std::string key, std::string value);
 };
 
+struct LangData {
+  std::string code;
+  std::string title;
+  std::map<std::string, std::string> entries;
+
+  LangData(std::string code, std::string title) : code(code), title(title) {}
+  std::string get(std::string& key);
+};
+class LangStr {
+ public:
+  explicit LangStr(std::string str) : m_str(str) {}
+  operator std::string() const { return m_str; };
+  operator std::string_view() const { return m_str; };
+  operator const char*() const { return m_str.c_str(); }
+
+ private:
+  std::string m_str;
+};
+
+std::map<std::string, LangData>& getLangs();
+std::string& getLangFallback();
+std::string& getLang();
+std::string i18n(std::string key);
+inline LangStr operator""_i18n(const char* key, size_t) { return LangStr(i18n(key)); }
+
 inline float scaled(float n) { return n * ImGui::GetFontSize(); }
 inline ImVec2 scaled(const ImVec2& vector) { return vector * ImGui::GetFontSize(); }
 

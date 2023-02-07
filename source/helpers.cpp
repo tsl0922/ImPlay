@@ -5,12 +5,10 @@
 #include <cstdlib>
 #include <cctype>
 #include <cstring>
-#include <string>
-#include <filesystem>
-#include <fmt/format.h>
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
 #include <romfs/romfs.hpp>
+#include <nlohmann/json.hpp>
 #ifdef _WIN32
 #include <windows.h>
 #include <shlobj.h>
@@ -339,6 +337,62 @@ void ImPlay::OptionParser::parse(int argc, char** argv) {
 bool ImPlay::OptionParser::check(std::string key, std::string value) {
   auto it = options.find(key);
   return it != options.end() && it->second == value;
+}
+
+std::string ImPlay::LangData::get(std::string& key) {
+  auto it = entries.find(key);
+  if (it != entries.end()) return it->second;
+  return key;
+}
+
+std::map<std::string, ImPlay::LangData>& ImPlay::getLangs() {
+  static std::map<std::string, ImPlay::LangData> langs;
+  static bool loaded = false;
+  if (loaded) return langs;
+
+  auto list = romfs::list("lang");
+  for (auto& path : list) {
+    auto file = romfs::get(path);
+    auto j = nlohmann::json::parse(file.data(), file.data() + file.size());
+    const auto& code = j["code"];
+    const auto& title = j["title"];
+    const auto& entries = j["entries"];
+    if (!code.is_string() && !title.is_string() && !entries.is_object()) continue;
+    if (j.contains("fallback")) {
+      const auto& fallback = j["fallback"];
+      if (fallback.is_boolean() && fallback.get<bool>()) ImPlay::getLangFallback() = code.get<std::string>();
+    }
+    auto lang = ImPlay::LangData{code.get<std::string>(), title.get<std::string>()};
+    for (auto& [key, value] : entries.items()) {
+      if (!value.is_string()) continue;
+      lang.entries[key] = value.get<std::string>();
+    }
+    langs.insert({lang.code, lang});
+  }
+  loaded = true;
+  return langs;
+}
+
+std::string& ImPlay::getLangFallback() {
+  static std::string fallback = "en-US";
+  return fallback;
+}
+
+std::string& ImPlay::getLang() {
+  static std::string lang = "en-US";
+  return lang;
+}
+
+std::string ImPlay::i18n(std::string key) {
+  auto langs = ImPlay::getLangs();
+  std::string value;
+  auto it = langs.find(getLang());
+  if (it != langs.end()) value = it->second.get(key);
+  if (value.empty() || value == key) {
+    it = langs.find(ImPlay::getLangFallback());
+    if (it != langs.end()) value = it->second.get(key);
+  }
+  return value;
 }
 
 namespace ImPlay {

@@ -21,6 +21,7 @@ void Config::load() {
   ini.parse(file);
   ini.interpolate();
 
+  inipp::get_value(ini.sections["interface"], "lang", Data.Interface.Lang);
   inipp::get_value(ini.sections["interface"], "theme", Data.Interface.Theme);
   inipp::get_value(ini.sections["interface"], "scale", Data.Interface.Scale);
   inipp::get_value(ini.sections["interface"], "docking", Data.Interface.Docking);
@@ -42,6 +43,7 @@ void Config::load() {
 }
 
 void Config::save() {
+  ini.sections["interface"]["lang"] = Data.Interface.Lang;
   ini.sections["interface"]["theme"] = Data.Interface.Theme;
   ini.sections["interface"]["scale"] = format("{}", Data.Interface.Scale);
   ini.sections["interface"]["docking"] = format("{}", Data.Interface.Docking);

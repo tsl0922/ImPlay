@@ -50,7 +50,7 @@ void CommandPalette::drawInput() {
 
   ImGui::PushItemWidth(-1);
   ImGui::InputTextWithHint(
-      "##command_input", "TIP: Press SPACE to select result", buffer.data(), buffer.size(),
+      "##command_input", "views.command_palette.tip"_i18n, buffer.data(), buffer.size(),
       ImGuiInputTextFlags_CallbackEdit | ImGuiInputTextFlags_EnterReturnsTrue,
       [](ImGuiInputTextCallbackData* data) -> int {
         auto cp = static_cast<CommandPalette*>(data->UserData);
