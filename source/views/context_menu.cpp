@@ -213,7 +213,7 @@ void ContextMenu::draw() {
       }
       ImGui::Separator();
       if (ImGui::MenuItem("menu.tools.debug"_i18n)) mpv->command("script-message-to implay metrics");
-      if (ImGui::MenuItem("menu.tools.open_config_dir"_i18n)) openUrl(datadir());
+      if (ImGui::MenuItem("menu.tools.open_config_dir"_i18n)) openUrl(config->dir());
       ImGui::EndMenu();
     }
     if (ImGui::BeginMenuEx("menu.help"_i18n, ICON_FA_QUESTION_CIRCLE)) {

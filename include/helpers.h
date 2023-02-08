@@ -72,7 +72,7 @@ void openFolder(std::function<void(std::string)> callback);
 int openUrl(std::string url);
 void revealInFolder(std::string path);
 
-std::string datadir(std::string subdir = "implay");
+std::string datadir();
 }  // namespace ImPlay
 
 namespace ImGui {

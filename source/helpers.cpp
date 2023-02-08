@@ -5,6 +5,7 @@
 #include <cstdlib>
 #include <cctype>
 #include <cstring>
+#include <filesystem>
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
 #include <romfs/romfs.hpp>
@@ -476,7 +477,7 @@ void ImPlay::revealInFolder(std::string path) {
 #endif
 }
 
-std::string ImPlay::datadir(std::string subdir) {
+std::string ImPlay::datadir() {
   std::string dataDir;
 #ifdef _WIN32
   wchar_t* dir = nullptr;
@@ -503,9 +504,5 @@ std::string ImPlay::datadir(std::string subdir) {
   else if (home != nullptr)
     dataDir = format("{}/.config", home);
 #endif
-  if (!subdir.empty()) {
-    if (!dataDir.empty()) dataDir += std::filesystem::path::preferred_separator;
-    dataDir += subdir;
-  }
   return dataDir;
 }

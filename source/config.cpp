@@ -8,12 +8,13 @@
 
 namespace ImPlay {
 Config::Config() {
-  auto dataDir = datadir();
-  if (!dataDir.empty()) {
-    std::filesystem::create_directories(dataDir);
-    configFile = format("{}/implay.conf", dataDir);
-  } else
-    configFile = "implay.conf";
+  auto path = std::filesystem::path(datadir()) / "implay";
+  auto file = path / "implay.conf";
+
+  std::filesystem::create_directories(path);
+
+  configDir = path.string();
+  configFile = file.string();
 }
 
 void Config::load() {

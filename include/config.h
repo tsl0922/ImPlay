@@ -61,6 +61,8 @@ class Config {
   void load();
   void save();
 
+  std::string dir() const { return configDir; }
+
   const ImWchar* buildGlyphRanges();
 
   ConfigData Data;
@@ -69,5 +71,6 @@ class Config {
  private:
   inipp::Ini<char> ini;
   std::string configFile;
+  std::string configDir;
 };
 }  // namespace ImPlay
