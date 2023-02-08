@@ -244,17 +244,18 @@ void Command::openQuickview(const char *tab) {
 
 void Command::drawOpenURL() {
   if (!m_openURL) return;
-  ImGui::OpenPopup("Open URL");
+  ImGui::OpenPopup("views.dialog.open_url.title"_i18n);
 
   ImVec2 wSize = ImGui::GetMainViewport()->WorkSize;
   ImGui::SetNextWindowSize(ImVec2(std::min(wSize.x * 0.8f, scaled(50)), 0), ImGuiCond_Always);
   ImGui::SetNextWindowPos(ImGui::GetMainViewport()->GetWorkCenter(), ImGuiCond_Always, ImVec2(0.5f, 0.5f));
-  if (ImGui::BeginPopupModal("Open URL", &m_openURL, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove)) {
+  if (ImGui::BeginPopupModal("views.dialog.open_url.title"_i18n, &m_openURL,
+                             ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove)) {
     if (ImGui::IsKeyDown(ImGuiKey_Escape)) m_openURL = false;
     static char url[256] = {0};
     bool loadfile = false;
     ImGui::SetNextItemWidth(-1);
-    if (ImGui::InputTextWithHint("##Input URL", "Input URL Here..", url, IM_ARRAYSIZE(url),
+    if (ImGui::InputTextWithHint("##Input URL", "views.dialog.open_url.hint"_i18n, url, IM_ARRAYSIZE(url),
                                  ImGuiInputTextFlags_EnterReturnsTrue)) {
       if (url[0] != '\0') loadfile = true;
     }
@@ -262,10 +263,10 @@ void Command::drawOpenURL() {
     ImGui::Separator();
     ImGui::Spacing();
     ImGui::SetCursorPosX(ImGui::GetContentRegionAvail().x - scaled(10));
-    if (ImGui::Button("Cancel", ImVec2(scaled(5), 0))) m_openURL = false;
+    if (ImGui::Button("views.dialog.open_url.cancel"_i18n, ImVec2(scaled(5), 0))) m_openURL = false;
     ImGui::SameLine();
     if (url[0] == '\0') ImGui::BeginDisabled();
-    if (ImGui::Button("OK", ImVec2(scaled(5), 0))) loadfile = true;
+    if (ImGui::Button("views.dialog.open_url.ok"_i18n, ImVec2(scaled(5), 0))) loadfile = true;
     if (url[0] == '\0') ImGui::EndDisabled();
     if (loadfile) {
       m_openURL = false;
