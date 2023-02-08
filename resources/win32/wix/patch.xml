@@ -8,7 +8,7 @@
             <RegistryValue Type="string" Value="[#CM_FP_ImPlay.exe]" />
             <RegistryValue Type="string" Name="Path" Value="[INSTALL_ROOT]" />
         </RegistryKey>
-        <!-- Default Programs -->
+        <!-- Default Programs Capabilities -->
         <RegistryKey Root="HKLM" Key="SOFTWARE\Clients\Media\ImPlay\Capabilities">
             <RegistryValue Type="string" Name="ApplicationName" Value="ImPlay" />
             <RegistryValue Type="string" Name="ApplicationDescription" Value="ImPlay Media Player" />
@@ -1126,5 +1126,7 @@
                 <Verb Id="open" TargetFile="CM_FP_ImPlay.exe" Argument="&quot;%1&quot;" />
             </Extension>
         </ProgId>
+        <!-- Default Programs entry -->
+        <RegistryValue Root="HKLM" Key="SOFTWARE\RegisteredApplications" Name="ImPlay" Value="SOFTWARE\Clients\Media\ImPlay\Capabilities" Type="string" />
 	</CPackWiXFragment>
 </CPackWiXPatch>
