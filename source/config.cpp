@@ -8,7 +8,7 @@
 
 namespace ImPlay {
 Config::Config() {
-  auto path = std::filesystem::path(datadir()) / "implay";
+  auto path = dataPath();
   auto file = path / "implay.conf";
 
   std::filesystem::create_directories(path);

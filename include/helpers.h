@@ -5,6 +5,7 @@
 #include <codecvt>
 #include <locale>
 #include <algorithm>
+#include <filesystem>
 #include <functional>
 #include <string>
 #include <map>
@@ -72,7 +73,7 @@ void openFolder(std::function<void(std::string)> callback);
 int openUrl(std::string url);
 void revealInFolder(std::string path);
 
-std::string datadir();
+std::filesystem::path dataPath();
 }  // namespace ImPlay
 
 namespace ImGui {

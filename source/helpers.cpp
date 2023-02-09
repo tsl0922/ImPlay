@@ -5,7 +5,6 @@
 #include <cstdlib>
 #include <cctype>
 #include <cstring>
-#include <filesystem>
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
 #include <romfs/romfs.hpp>
@@ -477,9 +476,14 @@ void ImPlay::revealInFolder(std::string path) {
 #endif
 }
 
-std::string ImPlay::datadir() {
+std::filesystem::path ImPlay::dataPath() {
   std::string dataDir;
 #ifdef _WIN32
+  std::wstring path(MAX_PATH, '\0');
+  if (GetModuleFileNameW(nullptr, path.data(), path.length()) > 0) {
+    auto dir = std::filesystem::path(path).parent_path() / "portable_config";
+    if (std::filesystem::exists(dir) && std::filesystem::is_directory(dir)) return dir;
+  }
   wchar_t* dir = nullptr;
   if (SUCCEEDED(SHGetKnownFolderPath(FOLDERID_RoamingAppData, KF_FLAG_CREATE, nullptr, &dir))) {
     dataDir = WideToUTF8(dir);
@@ -504,5 +508,5 @@ std::string ImPlay::datadir() {
   else if (home != nullptr)
     dataDir = format("{}/.config", home);
 #endif
-  return dataDir;
+  return std::filesystem::path(dataDir) / "implay";
 }
