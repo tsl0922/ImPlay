@@ -253,24 +253,24 @@ void Window::initGLFW(const char* title) {
 }
 
 void Window::loadFonts() {
+  float fontSize = config.Data.Font.Size;
+  float iconSize = fontSize - 2;
   float scale = config.Data.Interface.Scale;
   if (scale == 0) {
-#ifdef __APPLE__
-    scale = 1.0f;
-#else
     float xscale, yscale;
-    glfwGetWindowContentScale(window, &xscale, &yscale);
+    auto monitor = glfwGetWindowMonitor(window);
+    if (monitor == nullptr) monitor = glfwGetPrimaryMonitor();
+    glfwGetMonitorContentScale(monitor, &xscale, &yscale);
     scale = std::max(xscale, yscale);
-#endif
   }
-  float fontSize = std::floor(config.Data.Font.Size * scale);
-  float iconSize = fontSize - 2;
-  ImGuiIO& io = ImGui::GetIO();
-  io.DisplayFramebufferScale = ImVec2(scale, scale);
+  if (scale <= 0) scale = 1.0f;
+  fontSize = std::floor(fontSize * scale);
+  iconSize = std::floor(iconSize * scale);
 
+  ImGuiIO& io = ImGui::GetIO();
   ImGui::SetTheme(config.Data.Interface.Theme.c_str());
   ImGui::GetStyle().ScaleAllSizes(scale);
-
+  
   io.Fonts->Clear();
 
   ImFontConfig cfg;
