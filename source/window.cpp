@@ -49,6 +49,11 @@ Window::~Window() {
 }
 
 bool Window::run(OptionParser& parser) {
+  if (config.Data.Mpv.UseConfig)
+    parser.options["config"] = "yes";
+  else
+    parser.options["config-dir"] = config.dir();
+
   mpv->wakeupCb() = [](Mpv* ctx) { glfwPostEmptyEvent(); };
   mpv->updateCb() = [this](Mpv* ctx) {
     if (ctx->wantRender()) requestRender();
@@ -270,21 +275,20 @@ void Window::loadFonts() {
   ImGuiIO& io = ImGui::GetIO();
   ImGui::SetTheme(config.Data.Interface.Theme.c_str());
   ImGui::GetStyle().ScaleAllSizes(scale);
-  
+
   io.Fonts->Clear();
 
   ImFontConfig cfg;
   cfg.SizePixels = fontSize;
   io.Fonts->AddFontDefault(&cfg);
   cfg.MergeMode = true;
-  ImWchar fontAwesomeRange[] = {ICON_MIN_FA, ICON_MAX_FA, 0};
-  const ImWchar* unifontRange = config.buildGlyphRanges();
-  io.Fonts->AddFontFromMemoryCompressedTTF(font_awesome_compressed_data, font_awesome_compressed_size, iconSize, &cfg,
-                                           fontAwesomeRange);
+  ImWchar fa_range[] = {ICON_MIN_FA, ICON_MAX_FA, 0};
+  const ImWchar* unifont_range = config.buildGlyphRanges();
+  io.Fonts->AddFontFromMemoryCompressedTTF(fa_compressed_data, fa_compressed_size, iconSize, &cfg, fa_range);
   if (config.Data.Font.Path.empty())
-    io.Fonts->AddFontFromMemoryCompressedTTF(unifont_compressed_data, unifont_compressed_size, 0, &cfg, unifontRange);
+    io.Fonts->AddFontFromMemoryCompressedTTF(unifont_compressed_data, unifont_compressed_size, 0, &cfg, unifont_range);
   else
-    io.Fonts->AddFontFromFileTTF(config.Data.Font.Path.c_str(), 0, &cfg, unifontRange);
+    io.Fonts->AddFontFromFileTTF(config.Data.Font.Path.c_str(), 0, &cfg, unifont_range);
 
   io.Fonts->Build();
 }

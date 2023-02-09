@@ -267,7 +267,7 @@
         "views.settings.font.path": "路径",
         "views.settings.font.path.help": "如果为空，将会使用内置的字体.",
         "views.settings.font.size": "大小",
-        "views.settings.font.glyph_ranges": "字形范围",
+        "views.settings.font.glyph_ranges": "字形范围*",
         "views.settings.font.glyph_ranges.help": "要在界面显示非英文字符时需设置此选项.",
         "views.settings.font.glyph_ranges.chinese": "中文",
         "views.settings.font.glyph_ranges.cyrillic": "西里尔文",
