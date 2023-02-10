@@ -268,6 +268,7 @@ void Debug::drawPropNode(const char* name, mpv_node& node, int depth) {
     ImGui::BulletText("%s", title);
     ImGui::SameLine(ImGui::GetContentRegionAvail().x * 0.5f);
     ImGui::TextColored(color, "%s", value.c_str());
+    if (ImGui::IsItemHovered(ImGuiHoveredFlags_DelayNormal)) ImGui::SetTooltip("%s", value.c_str());
     ImGui::PopStyleVar();
     ImGui::PopID();
   };
