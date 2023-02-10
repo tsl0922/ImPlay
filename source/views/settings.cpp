@@ -75,10 +75,20 @@ void Settings::drawGeneralTab() {
     ImGui::SameLine();
     ImGui::HelpMarker("views.settings.general.mpv.wid.help"_i18n);
 #endif
+    ImGui::Checkbox("views.settings.general.recent.play_last"_i18n, &data.Recent.SpaceToPlayLast);
     ImGui::Checkbox("views.settings.general.mpv.watch_later"_i18n, &data.Mpv.WatchLater);
     ImGui::SameLine();
     ImGui::HelpMarker("views.settings.general.mpv.watch_later.help"_i18n);
     ImGui::Checkbox("views.settings.general.window.save"_i18n, &data.Window.Save);
+    ImGui::Spacing();
+    ImGui::Text("views.settings.general.recent.limit"_i18n);
+    ImGui::SameLine();
+    ImGui::SetNextItemWidth(scaled(6));
+    if (ImGui::InputInt("##recent_limit", &data.Recent.Limit, 1, 0, ImGuiInputTextFlags_CharsDecimal)) {
+      appliers.push_back([this]() {
+        if (data.Recent.Limit == 0) config->clearRecentFiles();
+      });
+    }
     ImGui::Unindent();
     ImGui::TextUnformatted("views.settings.general.debug"_i18n);
     ImGui::SameLine();

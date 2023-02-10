@@ -3,6 +3,8 @@
 
 #pragma once
 #include <map>
+#include <vector>
+#include <string>
 #include <imgui.h>
 #include <inipp.h>
 
@@ -40,6 +42,11 @@ struct ConfigData {
     int LogLimit = 500;
     bool operator==(const Debug_&) const = default;
   } Debug;
+  struct Recent_ {
+    int Limit = 10;
+    bool SpaceToPlayLast = false;
+    bool operator==(const Recent_&) const = default;
+  } Recent;
   bool operator==(const ConfigData&) const = default;
 };
 
@@ -62,6 +69,9 @@ class Config {
   void save();
 
   std::string dir() const { return configDir; }
+  std::vector<std::string> getRecentFiles();
+  void addRecentFile(const std::string& file);
+  void clearRecentFiles();
 
   const ImWchar* buildGlyphRanges();
 
@@ -72,5 +82,7 @@ class Config {
   inipp::Ini<char> ini;
   std::string configFile;
   std::string configDir;
+
+  std::vector<std::string> recentFiles;
 };
 }  // namespace ImPlay

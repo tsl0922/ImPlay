@@ -234,7 +234,7 @@ std::vector<Mpv::BindingItem> Mpv::bindingList() {
 }
 
 std::vector<std::string> Mpv::profileList() {
-  char *payload = property<char *, MPV_FORMAT_STRING>("profile-list");
+  auto payload = property<char *, MPV_FORMAT_STRING>("profile-list");
   std::vector<std::string> profiles;
   auto j = nlohmann::json::parse(payload);
   for (auto &elm : j) {
@@ -242,7 +242,6 @@ std::vector<std::string> Mpv::profileList() {
     if (name != "builtin-pseudo-gui" && name != "encoding" && name != "libmpv" && name != "pseudo-gui")
       profiles.emplace_back(name);
   }
-  mpv_free(payload);
   return profiles;
 }
 

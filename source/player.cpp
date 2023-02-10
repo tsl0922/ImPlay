@@ -49,6 +49,8 @@ bool Player::init(OptionParser& parser) {
 
   mpv->property<int64_t, MPV_FORMAT_INT64>("volume", config->Data.Mpv.Volume);
 
+  if (config->Data.Recent.SpaceToPlayLast) mpv->command("keybind SPACE 'script-message-to implay play-pause'");
+
   for (auto& path : parser.paths) mpv->commandv("loadfile", path.c_str(), "append-play", nullptr);
 
   mpv->command("keybind MBTN_RIGHT ignore");
@@ -57,7 +59,7 @@ bool Player::init(OptionParser& parser) {
 }
 
 void Player::drawLogo() {
-  if (logoTexture == nullptr || mpv->forceWindow() || fileOpen) return;
+  if (logoTexture == nullptr || mpv->forceWindow() || !idle) return;
 
   const ImGuiViewport* viewport = ImGui::GetMainViewport();
   ImGuiWindowFlags flags = ImGuiWindowFlags_NoNav | ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoInputs |
@@ -79,7 +81,7 @@ void Player::render(int w, int h) {
   glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
   glClear(GL_COLOR_BUFFER_BIT);
 
-  if (hasFile() || mpv->forceWindow()) mpv->render(w, h);
+  if (!idle || mpv->forceWindow()) mpv->render(w, h);
 
   bool renderGui = renderGui_;
 
@@ -188,10 +190,15 @@ void Player::initMpv() {
     }
   });
 
-  mpv->observeEvent(MPV_EVENT_START_FILE, [this](void* data) { fileOpen = true; });
+  mpv->observeEvent(MPV_EVENT_FILE_LOADED, [this](void* data) {
+    auto path = mpv->property("path");
+    if (path != "" && path != "bd://" && path != "dvd://") config->addRecentFile(path);
+  });
+
+  mpv->observeEvent(MPV_EVENT_START_FILE, [this](void* data) { idle = false; });
 
   mpv->observeEvent(MPV_EVENT_END_FILE, [this](void* data) {
-    fileOpen = false;
+    idle = true;
     glfwSetWindowTitle(window, title);
     glfwSetWindowAspectRatio(window, GLFW_DONT_CARE, GLFW_DONT_CARE);
   });

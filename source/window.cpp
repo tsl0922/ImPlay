@@ -210,13 +210,13 @@ void Window::initGLFW(const char* title) {
   });
   glfwSetWindowRefreshCallback(window, [](GLFWwindow* window) {
     auto win = static_cast<Window*>(glfwGetWindowUserPointer(window));
-    if (win->player->hasFile()) win->player->renderGui() = false;
+    if (!win->player->isIdle()) win->player->renderGui() = false;
     win->requestRender();
     win->dispatch.process();
   });
   glfwSetWindowPosCallback(window, [](GLFWwindow* window, int x, int y) {
     auto win = static_cast<Window*>(glfwGetWindowUserPointer(window));
-    if (win->player->hasFile()) win->player->renderGui() = false;
+    if (!win->player->isIdle()) win->player->renderGui() = false;
     win->requestRender();
     win->dispatch.process();
   });

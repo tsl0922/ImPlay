@@ -94,10 +94,9 @@ void Quickview::emptyLabel() {
 void Quickview::drawTracks(const char *type, const char *prop) {
   ImGui::TextUnformatted("views.quickview.tracks"_i18n);
   alignRight(ICON_FA_TOGGLE_ON);
-  char *state = mpv->property(prop);
-  if (toggleButton(state && !iequals(state, "no"), "views.quickview.tracks.toggle"_i18n))
+  auto state = mpv->property(prop);
+  if (toggleButton(!iequals(state, "no"), "views.quickview.tracks.toggle"_i18n))
     mpv->commandv("cycle-values", prop, "no", "auto", nullptr);
-  mpv_free(state);
   if (ImGui::BeginListBox("##tracks", ImVec2(-FLT_MIN, 3 * ImGui::GetTextLineHeightWithSpacing()))) {
     auto items = mpv->trackList();
     if (items.empty()) emptyLabel();;

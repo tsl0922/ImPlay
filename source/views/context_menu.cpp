@@ -227,6 +227,21 @@ void ContextMenu::draw() {
       if (ImGui::MenuItemEx("menu.open.files"_i18n, ICON_FA_FILE)) mpv->command("script-message-to implay open");
       if (ImGui::MenuItemEx("menu.open.folder"_i18n, ICON_FA_FOLDER_PLUS))
         mpv->command("script-message-to implay open-folder");
+      if (ImGui::BeginMenu("menu.open.recent"_i18n)) {
+        auto files = config->getRecentFiles();
+        int i = 0;
+        for (auto &path : files) {
+          if (i == 10) break;
+          if (ImGui::MenuItem(path.c_str())) mpv->commandv("loadfile", path.c_str(), nullptr);
+          i++;
+        }
+        if (files.size() > 10) {
+          if (ImGui::MenuItem(format("{} ({})", "menu.open.recent.all"_i18n, files.size()).c_str()))
+            mpv->command("script-message-to implay command-palette history");
+        }
+        if (ImGui::MenuItem("menu.open.recent.clear"_i18n)) config->clearRecentFiles();
+        ImGui::EndMenu();
+      }
       ImGui::Separator();
       if (ImGui::MenuItemEx("menu.open.url"_i18n, ICON_FA_LINK)) mpv->command("script-message-to implay open-url");
       if (ImGui::MenuItemEx("menu.open.clipboard"_i18n, ICON_FA_CLIPBOARD))
@@ -246,7 +261,7 @@ void ContextMenu::draw() {
 
 void ContextMenu::drawAudioDeviceList() {
   auto devices = mpv->audioDeviceList();
-  char *name = mpv->property("audio-device");
+  auto name = mpv->property("audio-device");
   if (ImGui::BeginMenuEx("menu.audio.devices"_i18n, ICON_FA_AUDIO_DESCRIPTION, !devices.empty())) {
     for (auto &device : devices) {
       auto title = format("[{}] {}", device.description, device.name);
@@ -255,14 +270,13 @@ void ContextMenu::drawAudioDeviceList() {
     }
     ImGui::EndMenu();
   }
-  mpv_free(name);
 }
 
 void ContextMenu::drawTracklist(const char *type, const char *prop) {
   auto items = mpv->trackList();
-  char *value = mpv->property(prop);
+  auto value = mpv->property(prop);
   if (ImGui::BeginMenuEx("menu.tracks"_i18n, ICON_FA_LIST)) {
-    if (ImGui::MenuItem("menu.tracks.disable"_i18n, nullptr, strcmp(value, "no") == 0))
+    if (ImGui::MenuItem("menu.tracks.disable"_i18n, nullptr, value == "no"))
       mpv->commandv("cycle-values", prop, "no", "auto", nullptr);
     for (auto &track : items) {
       if (track.type != type) continue;
@@ -273,7 +287,6 @@ void ContextMenu::drawTracklist(const char *type, const char *prop) {
     }
     ImGui::EndMenu();
   }
-  mpv_free(value);
 }
 
 void ContextMenu::drawChapterlist(std::vector<Mpv::ChapterItem> items) {

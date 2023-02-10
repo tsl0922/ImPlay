@@ -74,23 +74,7 @@ int openUrl(std::string url);
 void revealInFolder(std::string path);
 
 std::filesystem::path dataPath();
-}  // namespace ImPlay
 
-namespace ImGui {
-void HalignCenter(const char* text);
-void TextCentered(const char* text, bool disabled = false);
-void TextEllipsis(const char* text, float maxWidth = 0);
-void Hyperlink(const char* label, const char* url);
-void HelpMarker(const char* desc);
-ImTextureID LoadTexture(const char* path, int* width = nullptr, int* height = nullptr);
-void SetTheme(const char* theme);
-std::vector<const char*> Themes();
-void StyleColorsSpectrum(ImGuiStyle* dst);
-void StyleColorsDracula(ImGuiStyle* dst);
-void StyleColorsDeepDark(ImGuiStyle* dst);
-}  // namespace ImGui
-
-namespace {
 inline std::wstring UTF8ToWide(const std::string& str) {
   return std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>, wchar_t>().from_bytes(str);
 }
@@ -135,4 +119,20 @@ inline void print(std::string_view format, T... args) {
 inline std::string join(std::vector<std::string> v, std::string_view sep) {
   return fmt::format("{}", fmt::join(v, sep));
 }
-}  // namespace
+
+std::vector<std::string> split(const std::string& str, const std::string& sep);
+}  // namespace ImPlay
+
+namespace ImGui {
+void HalignCenter(const char* text);
+void TextCentered(const char* text, bool disabled = false);
+void TextEllipsis(const char* text, float maxWidth = 0);
+void Hyperlink(const char* label, const char* url);
+void HelpMarker(const char* desc);
+ImTextureID LoadTexture(const char* path, int* width = nullptr, int* height = nullptr);
+void SetTheme(const char* theme);
+std::vector<const char*> Themes();
+void StyleColorsSpectrum(ImGuiStyle* dst);
+void StyleColorsDracula(ImGuiStyle* dst);
+void StyleColorsDeepDark(ImGuiStyle* dst);
+}  // namespace ImGui

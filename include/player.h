@@ -23,7 +23,7 @@ class Player {
   void render(int w, int h);
   std::atomic_bool &renderGui() { return renderGui_; }
   void shutdown();
-  bool hasFile() { return fileOpen; }
+  bool isIdle() { return idle; }
 
   void onCursorEvent(double x, double y);
   void onMouseEvent(int button, int action, int mods);
@@ -40,8 +40,8 @@ class Player {
   Command *cmd = nullptr;
   Dispatch *dispatch;
   const char *title;
+  bool idle = true;
   std::atomic_bool renderGui_ = true;
-  bool fileOpen = false;
   ImTextureID logoTexture = nullptr;
 
   static void translateMod(std::vector<std::string> &keys, int mods) {

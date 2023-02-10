@@ -39,9 +39,9 @@ void Debug::draw() {
 
 void Debug::drawHeader() {
   ImGuiIO& io = ImGui::GetIO();
-  char* version = mpv->property("mpv-version");
+  auto version = mpv->property("mpv-version");
   auto style = ImGuiStyle();
-  ImGui::Text("%s", version);
+  ImGui::Text("%s", version.c_str());
   auto vSize = ImGui::CalcTextSize(format("ImGui {}", ImGui::GetVersion()).c_str());
   auto mSize = ImGui::CalcTextSize(format("FPS: %.2f", io.Framerate).c_str());
   ImGui::SameLine(ImGui::GetContentRegionAvail().x - (vSize.x + mSize.x + 2 * style.FramePadding.x));
@@ -50,7 +50,6 @@ void Debug::drawHeader() {
   ImGui::SameLine();
   ImGui::TextColored(style.Colors[ImGuiCol_CheckMark], "FPS: %.2f", io.Framerate);
   if (ImGui::IsItemClicked(ImGuiMouseButton_Left)) m_metrics = !m_metrics;
-  mpv_free(version);
   ImGui::BeginDisabled();
   ImGui::TextUnformatted("views.debug.hint"_i18n);
   ImGui::EndDisabled();

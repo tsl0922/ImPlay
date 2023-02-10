@@ -20,7 +20,6 @@ Config::Config() {
 void Config::load() {
   std::ifstream file(configFile);
   ini.parse(file);
-  ini.interpolate();
 
   inipp::get_value(ini.sections["interface"], "lang", Data.Interface.Lang);
   inipp::get_value(ini.sections["interface"], "theme", Data.Interface.Theme);
@@ -41,9 +40,19 @@ void Config::load() {
   inipp::get_value(ini.sections["window"], "h", Data.Window.H);
   inipp::get_value(ini.sections["debug"], "log-level", Data.Debug.LogLevel);
   inipp::get_value(ini.sections["debug"], "log-limit", Data.Debug.LogLimit);
+  inipp::get_value(ini.sections["recent"], "limit", Data.Recent.Limit);
+  inipp::get_value(ini.sections["recent"], "space-to-play-last", Data.Recent.SpaceToPlayLast);
+
+  for (auto& [key, value] : ini.sections["recent"]) {
+    if (key.find("file-") == 0 && value != "") recentFiles.push_back(value);
+  }
+
+  ini.clear();
 }
 
 void Config::save() {
+  ini.clear();
+
   ini.sections["interface"]["lang"] = Data.Interface.Lang;
   ini.sections["interface"]["theme"] = Data.Interface.Theme;
   ini.sections["interface"]["scale"] = format("{}", Data.Interface.Scale);
@@ -63,6 +72,13 @@ void Config::save() {
   ini.sections["window"]["h"] = std::to_string(Data.Window.H);
   ini.sections["debug"]["log-level"] = Data.Debug.LogLevel;
   ini.sections["debug"]["log-limit"] = std::to_string(Data.Debug.LogLimit);
+  ini.sections["recent"]["limit"] = std::to_string(Data.Recent.Limit);
+  ini.sections["recent"]["space-to-play-last"] = format("{}", Data.Recent.SpaceToPlayLast);
+
+  int index = 0;
+  for (auto& file : recentFiles) {
+    if (file != "") ini.sections["recent"][format("file-{}", index++)] = file;
+  }
 
   std::ofstream file(configFile);
   ini.generate(file);
@@ -82,4 +98,19 @@ const ImWchar* Config::buildGlyphRanges() {
   glyphRangesBuilder.BuildRanges(&glyphRanges);
   return &glyphRanges[0];
 }
+
+void Config::addRecentFile(const std::string& file) {
+  if (Data.Recent.Limit == 0) {
+    if (recentFiles.size() > 0) recentFiles.clear();
+    return;
+  }
+  auto it = std::find(recentFiles.begin(), recentFiles.end(), file);
+  if (it != recentFiles.end()) recentFiles.erase(it);
+  recentFiles.insert(recentFiles.begin(), file);
+  if (recentFiles.size() > Data.Recent.Limit) recentFiles.pop_back();
+}
+
+void Config::clearRecentFiles() { recentFiles.clear(); }
+
+std::vector<std::string> Config::getRecentFiles() { return recentFiles; }
 }  // namespace ImPlay

@@ -40,7 +40,12 @@ class Mpv {
   int command(const char *args[]) { return mpv_command(mpv, args); }
   int commandv(const char *arg, ...);
 
-  char *property(const char *name) { return mpv_get_property_string(mpv, name); }
+  std::string property(const char *name) {
+    char *data = mpv_get_property_string(mpv, name);
+    std::string ret = data ? data : "";
+    mpv_free(data);
+    return ret;
+  }
   int property(const char *name, const char *data) { return mpv_set_property_string(mpv, name, data); }
   template <typename T, mpv_format format>
   T property(const char *name) {

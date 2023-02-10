@@ -80,6 +80,21 @@ void Command::execute(int n_args, const char **args_) {
        [&](int n, const char **args) {
          openMediaFolder([&](std::string path, int i) { mpv->commandv("loadfile", path.c_str(), "append", nullptr); });
        }},
+      {"play-pause",
+       [&](int n, const char **args) {
+         auto count = mpv->property<int64_t, MPV_FORMAT_INT64>("playlist-count");
+         if (count > 0)
+           mpv->command("cycle pause");
+         else if (config->getRecentFiles().size() > 0) {
+           for (auto &file : config->getRecentFiles()) {
+             auto fp = std::filesystem::path(reinterpret_cast<char8_t *>(file.data()));
+             if (std::filesystem::exists(fp) || file.find("://") != std::string::npos) {
+               mpv->commandv("loadfile", file.c_str(), nullptr);
+               break;
+             }
+           }
+         }
+       }},
       {"about", [&](int n, const char **args) { about->show(); }},
       {"settings", [&](int n, const char **args) { settings->show(); }},
       {"metrics", [&](int n, const char **args) { debug->show(); }},
@@ -230,6 +245,15 @@ void Command::openCommandPalette(int n, const char **args) {
             else if (item.type == "sub")
               mpv->property<int64_t, MPV_FORMAT_INT64>("sid", item.id);
           },
+      });
+    }
+  } else if (source == "history") {
+    for (auto &item : config->getRecentFiles()) {
+      items.push_back({
+          item,
+          item,
+          "",
+          [=, this]() { mpv->commandv("loadfile", item.c_str(), nullptr); },
       });
     }
   }
