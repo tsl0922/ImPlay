@@ -263,9 +263,7 @@ void Window::loadFonts() {
   float scale = config.Data.Interface.Scale;
   if (scale == 0) {
     float xscale, yscale;
-    auto monitor = glfwGetWindowMonitor(window);
-    if (monitor == nullptr) monitor = glfwGetPrimaryMonitor();
-    glfwGetMonitorContentScale(monitor, &xscale, &yscale);
+    glfwGetWindowContentScale(window, &xscale, &yscale);
     scale = std::max(xscale, yscale);
   }
   if (scale <= 0) scale = 1.0f;
@@ -279,6 +277,8 @@ void Window::loadFonts() {
   io.Fonts->Clear();
 
   ImFontConfig cfg;
+  cfg.OversampleH = 2.0f;
+  cfg.OversampleV = 1.0f;
   cfg.SizePixels = fontSize;
   ImWchar fa_range[] = {ICON_MIN_FA, ICON_MAX_FA, 0};
   const ImWchar* font_range = config.buildGlyphRanges();
