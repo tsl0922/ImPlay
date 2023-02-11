@@ -47,6 +47,7 @@ class LangStr {
   std::string m_str;
 };
 
+const ImWchar* getLangGlyphRanges();
 std::map<std::string, LangData>& getLangs();
 std::string& getLangFallback();
 std::string& getLang();

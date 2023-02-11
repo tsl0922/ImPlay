@@ -345,6 +345,19 @@ std::string ImPlay::LangData::get(std::string& key) {
   return key;
 }
 
+const ImWchar* ImPlay::getLangGlyphRanges() {
+  static ImVector<ImWchar> glyphRanges;
+  if (glyphRanges.empty()) {
+    ImFontGlyphRangesBuilder builder;
+    for (auto& [code, lang] : ImPlay::getLangs()) {
+      builder.AddText(lang.title.c_str());
+      for (auto& [key, value] : lang.entries) builder.AddText(value.c_str());
+    }
+    builder.BuildRanges(&glyphRanges);
+  }
+  return &glyphRanges[0];
+}
+
 std::map<std::string, ImPlay::LangData>& ImPlay::getLangs() {
   static std::map<std::string, ImPlay::LangData> langs;
   static bool loaded = false;
