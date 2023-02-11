@@ -71,6 +71,8 @@ bool Window::run(OptionParser& parser) {
     player->onDropEvent(count, openedFileNames);
   }
 #endif
+  glfwShowWindow(window);
+  glfwFocusWindow(window);
 
   std::atomic_bool shutdown = false;
 
@@ -161,6 +163,8 @@ void Window::initGLFW(const char* title) {
   glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
   glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 #endif
+  glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
+  glfwWindowHint(GLFW_FOCUSED, GLFW_FALSE);
 
   GLFWmonitor* monitor = glfwGetPrimaryMonitor();
   const GLFWvidmode* mode = glfwGetVideoMode(monitor);
