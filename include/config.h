@@ -14,8 +14,8 @@ struct ConfigData {
     std::string Lang = "en-US";
     std::string Theme = "light";
     float Scale = 0;
-    bool Docking = true;
-    bool Viewports = true;
+    bool Docking = false;
+    bool Viewports = false;
     bool operator==(const Interface_&) const = default;
   } Interface;
   struct Mpv_ {
