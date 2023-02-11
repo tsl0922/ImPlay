@@ -130,6 +130,8 @@ void Settings::drawInterfaceTab() {
       if (langCodes[i].first == data.Interface.Lang) l_current = i;
     }
     ImGui::TextUnformatted("views.settings.interface.language"_i18n);
+    ImGui::SameLine();
+    ImGui::HelpMarker("views.settings.interface.language.hint"_i18n);
     ImGui::Indent();
     if (ImGui::Combo("##Language", &l_current, langs.data(), langs.size())) {
       data.Interface.Lang = langCodes[l_current].first;

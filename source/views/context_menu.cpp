@@ -333,7 +333,7 @@ void ContextMenu::drawPlaylist(std::vector<Mpv::PlayItem> items) {
     if (ImGui::MenuItem("menu.playlist.loop"_i18n, "L")) mpv->command("cycle-values loop-playlist inf no");
     ImGui::Separator();
     if (ImGui::MenuItem("menu.quickview"_i18n)) mpv->command("script-message-to implay quickview playlist");
-    ImGui::Separator();
+    if (items.size() > 0) ImGui::Separator();
     int i = 0;
     for (auto &item : items) {
       if (i == 10) break;
