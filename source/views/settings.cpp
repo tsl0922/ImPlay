@@ -81,7 +81,7 @@ void Settings::drawGeneralTab() {
     ImGui::HelpMarker("views.settings.general.mpv.watch_later.help"_i18n);
     ImGui::Checkbox("views.settings.general.window.save"_i18n, &data.Window.Save);
     ImGui::Spacing();
-    ImGui::Text("views.settings.general.recent.limit"_i18n);
+    ImGui::TextUnformatted("views.settings.general.recent.limit"_i18n);
     ImGui::SameLine();
     ImGui::SetNextItemWidth(scaled(6));
     if (ImGui::InputInt("##recent_limit", &data.Recent.Limit, 1, 0, ImGuiInputTextFlags_CharsDecimal)) {

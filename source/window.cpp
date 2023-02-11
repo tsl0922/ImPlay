@@ -280,15 +280,14 @@ void Window::loadFonts() {
 
   ImFontConfig cfg;
   cfg.SizePixels = fontSize;
-  io.Fonts->AddFontDefault(&cfg);
-  cfg.MergeMode = true;
   ImWchar fa_range[] = {ICON_MIN_FA, ICON_MAX_FA, 0};
-  const ImWchar* unifont_range = config.buildGlyphRanges();
+  const ImWchar* font_range = config.buildGlyphRanges();
   io.Fonts->AddFontFromMemoryCompressedTTF(fa_compressed_data, fa_compressed_size, iconSize, &cfg, fa_range);
+  cfg.MergeMode = true;
   if (config.Data.Font.Path.empty())
-    io.Fonts->AddFontFromMemoryCompressedTTF(unifont_compressed_data, unifont_compressed_size, 0, &cfg, unifont_range);
+    io.Fonts->AddFontFromMemoryCompressedTTF(unifont_compressed_data, unifont_compressed_size, 0, &cfg, font_range);
   else
-    io.Fonts->AddFontFromFileTTF(config.Data.Font.Path.c_str(), 0, &cfg, unifont_range);
+    io.Fonts->AddFontFromFileTTF(config.Data.Font.Path.c_str(), 0, &cfg, font_range);
 
   io.Fonts->Build();
 }

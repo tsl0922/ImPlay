@@ -88,7 +88,7 @@ const ImWchar* Config::buildGlyphRanges() {
   ImFontAtlas* fonts = ImGui::GetIO().Fonts;
   ImFontGlyphRangesBuilder glyphRangesBuilder;
   static ImVector<ImWchar> glyphRanges;
-  if (Data.Font.GlyphRange & GlyphRange_Default) glyphRangesBuilder.AddRanges(fonts->GetGlyphRangesDefault());
+  glyphRangesBuilder.AddRanges(fonts->GetGlyphRangesDefault());
   if (Data.Font.GlyphRange & GlyphRange_Chinese) glyphRangesBuilder.AddRanges(fonts->GetGlyphRangesChineseFull());
   if (Data.Font.GlyphRange & GlyphRange_Japanese) glyphRangesBuilder.AddRanges(fonts->GetGlyphRangesJapanese());
   if (Data.Font.GlyphRange & GlyphRange_Cyrillic) glyphRangesBuilder.AddRanges(fonts->GetGlyphRangesCyrillic());
