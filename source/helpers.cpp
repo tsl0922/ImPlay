@@ -515,7 +515,7 @@ std::vector<std::string> ImPlay::split(const std::string& str, const std::string
   std::vector<std::string> v;
   std::string::size_type pos1 = 0, pos2 = 0;
   while ((pos2 = str.find(sep, pos1)) != std::string::npos) {
-    if (pos2 - pos1 > 0) v.push_back(str.substr(pos1, pos2 - pos1));
+    v.push_back(str.substr(pos1, pos2 - pos1));
     pos1 = pos2 + sep.size();
   }
   if (pos1 != str.length()) v.push_back(str.substr(pos1));

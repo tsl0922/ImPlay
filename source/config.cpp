@@ -44,7 +44,9 @@ void Config::load() {
   inipp::get_value(ini.sections["recent"], "space-to-play-last", Data.Recent.SpaceToPlayLast);
 
   for (auto& [key, value] : ini.sections["recent"]) {
-    if (key.find("file-") == 0 && value != "") recentFiles.push_back(value);
+    if (key.find("file-") != 0 || value == "") continue;
+    auto parts = split(value, "|");
+    recentFiles.push_back({parts.front(), parts.back()});
   }
 
   ini.clear();
@@ -77,7 +79,8 @@ void Config::save() {
 
   int index = 0;
   for (auto& file : recentFiles) {
-    if (file != "") ini.sections["recent"][format("file-{}", index++)] = file;
+    ini.sections["recent"][format("file-{}", index++)] =
+        file.path == file.title ? file.path : format("{}|{}", file.path, file.title);
   }
 
   std::ofstream file(configFile);
@@ -99,18 +102,19 @@ const ImWchar* Config::buildGlyphRanges() {
   return &glyphRanges[0];
 }
 
-void Config::addRecentFile(const std::string& file) {
+void Config::addRecentFile(const std::string& path, const std::string& title) {
   if (Data.Recent.Limit == 0) {
     if (recentFiles.size() > 0) recentFiles.clear();
     return;
   }
-  auto it = std::find(recentFiles.begin(), recentFiles.end(), file);
+  auto item = Config::RecentItem{path, title == "" ? path : title};
+  auto it = std::find(recentFiles.begin(), recentFiles.end(), item);
   if (it != recentFiles.end()) recentFiles.erase(it);
-  recentFiles.insert(recentFiles.begin(), file);
+  recentFiles.insert(recentFiles.begin(), item);
   if (recentFiles.size() > Data.Recent.Limit) recentFiles.pop_back();
 }
 
 void Config::clearRecentFiles() { recentFiles.clear(); }
 
-std::vector<std::string> Config::getRecentFiles() { return recentFiles; }
+std::vector<Config::RecentItem>& Config::getRecentFiles() { return recentFiles; }
 }  // namespace ImPlay

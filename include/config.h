@@ -65,12 +65,18 @@ class Config {
     GlyphRange_Vietnamese = 1 << 5,
   };
 
+  struct RecentItem {
+    std::string path;
+    std::string title;
+    bool operator==(const RecentItem&) const = default;
+  };
+
   void load();
   void save();
 
   std::string dir() const { return configDir; }
-  std::vector<std::string> getRecentFiles();
-  void addRecentFile(const std::string& file);
+  std::vector<RecentItem> &getRecentFiles();
+  void addRecentFile(const std::string& path, const std::string& title);
   void clearRecentFiles();
 
   const ImWchar* buildGlyphRanges();
@@ -83,6 +89,6 @@ class Config {
   std::string configFile;
   std::string configDir;
 
-  std::vector<std::string> recentFiles;
+  std::vector<RecentItem> recentFiles;
 };
 }  // namespace ImPlay

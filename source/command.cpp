@@ -87,9 +87,10 @@ void Command::execute(int n_args, const char **args_) {
            mpv->command("cycle pause");
          else if (config->getRecentFiles().size() > 0) {
            for (auto &file : config->getRecentFiles()) {
-             auto fp = std::filesystem::path(reinterpret_cast<char8_t *>(file.data()));
-             if (std::filesystem::exists(fp) || file.find("://") != std::string::npos) {
-               mpv->commandv("loadfile", file.c_str(), nullptr);
+             auto path = file.path;
+             auto fp = std::filesystem::path(reinterpret_cast<char8_t *>(path.data()));
+             if (std::filesystem::exists(fp) || path.find("://") != std::string::npos) {
+               mpv->commandv("loadfile", path.c_str(), nullptr);
                break;
              }
            }
@@ -248,12 +249,12 @@ void Command::openCommandPalette(int n, const char **args) {
       });
     }
   } else if (source == "history") {
-    for (auto &item : config->getRecentFiles()) {
+    for (auto &file : config->getRecentFiles()) {
       items.push_back({
-          item,
-          item,
+          file.title,
+          file.path,
           "",
-          [=, this]() { mpv->commandv("loadfile", item.c_str(), nullptr); },
+          [=, this]() { mpv->commandv("loadfile", file.path.c_str(), nullptr); },
       });
     }
   }

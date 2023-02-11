@@ -230,9 +230,9 @@ void ContextMenu::draw() {
       if (ImGui::BeginMenu("menu.open.recent"_i18n)) {
         auto files = config->getRecentFiles();
         int i = 0;
-        for (auto &path : files) {
+        for (auto &file : files) {
           if (i == 10) break;
-          if (ImGui::MenuItem(path.c_str())) mpv->commandv("loadfile", path.c_str(), nullptr);
+          if (ImGui::MenuItem(file.title.c_str())) mpv->commandv("loadfile", file.path.c_str(), nullptr);
           i++;
         }
         if (files.size() > 10) {

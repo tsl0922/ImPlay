@@ -192,7 +192,7 @@ void Player::initMpv() {
 
   mpv->observeEvent(MPV_EVENT_FILE_LOADED, [this](void* data) {
     auto path = mpv->property("path");
-    if (path != "" && path != "bd://" && path != "dvd://") config->addRecentFile(path);
+    if (path != "" && path != "bd://" && path != "dvd://") config->addRecentFile(path, mpv->property("media-title"));
   });
 
   mpv->observeEvent(MPV_EVENT_START_FILE, [this](void* data) { idle = false; });
