@@ -4,7 +4,6 @@
 #pragma once
 #include <mpv/client.h>
 #include <mpv/render_gl.h>
-#include <GLFW/glfw3.h>
 #include <string>
 #include <map>
 #include <vector>

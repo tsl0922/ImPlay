@@ -33,6 +33,7 @@ class Player {
 
  private:
   void initMpv();
+  GLFWmonitor* getMonitor();
 
   Config *config = nullptr;
   GLFWwindow *window = nullptr;

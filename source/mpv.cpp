@@ -8,6 +8,7 @@
 #include <cstdarg>
 #include <fmt/format.h>
 #include <nlohmann/json.hpp>
+#include <GLFW/glfw3.h>
 #include "mpv.h"
 
 namespace ImPlay {

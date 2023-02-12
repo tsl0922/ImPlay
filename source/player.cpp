@@ -257,7 +257,7 @@ void Player::initMpv() {
     if (enable) {
       glfwGetWindowPos(window, &x, &y);
       glfwGetWindowSize(window, &w, &h);
-      GLFWmonitor* monitor = glfwGetPrimaryMonitor();
+      GLFWmonitor* monitor = getMonitor();
       const GLFWvidmode* mode = glfwGetVideoMode(monitor);
       glfwSetWindowMonitor(window, monitor, 0, 0, mode->width, mode->height, mode->refreshRate);
     } else
@@ -268,5 +268,28 @@ void Player::initMpv() {
     bool enable = static_cast<bool>(*(int*)data);
     glfwSetWindowAttrib(window, GLFW_FLOATING, enable ? GLFW_TRUE : GLFW_FALSE);
   });
+}
+
+GLFWmonitor* Player::getMonitor() {
+  int n, wx, wy, ww, wh, mx, my;
+  int bestoverlap = 0;
+
+  glfwGetWindowPos(window, &wx, &wy);
+  glfwGetWindowSize(window, &ww, &wh);
+  GLFWmonitor* bestmonitor = nullptr;
+  auto monitors = glfwGetMonitors(&n);
+
+  for (int i = 0; i < n; i++) {
+    const GLFWvidmode* mode = glfwGetVideoMode(monitors[i]);
+    glfwGetMonitorPos(monitors[i], &mx, &my);
+    int overlap = std::max(0, std::min(wx + ww, mx + mode->width) - std::max(wx, mx)) *
+              std::max(0, std::min(wy + wh, my + mode->height) - std::max(wy, my));
+    if (bestoverlap < overlap) {
+      bestoverlap = overlap;
+      bestmonitor = monitors[i];
+    }
+  }
+  
+  return bestmonitor != nullptr ? bestmonitor : glfwGetPrimaryMonitor();
 }
 }  // namespace ImPlay
