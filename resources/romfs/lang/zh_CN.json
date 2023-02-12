@@ -198,7 +198,7 @@
         "views.quickview.audio.equalizer.presets.techno": "电子乐",
         "views.quickview.audio.equalizer.custom": "自定义",
         "views.quickview.audio.equalizer.msg": "音频均衡器: {}",
-        "views.quickview.audio.equalizer.msg.disabled": "音频均衡器:: 已关闭",
+        "views.quickview.audio.equalizer.msg.disabled": "音频均衡器: 已关闭",
         "views.quickview.subtitle": "字幕",
         "views.quickview.subtitle.move_up": "上移字幕",
         "views.quickview.subtitle.move_down": "下移字幕",
