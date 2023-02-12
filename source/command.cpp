@@ -30,12 +30,6 @@ Command::~Command() {
 void Command::init() { debug->init(); }
 
 void Command::draw() {
-  ImGuiIO &io = ImGui::GetIO();
-  if (io.KeyCtrl && io.KeyShift && ImGui::IsKeyDown(ImGuiKey_P)) commandPalette->show();
-  if (ImGui::IsMouseReleased(ImGuiMouseButton_Right) && !ImGui::IsWindowHovered(ImGuiHoveredFlags_AnyWindow) &&
-      ImGui::GetTopMostPopupModal() == nullptr)
-    contextMenu->show();
-
   about->draw();
   debug->draw();
   quickview->draw();
@@ -100,6 +94,7 @@ void Command::execute(int n_args, const char **args_) {
       {"settings", [&](int n, const char **args) { settings->show(); }},
       {"metrics", [&](int n, const char **args) { debug->show(); }},
       {"command-palette", [&](int n, const char **args) { openCommandPalette(n, args); }},
+      {"context-menu", [&](int n, const char **args) { contextMenu->show(); }},
       {"show-message",
        [&](int n, const char **args) {
          if (n > 1) messageBox(args[0], args[1]);

@@ -48,12 +48,15 @@ bool Player::init(OptionParser& parser) {
   initMpv();
 
   mpv->property<int64_t, MPV_FORMAT_INT64>("volume", config->Data.Mpv.Volume);
-
+  mpv->command("keybind MBTN_RIGHT 'script-message-to implay context-menu'");
+#ifdef __APPLE__
+  mpv->command("keybind Meta+Shift+p 'script-message-to implay command-palette'");
+#else
+  mpv->command("keybind Ctrl+Shift+p 'script-message-to implay command-palette'");
+#endif
   if (config->Data.Recent.SpaceToPlayLast) mpv->command("keybind SPACE 'script-message-to implay play-pause'");
 
   for (auto& path : parser.paths) mpv->commandv("loadfile", path.c_str(), "append-play", nullptr);
-
-  mpv->command("keybind MBTN_RIGHT ignore");
 
   return true;
 }
@@ -288,13 +291,13 @@ GLFWmonitor* Player::getMonitor() {
     const GLFWvidmode* mode = glfwGetVideoMode(monitors[i]);
     glfwGetMonitorPos(monitors[i], &mx, &my);
     int overlap = std::max(0, std::min(wx + ww, mx + mode->width) - std::max(wx, mx)) *
-              std::max(0, std::min(wy + wh, my + mode->height) - std::max(wy, my));
+                  std::max(0, std::min(wy + wh, my + mode->height) - std::max(wy, my));
     if (bestoverlap < overlap) {
       bestoverlap = overlap;
       bestmonitor = monitors[i];
     }
   }
-  
+
   return bestmonitor != nullptr ? bestmonitor : glfwGetPrimaryMonitor();
 }
 }  // namespace ImPlay
