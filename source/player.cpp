@@ -83,7 +83,8 @@ void Player::render(int w, int h) {
 
   if (!idle || mpv->forceWindow()) mpv->render(w, h);
 
-  bool renderGui = renderGui_;
+  bool viewports = ImGui::GetIO().ConfigFlags & ImGuiConfigFlags_ViewportsEnable;
+  bool renderGui = renderGui_ || !viewports;
 
   if (renderGui) {
     ImGui_ImplOpenGL3_NewFrame();
@@ -98,7 +99,11 @@ void Player::render(int w, int h) {
   glfwSwapBuffers(window);
   glfwMakeContextCurrent(nullptr);
 
-  if (renderGui && ImGui::GetIO().ConfigFlags & ImGuiConfigFlags_ViewportsEnable) {
+  // This will block main thread, conflict with:
+  //   - open file dialog on macOS (must be run in main thread)
+  //   - window dragging on windows (blocking main thread)
+  // so, we only call it when viewports are enabled and no conflicts.
+  if (renderGui && viewports) {
     dispatch->sync(
         [](void* data) {
           ImGui::UpdatePlatformWindows();
