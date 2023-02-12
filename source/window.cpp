@@ -49,11 +49,6 @@ Window::~Window() {
 }
 
 bool Window::run(OptionParser& parser) {
-  if (config.Data.Mpv.UseConfig)
-    parser.options["config"] = "yes";
-  else
-    parser.options["config-dir"] = config.dir();
-
   mpv->wakeupCb() = [](Mpv* ctx) { glfwPostEmptyEvent(); };
   mpv->updateCb() = [this](Mpv* ctx) {
     if (ctx->wantRender()) requestRender();

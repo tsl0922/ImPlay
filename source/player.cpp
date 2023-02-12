@@ -2,6 +2,8 @@
 // SPDX-License-Identifier: GPL-2.0-only
 
 #include <filesystem>
+#include <fstream>
+#include <romfs/romfs.hpp>
 #include <imgui.h>
 #include <imgui_internal.h>
 #include <imgui_impl_glfw.h>
@@ -30,11 +32,17 @@ Player::~Player() { delete cmd; }
 bool Player::init(OptionParser& parser) {
   logoTexture = ImGui::LoadTexture("icon.png");
 
+  mpv->option("config", "yes");
   mpv->option("osc", "yes");
   mpv->option("input-default-bindings", "yes");
   mpv->option("input-vo-keyboard", "yes");
   mpv->option("osd-playing-msg", "${media-title}");
   mpv->option("screenshot-directory", "~~desktop/");
+
+  if (!config->Data.Mpv.UseConfig) {
+    writeMpvConf();
+    mpv->option("config-dir", config->dir().c_str());
+  }
 
   for (const auto& [key, value] : parser.options) {
     if (int err = mpv->option(key.c_str(), value.c_str()); err < 0) {
@@ -45,15 +53,9 @@ bool Player::init(OptionParser& parser) {
 
   cmd->init();
   mpv->init();
-  initMpv();
 
+  initObservers();
   mpv->property<int64_t, MPV_FORMAT_INT64>("volume", config->Data.Mpv.Volume);
-  mpv->command("keybind MBTN_RIGHT 'script-message-to implay context-menu'");
-#ifdef __APPLE__
-  mpv->command("keybind Meta+Shift+p 'script-message-to implay command-palette'");
-#else
-  mpv->command("keybind Ctrl+Shift+p 'script-message-to implay command-palette'");
-#endif
   if (config->Data.Recent.SpaceToPlayLast) mpv->command("keybind SPACE 'script-message-to implay play-pause'");
 
   for (auto& path : parser.paths) mpv->commandv("loadfile", path.c_str(), "append-play", nullptr);
@@ -186,7 +188,7 @@ void Player::onDropEvent(int count, const char** paths) {
   }
 }
 
-void Player::initMpv() {
+void Player::initObservers() {
   mpv->observeEvent(MPV_EVENT_SHUTDOWN, [this](void* data) { glfwSetWindowShouldClose(window, GLFW_TRUE); });
 
   mpv->observeEvent(MPV_EVENT_VIDEO_RECONFIG, [this](void* data) {
@@ -276,6 +278,33 @@ void Player::initMpv() {
     bool enable = static_cast<bool>(*(int*)data);
     glfwSetWindowAttrib(window, GLFW_FLOATING, enable ? GLFW_TRUE : GLFW_FALSE);
   });
+}
+
+void Player::writeMpvConf() {
+  auto path = dataPath();
+  auto mpvConf = path / "mpv.conf";
+  auto inputConf = path / "input.conf";
+
+  if (!std::filesystem::exists(mpvConf)) {
+    std::ofstream file(mpvConf);
+    auto content = romfs::get("mpv/mpv.conf");
+    file.write(reinterpret_cast<const char*>(content.data()), content.size()) << std::endl;
+    file << "# use opengl-hq video output for high-quality video rendering." << std::endl;
+    file << "profile=gpu-hq" << std::endl;
+    file << "deband=no" << std::endl;
+  }
+
+  if (!std::filesystem::exists(inputConf)) {
+    std::ofstream file(inputConf);
+    auto content = romfs::get("mpv/input.conf");
+    file.write(reinterpret_cast<const char*>(content.data()), content.size()) << std::endl;
+    file << "MBTN_RIGHT   script-message-to implay context-menu    # show context menu" << std::endl;
+#ifdef __APPLE__
+    file << "Meta+Shift+p script-message-to implay command-palette # show command palette" << std::endl;
+#else
+    file << "Ctrl+Shift+p script-message-to implay command-palette # show command palette" << std::endl;
+#endif
+  }
 }
 
 GLFWmonitor* Player::getMonitor() {

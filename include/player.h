@@ -32,7 +32,8 @@ class Player {
   void onDropEvent(int count, const char **paths);
 
  private:
-  void initMpv();
+  void initObservers();
+  void writeMpvConf();
   GLFWmonitor* getMonitor();
 
   Config *config = nullptr;
