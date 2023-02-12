@@ -98,8 +98,6 @@ bool Mpv::allowDrag() {
   return property<int, MPV_FORMAT_FLAG>("window-dragging") && !property<int, MPV_FORMAT_FLAG>("fullscreen");
 }
 
-bool Mpv::forceWindow() { return property<int, MPV_FORMAT_FLAG>("force-window"); }
-
 void Mpv::init() {
   if (mpv_initialize(mpv) < 0) throw std::runtime_error("could not initialize mpv context");
   if (wid == 0) initRender();

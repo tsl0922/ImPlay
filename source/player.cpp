@@ -55,6 +55,7 @@ bool Player::init(OptionParser& parser) {
   mpv->init();
 
   initObservers();
+  forceWindow = mpv->property<int, MPV_FORMAT_FLAG>("force-window");
   mpv->property<int64_t, MPV_FORMAT_INT64>("volume", config->Data.Mpv.Volume);
   if (config->Data.Recent.SpaceToPlayLast) mpv->command("keybind SPACE 'script-message-to implay play-pause'");
 
@@ -64,7 +65,7 @@ bool Player::init(OptionParser& parser) {
 }
 
 void Player::drawLogo() {
-  if (logoTexture == nullptr || mpv->forceWindow() || !idle) return;
+  if (logoTexture == nullptr || forceWindow || !idle) return;
 
   const ImGuiViewport* viewport = ImGui::GetMainViewport();
   ImGuiWindowFlags flags = ImGuiWindowFlags_NoNav | ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoInputs |
@@ -86,7 +87,7 @@ void Player::render(int w, int h) {
   glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
   glClear(GL_COLOR_BUFFER_BIT);
 
-  if (!idle || mpv->forceWindow()) mpv->render(w, h);
+  if (!idle || forceWindow) mpv->render(w, h);
 
   bool viewports = ImGui::GetIO().ConfigFlags & ImGuiConfigFlags_ViewportsEnable;
   bool renderGui = renderGui_ || !viewports;

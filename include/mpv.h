@@ -29,7 +29,6 @@ class Mpv {
   bool paused();
   bool playing();
   bool allowDrag();
-  bool forceWindow();
 
   Callback &wakeupCb() { return wakeupCb_; }
   Callback &updateCb() { return updateCb_; }
