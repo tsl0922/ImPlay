@@ -152,7 +152,6 @@ void Window::initGLFW(const char* title) {
   glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
   glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
   glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
-  glfwWindowHint(GLFW_COCOA_RETINA_FRAMEBUFFER, GLFW_FALSE);
 #else
   glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
   glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
@@ -271,7 +270,11 @@ void Window::loadFonts() {
 
   ImGuiIO& io = ImGui::GetIO();
   ImGui::SetTheme(config.Data.Interface.Theme.c_str());
+#ifdef __APPLE__
+  io.FontGlobalScale = 1.0f / scale;
+#else
   ImGui::GetStyle().ScaleAllSizes(scale);
+#endif
 
   io.Fonts->Clear();
 
