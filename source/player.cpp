@@ -292,7 +292,9 @@ void Player::writeMpvConf() {
     file.write(reinterpret_cast<const char*>(content.data()), content.size()) << std::endl;
     file << "# use opengl-hq video output for high-quality video rendering." << std::endl;
     file << "profile=gpu-hq" << std::endl;
-    file << "deband=no" << std::endl;
+    file << "deband=no" << std::endl << std::endl;
+    file << "# Enable hardware decoding if available." << std::endl;
+    file << "hwdec=auto" << std::endl;
   }
 
   if (!std::filesystem::exists(inputConf)) {
