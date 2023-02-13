@@ -56,6 +56,7 @@ set(SOURCE_FILES
   source/views/about.cpp
   source/views/quickview.cpp
   source/views/settings.cpp
+  source/theme.cpp
   source/helpers.cpp
   source/command.cpp
   source/config.cpp

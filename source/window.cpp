@@ -17,6 +17,7 @@
 #include <GL/gl.h>
 #endif
 #include "helpers.h"
+#include "theme.h"
 #include "window.h"
 
 namespace ImPlay {

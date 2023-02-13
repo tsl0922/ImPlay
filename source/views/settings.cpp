@@ -5,6 +5,7 @@
 #include <string>
 #include <fonts/fontawesome.h>
 #include "helpers.h"
+#include "theme.h"
 #include "views/settings.h"
 
 namespace ImPlay::Views {

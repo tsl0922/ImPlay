@@ -3,6 +3,7 @@
 
 #include <fonts/fontawesome.h>
 #include "helpers.h"
+#include "theme.h"
 #include "views/context_menu.h"
 
 namespace ImPlay::Views {

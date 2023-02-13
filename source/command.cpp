@@ -5,6 +5,7 @@
 #include <algorithm>
 #include <filesystem>
 #include "helpers.h"
+#include "theme.h"
 #include "command.h"
 
 namespace ImPlay {
