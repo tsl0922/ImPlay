@@ -18,6 +18,7 @@
 #include <imgui.h>
 #include <imgui_internal.h>
 #include <nfd.hpp>
+#include "lang.h"
 
 namespace ImPlay {
 struct OptionParser {
@@ -28,31 +29,7 @@ struct OptionParser {
   bool check(std::string key, std::string value);
 };
 
-struct LangData {
-  std::string code;
-  std::string title;
-  std::map<std::string, std::string> entries;
-
-  LangData(std::string code, std::string title) : code(code), title(title) {}
-  std::string get(std::string& key);
-};
-class LangStr {
- public:
-  explicit LangStr(std::string str) : m_str(str) {}
-  operator std::string() const { return m_str; };
-  operator std::string_view() const { return m_str; };
-  operator const char*() const { return m_str.c_str(); }
-
- private:
-  std::string m_str;
-};
-
-const ImWchar* getLangGlyphRanges();
-std::map<std::string, LangData>& getLangs();
-std::string& getLangFallback();
-std::string& getLang();
-std::string i18n(std::string key);
-inline LangStr operator""_i18n(const char* key, size_t) { return LangStr(i18n(key)); }
+inline LangStr operator""_i18n(const char* key, size_t) { return LangStr(key); }
 
 inline float scaled(float n) { return n * ImGui::GetFontSize(); }
 inline ImVec2 scaled(const ImVec2& vector) { return vector * ImGui::GetFontSize(); }
@@ -82,12 +59,12 @@ inline std::wstring UTF8ToWide(const std::string& str) {
 inline std::string WideToUTF8(const std::wstring& str) {
   return std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>, wchar_t>().to_bytes(str);
 }
+
 inline std::string tolower(std::string s) {
   std::string str = s;
   std::transform(str.begin(), str.end(), str.begin(), ::tolower);
   return str;
 }
-
 inline std::string toupper(std::string s) {
   std::string str = s;
   std::transform(str.begin(), str.end(), str.begin(), ::toupper);
