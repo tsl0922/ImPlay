@@ -94,6 +94,11 @@ ImTextureID ImGui::LoadTexture(const char* path, int* width, int* height) {
   return reinterpret_cast<ImTextureID>(static_cast<intptr_t>(texture));
 }
 
+ImFont* &ImGui::codeFont() {
+  static ImFont* font = nullptr;
+  return font;
+}
+
 std::vector<const char*> ImGui::Themes() { return {"Dracula", "Spectrum", "DeepDark", "Dark", "Light", "Classic"}; }
 
 void ImGui::SetTheme(const char* theme) {

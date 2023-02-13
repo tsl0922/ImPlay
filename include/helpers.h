@@ -131,6 +131,7 @@ void TextEllipsis(const char* text, float maxWidth = 0);
 void Hyperlink(const char* label, const char* url);
 void HelpMarker(const char* desc);
 ImTextureID LoadTexture(const char* path, int* width = nullptr, int* height = nullptr);
+ImFont* &codeFont();
 void SetTheme(const char* theme);
 std::vector<const char*> Themes();
 void StyleColorsSpectrum(ImGuiStyle* dst);

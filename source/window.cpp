@@ -6,6 +6,7 @@
 #include <imgui_impl_glfw.h>
 #include <imgui_impl_opengl3.h>
 #include <fonts/fontawesome.h>
+#include <fonts/source_code_pro.h>
 #include <fonts/unifont.h>
 #include <algorithm>
 #include <stdexcept>
@@ -290,6 +291,9 @@ void Window::loadFonts() {
     io.Fonts->AddFontFromMemoryCompressedTTF(unifont_compressed_data, unifont_compressed_size, 0, &cfg, font_range);
   else
     io.Fonts->AddFontFromFileTTF(config.Data.Font.Path.c_str(), 0, &cfg, font_range);
+
+  ImGui::codeFont() = io.Fonts->AddFontFromMemoryCompressedTTF(source_code_pro_compressed_data,
+                                                               source_code_pro_compressed_size, fontSize);
 
   io.Fonts->Build();
 }

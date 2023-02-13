@@ -438,6 +438,7 @@ void Debug::Console::draw() {
     // - Split them into same height items would be simpler and facilitate random-seeking into your list.
     // - Consider using manual call to IsRectVisible() and skipping extraneous decoration from your items.
     ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(4, 1));  // Tighten spacing
+    ImGui::PushFont(ImGui::codeFont());
     if (copy_to_clipboard) ImGui::LogToClipboard();
     for (int i = 0; i < Items.Size; i++) {
       auto item = Items[i];
@@ -453,7 +454,7 @@ void Debug::Console::draw() {
     // Using a scrollbar or mouse-wheel will take away from the bottom edge.
     if (ScrollToBottom || (AutoScroll && ImGui::GetScrollY() >= ImGui::GetScrollMaxY())) ImGui::SetScrollHereY(1.0f);
     ScrollToBottom = false;
-
+    ImGui::PopFont();
     ImGui::PopStyleVar();
   }
   ImGui::EndChild();

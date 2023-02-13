@@ -15,6 +15,7 @@ add_library(imgui OBJECT
   source/imgui_tables.cpp
   source/imgui_widgets.cpp
   source/fonts/fontawesome.c
+  source/fonts/source_code_pro.c
   source/fonts/unifont.c
 )
 
