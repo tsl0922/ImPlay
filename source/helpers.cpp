@@ -94,9 +94,10 @@ ImTextureID ImGui::LoadTexture(const char* path, int* width, int* height) {
   return reinterpret_cast<ImTextureID>(static_cast<intptr_t>(texture));
 }
 
-ImFont* &ImGui::codeFont() {
-  static ImFont* font = nullptr;
-  return font;
+// return the second font
+ImFont* ImGui::codeFont() {
+  auto fonts = ImGui::GetIO().Fonts->Fonts;
+  return fonts.size() > 1 ? fonts[1] : fonts[0];
 }
 
 void ImPlay::OptionParser::parse(int argc, char** argv) {

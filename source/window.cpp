@@ -293,8 +293,7 @@ void Window::loadFonts() {
   else
     io.Fonts->AddFontFromFileTTF(config.Data.Font.Path.c_str(), 0, &cfg, font_range);
 
-  ImGui::codeFont() = io.Fonts->AddFontFromMemoryCompressedTTF(source_code_pro_compressed_data,
-                                                               source_code_pro_compressed_size, fontSize);
+  io.Fonts->AddFontFromMemoryCompressedTTF(source_code_pro_compressed_data, source_code_pro_compressed_size, fontSize);
 
   io.Fonts->Build();
 }
