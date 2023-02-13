@@ -7,7 +7,7 @@
 namespace ImGui {
 void SetTheme(const char* theme);
 std::vector<const char*> Themes();
-void StyleColorsSpectrum(ImGuiStyle* dst);
-void StyleColorsDracula(ImGuiStyle* dst);
-void StyleColorsDeepDark(ImGuiStyle* dst);
+void StyleColorsSpectrum(ImGuiStyle* dst = nullptr);
+void StyleColorsDracula(ImGuiStyle* dst = nullptr);
+void StyleColorsDeepDark(ImGuiStyle* dst = nullptr);
 }  // namespace ImGui

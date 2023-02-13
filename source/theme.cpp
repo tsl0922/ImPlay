@@ -9,34 +9,18 @@ std::vector<const char*> ImGui::Themes() {
 }
 
 void ImGui::SetTheme(const char* theme) {
-  ImGuiStyle style;
   if (strcmp(theme, "dark") == 0)
-    ImGui::StyleColorsDark(&style);
+    ImGui::StyleColorsDark();
   else if (strcmp(theme, "light") == 0)
-    ImGui::StyleColorsLight(&style);
+    ImGui::StyleColorsLight();
   else if (strcmp(theme, "classic") == 0)
-    ImGui::StyleColorsClassic(&style);
+    ImGui::StyleColorsClassic();
   else if (strcmp(theme, "spectrum") == 0)
-    ImGui::StyleColorsSpectrum(&style);
+    ImGui::StyleColorsSpectrum();
   else if (strcmp(theme, "dracula") == 0)
-    ImGui::StyleColorsDracula(&style);
+    ImGui::StyleColorsDracula();
   else if (strcmp(theme, "deepdark") == 0)
-    ImGui::StyleColorsDeepDark(&style);
-  else
-    return;
-
-  style.TabRounding = 4;
-  style.ScrollbarRounding = 9;
-  style.WindowRounding = 7;
-  style.GrabRounding = 3;
-  style.FrameRounding = 3;
-  style.PopupRounding = 4;
-  style.ChildRounding = 4;
-  style.WindowShadowSize = 50.0f;
-  style.ScrollbarSize = 10.0f;
-  style.Colors[ImGuiCol_WindowShadow] = ImVec4(0, 0, 0, 1.0f);
-
-  ImGui::GetStyle() = style;
+    ImGui::StyleColorsDeepDark();
 }
 
 // https://github.com/adobe/imgui/blob/master/docs/Spectrum.md

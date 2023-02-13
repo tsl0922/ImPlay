@@ -271,11 +271,26 @@ void Window::loadFonts() {
   iconSize = std::floor(iconSize * scale);
 
   ImGuiIO& io = ImGui::GetIO();
-  ImGui::SetTheme(config.Data.Interface.Theme.c_str());
+  ImGuiStyle& style = ImGui::GetStyle();
+
+  {
+    ImGui::SetTheme(config.Data.Interface.Theme.c_str());
+    style.TabRounding = 4;
+    style.ScrollbarRounding = 9;
+    style.WindowRounding = 7;
+    style.GrabRounding = 3;
+    style.FrameRounding = 3;
+    style.PopupRounding = 4;
+    style.ChildRounding = 4;
+    style.WindowShadowSize = 50.0f;
+    style.ScrollbarSize = 10.0f;
+    style.Colors[ImGuiCol_WindowShadow] = ImVec4(0, 0, 0, 1.0f);
+  }
+
 #ifdef __APPLE__
   io.FontGlobalScale = 1.0f / scale;
 #else
-  ImGui::GetStyle().ScaleAllSizes(scale);
+  style.ScaleAllSizes(scale);
 #endif
 
   io.Fonts->Clear();
