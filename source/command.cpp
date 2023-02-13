@@ -189,7 +189,7 @@ void Command::openCommandPalette(int n, const char **args) {
   std::string source = "bindings";
   if (n > 0) source = args[0];
   if (source == "bindings") {
-    auto bindings = mpv->bindingList();
+    auto bindings = mpv->bindings;
     for (auto &item : bindings)
       items.push_back({
           item.comment,
@@ -198,7 +198,7 @@ void Command::openCommandPalette(int n, const char **args) {
           [=, this]() { mpv->command(item.cmd); },
       });
   } else if (source == "playlist") {
-    auto playlist = mpv->playlist();
+    auto playlist = mpv->playlist;
     for (auto &item : playlist) {
       std::string title = item.title;
       if (title.empty() && !item.filename.empty()) title = item.filename;
@@ -211,7 +211,7 @@ void Command::openCommandPalette(int n, const char **args) {
       });
     }
   } else if (source == "chapters") {
-    auto chapters = mpv->chapterList();
+    auto chapters = mpv->chapters;
     for (auto &item : chapters) {
       auto title = item.title.empty() ? format("Chapter {}", item.id + 1) : item.title;
       auto time = format("{:%H:%M:%S}", std::chrono::duration<int>((int)item.time));
@@ -224,7 +224,7 @@ void Command::openCommandPalette(int n, const char **args) {
     }
   } else if (source == "tracks") {
     const char *type = n > 1 ? args[1] : "";
-    auto tracks = mpv->trackList();
+    auto tracks = mpv->tracks;
     for (auto &item : tracks) {
       if (type[0] != '\0' && item.type != type) continue;
       auto title = item.title.empty() ? format("Track {}", item.id) : item.title;

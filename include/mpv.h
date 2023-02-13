@@ -5,7 +5,6 @@
 #include <mpv/client.h>
 #include <mpv/render_gl.h>
 #include <string>
-#include <map>
 #include <vector>
 #include <functional>
 
@@ -26,9 +25,10 @@ class Mpv {
   void waitEvent(double timeout = 0);
   void requestLog(const char *level, LogHandler handler);
   int loadConfig(const char *path);
-  bool paused();
-  bool playing();
-  bool allowDrag();
+
+  bool paused() { return pause; }
+  bool playing() { return playlistPlayingPos != -1; }
+  bool allowDrag() { return windowDragging && !fullscreen; }
 
   Callback &wakeupCb() { return wakeupCb_; }
   Callback &updateCb() { return updateCb_; }
@@ -100,16 +100,28 @@ class Mpv {
     std::string description;
   };
 
-  std::vector<TrackItem> trackList();
-  std::vector<PlayItem> playlist();
-  std::vector<ChapterItem> chapterList();
-  std::vector<BindingItem> bindingList();
-  std::vector<std::string> profileList();
-  std::vector<AudioDevice> audioDeviceList();
+  // cached mpv properties
+  std::vector<PlayItem> playlist;
+  std::vector<ChapterItem> chapters;
+  std::vector<TrackItem> tracks;
+  std::vector<AudioDevice> audioDevices;
+  std::vector<BindingItem> bindings;
+  std::vector<std::string> profiles;
+  std::string aid, vid, sid, audioDevice;
+  int64_t chapter, volume, playlistPos, playlistPlayingPos;
+  bool pause, mute, fullscreen, windowDragging, forceWindow;
 
  private:
   void initRender();
   void eventLoop();
+
+  void observeProperties();
+  void initPlaylist(mpv_node &node);
+  void initChapters(mpv_node &node);
+  void initTracks(mpv_node &node);
+  void initAudioDevices(mpv_node &node);
+  void initBindings(mpv_node &node);
+  void initProfiles(const char *payload);
 
   int64_t wid = 0;
   mpv_handle *main = nullptr;

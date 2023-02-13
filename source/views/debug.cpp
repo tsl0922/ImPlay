@@ -14,7 +14,7 @@ void Debug::init() { console->init(config->Data.Debug.LogLevel.c_str(), config->
 
 void Debug::show() {
   m_open = true;
-  console->initCommands();
+  initData();
 }
 
 void Debug::draw() {
@@ -26,8 +26,8 @@ void Debug::draw() {
                           ImVec2(0.2f, 0.5f));
   if (ImGui::Begin("views.debug.title"_i18n, &m_open, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoScrollbar)) {
     drawHeader();
-    drawProperties("views.debug.options"_i18n, "options");
-    drawProperties("views.debug.properties"_i18n, "property-list");
+    drawProperties("views.debug.options"_i18n, options);
+    drawProperties("views.debug.properties"_i18n, properties);
     drawBindings();
     drawCommands();
     drawConsole();
@@ -39,7 +39,6 @@ void Debug::draw() {
 
 void Debug::drawHeader() {
   ImGuiIO& io = ImGui::GetIO();
-  auto version = mpv->property("mpv-version");
   auto style = ImGuiStyle();
   ImGui::Text("%s", version.c_str());
   auto vSize = ImGui::CalcTextSize(format("ImGui {}", ImGui::GetVersion()).c_str());
@@ -65,7 +64,7 @@ void Debug::drawConsole() {
 }
 
 void Debug::drawBindings() {
-  auto bindings = mpv->bindingList();
+  auto bindings = mpv->bindings;
   if (m_node != "Bindings") ImGui::SetNextItemOpen(false, ImGuiCond_Always);
   if (!ImGui::CollapsingHeader(format("views.debug.bindings"_i18n, bindings.size()).c_str())) return;
   m_node = "Bindings";
@@ -94,8 +93,7 @@ void Debug::drawBindings() {
   }
 }
 
-static std::vector<std::pair<std::string, std::string>> formatCommands(mpv_node& node) {
-  std::vector<std::pair<std::string, std::string>> commands;
+static void formatCommands(mpv_node& node, std::vector<std::pair<std::string, std::string>>& commands) {
   for (int i = 0; i < node.u.list->num; i++) {
     auto item = node.u.list->values[i];
     char* name = nullptr;
@@ -129,16 +127,32 @@ static std::vector<std::pair<std::string, std::string>> formatCommands(mpv_node&
     }
     commands.push_back({name, args_str});
   }
-  return commands;
+}
+
+void Debug::initData() {
+  version = mpv->property("mpv-version");
+
+  mpv_node node = mpv->property<mpv_node, MPV_FORMAT_NODE>("options");
+  options.clear();
+  for (int i = 0; i < node.u.list->num; i++) options.push_back(node.u.list->values[i].u.string);
+  mpv_free_node_contents(&node);
+
+  node = mpv->property<mpv_node, MPV_FORMAT_NODE>("property-list");
+  properties.clear();
+  for (int i = 0; i < node.u.list->num; i++) properties.push_back(node.u.list->values[i].u.string);
+  mpv_free_node_contents(&node);
+
+  node = mpv->property<mpv_node, MPV_FORMAT_NODE>("command-list");
+  commands.clear();
+  formatCommands(node, commands);
+  mpv_free_node_contents(&node);
+
+  console->initCommands(commands);
 }
 
 void Debug::drawCommands() {
-  auto node = mpv->property<mpv_node, MPV_FORMAT_NODE>("command-list");
   if (m_node != "Commands") ImGui::SetNextItemOpen(false, ImGuiCond_Always);
-  if (!ImGui::CollapsingHeader(format("views.debug.commands"_i18n, node.u.list->num).c_str())) {
-    mpv_free_node_contents(&node);
-    return;
-  }
+  if (!ImGui::CollapsingHeader(format("views.debug.commands"_i18n, commands.size()).c_str())) return;
   m_node = "Commands";
 
   static char buf[256] = "";
@@ -148,7 +162,6 @@ void Debug::drawCommands() {
   ImGui::InputText("##Filter.commands", buf, IM_ARRAYSIZE(buf));
   ImGui::PopItemWidth();
   if (ImGui::BeginListBox("command-list", ImVec2(-FLT_MIN, -FLT_MIN))) {
-    auto commands = formatCommands(node);
     for (auto& [name, args] : commands) {
       if (!name.starts_with(buf)) continue;
       ImGui::PushID(name.c_str());
@@ -163,14 +176,11 @@ void Debug::drawCommands() {
     }
     ImGui::EndListBox();
   }
-  mpv_free_node_contents(&node);
 }
 
-void Debug::drawProperties(const char* title, const char* key) {
-  mpv_node node = mpv->property<mpv_node, MPV_FORMAT_NODE>(key);
+void Debug::drawProperties(const char* title, std::vector<std::string>& props) {
   if (m_node != title) ImGui::SetNextItemOpen(false, ImGuiCond_Always);
-  if (!ImGui::CollapsingHeader(format("{} [{}]", title, node.u.list->num).c_str())) {
-    mpv_free_node_contents(&node);
+  if (!ImGui::CollapsingHeader(format("{} [{}]", title, props.size()).c_str())) {
     return;
   }
   m_node = title;
@@ -208,22 +218,19 @@ void Debug::drawProperties(const char* title, const char* key) {
   ImGui::InputText("##Filter.properties", buf, IM_ARRAYSIZE(buf));
   ImGui::PopItemWidth();
   auto posY = ImGui::GetCursorScreenPos().y;
-  if (format > 0 && ImGui::BeginListBox(key, ImVec2(-FLT_MIN, -FLT_MIN))) {
-    for (int i = 0; i < node.u.list->num; i++) {
-      auto item = node.u.list->values[i];
-      if (buf[0] != '\0' && !strstr(item.u.string, buf)) continue;
+  if (format > 0 && ImGui::BeginListBox(title, ImVec2(-FLT_MIN, -FLT_MIN))) {
+    for (auto& name : props) {
+      if (buf[0] != '\0' && name.find(buf) == std::string::npos) continue;
       if (ImGui::GetCursorScreenPos().y > posY + ImGui::GetStyle().FramePadding.y && !ImGui::IsItemVisible()) {
-        ImGui::BulletText("%s", item.u.string);
+        ImGui::BulletText("%s", name.c_str());
         continue;
       }
-      auto prop = mpv->property<mpv_node, MPV_FORMAT_NODE>(item.u.string);
-      if (format & 1 << prop.format) drawPropNode(item.u.string, prop);
+      auto prop = mpv->property<mpv_node, MPV_FORMAT_NODE>(name.c_str());
+      if (format & 1 << prop.format) drawPropNode(name.c_str(), prop);
       mpv_free_node_contents(&prop);
     }
     ImGui::EndListBox();
   }
-
-  mpv_free_node_contents(&node);
 }
 
 void Debug::drawPropNode(const char* name, mpv_node& node, int depth) {
@@ -324,22 +331,10 @@ void Debug::Console::init(const char* level, int limit) {
   });
 }
 
-void Debug::Console::initCommands() {
+void Debug::Console::initCommands(std::vector<std::pair<std::string, std::string>>& commands) {
   if (CommandInited) return;
   for (auto& cmd : builtinCommands) Commands.push_back(ImStrdup(cmd.c_str()));
-
-  auto node = mpv->property<mpv_node, MPV_FORMAT_NODE>("command-list");
-  for (int i = 0; i < node.u.list->num; i++) {
-    auto item = node.u.list->values[i];
-    for (int j = 0; j < item.u.list->num; j++) {
-      auto key = item.u.list->keys[j];
-      auto value = item.u.list->values[j];
-      if (strcmp(key, "name") == 0) {
-        Commands.push_back(ImStrdup(value.u.string));
-      }
-    }
-  }
-  mpv_free_node_contents(&node);
+  for (auto& [name, args] : commands) Commands.push_back(ImStrdup(name.c_str()));
   CommandInited = true;
 }
 
@@ -510,7 +505,8 @@ void Debug::Console::ExecCommand(const char* command_line) {
     for (auto& cmd : builtinCommands) AddLog("- %s", cmd.c_str());
     AddLog("info", "MPV Commands:");
     auto node = mpv->property<mpv_node, MPV_FORMAT_NODE>("command-list");
-    auto commands = formatCommands(node);
+    std::vector<std::pair<std::string, std::string>> commands;
+    formatCommands(node, commands);
     for (auto& [name, args] : commands) AddLog("info", "- %s %s", name.c_str(), args.c_str());
     mpv_free_node_contents(&node);
   } else if (ImStricmp(command_line, "HISTORY") == 0) {

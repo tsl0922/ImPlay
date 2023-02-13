@@ -4,9 +4,9 @@
 #include <stdexcept>
 #include <string>
 #include <thread>
-#include <filesystem>
 #include <cstdarg>
-#include <fmt/format.h>
+#include <cstring>
+#include <filesystem>
 #include <nlohmann/json.hpp>
 #include <GLFW/glfw3.h>
 #include "mpv.h"
@@ -22,6 +22,7 @@ Mpv::Mpv(int64_t wid) : wid(wid) {
 
 Mpv::~Mpv() {
   if (renderCtx != nullptr) mpv_render_context_free(renderCtx);
+  mpv_unobserve_property(mpv, 0);
   mpv_destroy(main);
   mpv_destroy(mpv);
 }
@@ -90,14 +91,6 @@ bool Mpv::wantRender() {
   return renderCtx != nullptr && (mpv_render_context_update(renderCtx) & MPV_RENDER_UPDATE_FRAME);
 }
 
-bool Mpv::paused() { return (bool)property<int, MPV_FORMAT_FLAG>("pause"); }
-
-bool Mpv::playing() { return property<int64_t, MPV_FORMAT_INT64>("playlist-playing-pos") != -1; }
-
-bool Mpv::allowDrag() {
-  return property<int, MPV_FORMAT_FLAG>("window-dragging") && !property<int, MPV_FORMAT_FLAG>("fullscreen");
-}
-
 void Mpv::init() {
   if (mpv_initialize(mpv) < 0) throw std::runtime_error("could not initialize mpv context");
   if (wid == 0) initRender();
@@ -112,6 +105,9 @@ void Mpv::init() {
       },
       this);
   std::thread(&Mpv::eventLoop, this).detach();
+
+  forceWindow = property<int, MPV_FORMAT_FLAG>("force-window");
+  observeProperties();
 }
 
 void Mpv::initRender() {
@@ -137,9 +133,97 @@ void Mpv::initRender() {
       this);
 }
 
-std::vector<Mpv::TrackItem> Mpv::trackList() {
-  auto node = property<mpv_node, MPV_FORMAT_NODE>("track-list");
-  std::vector<Mpv::TrackItem> tracks;
+void Mpv::observeProperties() {
+  observeProperty("playlist", MPV_FORMAT_NODE, [this](void *data) {
+    auto node = static_cast<mpv_node>(*(mpv_node *)data);
+    if (node.format == MPV_FORMAT_NODE_ARRAY) initPlaylist(node);
+  });
+
+  observeProperty("chapter-list", MPV_FORMAT_NODE, [this](void *data) {
+    auto node = static_cast<mpv_node>(*(mpv_node *)data);
+    if (node.format == MPV_FORMAT_NODE_ARRAY) initChapters(node);
+  });
+
+  observeProperty("track-list", MPV_FORMAT_NODE, [this](void *data) {
+    auto node = static_cast<mpv_node>(*(mpv_node *)data);
+    if (node.format == MPV_FORMAT_NODE_ARRAY) initTracks(node);
+  });
+
+  observeProperty("audio-device-list", MPV_FORMAT_NODE, [this](void *data) {
+    auto node = static_cast<mpv_node>(*(mpv_node *)data);
+    if (node.format == MPV_FORMAT_NODE_ARRAY) initAudioDevices(node);
+  });
+
+  observeProperty("input-bindings", MPV_FORMAT_NODE, [this](void *data) {
+    auto node = static_cast<mpv_node>(*(mpv_node *)data);
+    if (node.format == MPV_FORMAT_NODE_ARRAY) initBindings(node);
+  });
+
+  observeProperty("profile-list", MPV_FORMAT_STRING, [this](void *data) {
+    if (data != nullptr) initProfiles(static_cast<char *>(*(char **)data));
+  });
+
+  observeProperty("aid", MPV_FORMAT_STRING, [this](void *data) { aid = static_cast<char *>(*(char **)data); });
+  observeProperty("vid", MPV_FORMAT_STRING, [this](void *data) { vid = static_cast<char *>(*(char **)data); });
+  observeProperty("sid", MPV_FORMAT_STRING, [this](void *data) { sid = static_cast<char *>(*(char **)data); });
+  observeProperty("audio-device", MPV_FORMAT_STRING, [this](void *data) { audioDevice = static_cast<char *>(*(char **)data); });
+
+  observeProperty("pause", MPV_FORMAT_FLAG, [this](void *data) { pause = static_cast<bool>(*(int *)data); });
+  observeProperty("mute", MPV_FORMAT_FLAG, [this](void *data) { mute = static_cast<bool>(*(int *)data); });
+  observeProperty("fullscreen", MPV_FORMAT_FLAG, [this](void *data) { fullscreen = static_cast<bool>(*(int *)data); });
+  observeProperty("window-dragging", MPV_FORMAT_FLAG,
+                  [this](void *data) { windowDragging = static_cast<bool>(*(int *)data); });
+
+  observeProperty("volume", MPV_FORMAT_INT64, [this](void *data) { volume = static_cast<int64_t>(*(int64_t *)data); });
+  observeProperty("chapter", MPV_FORMAT_INT64,
+                  [this](void *data) { chapter = static_cast<int64_t>(*(int64_t *)data); });
+  observeProperty("playlist-pos", MPV_FORMAT_INT64,
+                  [this](void *data) { playlistPos = static_cast<int64_t>(*(int64_t *)data); });
+  observeProperty("playlist-playing-pos", MPV_FORMAT_INT64,
+                  [this](void *data) { playlistPlayingPos = static_cast<int64_t>(*(int64_t *)data); });
+}
+
+void Mpv::initPlaylist(mpv_node &node) {
+  playlist.clear();
+  for (int i = 0; i < node.u.list->num; i++) {
+    auto item = node.u.list->values[i];
+    Mpv::PlayItem t;
+    t.id = i;
+    for (int j = 0; j < item.u.list->num; j++) {
+      auto key = item.u.list->keys[j];
+      auto value = item.u.list->values[j];
+      if (strcmp(key, "title") == 0) {
+        t.title = value.u.string;
+      } else if (strcmp(key, "filename") == 0) {
+        t.path = value.u.string;
+        t.filename = std::filesystem::path(reinterpret_cast<char8_t *>(t.path.data())).filename().string();
+      }
+    }
+    playlist.emplace_back(t);
+  }
+}
+
+void Mpv::initChapters(mpv_node &node) {
+  chapters.clear();
+  for (int i = 0; i < node.u.list->num; i++) {
+    auto item = node.u.list->values[i];
+    Mpv::ChapterItem t;
+    t.id = i;
+    for (int j = 0; j < item.u.list->num; j++) {
+      auto key = item.u.list->keys[j];
+      auto value = item.u.list->values[j];
+      if (strcmp(key, "title") == 0) {
+        t.title = value.u.string;
+      } else if (strcmp(key, "time") == 0) {
+        t.time = value.u.double_;
+      }
+    }
+    chapters.emplace_back(t);
+  }
+}
+
+void Mpv::initTracks(mpv_node &node) {
+  tracks.clear();
   for (int i = 0; i < node.u.list->num; i++) {
     auto track = node.u.list->values[i];
     Mpv::TrackItem t;
@@ -160,58 +244,28 @@ std::vector<Mpv::TrackItem> Mpv::trackList() {
     }
     tracks.emplace_back(t);
   }
-  mpv_free_node_contents(&node);
-  return tracks;
 }
 
-std::vector<Mpv::PlayItem> Mpv::playlist() {
-  auto node = property<mpv_node, MPV_FORMAT_NODE>("playlist");
-  std::vector<Mpv::PlayItem> playlist;
+void Mpv::initAudioDevices(mpv_node &node) {
+  audioDevices.clear();
   for (int i = 0; i < node.u.list->num; i++) {
     auto item = node.u.list->values[i];
-    Mpv::PlayItem t;
-    t.id = i;
+    Mpv::AudioDevice t;
     for (int j = 0; j < item.u.list->num; j++) {
       auto key = item.u.list->keys[j];
       auto value = item.u.list->values[j];
-      if (strcmp(key, "title") == 0) {
-        t.title = value.u.string;
-      } else if (strcmp(key, "filename") == 0) {
-        t.path = value.u.string;
-        t.filename = std::filesystem::path(reinterpret_cast<char8_t *>(t.path.data())).filename().string();
+      if (strcmp(key, "name") == 0) {
+        t.name = value.u.string;
+      } else if (strcmp(key, "description") == 0) {
+        t.description = value.u.string;
       }
     }
-    playlist.emplace_back(t);
+    audioDevices.emplace_back(t);
   }
-  mpv_free_node_contents(&node);
-  return playlist;
 }
 
-std::vector<Mpv::ChapterItem> Mpv::chapterList() {
-  auto node = property<mpv_node, MPV_FORMAT_NODE>("chapter-list");
-  std::vector<Mpv::ChapterItem> chapters;
-  for (int i = 0; i < node.u.list->num; i++) {
-    auto item = node.u.list->values[i];
-    Mpv::ChapterItem t;
-    t.id = i;
-    for (int j = 0; j < item.u.list->num; j++) {
-      auto key = item.u.list->keys[j];
-      auto value = item.u.list->values[j];
-      if (strcmp(key, "title") == 0) {
-        t.title = value.u.string;
-      } else if (strcmp(key, "time") == 0) {
-        t.time = value.u.double_;
-      }
-    }
-    chapters.emplace_back(t);
-  }
-  mpv_free_node_contents(&node);
-  return chapters;
-}
-
-std::vector<Mpv::BindingItem> Mpv::bindingList() {
-  auto node = property<mpv_node, MPV_FORMAT_NODE>("input-bindings");
-  std::vector<Mpv::BindingItem> bindings;
+void Mpv::initBindings(mpv_node &node) {
+  bindings.clear();
   for (int i = 0; i < node.u.list->num; i++) {
     auto item = node.u.list->values[i];
     Mpv::BindingItem t;
@@ -228,40 +282,15 @@ std::vector<Mpv::BindingItem> Mpv::bindingList() {
     }
     bindings.emplace_back(t);
   }
-  mpv_free_node_contents(&node);
-  return bindings;
 }
 
-std::vector<std::string> Mpv::profileList() {
-  auto payload = property<char *, MPV_FORMAT_STRING>("profile-list");
-  std::vector<std::string> profiles;
+void Mpv::initProfiles(const char *payload) {
+  profiles.clear();
   auto j = nlohmann::json::parse(payload);
   for (auto &elm : j) {
     auto name = elm["name"].get_ref<const std::string &>();
     if (name != "builtin-pseudo-gui" && name != "encoding" && name != "libmpv" && name != "pseudo-gui")
       profiles.emplace_back(name);
   }
-  return profiles;
-}
-
-std::vector<Mpv::AudioDevice> Mpv::audioDeviceList() {
-  auto node = property<mpv_node, MPV_FORMAT_NODE>("audio-device-list");
-  std::vector<Mpv::AudioDevice> devices;
-  for (int i = 0; i < node.u.list->num; i++) {
-    auto item = node.u.list->values[i];
-    AudioDevice t;
-    for (int j = 0; j < item.u.list->num; j++) {
-      auto key = item.u.list->keys[j];
-      auto value = item.u.list->values[j];
-      if (strcmp(key, "name") == 0) {
-        t.name = value.u.string;
-      } else if (strcmp(key, "description") == 0) {
-        t.description = value.u.string;
-      }
-    }
-    devices.emplace_back(t);
-  }
-  mpv_free_node_contents(&node);
-  return devices;
 }
 }  // namespace ImPlay

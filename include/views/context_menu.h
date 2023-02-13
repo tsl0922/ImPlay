@@ -12,9 +12,10 @@ class ContextMenu : public View {
 
  private:
   void drawAudioDeviceList();
-  void drawTracklist(const char *type, const char *prop);
+  void drawTracklist(const char *type, const char *prop, std::string pos);
   void drawChapterlist(std::vector<Mpv::ChapterItem> items);
   void drawPlaylist(std::vector<Mpv::PlayItem> items);
   void drawProfilelist();
+  void drawRecentFiles();
 };
 }  // namespace ImPlay::Views

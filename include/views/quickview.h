@@ -31,7 +31,7 @@ class Quickview : public View {
     bool child;
   };
 
-  void drawTracks(const char *type, const char *prop);
+  void drawTracks(const char *type, const char *prop, std::string pos);
   void drawPlaylistTabContent();
   void drawChaptersTabContent();
   void drawVideoTabContent();

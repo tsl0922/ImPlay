@@ -15,8 +15,8 @@ void ContextMenu::draw() {
   if (ImGui::BeginPopup("##context_menu", ImGuiWindowFlags_NoMove)) {
     bool paused = mpv->paused();
     bool playing = mpv->playing();
-    auto playlist = mpv->playlist();
-    auto chapterlist = mpv->chapterList();
+    auto playlist = mpv->playlist;
+    auto chapterlist = mpv->chapters;
     if (ImGui::GetIO().AppFocusLost || ImGui::GetWindowViewport()->Flags & ImGuiViewportFlags_Minimized)
       ImGui::CloseCurrentPopup();
     if (ImGui::MenuItemEx(paused ? "menu.play"_i18n : "menu.pause"_i18n, paused ? ICON_FA_PLAY : ICON_FA_PAUSE, "Space",
@@ -73,7 +73,7 @@ void ContextMenu::draw() {
     drawChapterlist(chapterlist);
     ImGui::Separator();
     if (ImGui::BeginMenuEx("menu.audio"_i18n, ICON_FA_VOLUME_UP)) {
-      drawTracklist("audio", "aid");
+      drawTracklist("audio", "aid", mpv->aid);
       drawAudioDeviceList();
       ImGui::Separator();
       if (ImGui::MenuItemEx("menu.audio.inc_volume"_i18n, ICON_FA_VOLUME_UP, "0")) mpv->command("add volume 2");
@@ -88,7 +88,7 @@ void ContextMenu::draw() {
       ImGui::EndMenu();
     }
     if (ImGui::BeginMenuEx("menu.video"_i18n, ICON_FA_VIDEO)) {
-      drawTracklist("video", "vid");
+      drawTracklist("video", "vid", mpv->vid);
       if (ImGui::BeginMenuEx("menu.video.rotate"_i18n, ICON_FA_SPINNER)) {
         if (ImGui::MenuItem("90°")) mpv->command("set video-rotate 90");
         if (ImGui::MenuItem("180°")) mpv->command("set video-rotate 180");
@@ -158,7 +158,7 @@ void ContextMenu::draw() {
       ImGui::EndMenu();
     }
     if (ImGui::BeginMenuEx("menu.subtitle"_i18n, ICON_FA_FONT)) {
-      drawTracklist("sub", "sid");
+      drawTracklist("sub", "sid", mpv->sid);
       if (ImGui::MenuItemEx("menu.subtitle.load"_i18n, ICON_FA_FOLDER_OPEN))
         mpv->command("script-message-to implay load-sub");
       if (ImGui::MenuItem("menu.subtitle.show_hide"_i18n, "v")) mpv->command("cycle sub-visibility");
@@ -227,21 +227,7 @@ void ContextMenu::draw() {
       if (ImGui::MenuItemEx("menu.open.files"_i18n, ICON_FA_FILE)) mpv->command("script-message-to implay open");
       if (ImGui::MenuItemEx("menu.open.folder"_i18n, ICON_FA_FOLDER_PLUS))
         mpv->command("script-message-to implay open-folder");
-      if (ImGui::BeginMenu("menu.open.recent"_i18n)) {
-        auto files = config->getRecentFiles();
-        int i = 0;
-        for (auto &file : files) {
-          if (i == 10) break;
-          if (ImGui::MenuItem(file.title.c_str())) mpv->commandv("loadfile", file.path.c_str(), nullptr);
-          i++;
-        }
-        if (files.size() > 10) {
-          if (ImGui::MenuItem(format("{} ({})", "menu.open.recent.all"_i18n, files.size()).c_str()))
-            mpv->command("script-message-to implay command-palette history");
-        }
-        if (ImGui::MenuItem("menu.open.recent.clear"_i18n)) config->clearRecentFiles();
-        ImGui::EndMenu();
-      }
+      drawRecentFiles();
       ImGui::Separator();
       if (ImGui::MenuItemEx("menu.open.url"_i18n, ICON_FA_LINK)) mpv->command("script-message-to implay open-url");
       if (ImGui::MenuItemEx("menu.open.clipboard"_i18n, ICON_FA_CLIPBOARD))
@@ -260,25 +246,22 @@ void ContextMenu::draw() {
 }
 
 void ContextMenu::drawAudioDeviceList() {
-  auto devices = mpv->audioDeviceList();
-  auto name = mpv->property("audio-device");
+  auto devices = mpv->audioDevices;
   if (ImGui::BeginMenuEx("menu.audio.devices"_i18n, ICON_FA_AUDIO_DESCRIPTION, !devices.empty())) {
     for (auto &device : devices) {
       auto title = format("[{}] {}", device.description, device.name);
-      if (ImGui::MenuItem(title.c_str(), nullptr, device.name == name))
+      if (ImGui::MenuItem(title.c_str(), nullptr, device.name == mpv->audioDevice))
         mpv->property("audio-device", device.name.c_str());
     }
     ImGui::EndMenu();
   }
 }
 
-void ContextMenu::drawTracklist(const char *type, const char *prop) {
-  auto items = mpv->trackList();
-  auto value = mpv->property(prop);
+void ContextMenu::drawTracklist(const char *type, const char *prop, std::string pos) {
   if (ImGui::BeginMenuEx("menu.tracks"_i18n, ICON_FA_LIST)) {
-    if (ImGui::MenuItem("menu.tracks.disable"_i18n, nullptr, value == "no"))
+    if (ImGui::MenuItem("menu.tracks.disable"_i18n, nullptr, pos == "no"))
       mpv->commandv("cycle-values", prop, "no", "auto", nullptr);
-    for (auto &track : items) {
+    for (auto &track : mpv->tracks) {
       if (track.type != type) continue;
       auto title = track.title.empty() ? format("menu.tracks.item"_i18n, track.id) : track.title;
       if (!track.lang.empty()) title += format(" [{}]", track.lang);
@@ -290,7 +273,7 @@ void ContextMenu::drawTracklist(const char *type, const char *prop) {
 }
 
 void ContextMenu::drawChapterlist(std::vector<Mpv::ChapterItem> items) {
-  auto pos = mpv->property<int64_t, MPV_FORMAT_INT64>("chapter");
+  auto pos = mpv->chapter;
   if (ImGui::BeginMenuEx("menu.chapters"_i18n, ICON_FA_LIST, !items.empty())) {
     if (ImGui::MenuItemEx("menu.chapters.next"_i18n, ICON_FA_ARROW_RIGHT)) mpv->command("add chapter 1");
     if (ImGui::MenuItemEx("menu.chapters.previous"_i18n, ICON_FA_ARROW_LEFT)) mpv->command("add chapter -1");
@@ -316,7 +299,7 @@ void ContextMenu::drawChapterlist(std::vector<Mpv::ChapterItem> items) {
 }
 
 void ContextMenu::drawPlaylist(std::vector<Mpv::PlayItem> items) {
-  auto pos = mpv->property<int64_t, MPV_FORMAT_INT64>("playlist-pos");
+  auto pos = mpv->playlistPos;
   if (ImGui::BeginMenuEx("menu.playlist"_i18n, ICON_FA_LIST)) {
     if (ImGui::MenuItemEx("menu.playlist.next"_i18n, ICON_FA_ARROW_RIGHT, ">", false, items.size() > 1))
       mpv->command("playlist-next");
@@ -353,12 +336,29 @@ void ContextMenu::drawPlaylist(std::vector<Mpv::PlayItem> items) {
 }
 
 void ContextMenu::drawProfilelist() {
-  auto profilelist = mpv->profileList();
   if (ImGui::BeginMenuEx("menu.tools.profiles"_i18n, ICON_FA_USER)) {
-    for (auto &profile : profilelist) {
+    for (auto &profile : mpv->profiles) {
       if (ImGui::MenuItem(profile.c_str()))
         mpv->command(format("show-text {}; apply-profile {}", profile, profile).c_str());
     }
+    ImGui::EndMenu();
+  }
+}
+
+void ContextMenu::drawRecentFiles() {
+  if (ImGui::BeginMenu("menu.open.recent"_i18n)) {
+    auto files = config->getRecentFiles();
+    int i = 0;
+    for (auto &file : files) {
+      if (i == 10) break;
+      if (ImGui::MenuItem(file.title.c_str())) mpv->commandv("loadfile", file.path.c_str(), nullptr);
+      i++;
+    }
+    if (files.size() > 10) {
+      if (ImGui::MenuItem(format("{} ({})", "menu.open.recent.all"_i18n, files.size()).c_str()))
+        mpv->command("script-message-to implay command-palette history");
+    }
+    if (ImGui::MenuItem("menu.open.recent.clear"_i18n)) config->clearRecentFiles();
     ImGui::EndMenu();
   }
 }

@@ -30,7 +30,7 @@ class Debug : public View {
     void AddLog(const char *level, const char *fmt, ...);
     void ExecCommand(const char *command_line);
     int TextEditCallback(ImGuiInputTextCallbackData *data);
-    void initCommands();
+    void initCommands(std::vector<std::pair<std::string, std::string>> &commands);
 
     ImVec4 LogColor(const char *level);
 
@@ -59,12 +59,18 @@ class Debug : public View {
   void drawConsole();
   void drawBindings();
   void drawCommands();
-  void drawProperties(const char *title, const char *key);
+  void drawProperties(const char *title, std::vector<std::string> &props);
   void drawPropNode(const char *name, mpv_node &node, int depth = 0);
 
+  void initData();
+
   Console *console = nullptr;
+  std::string version;
   std::string m_node = "Console";
-  bool m_demo = false;
-  bool m_metrics = false;
+  bool m_demo = false, m_metrics = false;
+
+  std::vector<std::string> options;
+  std::vector<std::string> properties;
+  std::vector<std::pair<std::string, std::string>> commands;
 };
 }  // namespace ImPlay::Views

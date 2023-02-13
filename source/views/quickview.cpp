@@ -91,15 +91,14 @@ void Quickview::emptyLabel() {
   ImGui::EndDisabled();
 }
 
-void Quickview::drawTracks(const char *type, const char *prop) {
+void Quickview::drawTracks(const char *type, const char *prop, std::string pos) {
   ImGui::TextUnformatted("views.quickview.tracks"_i18n);
   alignRight(ICON_FA_TOGGLE_ON);
-  auto state = mpv->property(prop);
-  if (toggleButton(!iequals(state, "no"), "views.quickview.tracks.toggle"_i18n))
+  if (toggleButton(!iequals(pos, "no"), "views.quickview.tracks.toggle"_i18n))
     mpv->commandv("cycle-values", prop, "no", "auto", nullptr);
   if (ImGui::BeginListBox("##tracks", ImVec2(-FLT_MIN, 3 * ImGui::GetTextLineHeightWithSpacing()))) {
-    auto items = mpv->trackList();
-    if (items.empty()) emptyLabel();;
+    auto items = mpv->tracks;
+    if (items.empty()) emptyLabel();
     for (auto &item : items) {
       if (item.type != type) continue;
       auto title = item.title.empty() ? format("views.quickview.tracks.item"_i18n, item.id) : item.title;
@@ -117,7 +116,7 @@ void Quickview::drawTracks(const char *type, const char *prop) {
 
 void Quickview::drawPlaylistTabContent() {
   auto style = ImGui::GetStyle();
-  auto pos = mpv->property<int64_t, MPV_FORMAT_INT64>("playlist-pos");
+  auto pos = mpv->playlistPos;
 
   iconButton(ICON_FA_SEARCH, "script-message-to implay command-palette playlist",
              "views.quickview.playlist.search"_i18n, false);
@@ -133,7 +132,7 @@ void Quickview::drawPlaylistTabContent() {
   ImGui::Separator();
 
   if (ImGui::BeginListBox("##playlist", ImVec2(-FLT_MIN, -FLT_MIN))) {
-    auto items = mpv->playlist();
+    auto items = mpv->playlist;
     static int selected = pos;
     auto drawContextmenu = [&](Mpv::PlayItem *item = nullptr) {
       bool enabled = item != nullptr;
@@ -196,8 +195,8 @@ void Quickview::drawPlaylistTabContent() {
 }
 
 void Quickview::drawChaptersTabContent() {
-  auto items = mpv->chapterList();
-  auto pos = mpv->property<int64_t, MPV_FORMAT_INT64>("chapter");
+  auto items = mpv->chapters;
+  auto pos = mpv->chapter;
   if (ImGui::BeginListBox("##chapters", ImVec2(-FLT_MIN, -FLT_MIN))) {
     if (items.empty()) emptyLabel();
     for (auto &item : items) {
@@ -218,7 +217,7 @@ void Quickview::drawChaptersTabContent() {
 }
 
 void Quickview::drawVideoTabContent() {
-  drawTracks("video", "vid");
+  drawTracks("video", "vid", mpv->vid);
   ImGui::NewLine();
 
   ImGui::TextUnformatted("views.quickview.video.rotate"_i18n);
@@ -310,16 +309,15 @@ void Quickview::drawVideoTabContent() {
 }
 
 void Quickview::drawAudioTabContent() {
-  drawTracks("audio", "aid");
+  drawTracks("audio", "aid", mpv->aid);
   ImGui::NewLine();
 
   ImGui::TextUnformatted("views.quickview.audio.volume"_i18n);
-  static int volume = (int)mpv->property<int64_t, MPV_FORMAT_INT64>("volume");
+  static int volume = (int)mpv->volume;
   if (ImGui::SliderInt("##Volume", &volume, 0, 200, "%d%%"))
     mpv->commandv("set", "volume", std::to_string(volume).c_str(), nullptr);
   ImGui::SameLine();
-  bool mute = mpv->property<int, MPV_FORMAT_FLAG>("mute");
-  if (toggleButton(ICON_FA_VOLUME_MUTE, mute, "views.quickview.audio.mute"_i18n)) mpv->command("cycle mute");
+  if (toggleButton(ICON_FA_VOLUME_MUTE, mpv->mute, "views.quickview.audio.mute"_i18n)) mpv->command("cycle mute");
   ImGui::NewLine();
 
   ImGui::TextUnformatted("views.quickview.audio.delay"_i18n);
@@ -335,7 +333,7 @@ void Quickview::drawAudioTabContent() {
 }
 
 void Quickview::drawSubtitleTabContent() {
-  drawTracks("sub", "sid");
+  drawTracks("sub", "sid", mpv->sid);
 
   iconButton(ICON_FA_ARROW_UP, "add sub-pos -1", "views.quickview.subtitle.move_up"_i18n, false);
   iconButton(ICON_FA_ARROW_DOWN, "add sub-pos 1", "views.quickview.subtitle.move_down"_i18n);

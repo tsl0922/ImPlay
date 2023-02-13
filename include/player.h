@@ -43,7 +43,6 @@ class Player {
   Dispatch *dispatch;
   const char *title;
   bool idle = true;
-  bool forceWindow = false;
   std::atomic_bool renderGui_ = true;
   ImTextureID logoTexture = nullptr;
 
