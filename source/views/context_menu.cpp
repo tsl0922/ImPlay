@@ -190,6 +190,7 @@ void ContextMenu::draw() {
       if (ImGui::MenuItemEx("menu.tools.window_ontop"_i18n, ICON_FA_ARROW_UP, "T")) mpv->command("cycle ontop");
       if (ImGui::MenuItemEx("menu.tools.show_progress"_i18n, ICON_FA_SPINNER, "o", false, playing))
         mpv->command("show-progress");
+      if (ImGui::MenuItem("menu.tools.show_stats"_i18n, "I")) mpv->command("script-binding stats/display-stats-toggle");
       if (ImGui::MenuItem("menu.tools.osc_visibility"_i18n, "DEL")) mpv->command("script-binding osc/visibility");
       ImGui::Separator();
       drawProfilelist();
@@ -203,13 +204,6 @@ void ContextMenu::draw() {
             config->save();
           }
         }
-        ImGui::EndMenu();
-      }
-      if (ImGui::BeginMenuEx("menu.tools.stats"_i18n, ICON_FA_INFO_CIRCLE)) {
-        if (ImGui::MenuItem("menu.tools.stats.1"_i18n, "i")) mpv->command("script-binding stats/display-page-1");
-        if (ImGui::MenuItem("menu.tools.stats.2"_i18n)) mpv->command("script-binding stats/display-page-2");
-        if (ImGui::MenuItem("menu.tools.stats.3"_i18n)) mpv->command("script-binding stats/display-page-3");
-        if (ImGui::MenuItem("menu.tools.stats.4"_i18n)) mpv->command("script-binding stats/display-page-0");
         ImGui::EndMenu();
       }
       ImGui::Separator();
