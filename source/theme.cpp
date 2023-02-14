@@ -8,19 +8,19 @@ std::vector<const char*> ImGui::Themes() {
   return themes;
 }
 
-void ImGui::SetTheme(const char* theme) {
+void ImGui::SetTheme(const char* theme, ImGuiStyle* dst) {
   if (strcmp(theme, "dark") == 0)
-    ImGui::StyleColorsDark();
+    ImGui::StyleColorsDark(dst);
   else if (strcmp(theme, "light") == 0)
-    ImGui::StyleColorsLight();
+    ImGui::StyleColorsLight(dst);
   else if (strcmp(theme, "classic") == 0)
-    ImGui::StyleColorsClassic();
+    ImGui::StyleColorsClassic(dst);
   else if (strcmp(theme, "spectrum") == 0)
-    ImGui::StyleColorsSpectrum();
+    ImGui::StyleColorsSpectrum(dst);
   else if (strcmp(theme, "dracula") == 0)
-    ImGui::StyleColorsDracula();
+    ImGui::StyleColorsDracula(dst);
   else if (strcmp(theme, "deepdark") == 0)
-    ImGui::StyleColorsDeepDark();
+    ImGui::StyleColorsDeepDark(dst);
 }
 
 // https://github.com/adobe/imgui/blob/master/docs/Spectrum.md

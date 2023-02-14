@@ -5,11 +5,11 @@
 
 namespace ImPlay::Views {
 Quickview::Quickview(Config *config, Dispatch *dispatch, Mpv *mpv) : View(config, dispatch, mpv) {
-  addTab("playlist", "views.quickview.playlist"_i18n, [this]() { drawPlaylistTabContent(); });
-  addTab("chapters", "views.quickview.chapters"_i18n, [this]() { drawChaptersTabContent(); });
-  addTab("video", "views.quickview.video"_i18n, [this]() { drawVideoTabContent(); }, true);
-  addTab("audio", "views.quickview.audio"_i18n, [this]() { drawAudioTabContent(); }, true);
-  addTab("subtitle", "views.quickview.subtitle"_i18n, [this]() { drawSubtitleTabContent(); }, true);
+  addTab("playlist", "views.quickview.playlist", [this]() { drawPlaylistTabContent(); });
+  addTab("chapters", "views.quickview.chapters", [this]() { drawChaptersTabContent(); });
+  addTab("video", "views.quickview.video", [this]() { drawVideoTabContent(); }, true);
+  addTab("audio", "views.quickview.audio", [this]() { drawAudioTabContent(); }, true);
+  addTab("subtitle", "views.quickview.subtitle", [this]() { drawSubtitleTabContent(); }, true);
 
   mpv->observeEvent(MPV_EVENT_FILE_LOADED, [this](void *data) {
     updateAudioEqChannels();
@@ -39,7 +39,7 @@ void Quickview::draw() {
           flags |= ImGuiTabItemFlags_SetSelected;
           tabSwitched = true;
         }
-        if (ImGui::BeginTabItem(title.c_str(), nullptr, flags)) {
+        if (ImGui::BeginTabItem(i18n(title).c_str(), nullptr, flags)) {
           if (child) ImGui::BeginChild(name.c_str());
           draw();
           if (child) ImGui::EndChild();

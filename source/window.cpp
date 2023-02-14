@@ -271,10 +271,11 @@ void Window::loadFonts() {
   iconSize = std::floor(iconSize * scale);
 
   ImGuiIO& io = ImGui::GetIO();
-  ImGuiStyle& style = ImGui::GetStyle();
+  ImGuiStyle style;
+  std::string theme = config.Data.Interface.Theme;
 
   {
-    ImGui::SetTheme(config.Data.Interface.Theme.c_str());
+    ImGui::SetTheme(theme.c_str(), &style);
     style.TabRounding = 4;
     style.ScrollbarRounding = 9;
     style.WindowRounding = 7;
@@ -292,6 +293,7 @@ void Window::loadFonts() {
 #else
   style.ScaleAllSizes(scale);
 #endif
+  ImGui::GetStyle() = style;
 
   io.Fonts->Clear();
 

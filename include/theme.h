@@ -5,8 +5,8 @@
 #include <imgui.h>
 
 namespace ImGui {
-void SetTheme(const char* theme);
 std::vector<const char*> Themes();
+void SetTheme(const char* theme, ImGuiStyle* dst = nullptr);
 void StyleColorsSpectrum(ImGuiStyle* dst = nullptr);
 void StyleColorsDracula(ImGuiStyle* dst = nullptr);
 void StyleColorsDeepDark(ImGuiStyle* dst = nullptr);
