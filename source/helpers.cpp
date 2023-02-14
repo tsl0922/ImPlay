@@ -23,82 +23,6 @@
 #endif
 #include "helpers.h"
 
-void ImGui::HalignCenter(const char* text) {
-  ImGui::SetCursorPosX((ImGui::GetWindowWidth() - ImGui::CalcTextSize(text).x) * 0.5f);
-}
-
-void ImGui::TextCentered(const char* text, bool disabled) {
-  ImGui::HalignCenter(text);
-  if (disabled)
-    ImGui::TextDisabled("%s", text);
-  else
-    ImGui::Text("%s", text);
-}
-
-void ImGui::TextEllipsis(const char* text, float maxWidth) {
-  if (maxWidth == 0) maxWidth = ImGui::GetContentRegionAvail().x;
-  ImGuiStyle style = ImGui::GetStyle();
-  ImGuiWindow* window = ImGui::GetCurrentWindow();
-  ImVec2 textSize = ImGui::CalcTextSize(text);
-  ImVec2 min = ImGui::GetCursorScreenPos();
-  ImVec2 max = min + ImVec2(maxWidth - style.FramePadding.x, textSize.y);
-  ImRect textRect(min, max);
-  ImGui::ItemSize(textRect);
-  if (ImGui::ItemAdd(textRect, window->GetID(text)))
-    ImGui::RenderTextEllipsis(ImGui::GetWindowDrawList(), min, max, max.x, max.x, text, nullptr, &textSize);
-}
-
-void ImGui::Hyperlink(const char* label, const char* url) {
-  auto style = ImGui::GetStyle();
-  ImGui::PushStyleColor(ImGuiCol_Text, style.Colors[ImGuiCol_CheckMark]);
-  ImGui::Text("%s", label ? label : url);
-  if (ImGui::IsItemHovered()) ImGui::SetMouseCursor(ImGuiMouseCursor_Hand);
-  if (ImGui::IsItemClicked()) ImPlay::openUrl(url);
-  ImGui::PopStyleColor();
-}
-
-void ImGui::HelpMarker(const char* desc) {
-  ImGui::TextDisabled("(?)");
-  if (ImGui::IsItemHovered(ImGuiHoveredFlags_DelayShort)) {
-    ImGui::BeginTooltip();
-    ImGui::PushTextWrapPos(35 * ImGui::GetFontSize());
-    ImGui::TextUnformatted(desc);
-    ImGui::PopTextWrapPos();
-    ImGui::EndTooltip();
-  }
-}
-
-ImTextureID ImGui::LoadTexture(const char* path, int* width, int* height) {
-  int w, h;
-  auto icon = romfs::get(path);
-  auto data = stbi_load_from_memory(reinterpret_cast<const stbi_uc*>(icon.data()), icon.size(), &w, &h, NULL, 4);
-  if (data == nullptr) return nullptr;
-
-  GLuint texture;
-  glGenTextures(1, &texture);
-  glBindTexture(GL_TEXTURE_2D, texture);
-
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-#if defined(GL_UNPACK_ROW_LENGTH) && !defined(__EMSCRIPTEN__)
-  glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
-#endif
-  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
-  stbi_image_free(data);
-
-  if (width != nullptr) *width = w;
-  if (height != nullptr) *height = h;
-
-  return reinterpret_cast<ImTextureID>(static_cast<intptr_t>(texture));
-}
-
-// return the second font
-ImFont* ImGui::codeFont() {
-  auto fonts = ImGui::GetIO().Fonts->Fonts;
-  return fonts.size() > 1 ? fonts[1] : fonts[0];
-}
-
 void ImPlay::OptionParser::parse(int argc, char** argv) {
   bool optEnd = false;
 #ifdef _WIN32
@@ -266,4 +190,74 @@ std::vector<std::string> ImPlay::split(const std::string& str, const std::string
   }
   if (pos1 != str.length()) v.push_back(str.substr(pos1));
   return v;
+}
+
+void ImGui::HalignCenter(const char* text) {
+  ImGui::SetCursorPosX((ImGui::GetWindowWidth() - ImGui::CalcTextSize(text).x) * 0.5f);
+}
+
+void ImGui::TextCentered(const char* text, bool disabled) {
+  ImGui::HalignCenter(text);
+  if (disabled)
+    ImGui::TextDisabled("%s", text);
+  else
+    ImGui::Text("%s", text);
+}
+
+void ImGui::TextEllipsis(const char* text, float maxWidth) {
+  if (maxWidth == 0) maxWidth = ImGui::GetContentRegionAvail().x;
+  ImGuiStyle style = ImGui::GetStyle();
+  ImGuiWindow* window = ImGui::GetCurrentWindow();
+  ImVec2 textSize = ImGui::CalcTextSize(text);
+  ImVec2 min = ImGui::GetCursorScreenPos();
+  ImVec2 max = min + ImVec2(maxWidth - style.FramePadding.x, textSize.y);
+  ImRect textRect(min, max);
+  ImGui::ItemSize(textRect);
+  if (ImGui::ItemAdd(textRect, window->GetID(text)))
+    ImGui::RenderTextEllipsis(ImGui::GetWindowDrawList(), min, max, max.x, max.x, text, nullptr, &textSize);
+}
+
+void ImGui::Hyperlink(const char* label, const char* url) {
+  auto style = ImGui::GetStyle();
+  ImGui::PushStyleColor(ImGuiCol_Text, style.Colors[ImGuiCol_CheckMark]);
+  ImGui::Text("%s", label ? label : url);
+  if (ImGui::IsItemHovered()) ImGui::SetMouseCursor(ImGuiMouseCursor_Hand);
+  if (ImGui::IsItemClicked()) ImPlay::openUrl(url);
+  ImGui::PopStyleColor();
+}
+
+void ImGui::HelpMarker(const char* desc) {
+  ImGui::TextDisabled("(?)");
+  if (ImGui::IsItemHovered(ImGuiHoveredFlags_DelayShort)) {
+    ImGui::BeginTooltip();
+    ImGui::PushTextWrapPos(35 * ImGui::GetFontSize());
+    ImGui::TextUnformatted(desc);
+    ImGui::PopTextWrapPos();
+    ImGui::EndTooltip();
+  }
+}
+
+ImTextureID ImGui::LoadTexture(const char* path, int* width, int* height) {
+  int w, h;
+  auto icon = romfs::get(path);
+  auto data = stbi_load_from_memory(reinterpret_cast<const stbi_uc*>(icon.data()), icon.size(), &w, &h, NULL, 4);
+  if (data == nullptr) return nullptr;
+
+  GLuint texture;
+  glGenTextures(1, &texture);
+  glBindTexture(GL_TEXTURE_2D, texture);
+
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+#if defined(GL_UNPACK_ROW_LENGTH) && !defined(__EMSCRIPTEN__)
+  glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
+#endif
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+  stbi_image_free(data);
+
+  if (width != nullptr) *width = w;
+  if (height != nullptr) *height = h;
+
+  return reinterpret_cast<ImTextureID>(static_cast<intptr_t>(texture));
 }

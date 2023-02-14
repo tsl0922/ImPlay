@@ -296,19 +296,16 @@ void Window::loadFonts() {
   io.Fonts->Clear();
 
   ImFontConfig cfg;
-  cfg.OversampleH = 2.0f;
-  cfg.OversampleV = 1.0f;
   cfg.SizePixels = fontSize;
   ImWchar fa_range[] = {ICON_MIN_FA, ICON_MAX_FA, 0};
   const ImWchar* font_range = config.buildGlyphRanges();
-  io.Fonts->AddFontFromMemoryCompressedTTF(fa_compressed_data, fa_compressed_size, iconSize, &cfg, fa_range);
+  io.Fonts->AddFontFromMemoryCompressedTTF(source_code_pro_compressed_data, source_code_pro_compressed_size, 0, &cfg);
   cfg.MergeMode = true;
+  io.Fonts->AddFontFromMemoryCompressedTTF(fa_compressed_data, fa_compressed_size, iconSize, &cfg, fa_range);
   if (config.Data.Font.Path.empty())
     io.Fonts->AddFontFromMemoryCompressedTTF(unifont_compressed_data, unifont_compressed_size, 0, &cfg, font_range);
   else
     io.Fonts->AddFontFromFileTTF(config.Data.Font.Path.c_str(), 0, &cfg, font_range);
-
-  io.Fonts->AddFontFromMemoryCompressedTTF(source_code_pro_compressed_data, source_code_pro_compressed_size, fontSize);
 
   io.Fonts->Build();
 }
