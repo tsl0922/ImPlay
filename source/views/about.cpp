@@ -9,9 +9,8 @@ void About::draw() {
   if (m_open) ImGui::OpenPopup("views.about.title"_i18n);
 
   ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, scaled(ImVec2(4.0f, 1.0f)));
-  ImGui::SetNextWindowPos(ImGui::GetMainViewport()->GetWorkCenter(), ImGuiCond_Always, ImVec2(0.5f, 0.5f));
-  if (ImGui::BeginPopupModal("views.about.title"_i18n, &m_open,
-                             ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoMove)) {
+  ImGui::SetNextWindowPos(ImGui::GetMainViewport()->GetWorkCenter(), ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
+  if (ImGui::BeginPopupModal("views.about.title"_i18n, &m_open, ImGuiWindowFlags_AlwaysAutoResize)) {
     if (ImGui::IsKeyDown(ImGuiKey_Escape)) m_open = false;
     ImGui::TextCentered("ImPlay");
 #ifdef APP_VERSION

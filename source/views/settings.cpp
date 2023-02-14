@@ -17,12 +17,11 @@ void Settings::show() {
 void Settings::draw() {
   if (!m_open) return;
   ImGui::OpenPopup("views.settings.title"_i18n);
-  ImVec2 wSize = ImGui::GetMainViewport()->WorkSize;
-  float w = std::min(wSize.x * 0.8f, scaled(50));
+  auto viewport = ImGui::GetMainViewport();
+  float w = std::min(viewport->WorkSize.x * 0.8f, scaled(50));
   ImGui::SetNextWindowSize(ImVec2(w, 0), ImGuiCond_Always);
-  ImGui::SetNextWindowPos(ImGui::GetMainViewport()->GetWorkCenter(), ImGuiCond_Always, ImVec2(0.5f, 0.5f));
-  if (ImGui::BeginPopupModal("views.settings.title"_i18n, &m_open,
-                             ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize)) {
+  ImGui::SetNextWindowPos(viewport->GetWorkCenter(), ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
+  if (ImGui::BeginPopupModal("views.settings.title"_i18n, &m_open)) {
     if (ImGui::IsKeyDown(ImGuiKey_Escape)) m_open = false;
     ImGui::TextUnformatted("views.settings.hint"_i18n);
     if (ImGui::BeginTabBar("Settings")) {
