@@ -9,6 +9,7 @@ namespace ImPlay {
 struct LangData {
   std::string code;
   std::string title;
+  std::vector<std::pair<std::string, int>> fonts;
   std::map<std::string, std::string> entries;
 
   LangData(std::string code, std::string title) : code(code), title(title) {}

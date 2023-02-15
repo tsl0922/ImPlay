@@ -82,10 +82,8 @@ void Command::execute(int n_args, const char **args_) {
            mpv->command("cycle pause");
          else if (config->getRecentFiles().size() > 0) {
            for (auto &file : config->getRecentFiles()) {
-             auto path = file.path;
-             auto fp = std::filesystem::path(reinterpret_cast<char8_t *>(path.data()));
-             if (std::filesystem::exists(fp) || path.find("://") != std::string::npos) {
-               mpv->commandv("loadfile", path.c_str(), nullptr);
+             if (fileExists(file.path) || file.path.find("://") != std::string::npos) {
+               mpv->commandv("loadfile", file.path.c_str(), nullptr);
                break;
              }
            }

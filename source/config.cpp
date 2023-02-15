@@ -49,6 +49,8 @@ void Config::load() {
     recentFiles.push_back({parts.front(), parts.back()});
   }
 
+  getLang() = Data.Interface.Lang;
+
   ini.clear();
 }
 

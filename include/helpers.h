@@ -43,6 +43,8 @@ class nfd_error : public std::exception {
   std::runtime_error m;
 };
 
+bool fileExists(std::string path);
+
 void openFile(std::vector<std::pair<std::string, std::string>> filters, std::function<void(std::string)> callback);
 void openFiles(std::vector<std::pair<std::string, std::string>> filters,
                std::function<void(std::string, int)> callback);

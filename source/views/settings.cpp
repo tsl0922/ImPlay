@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: GPL-2.0-only
 
 #include <algorithm>
+#include <filesystem>
 #include <string>
 #include <fonts/fontawesome.h>
 #include "helpers.h"
@@ -55,6 +56,20 @@ void Settings::drawButtons() {
   if (same) ImGui::EndDisabled();
 
   if (!same && apply) {
+    // use recommended font from lang if not set
+    if (data.Interface.Lang != config->Data.Interface.Lang && data.Font.Path == "") {
+      auto it = getLangs().find(data.Interface.Lang);
+      if (it != getLangs().end()) {
+        auto lang = it->second;
+        for (auto &[path, size] : lang.fonts) {
+          if (path != "" && fileExists(path)) {
+            data.Font.Path = path;
+            data.Font.Size = size > 0 ? size : 13;
+            break;
+          }
+        }
+      }
+    }
     if (data.Font != config->Data.Font || data.Interface.Scale != config->Data.Interface.Scale)
       config->FontReload = true;
     config->Data = data;

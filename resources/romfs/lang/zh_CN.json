@@ -1,6 +1,20 @@
 {
     "code": "zh-CN",
     "title": "中文（简体）",
+    "fonts": [
+        {
+            "path": "C:\\Windows\\Fonts\\msyh.ttc",
+            "size": 14
+        },
+        {
+            "path": "/System/Library/Fonts/PingFang.ttc",
+            "size": 15
+        },
+        {
+            "path": "/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc",
+            "size": 15
+        }
+    ],
     "entries": {
         "menu.play": "播放",
         "menu.pause": "暂停",

@@ -38,12 +38,12 @@ std::map<std::string, LangData>& getLangs() {
   static bool loaded = false;
   if (loaded) return langs;
 
-  auto list = romfs::list("lang");
-  for (auto& path : list) {
+  for (auto& path : romfs::list("lang")) {
     auto file = romfs::get(path);
     auto j = nlohmann::json::parse(file.data(), file.data() + file.size());
     const auto& code = j["code"];
     const auto& title = j["title"];
+    const auto& fonts = j["fonts"];
     const auto& entries = j["entries"];
     if (!code.is_string() && !title.is_string() && !entries.is_object()) continue;
     if (j.contains("fallback")) {
@@ -51,6 +51,14 @@ std::map<std::string, LangData>& getLangs() {
       if (fallback.is_boolean() && fallback.get<bool>()) getLangFallback() = code.get<std::string>();
     }
     auto lang = LangData{code.get<std::string>(), title.get<std::string>()};
+    if (fonts.is_array()) {
+      for (auto& [key, value] : fonts.items()) {
+        auto& path = value["path"];
+        auto& size = value["size"];
+        if (path.is_string() && size.is_number_integer())
+          lang.fonts.push_back({path.get<std::string>(), size.get<int>()});
+      }
+    }
     for (auto& [key, value] : entries.items()) {
       if (!value.is_string()) continue;
       lang.entries[key] = value.get<std::string>();
@@ -72,14 +80,23 @@ std::string& getLang() {
 }
 
 std::string i18n(std::string key) {
-  auto langs = getLangs();
-  std::string value;
-  auto it = langs.find(getLang());
-  if (it != langs.end()) value = it->second.get(key);
-  if (value.empty() || value == key) {
+  static std::string lang;
+  static std::map<std::string, std::string> entries;
+  if (entries.empty() || lang != getLang()) {
+    entries.clear();
+    auto langs = getLangs();
+    auto it = langs.find(getLang());
+    if (it != langs.end()) {
+      for (auto& [key, value] : it->second.entries) entries.insert({key, value});
+    }
     it = langs.find(getLangFallback());
-    if (it != langs.end()) value = it->second.get(key);
+    if (it != langs.end()) {
+      for (auto& [key, value] : it->second.entries) entries.insert({key, value});
+    }
+    lang = getLang();
   }
-  return value;
+  auto it = entries.find(key);
+  if (it != entries.end()) return it->second;
+  return key;
 }
 }  // namespace ImPlay
