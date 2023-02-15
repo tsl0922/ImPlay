@@ -5,7 +5,7 @@
         "menu.play": "播放",
         "menu.pause": "暂停",
         "menu.stop": "停止",
-        "menu.playback": "播放",
+        "menu.playback": "播放##playback",
         "menu.playback.seek_forward.10s": "快进10秒",
         "menu.playback.seek_back.10s": "快退10秒",
         "menu.playback.seek_forward.1m": "快进1分",
