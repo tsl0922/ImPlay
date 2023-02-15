@@ -379,7 +379,8 @@ void Quickview::drawAudioEq() {
     }
     lineWidth += ImGui::GetItemRectSize().x + ImGui::GetStyle().ItemSpacing.x;
     if (i < pSize - 1) {
-      if (lineWidth + ImGui::CalcTextSize(audioEqPresets[i + 1].name.c_str()).x < availWidth)
+      auto textSize = ImGui::CalcTextSize(audioEqPresets[i + 1].name.c_str());
+      if (lineWidth + textSize.x + 2 * ImGui::GetStyle().ItemInnerSpacing.x < availWidth)
         ImGui::SameLine();
       else
         lineWidth = 0;
