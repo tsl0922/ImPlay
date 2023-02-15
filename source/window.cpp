@@ -187,6 +187,8 @@ void Window::initGLFW(const char* title) {
   if (!gladLoadGL(glfwGetProcAddress)) throw std::runtime_error("Failed to load GL!");
 #endif
   glfwSwapInterval(1);
+  glfwGetFramebufferSize(window, &width, &height);
+  glViewport(0, 0, width, height);
   glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
   glClear(GL_COLOR_BUFFER_BIT);
   glfwSwapBuffers(window);
@@ -225,6 +227,12 @@ void Window::initGLFW(const char* title) {
   });
   glfwSetCursorPosCallback(window, [](GLFWwindow* window, double x, double y) {
     auto win = static_cast<Window*>(glfwGetWindowUserPointer(window));
+#ifdef __APPLE__
+    float xscale, yscale;
+    glfwGetWindowContentScale(window, &xscale, &yscale);
+    x *= xscale;
+    y *= yscale;
+#endif
     win->lastInputAt = glfwGetTime();
     if (ImGui::GetIO().WantCaptureMouse) return;
     win->player->onCursorEvent(x, y);
