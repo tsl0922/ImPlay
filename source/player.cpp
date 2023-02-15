@@ -195,7 +195,12 @@ void Player::initObservers() {
     int width = (int)mpv->property<int64_t, MPV_FORMAT_INT64>("dwidth");
     int height = (int)mpv->property<int64_t, MPV_FORMAT_INT64>("dheight");
     if (width > 0 && height > 0) {
+      int x, y, w, h;
+      glfwGetWindowPos(window, &x, &y);
+      glfwGetWindowSize(window, &w, &h);
+
       glfwSetWindowSize(window, width, height);
+      glfwSetWindowPos(window, x + (w - width) / 2, y + (h - height) / 2);
       if (mpv->property<int, MPV_FORMAT_FLAG>("keepaspect-window")) glfwSetWindowAspectRatio(window, width, height);
     }
   });
