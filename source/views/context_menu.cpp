@@ -306,9 +306,10 @@ void ContextMenu::drawPlaylist(std::vector<Mpv::PlayItem> items) {
     if (ImGui::MenuItemEx("menu.playlist.add_folder"_i18n, ICON_FA_FOLDER_PLUS))
       mpv->command("script-message-to implay playlist-add-folder");
     ImGui::Separator();
-    if (ImGui::MenuItem("menu.playlist.clear"_i18n)) mpv->command("playlist-clear");
-    if (ImGui::MenuItem("menu.playlist.shuffle"_i18n)) mpv->command("playlist-shuffle");
-    if (ImGui::MenuItem("menu.playlist.loop"_i18n, "L")) mpv->command("cycle-values loop-playlist inf no");
+    if (ImGui::MenuItemEx("menu.playlist.shuffle"_i18n, ICON_FA_RANDOM)) mpv->command("playlist-shuffle");
+    if (ImGui::MenuItemEx("menu.playlist.loop"_i18n, ICON_FA_SYNC, "L"))
+      mpv->command("cycle-values loop-playlist inf no");
+    if (ImGui::MenuItemEx("menu.playlist.clear"_i18n, ICON_FA_TRASH_ALT)) mpv->command("playlist-clear");
     ImGui::Separator();
     if (ImGui::MenuItem("menu.quickview"_i18n)) mpv->command("script-message-to implay quickview playlist");
     if (items.size() > 0) ImGui::Separator();
