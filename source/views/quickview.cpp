@@ -27,7 +27,6 @@ void Quickview::draw() {
   ImGui::SetNextWindowSize(ImVec2(width, viewport->WorkSize.y));
   ImGui::SetNextWindowPos(ImVec2(viewport->WorkPos.x + viewport->WorkSize.x - width, viewport->WorkPos.y));
   ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
-  ImGui::PushStyleVar(ImGuiStyleVar_ChildBorderSize, 0.0f);
   ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
   if (ImGui::Begin("Quickview Panel", &m_open, flags)) {
     if (ImGui::IsKeyDown(ImGuiKey_Escape) || (!pin && !ImGui::IsWindowFocused(ImGuiFocusedFlags_ChildWindows)))
@@ -54,7 +53,7 @@ void Quickview::draw() {
     }
     ImGui::End();
   }
-  ImGui::PopStyleVar(3);
+  ImGui::PopStyleVar(2);
 }
 
 void Quickview::alignRight(const char *label) {
