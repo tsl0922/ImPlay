@@ -179,7 +179,11 @@ void ContextMenu::draw() {
     ImGui::Separator();
     if (ImGui::MenuItemEx("menu.fullscreen"_i18n, ICON_FA_EXPAND, "f")) mpv->command("cycle fullscreen");
     if (ImGui::MenuItemEx("menu.quickview"_i18n, ICON_FA_COGS)) mpv->command("script-message-to implay quickview");
+#ifdef __APPLE__
+    if (ImGui::MenuItemEx("menu.command_palette"_i18n, ICON_FA_SEARCH, "Cmd+Shift+p"))
+#else
     if (ImGui::MenuItemEx("menu.command_palette"_i18n, ICON_FA_SEARCH, "Ctrl+Shift+p"))
+#endif
       mpv->command("script-message-to implay command-palette");
     ImGui::Separator();
     if (ImGui::BeginMenuEx("menu.tools"_i18n, ICON_FA_TOOLS)) {
