@@ -95,19 +95,15 @@ bool Window::run(OptionParser& parser) {
     shutdown = true;
   });
 
-  int64_t cursorAutoHide = mpv->property<int64_t, MPV_FORMAT_INT64>("cursor-autohide");
-
   while (!shutdown) {
     glfwWaitEvents();
     player->renderGui() = true;
     mpv->waitEvent();
     dispatch.process();
 
+    if (ownCursor) updateCursor();
+
     bool hasInputEvents = !ImGui::GetCurrentContext()->InputEventsQueue.empty();
-    if (ownCursor && cursorAutoHide > 0 && mpv->playing() && !ImGui::GetIO().WantCaptureMouse) {
-      int mode = (glfwGetTime() - lastInputAt) * 1000 > cursorAutoHide ? GLFW_CURSOR_DISABLED : GLFW_CURSOR_NORMAL;
-      glfwSetInputMode(window, GLFW_CURSOR, mode);
-    }
     if ((!glfwGetWindowAttrib(window, GLFW_VISIBLE) || glfwGetWindowAttrib(window, GLFW_ICONIFIED)) &&
         !hasInputEvents && ImGui::GetCurrentContext()->Viewports.Size == 1) {
       waitTimeout = INT_MAX;
@@ -136,6 +132,22 @@ void Window::requestRender() {
   lk.unlock();
   renderCond.notify_one();
   lastRenderAt = glfwGetTime();
+}
+
+void Window::updateCursor() {
+  if (ImGui::GetIO().WantCaptureMouse) return;
+  int old = glfwGetInputMode(window, GLFW_CURSOR);
+  int mode = old;
+  if (mpv->cursorAutohide == "no") {
+    mode = GLFW_CURSOR_NORMAL;
+  } else if (mpv->cursorAutohide == "always") {
+    mode = GLFW_CURSOR_HIDDEN;
+  } else {
+    int timeout = std::stoi(mpv->cursorAutohide);
+    double delta = glfwGetTime() - lastInputAt;
+    mode = delta * 1000 > timeout ? GLFW_CURSOR_HIDDEN : GLFW_CURSOR_NORMAL;
+  }
+  if (mode != old) glfwSetInputMode(window, GLFW_CURSOR, mode);
 }
 
 void Window::initGLFW(const char* title) {

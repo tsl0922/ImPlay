@@ -32,6 +32,7 @@ class Window {
  private:
   void render();
   void requestRender();
+  void updateCursor();
 
   void loadFonts();
   void initGLFW(const char *title);
