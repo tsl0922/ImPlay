@@ -230,41 +230,38 @@ void Player::initObservers() {
     io.SetAppAcceptingEvents(true);
   });
 
-  mpv->observeProperty("media-title", MPV_FORMAT_STRING, [this](void* data) {
-    char* title = static_cast<char*>(*(char**)data);
-    glfwSetWindowTitle(window, title);
+  mpv->observeProperty<char*, MPV_FORMAT_STRING>("media-title",
+                                                 [this](char* data) { glfwSetWindowTitle(window, data); });
+
+  mpv->observeProperty<int, MPV_FORMAT_FLAG>("border", [this](int flag) {
+    bool enable = static_cast<bool>(flag);
+    glfwSetWindowAttrib(window, GLFW_DECORATED, enable);
   });
 
-  mpv->observeProperty("border", MPV_FORMAT_FLAG, [this](void* data) {
-    bool enable = static_cast<bool>(*(int*)data);
-    glfwSetWindowAttrib(window, GLFW_DECORATED, enable ? GLFW_TRUE : GLFW_FALSE);
-  });
-
-  mpv->observeProperty("window-maximized", MPV_FORMAT_FLAG, [this](void* data) {
-    bool enable = static_cast<bool>(*(int*)data);
+  mpv->observeProperty<int, MPV_FORMAT_FLAG>("window-maximized", [this](int flag) {
+    bool enable = static_cast<bool>(flag);
     if (enable)
       glfwMaximizeWindow(window);
     else
       glfwRestoreWindow(window);
   });
 
-  mpv->observeProperty("window-minimized", MPV_FORMAT_FLAG, [this](void* data) {
-    bool enable = static_cast<bool>(*(int*)data);
+  mpv->observeProperty<int, MPV_FORMAT_FLAG>("window-minimized", [this](int flag) {
+    bool enable = static_cast<bool>(flag);
     if (enable)
       glfwIconifyWindow(window);
     else
       glfwRestoreWindow(window);
   });
 
-  mpv->observeProperty("window-scale", MPV_FORMAT_DOUBLE, [this](void* data) {
-    double scale = static_cast<double>(*(double*)data);
+  mpv->observeProperty<double, MPV_FORMAT_DOUBLE>("window-scale", [this](double scale) {
     int w = (int)mpv->property<int64_t, MPV_FORMAT_INT64>("dwidth");
     int h = (int)mpv->property<int64_t, MPV_FORMAT_INT64>("dheight");
     if (w > 0 && h > 0) glfwSetWindowSize(window, (int)(w * scale), (int)(h * scale));
   });
 
-  mpv->observeProperty("fullscreen", MPV_FORMAT_FLAG, [this](void* data) {
-    bool enable = static_cast<bool>(*(int*)data);
+  mpv->observeProperty<int, MPV_FORMAT_FLAG>("fullscreen", [this](int flag) {
+    bool enable = static_cast<bool>(flag);
     bool isFullscreen = glfwGetWindowMonitor(window) != nullptr;
     if (isFullscreen == enable) return;
 
@@ -279,9 +276,9 @@ void Player::initObservers() {
       glfwSetWindowMonitor(window, nullptr, x, y, w, h, 0);
   });
 
-  mpv->observeProperty("ontop", MPV_FORMAT_FLAG, [this](void* data) {
-    bool enable = static_cast<bool>(*(int*)data);
-    glfwSetWindowAttrib(window, GLFW_FLOATING, enable ? GLFW_TRUE : GLFW_FALSE);
+  mpv->observeProperty<int, MPV_FORMAT_FLAG>("ontop", [this](int flag) {
+    bool enable = static_cast<bool>(flag);
+    glfwSetWindowAttrib(window, GLFW_FLOATING, enable);
   });
 }
 

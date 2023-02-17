@@ -134,56 +134,32 @@ void Mpv::initRender() {
 }
 
 void Mpv::observeProperties() {
-  observeProperty("playlist", MPV_FORMAT_NODE, [this](void *data) {
-    auto node = static_cast<mpv_node>(*(mpv_node *)data);
-    if (node.format == MPV_FORMAT_NODE_ARRAY) initPlaylist(node);
-  });
+  observeProperty<mpv_node, MPV_FORMAT_NODE>("playlist", [this](mpv_node node) { initPlaylist(node); });
+  observeProperty<mpv_node, MPV_FORMAT_NODE>("chapter-list", [this](mpv_node node) { initChapters(node); });
+  observeProperty<mpv_node, MPV_FORMAT_NODE>("track-list", [this](mpv_node node) { initTracks(node); });
+  observeProperty<mpv_node, MPV_FORMAT_NODE>("audio-device-list", [this](mpv_node node) { initAudioDevices(node); });
+  observeProperty<mpv_node, MPV_FORMAT_NODE>("input-bindings", [this](mpv_node node) { initBindings(node); });
+  observeProperty<char *, MPV_FORMAT_STRING>("profile-list", [this](char *data) { initProfiles(data); });
 
-  observeProperty("chapter-list", MPV_FORMAT_NODE, [this](void *data) {
-    auto node = static_cast<mpv_node>(*(mpv_node *)data);
-    if (node.format == MPV_FORMAT_NODE_ARRAY) initChapters(node);
-  });
+  observeProperty<char *, MPV_FORMAT_STRING>("aid", [this](char *data) { aid = data; });
+  observeProperty<char *, MPV_FORMAT_STRING>("vid", [this](char *data) { vid = data; });
+  observeProperty<char *, MPV_FORMAT_STRING>("sid", [this](char *data) { sid = data; });
+  observeProperty<char *, MPV_FORMAT_STRING>("audio-device", [this](char *data) { audioDevice = data; });
 
-  observeProperty("track-list", MPV_FORMAT_NODE, [this](void *data) {
-    auto node = static_cast<mpv_node>(*(mpv_node *)data);
-    if (node.format == MPV_FORMAT_NODE_ARRAY) initTracks(node);
-  });
+  observeProperty<int, MPV_FORMAT_FLAG>("pause", [this](int flag) { pause = static_cast<bool>(flag); });
+  observeProperty<int, MPV_FORMAT_FLAG>("mute", [this](int flag) { mute = static_cast<bool>(flag); });
+  observeProperty<int, MPV_FORMAT_FLAG>("fullscreen", [this](int flag) { fullscreen = static_cast<bool>(flag); });
+  observeProperty<int, MPV_FORMAT_FLAG>("window-dragging",
+                                        [this](int flag) { windowDragging = static_cast<bool>(flag); });
 
-  observeProperty("audio-device-list", MPV_FORMAT_NODE, [this](void *data) {
-    auto node = static_cast<mpv_node>(*(mpv_node *)data);
-    if (node.format == MPV_FORMAT_NODE_ARRAY) initAudioDevices(node);
-  });
-
-  observeProperty("input-bindings", MPV_FORMAT_NODE, [this](void *data) {
-    auto node = static_cast<mpv_node>(*(mpv_node *)data);
-    if (node.format == MPV_FORMAT_NODE_ARRAY) initBindings(node);
-  });
-
-  observeProperty("profile-list", MPV_FORMAT_STRING, [this](void *data) {
-    if (data != nullptr) initProfiles(static_cast<char *>(*(char **)data));
-  });
-
-  observeProperty("aid", MPV_FORMAT_STRING, [this](void *data) { aid = static_cast<char *>(*(char **)data); });
-  observeProperty("vid", MPV_FORMAT_STRING, [this](void *data) { vid = static_cast<char *>(*(char **)data); });
-  observeProperty("sid", MPV_FORMAT_STRING, [this](void *data) { sid = static_cast<char *>(*(char **)data); });
-  observeProperty("audio-device", MPV_FORMAT_STRING, [this](void *data) { audioDevice = static_cast<char *>(*(char **)data); });
-
-  observeProperty("pause", MPV_FORMAT_FLAG, [this](void *data) { pause = static_cast<bool>(*(int *)data); });
-  observeProperty("mute", MPV_FORMAT_FLAG, [this](void *data) { mute = static_cast<bool>(*(int *)data); });
-  observeProperty("fullscreen", MPV_FORMAT_FLAG, [this](void *data) { fullscreen = static_cast<bool>(*(int *)data); });
-  observeProperty("window-dragging", MPV_FORMAT_FLAG,
-                  [this](void *data) { windowDragging = static_cast<bool>(*(int *)data); });
-
-  observeProperty("volume", MPV_FORMAT_INT64, [this](void *data) { volume = static_cast<int64_t>(*(int64_t *)data); });
-  observeProperty("chapter", MPV_FORMAT_INT64,
-                  [this](void *data) { chapter = static_cast<int64_t>(*(int64_t *)data); });
-  observeProperty("playlist-pos", MPV_FORMAT_INT64,
-                  [this](void *data) { playlistPos = static_cast<int64_t>(*(int64_t *)data); });
-  observeProperty("playlist-playing-pos", MPV_FORMAT_INT64,
-                  [this](void *data) { playlistPlayingPos = static_cast<int64_t>(*(int64_t *)data); });
+  observeProperty<int64_t, MPV_FORMAT_INT64>("volume", [this](int64_t val) { volume = val; });
+  observeProperty<int64_t, MPV_FORMAT_INT64>("chapter", [this](int64_t val) { chapter = val; });
+  observeProperty<int64_t, MPV_FORMAT_INT64>("playlist-pos", [this](int64_t val) { playlistPos = val; });
+  observeProperty<int64_t, MPV_FORMAT_INT64>("playlist-playing-pos", [this](int64_t val) { playlistPlayingPos = val; });
 }
 
 void Mpv::initPlaylist(mpv_node &node) {
+  if (node.format != MPV_FORMAT_NODE_ARRAY) return;
   playlist.clear();
   for (int i = 0; i < node.u.list->num; i++) {
     auto item = node.u.list->values[i];
@@ -204,6 +180,7 @@ void Mpv::initPlaylist(mpv_node &node) {
 }
 
 void Mpv::initChapters(mpv_node &node) {
+  if (node.format != MPV_FORMAT_NODE_ARRAY) return;
   chapters.clear();
   for (int i = 0; i < node.u.list->num; i++) {
     auto item = node.u.list->values[i];
@@ -223,6 +200,7 @@ void Mpv::initChapters(mpv_node &node) {
 }
 
 void Mpv::initTracks(mpv_node &node) {
+  if (node.format != MPV_FORMAT_NODE_ARRAY) return;
   tracks.clear();
   for (int i = 0; i < node.u.list->num; i++) {
     auto track = node.u.list->values[i];
@@ -247,6 +225,7 @@ void Mpv::initTracks(mpv_node &node) {
 }
 
 void Mpv::initAudioDevices(mpv_node &node) {
+  if (node.format != MPV_FORMAT_NODE_ARRAY) return;
   audioDevices.clear();
   for (int i = 0; i < node.u.list->num; i++) {
     auto item = node.u.list->values[i];
@@ -265,6 +244,7 @@ void Mpv::initAudioDevices(mpv_node &node) {
 }
 
 void Mpv::initBindings(mpv_node &node) {
+  if (node.format != MPV_FORMAT_NODE_ARRAY) return;
   bindings.clear();
   for (int i = 0; i < node.u.list->num; i++) {
     auto item = node.u.list->values[i];
@@ -285,6 +265,7 @@ void Mpv::initBindings(mpv_node &node) {
 }
 
 void Mpv::initProfiles(const char *payload) {
+  if (payload == nullptr) return;
   profiles.clear();
   auto j = nlohmann::json::parse(payload);
   for (auto &elm : j) {

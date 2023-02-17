@@ -63,8 +63,9 @@ class Mpv {
   }
 
   void observeEvent(mpv_event_id event, const EventHandler &handler) { events.emplace_back(event, handler); }
-  void observeProperty(const std::string &name, mpv_format format, const EventHandler &handler) {
-    propertyEvents.emplace_back(name, format, handler);
+  template <typename T, mpv_format format>
+  void observeProperty(const std::string &name, const std::function<void(T data)> &handler) {
+    propertyEvents.emplace_back(name, format, [=](void *data) { handler(*(T *)data); });
     mpv_observe_property(mpv, 0, name.c_str(), format);
   }
 
