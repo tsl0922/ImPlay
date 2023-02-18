@@ -238,7 +238,7 @@
         "views.debug.commands.filter": "过滤:",
         "views.debug.console": "控制台",
         "views.debug.console.tip": "输入 'HELP' 显示帮助, TAB 键自动补全, 上下键显示命令历史记录.",
-        "views.debug.console.filter": "过滤",
+        "views.debug.console.log.filter": "过滤",
         "views.debug.console.log.limit": "行数",
         "views.debug.console.log.level": "级别",
         "views.debug.console.log.hint": "此处修改的日志级别和限制不会被保存.\n可以在 '帮助-设置' 中修改启动时的日志参数",

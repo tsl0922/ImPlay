@@ -389,7 +389,7 @@ void Debug::Console::draw() {
     ImGui::EndPopup();
   }
 
-  Filter.Draw(format("{}##log", "views.debug.console.filter"_i18n).c_str(), scaled(8));
+  Filter.Draw(format("{}##log", "views.debug.console.log.filter"_i18n).c_str(), scaled(8));
   ImGui::SameLine();
   ImGui::SetNextItemWidth(scaled(3));
   ImGui::InputInt("views.debug.console.log.limit"_i18n, &LogLimit, 0);
