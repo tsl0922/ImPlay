@@ -273,6 +273,8 @@
         "views.settings.interface.docking.help": "启用 ImGui 的窗口停靠功能.\n这将允许通过拖动窗口标题栏或选项卡标题来停靠子窗口.",
         "views.settings.interface.viewports": "启用视图*",
         "views.settings.interface.viewports.help": "启用 ImGui 的多视图功能.\n这将允许子窗口被移出主窗口.",
+        "views.settings.interface.fps": "帧率限制",
+        "views.settings.interface.fps.help": "限制播放器空闲时界面渲染的帧率",
         "views.settings.interface.language": "语言",
         "views.settings.interface.language.hint": "如果遇到字符显示异常, 需到字体选项卡选择选择字形范围.",
         "views.settings.interface.theme": "主题",

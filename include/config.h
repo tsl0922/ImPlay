@@ -14,6 +14,7 @@ struct ConfigData {
     std::string Lang = "en-US";
     std::string Theme = "light";
     float Scale = 0;
+    int Fps = 30;
     bool Docking = false;
     bool Viewports = false;
     bool operator==(const Interface_&) const = default;

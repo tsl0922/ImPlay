@@ -24,6 +24,7 @@ void Config::load() {
   inipp::get_value(ini.sections["interface"], "lang", Data.Interface.Lang);
   inipp::get_value(ini.sections["interface"], "theme", Data.Interface.Theme);
   inipp::get_value(ini.sections["interface"], "scale", Data.Interface.Scale);
+  inipp::get_value(ini.sections["interface"], "fps", Data.Interface.Fps);
   inipp::get_value(ini.sections["interface"], "docking", Data.Interface.Docking);
   inipp::get_value(ini.sections["interface"], "viewports", Data.Interface.Viewports);
   inipp::get_value(ini.sections["font"], "path", Data.Font.Path);
@@ -60,6 +61,7 @@ void Config::save() {
   ini.sections["interface"]["lang"] = Data.Interface.Lang;
   ini.sections["interface"]["theme"] = Data.Interface.Theme;
   ini.sections["interface"]["scale"] = format("{}", Data.Interface.Scale);
+  ini.sections["interface"]["fps"] = format("{}", Data.Interface.Fps);
   ini.sections["interface"]["docking"] = format("{}", Data.Interface.Docking);
   ini.sections["interface"]["viewports"] = format("{}", Data.Interface.Viewports);
   ini.sections["font"]["path"] = Data.Font.Path;

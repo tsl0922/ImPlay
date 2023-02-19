@@ -85,7 +85,7 @@ void Window::renderLoop() {
   while (!glfwWindowShouldClose(window)) {
     {
       std::unique_lock<std::mutex> lk(renderMutex);
-      auto timeout = std::chrono::milliseconds(waitTimeout);
+      auto timeout = std::chrono::milliseconds(waitTimeout - int(ImGui::GetIO().DeltaTime * 1000));
       renderCond.wait_for(lk, timeout, [&]() { return wantRender; });
       wantRender = false;
     }
@@ -110,7 +110,6 @@ void Window::requestRender() {
   wantRender = true;
   lk.unlock();
   renderCond.notify_one();
-  lastRenderAt = glfwGetTime();
 }
 
 void Window::eventLoop() {
@@ -122,15 +121,15 @@ void Window::eventLoop() {
 
     if (ownCursor) updateCursor();
 
+    int oldWaitTimeout = waitTimeout;
     bool hasInputEvents = !ImGui::GetCurrentContext()->InputEventsQueue.empty();
     if ((!glfwGetWindowAttrib(window, GLFW_VISIBLE) || glfwGetWindowAttrib(window, GLFW_ICONIFIED)) &&
         !hasInputEvents && ImGui::GetCurrentContext()->Viewports.Size == 1) {
       waitTimeout = INT_MAX;
-      continue;
+    } else {
+      waitTimeout = 1000.0 / config.Data.Interface.Fps;
     }
-    double delta = glfwGetTime() - lastRenderAt;
-    waitTimeout = hasInputEvents ? std::max(defaultTimeout, (int)(delta * 1000)) : 1000;
-    if (hasInputEvents && (delta * 1000 > defaultTimeout)) requestRender();
+    if (oldWaitTimeout != waitTimeout) requestRender();
   }
 }
 
@@ -148,7 +147,7 @@ void Window::updateCursor() {
 
   int old = glfwGetInputMode(window, GLFW_CURSOR);
   int mode = old;
-  
+
   if (mpv->cursorAutohide == "no") {
     mode = GLFW_CURSOR_NORMAL;
   } else if (mpv->cursorAutohide == "always") {
@@ -158,7 +157,7 @@ void Window::updateCursor() {
     double delta = glfwGetTime() - lastInputAt;
     mode = delta * 1000 > timeout ? GLFW_CURSOR_HIDDEN : GLFW_CURSOR_NORMAL;
   }
-  
+
   if (mode != old) glfwSetInputMode(window, GLFW_CURSOR, mode);
 }
 

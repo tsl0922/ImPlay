@@ -51,15 +51,12 @@ class Window {
   int width = 1280;
   int height = 720;
 
-  const int defaultTimeout = 50;  // ms
-
   std::mutex renderMutex;
   std::condition_variable renderCond;
   std::atomic_bool shutdown = false;
-  std::atomic_int waitTimeout = defaultTimeout;
+  std::atomic_int waitTimeout = 50;
   bool ownCursor = false;
   bool wantRender = true;
-  double lastRenderAt = 0;
   double lastInputAt = 0;
   double lastMousePressAt = 0;
 };

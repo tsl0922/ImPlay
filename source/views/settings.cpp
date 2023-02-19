@@ -132,6 +132,9 @@ void Settings::drawInterfaceTab() {
     ImGui::Checkbox("views.settings.interface.viewports"_i18n, &data.Interface.Viewports);
     ImGui::SameLine();
     ImGui::HelpMarker("views.settings.interface.viewports.help"_i18n);
+    ImGui::SliderInt("views.settings.interface.fps"_i18n, &data.Interface.Fps, 15, 60);
+    ImGui::SameLine();
+    ImGui::HelpMarker("views.settings.interface.fps.help"_i18n);
     ImGui::Unindent();
 
     std::vector<std::pair<std::string, std::string>> langCodes;
