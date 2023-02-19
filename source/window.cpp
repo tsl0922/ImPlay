@@ -251,14 +251,14 @@ void Window::initGLFW(const char* title) {
   });
   glfwSetCursorPosCallback(window, [](GLFWwindow* window, double x, double y) {
     auto win = static_cast<Window*>(glfwGetWindowUserPointer(window));
+    win->lastInputAt = glfwGetTime();
+    if (ImGui::GetIO().WantCaptureMouse) return;
 #ifdef __APPLE__
     float xscale, yscale;
     glfwGetWindowContentScale(window, &xscale, &yscale);
     x *= xscale;
     y *= yscale;
 #endif
-    win->lastInputAt = glfwGetTime();
-    if (ImGui::GetIO().WantCaptureMouse) return;
     win->player->onCursorEvent(x, y);
 #ifdef GLFW_PATCHED
     if (win->mpv->allowDrag() && win->height - y > 150 && glfwGetTime() - win->lastMousePressAt > 0.01) {

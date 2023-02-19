@@ -210,14 +210,6 @@ void Player::initObservers() {
     if (path != "" && path != "bd://" && path != "dvd://") config->addRecentFile(path, mpv->property("media-title"));
   });
 
-  mpv->observeEvent(MPV_EVENT_START_FILE, [this](void* data) { idle = false; });
-
-  mpv->observeEvent(MPV_EVENT_END_FILE, [this](void* data) {
-    idle = true;
-    glfwSetWindowTitle(window, title);
-    glfwSetWindowAspectRatio(window, GLFW_DONT_CARE, GLFW_DONT_CARE);
-  });
-
   mpv->observeEvent(MPV_EVENT_CLIENT_MESSAGE, [this](void* data) {
     ImGuiIO& io = ImGui::GetIO();
     renderGui_ = false;
@@ -228,6 +220,14 @@ void Player::initObservers() {
 
     renderGui_ = true;
     io.SetAppAcceptingEvents(true);
+  });
+
+  mpv->observeProperty<int, MPV_FORMAT_FLAG>("idle-active", [this](int flag) {
+    idle = static_cast<bool>(flag);
+    if (idle) {
+      glfwSetWindowTitle(window, title);
+      glfwSetWindowAspectRatio(window, GLFW_DONT_CARE, GLFW_DONT_CARE);
+    }
   });
 
   mpv->observeProperty<char*, MPV_FORMAT_STRING>("media-title",
