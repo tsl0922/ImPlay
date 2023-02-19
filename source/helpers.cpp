@@ -35,7 +35,10 @@ void ImPlay::OptionParser::parse(int argc, char** argv) {
     std::string arg = argv[i];
 #endif
     if (arg[0] == '-' && !optEnd) {
-      if (arg[1] == '\0') continue;
+      if (arg[1] == '\0') {
+        paths.emplace_back(arg);
+        break;
+      }
       if (arg[1] == '-') {
         if (arg[2] == '\0') {
           optEnd = true;

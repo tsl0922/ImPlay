@@ -58,7 +58,10 @@ bool Player::init(OptionParser& parser) {
   mpv->property<int64_t, MPV_FORMAT_INT64>("volume", config->Data.Mpv.Volume);
   if (config->Data.Recent.SpaceToPlayLast) mpv->command("keybind SPACE 'script-message-to implay play-pause'");
 
-  for (auto& path : parser.paths) mpv->commandv("loadfile", path.c_str(), "append-play", nullptr);
+  for (auto& path : parser.paths) {
+    if (path == "-") mpv->property("input-terminal", "yes");
+    mpv->commandv("loadfile", path.c_str(), "append-play", nullptr);
+  }
 
   return true;
 }
