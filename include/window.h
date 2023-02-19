@@ -27,12 +27,15 @@ class Window {
   Window();
   ~Window();
 
-  bool run(OptionParser &optionParser);
+  bool init(OptionParser& parser);
+  void run();
 
  private:
-  void render();
+  void eventLoop();
+  void renderLoop();
   void requestRender();
   void updateCursor();
+  void saveState();
 
   void loadFonts();
   void initGLFW(const char *title);
@@ -52,6 +55,7 @@ class Window {
 
   std::mutex renderMutex;
   std::condition_variable renderCond;
+  std::atomic_bool shutdown = false;
   std::atomic_int waitTimeout = defaultTimeout;
   bool ownCursor = false;
   bool wantRender = true;

@@ -49,7 +49,7 @@ Window::~Window() {
   exitGLFW();
 }
 
-bool Window::run(OptionParser& parser) {
+bool Window::init(OptionParser& parser) {
   mpv->wakeupCb() = [](Mpv* ctx) { glfwPostEmptyEvent(); };
   mpv->updateCb() = [this](Mpv* ctx) {
     if (ctx->wantRender()) requestRender();
@@ -67,34 +67,53 @@ bool Window::run(OptionParser& parser) {
     player->onDropEvent(count, openedFileNames);
   }
 #endif
+  return true;
+}
+
+void Window::run() {
   glfwShowWindow(window);
   glfwFocusWindow(window);
 
-  std::atomic_bool shutdown = false;
+  std::thread render(&Window::renderLoop, this);
+  eventLoop();
+  render.join();
 
-  std::thread renderThread([&]() {
-    while (!glfwWindowShouldClose(window)) {
-      {
-        std::unique_lock<std::mutex> lk(renderMutex);
-        auto timeout = std::chrono::milliseconds(waitTimeout);
-        renderCond.wait_for(lk, timeout, [&]() { return wantRender; });
-        wantRender = false;
-      }
+  saveState();
+}
 
-      if (config.FontReload) {
-        loadFonts();
-        config.FontReload = false;
-        glfwMakeContextCurrent(window);
-        ImGui_ImplOpenGL3_DestroyFontsTexture();
-        ImGui_ImplOpenGL3_CreateFontsTexture();
-        glfwMakeContextCurrent(nullptr);
-      }
-
-      player->render(width, height);
+void Window::renderLoop() {
+  while (!glfwWindowShouldClose(window)) {
+    {
+      std::unique_lock<std::mutex> lk(renderMutex);
+      auto timeout = std::chrono::milliseconds(waitTimeout);
+      renderCond.wait_for(lk, timeout, [&]() { return wantRender; });
+      wantRender = false;
     }
-    shutdown = true;
-  });
 
+    if (config.FontReload) {
+      loadFonts();
+      config.FontReload = false;
+      glfwMakeContextCurrent(window);
+      ImGui_ImplOpenGL3_DestroyFontsTexture();
+      ImGui_ImplOpenGL3_CreateFontsTexture();
+      glfwMakeContextCurrent(nullptr);
+    }
+
+    player->render(width, height);
+  }
+
+  shutdown = true;
+}
+
+void Window::requestRender() {
+  std::unique_lock<std::mutex> lk(renderMutex);
+  wantRender = true;
+  lk.unlock();
+  renderCond.notify_one();
+  lastRenderAt = glfwGetTime();
+}
+
+void Window::eventLoop() {
   while (!shutdown) {
     glfwWaitEvents();
     player->renderGui() = true;
@@ -110,34 +129,26 @@ bool Window::run(OptionParser& parser) {
       continue;
     }
     double delta = glfwGetTime() - lastRenderAt;
-    waitTimeout = hasInputEvents ? std::max(defaultTimeout, (int)delta * 1000) : 1000;
-    if (hasInputEvents && (delta > (double)defaultTimeout / 1000)) requestRender();
+    waitTimeout = hasInputEvents ? std::max(defaultTimeout, (int)(delta * 1000)) : 1000;
+    if (hasInputEvents && (delta * 1000 > defaultTimeout)) requestRender();
   }
+}
 
-  renderThread.join();
-
+void Window::saveState() {
   if (config.Data.Window.Save) {
     glfwGetWindowPos(window, &config.Data.Window.X, &config.Data.Window.Y);
     glfwGetWindowSize(window, &config.Data.Window.W, &config.Data.Window.H);
   }
   config.Data.Mpv.Volume = mpv->volume;
   config.save();
-
-  return true;
-}
-
-void Window::requestRender() {
-  std::unique_lock<std::mutex> lk(renderMutex);
-  wantRender = true;
-  lk.unlock();
-  renderCond.notify_one();
-  lastRenderAt = glfwGetTime();
 }
 
 void Window::updateCursor() {
   if (ImGui::GetIO().WantCaptureMouse) return;
+
   int old = glfwGetInputMode(window, GLFW_CURSOR);
   int mode = old;
+  
   if (mpv->cursorAutohide == "no") {
     mode = GLFW_CURSOR_NORMAL;
   } else if (mpv->cursorAutohide == "always") {
@@ -147,6 +158,7 @@ void Window::updateCursor() {
     double delta = glfwGetTime() - lastInputAt;
     mode = delta * 1000 > timeout ? GLFW_CURSOR_HIDDEN : GLFW_CURSOR_NORMAL;
   }
+  
   if (mode != old) glfwSetInputMode(window, GLFW_CURSOR, mode);
 }
 

@@ -72,7 +72,10 @@ int main(int argc, char* argv[]) {
       return run_headless(parser);
 
     ImPlay::Window window;
-    return window.run(parser);
+    if (!window.init(parser)) return 1;
+    
+    window.run();
+    return 0;
   } catch (const std::exception& e) {
     fmt::print(fg(fmt::color::red), "Error: {}\n", e.what());
     return 1;
