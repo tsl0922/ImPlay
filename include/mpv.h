@@ -108,9 +108,9 @@ class Mpv {
   std::vector<AudioDevice> audioDevices;
   std::vector<BindingItem> bindings;
   std::vector<std::string> profiles;
-  std::string aid, vid, sid, audioDevice, cursorAutohide;
+  std::string aid, vid, sid, sid2, audioDevice, cursorAutohide;
   int64_t chapter, volume, playlistPos, playlistPlayingPos;
-  bool pause, mute, fullscreen, windowDragging, forceWindow;
+  bool pause, mute, fullscreen, sidv, sidv2, windowDragging, forceWindow;
 
  private:
   void initRender();

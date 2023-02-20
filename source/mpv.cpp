@@ -144,12 +144,16 @@ void Mpv::observeProperties() {
   observeProperty<char *, MPV_FORMAT_STRING>("aid", [this](char *data) { aid = data; });
   observeProperty<char *, MPV_FORMAT_STRING>("vid", [this](char *data) { vid = data; });
   observeProperty<char *, MPV_FORMAT_STRING>("sid", [this](char *data) { sid = data; });
+  observeProperty<char *, MPV_FORMAT_STRING>("secondary-sid", [this](char *data) { sid2 = data; });
   observeProperty<char *, MPV_FORMAT_STRING>("audio-device", [this](char *data) { audioDevice = data; });
   observeProperty<char *, MPV_FORMAT_STRING>("cursor-autohide", [this](char *data) { cursorAutohide = data; });
 
   observeProperty<int, MPV_FORMAT_FLAG>("pause", [this](int flag) { pause = static_cast<bool>(flag); });
   observeProperty<int, MPV_FORMAT_FLAG>("mute", [this](int flag) { mute = static_cast<bool>(flag); });
   observeProperty<int, MPV_FORMAT_FLAG>("fullscreen", [this](int flag) { fullscreen = static_cast<bool>(flag); });
+  observeProperty<int, MPV_FORMAT_FLAG>("sub-visibility", [this](int flag) { sidv = static_cast<bool>(flag); });
+  observeProperty<int, MPV_FORMAT_FLAG>("secondary-sub-visibility",
+                                        [this](int flag) { sidv2 = static_cast<bool>(flag); });
   observeProperty<int, MPV_FORMAT_FLAG>("window-dragging",
                                         [this](int flag) { windowDragging = static_cast<bool>(flag); });
 

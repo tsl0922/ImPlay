@@ -90,27 +90,44 @@ void Quickview::emptyLabel() {
   ImGui::EndDisabled();
 }
 
-void Quickview::drawTracks(const char *type, const char *prop, std::string pos) {
-  ImGui::TextUnformatted("views.quickview.tracks"_i18n);
+void Quickview::drawTracks(const char *title, const char *type, const char *prop, std::string pos) {
+  ImGui::TextUnformatted(title);
   alignRight(ICON_FA_TOGGLE_ON);
-  if (toggleButton(!iequals(pos, "no"), "views.quickview.tracks.toggle"_i18n))
-    mpv->commandv("cycle-values", prop, "no", "auto", nullptr);
-  if (ImGui::BeginListBox("##tracks", ImVec2(-FLT_MIN, 3 * ImGui::GetTextLineHeightWithSpacing()))) {
+  bool toggle = !iequals(pos, "no");
+  if (strcmp(prop, "sid") == 0) toggle = mpv->sidv;
+  if (strcmp(prop, "secondary-sid") == 0) toggle = mpv->sidv2;
+  if (toggleButton(toggle, format("{}##{}", "views.quickview.tracks"_i18n, prop).c_str())) {
+    if (strstr(prop, "sid") != nullptr) {
+      const char *prefix = strstr(prop, "secondary") != nullptr ? "secondary-" : "";
+      mpv->commandv("set", format("{}sub-visibility", prefix).c_str(), toggle ? "no" : "yes", nullptr);
+    } else {
+      mpv->commandv("cycle-values", prop, "no", "auto", nullptr);
+    }
+  }
+  if (ImGui::BeginListBox(format("##tracks-{}", prop).c_str(),
+                          ImVec2(-FLT_MIN, 3 * ImGui::GetFrameHeightWithSpacing()))) {
     auto items = mpv->tracks;
-    if (items.empty()) emptyLabel();
+    if (items.empty())
+      emptyLabel();
+    else
+      items.insert(items.begin(), {0, type, "views.quickview.tracks.no"_i18n, "", false});
     for (auto &item : items) {
       if (item.type != type) continue;
+      bool selected = item.id == 0 ? pos == "no" : pos == std::to_string(item.id);
       auto title = item.title.empty() ? format("views.quickview.tracks.item"_i18n, item.id) : item.title;
       if (!item.lang.empty()) title += format(" [{}]", item.lang);
       ImGui::PushID(item.id);
-      if (ImGui::Selectable("", item.selected)) mpv->property(prop, std::to_string(item.id).c_str());
+      if (ImGui::Selectable("", selected)) mpv->property(prop, std::to_string(item.id).c_str());
       ImGui::SameLine();
-      ImGui::TextColored(ImGui::GetStyleColorVec4(item.selected ? ImGuiCol_CheckMark : ImGuiCol_Text), "%s",
-                         title.c_str());
+      ImGui::TextColored(ImGui::GetStyleColorVec4(selected ? ImGuiCol_CheckMark : ImGuiCol_Text), "%s", title.c_str());
       ImGui::PopID();
     }
     ImGui::EndListBox();
   }
+}
+
+void Quickview::drawTracks(const char *type, const char *prop, std::string pos) {
+  drawTracks("views.quickview.tracks"_i18n, type, prop, pos);
 }
 
 void Quickview::drawPlaylistTabContent() {
@@ -341,10 +358,12 @@ void Quickview::drawSubtitleTabContent() {
   iconButton(ICON_FA_ARROW_UP, "add sub-pos -1", "views.quickview.subtitle.move_up"_i18n, false);
   iconButton(ICON_FA_ARROW_DOWN, "add sub-pos 1", "views.quickview.subtitle.move_down"_i18n);
   iconButton(ICON_FA_REDO, "set sub-pos 100", "views.quickview.subtitle.reset_pos"_i18n);
-  iconButton(ICON_FA_EYE_SLASH, "cycle sub-visibility", "views.quickview.subtitle.toggle"_i18n);
   alignRight(ICON_FA_PLUS);
   iconButton(ICON_FA_PLUS, "script-message-to implay load-sub", "views.quickview.subtitle.load"_i18n, false);
   ImGui::Separator();
+  ImGui::NewLine();
+
+  drawTracks("views.quickview.subtitle.secondary"_i18n, "sub", "secondary-sid", mpv->sid2);
   ImGui::NewLine();
 
   ImGui::TextUnformatted("views.quickview.subtitle.scale"_i18n);
