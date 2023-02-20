@@ -55,7 +55,7 @@ class Window {
   std::condition_variable renderCond;
   std::atomic_bool shutdown = false;
   std::atomic_int waitTimeout = 50;
-  bool ownCursor = false;
+  bool ownCursor = true;
   bool wantRender = true;
   double lastInputAt = 0;
   double lastMousePressAt = 0;

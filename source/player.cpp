@@ -112,13 +112,11 @@ void Player::render(int w, int h) {
   //   - window dragging on windows (blocking main thread)
   // so, we only call it when viewports are enabled and no conflicts.
   if (renderGui && viewports) {
-    dispatch->sync(
-        [](void* data) {
-          ImGui::UpdatePlatformWindows();
-          ImGui::RenderPlatformWindowsDefault();
-          glfwMakeContextCurrent(nullptr);
-        },
-        nullptr);
+    dispatch->sync([](void* data) {
+      ImGui::UpdatePlatformWindows();
+      ImGui::RenderPlatformWindowsDefault();
+      glfwMakeContextCurrent(nullptr);
+    });
   }
 }
 

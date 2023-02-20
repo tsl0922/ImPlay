@@ -14,10 +14,10 @@ class Dispatch {
   using Fn = std::function<void(void *)>;
 
   // Submits a block object for execution and returns after that block finishes executing
-  void sync(Fn func, void *data);
+  void sync(Fn func, void *data = nullptr);
 
   // Submits a block object for execution (on the next event loop) and returns immediately
-  void async(Fn func, void *data);
+  void async(Fn func, void *data = nullptr);
 
   // process all the tasks in the queue, should be called in the main thread only
   void process();

@@ -85,7 +85,7 @@ void Window::renderLoop() {
   while (!glfwWindowShouldClose(window)) {
     {
       std::unique_lock<std::mutex> lk(renderMutex);
-      auto timeout = std::chrono::milliseconds(waitTimeout - int(ImGui::GetIO().DeltaTime * 1000));
+      auto timeout = std::chrono::milliseconds(waitTimeout);
       renderCond.wait_for(lk, timeout, [&]() { return wantRender; });
       wantRender = false;
     }
@@ -100,6 +100,8 @@ void Window::renderLoop() {
     }
 
     player->render(width, height);
+
+    dispatch.async([this](void* data) { updateCursor(); });
   }
 
   shutdown = true;
@@ -115,11 +117,8 @@ void Window::requestRender() {
 void Window::eventLoop() {
   while (!shutdown) {
     glfwWaitEvents();
-    player->renderGui() = true;
     mpv->waitEvent();
     dispatch.process();
-
-    if (ownCursor) updateCursor();
 
     int oldWaitTimeout = waitTimeout;
     bool hasInputEvents = !ImGui::GetCurrentContext()->InputEventsQueue.empty();
@@ -143,22 +142,17 @@ void Window::saveState() {
 }
 
 void Window::updateCursor() {
-  if (ImGui::GetIO().WantCaptureMouse) return;
+  if (!ownCursor || ImGui::GetIO().WantCaptureMouse) return;
 
-  int old = glfwGetInputMode(window, GLFW_CURSOR);
-  int mode = old;
-
-  if (mpv->cursorAutohide == "no") {
-    mode = GLFW_CURSOR_NORMAL;
-  } else if (mpv->cursorAutohide == "always") {
-    mode = GLFW_CURSOR_HIDDEN;
-  } else {
-    int timeout = std::stoi(mpv->cursorAutohide);
-    double delta = glfwGetTime() - lastInputAt;
-    mode = delta * 1000 > timeout ? GLFW_CURSOR_HIDDEN : GLFW_CURSOR_NORMAL;
-  }
-
-  if (mode != old) glfwSetInputMode(window, GLFW_CURSOR, mode);
+  bool cursor = true;
+  if (mpv->cursorAutohide == "no")
+    cursor = true;
+  else if (mpv->cursorAutohide == "always")
+    cursor = false;
+  else
+    cursor = (glfwGetTime() - lastInputAt) * 1000 < std::stoi(mpv->cursorAutohide);
+  glfwSetInputMode(window, GLFW_CURSOR, cursor ? GLFW_CURSOR_NORMAL : GLFW_CURSOR_HIDDEN);
+  ImGui::SetMouseCursor(cursor ? ImGuiMouseCursor_Arrow : ImGuiMouseCursor_None);
 }
 
 void Window::initGLFW(const char* title) {
@@ -237,12 +231,14 @@ void Window::initGLFW(const char* title) {
     if (!win->player->isIdle()) win->player->renderGui() = false;
     win->requestRender();
     win->dispatch.process();
+    win->player->renderGui() = true;
   });
   glfwSetWindowPosCallback(window, [](GLFWwindow* window, int x, int y) {
     auto win = static_cast<Window*>(glfwGetWindowUserPointer(window));
     if (!win->player->isIdle()) win->player->renderGui() = false;
     win->requestRender();
     win->dispatch.process();
+    win->player->renderGui() = true;
   });
   glfwSetCursorEnterCallback(window, [](GLFWwindow* window, int entered) {
     auto win = static_cast<Window*>(glfwGetWindowUserPointer(window));
