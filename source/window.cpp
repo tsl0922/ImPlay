@@ -67,6 +67,9 @@ bool Window::init(OptionParser& parser) {
     player->onDropEvent(count, openedFileNames);
   }
 #endif
+
+  int border = mpv->property<int, MPV_FORMAT_FLAG>("border");
+  glfwSetWindowAttrib(window, GLFW_DECORATED, border);
   return true;
 }
 
