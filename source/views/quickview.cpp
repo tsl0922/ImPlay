@@ -230,6 +230,8 @@ void Quickview::drawVideoTabContent() {
   ImGui::NewLine();
 
   ImGui::TextUnformatted("views.quickview.video.scale"_i18n);
+  ImGui::SameLine();
+  ImGui::HelpMarker("views.quickview.video.scale.help"_i18n);
   const float scales[] = {0.25f, 0.5f, 0.75f, 1.0f, 1.5f, 2.0f};
   for (auto scale : scales) {
     if (ImGui::Button(format("{}%", (int)(scale * 100)).c_str()))
@@ -241,6 +243,8 @@ void Quickview::drawVideoTabContent() {
   ImGui::NewLine();
 
   ImGui::TextUnformatted("views.quickview.video.panscan"_i18n);
+  ImGui::SameLine();
+  ImGui::HelpMarker("views.quickview.video.panscan.help"_i18n);
   iconButton(ICON_FA_MINUS, "add panscan -0.1", "views.quickview.video.panscan.dec"_i18n, false);
   iconButton(ICON_FA_PLUS, "add panscan 0.1", "views.quickview.video.panscan.inc"_i18n);
   iconButton(ICON_FA_ARROW_LEFT, "add video-pan-x -0.1", "views.quickview.video.panscan.move_left"_i18n);
