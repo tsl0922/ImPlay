@@ -32,6 +32,11 @@ void ContextMenu::draw() {
       if (ImGui::MenuItemEx("menu.playback.seek_back.10s"_i18n, ICON_FA_BACKWARD, "WHEEL_DOWN", false, playing))
         mpv->command("seek -10");
       if (ImGui::MenuItem("menu.playback.seek_back.1m"_i18n, "DOWN", false, playing)) mpv->command("seek -60");
+      ImGui::Separator();
+      if (ImGui::MenuItemEx("menu.playback.next_frame"_i18n, ICON_FA_ARROW_RIGHT, ".", false, playing))
+        mpv->command("frame-step");
+      if (ImGui::MenuItemEx("menu.playback.previous_frame"_i18n, ICON_FA_ARROW_LEFT, ",", false, playing))
+        mpv->command("frame-back-step");
       if (ImGui::BeginMenu("menu.playback.speed"_i18n, playing)) {
         if (ImGui::MenuItem("2x")) mpv->command("multiply speed 2.0");
         if (ImGui::MenuItem("1.5x")) mpv->command("multiply speed 1.5");
@@ -42,19 +47,12 @@ void ContextMenu::draw() {
         ImGui::EndMenu();
       }
       ImGui::Separator();
-      if (ImGui::MenuItemEx("menu.playback.next_frame"_i18n, ICON_FA_ARROW_RIGHT, ".", false, playing))
-        mpv->command("frame-step");
-      if (ImGui::MenuItemEx("menu.playback.previous_frame"_i18n, ICON_FA_ARROW_LEFT, ",", false, playing))
-        mpv->command("frame-back-step");
-      ImGui::Separator();
       if (ImGui::MenuItemEx("menu.playback.next_media"_i18n, ICON_FA_ARROW_RIGHT, ">", false, playlist.size() > 1))
         mpv->command("playlist-next");
       if (ImGui::MenuItemEx("menu.playback.previous_media"_i18n, ICON_FA_ARROW_LEFT, "<", false, playlist.size() > 1))
         mpv->command("playlist-prev");
-      if (ImGui::MenuItemEx("menu.playlist"_i18n, ICON_FA_LIST, nullptr, false, playlist.size() > 0))
+      if (ImGui::MenuItem("menu.playlist"_i18n, nullptr, false, playlist.size() > 0))
         mpv->command("script-message-to implay command-palette playlist");
-      if (ImGui::MenuItem("menu.playback.playlist_loop"_i18n, nullptr, false, playlist.size() > 0))
-        mpv->command("cycle-values loop-playlist inf no");
       ImGui::Separator();
       if (ImGui::MenuItemEx("menu.playback.next_chapter"_i18n, ICON_FA_ARROW_RIGHT, nullptr, false,
                             chapterlist.size() > 1))
@@ -62,12 +60,14 @@ void ContextMenu::draw() {
       if (ImGui::MenuItemEx("menu.playback.previous_chapter"_i18n, ICON_FA_ARROW_LEFT, nullptr, false,
                             chapterlist.size() > 1))
         mpv->command("add chapter -1");
-      if (ImGui::MenuItemEx("menu.chapters"_i18n, ICON_FA_LIST, nullptr, false, chapterlist.size() > 0))
+      if (ImGui::MenuItem("menu.chapters"_i18n, nullptr, false, chapterlist.size() > 0))
         mpv->command("script-message-to implay command-palette chapters");
       ImGui::Separator();
       if (ImGui::MenuItem("menu.playback.ab_loop"_i18n, "l", false, playing)) mpv->command("ab-loop");
       if (ImGui::MenuItem("menu.playback.file_loop"_i18n, "L", false, playing))
         mpv->command("cycle-values loop-file inf no");
+      if (ImGui::MenuItem("menu.playback.playlist_loop"_i18n, nullptr, false, playlist.size() > 0))
+        mpv->command("cycle-values loop-playlist inf no");
       ImGui::EndMenu();
     }
     drawPlaylist(playlist);
@@ -194,7 +194,8 @@ void ContextMenu::draw() {
       if (ImGui::MenuItemEx("menu.tools.window_ontop"_i18n, ICON_FA_ARROW_UP, "T")) mpv->command("cycle ontop");
       if (ImGui::MenuItemEx("menu.tools.show_progress"_i18n, ICON_FA_SPINNER, "o", false, playing))
         mpv->command("show-progress");
-      if (ImGui::MenuItem("menu.tools.show_stats"_i18n, "I")) mpv->command("script-binding stats/display-stats-toggle");
+      if (ImGui::MenuItemEx("menu.tools.show_stats"_i18n, ICON_FA_CHART_BAR, "I"))
+        mpv->command("script-binding stats/display-stats-toggle");
       if (ImGui::MenuItem("menu.tools.osc_visibility"_i18n, "DEL")) mpv->command("script-binding osc/visibility");
       ImGui::Separator();
       drawProfilelist();
@@ -224,18 +225,15 @@ void ContextMenu::draw() {
     ImGui::Separator();
     if (ImGui::BeginMenuEx("menu.open"_i18n, ICON_FA_FOLDER_OPEN)) {
       if (ImGui::MenuItemEx("menu.open.files"_i18n, ICON_FA_FILE)) mpv->command("script-message-to implay open");
-      if (ImGui::MenuItemEx("menu.open.folder"_i18n, ICON_FA_FOLDER_PLUS))
+      if (ImGui::MenuItemEx("menu.open.folder"_i18n, ICON_FA_FOLDER))
         mpv->command("script-message-to implay open-folder");
       drawRecentFiles();
       ImGui::Separator();
-      if (ImGui::MenuItemEx("menu.open.url"_i18n, ICON_FA_LINK)) mpv->command("script-message-to implay open-url");
-      if (ImGui::MenuItemEx("menu.open.clipboard"_i18n, ICON_FA_CLIPBOARD))
-        mpv->command("script-message-to implay open-clipboard");
+      if (ImGui::MenuItemEx("menu.open.url"_i18n, ICON_FA_GLOBE)) mpv->command("script-message-to implay open-url");
+      if (ImGui::MenuItem("menu.open.clipboard"_i18n)) mpv->command("script-message-to implay open-clipboard");
       ImGui::Separator();
-      if (ImGui::MenuItemEx("menu.open.disk"_i18n, ICON_FA_FOLDER_OPEN))
-        mpv->command("script-message-to implay open-disk");
-      if (ImGui::MenuItemEx("menu.open.iso"_i18n, ICON_FA_COMPACT_DISC))
-        mpv->command("script-message-to implay open-iso");
+      if (ImGui::MenuItem("menu.open.disk"_i18n)) mpv->command("script-message-to implay open-disk");
+      if (ImGui::MenuItem("menu.open.iso"_i18n)) mpv->command("script-message-to implay open-iso");
       ImGui::EndMenu();
     }
     if (ImGui::MenuItemEx("menu.quit"_i18n, ICON_FA_WINDOW_CLOSE, "q"))
@@ -273,9 +271,9 @@ void ContextMenu::drawTracklist(const char *type, const char *prop, std::string 
 
 void ContextMenu::drawChapterlist(std::vector<Mpv::ChapterItem> items) {
   auto pos = mpv->chapter;
-  if (ImGui::BeginMenuEx("menu.chapters"_i18n, ICON_FA_LIST, !items.empty())) {
-    if (ImGui::MenuItemEx("menu.chapters.next"_i18n, ICON_FA_ARROW_RIGHT)) mpv->command("add chapter 1");
-    if (ImGui::MenuItemEx("menu.chapters.previous"_i18n, ICON_FA_ARROW_LEFT)) mpv->command("add chapter -1");
+  if (ImGui::BeginMenuEx("menu.chapters"_i18n, ICON_FA_LIST_OL, !items.empty())) {
+    if (ImGui::MenuItemEx("menu.chapters.next"_i18n, ICON_FA_FAST_FORWARD)) mpv->command("add chapter 1");
+    if (ImGui::MenuItemEx("menu.chapters.previous"_i18n, ICON_FA_FAST_BACKWARD)) mpv->command("add chapter -1");
     ImGui::Separator();
     if (ImGui::MenuItem("menu.quickview"_i18n)) mpv->command("script-message-to implay quickview chapters");
     ImGui::Separator();
@@ -299,21 +297,20 @@ void ContextMenu::drawChapterlist(std::vector<Mpv::ChapterItem> items) {
 
 void ContextMenu::drawPlaylist(std::vector<Mpv::PlayItem> items) {
   auto pos = mpv->playlistPos;
-  if (ImGui::BeginMenuEx("menu.playlist"_i18n, ICON_FA_LIST)) {
+  if (ImGui::BeginMenuEx("menu.playlist"_i18n, ICON_FA_TASKS)) {
     if (ImGui::MenuItemEx("menu.playlist.next"_i18n, ICON_FA_ARROW_RIGHT, ">", false, items.size() > 1))
       mpv->command("playlist-next");
     if (ImGui::MenuItemEx("menu.playlist.previous"_i18n, ICON_FA_ARROW_LEFT, "<", false, items.size() > 1))
       mpv->command("playlist-prev");
     ImGui::Separator();
-    if (ImGui::MenuItemEx("menu.playlist.add_files"_i18n, ICON_FA_FILE_UPLOAD))
+    if (ImGui::MenuItemEx("menu.playlist.add_files"_i18n, ICON_FA_PLUS))
       mpv->command("script-message-to implay playlist-add-files");
     if (ImGui::MenuItemEx("menu.playlist.add_folder"_i18n, ICON_FA_FOLDER_PLUS))
       mpv->command("script-message-to implay playlist-add-folder");
     ImGui::Separator();
     if (ImGui::MenuItemEx("menu.playlist.shuffle"_i18n, ICON_FA_RANDOM)) mpv->command("playlist-shuffle");
-    if (ImGui::MenuItemEx("menu.playlist.loop"_i18n, ICON_FA_SYNC, "L"))
-      mpv->command("cycle-values loop-playlist inf no");
-    if (ImGui::MenuItemEx("menu.playlist.clear"_i18n, ICON_FA_TRASH_ALT)) mpv->command("playlist-clear");
+    if (ImGui::MenuItem("menu.playlist.loop"_i18n, "L")) mpv->command("cycle-values loop-playlist inf no");
+    if (ImGui::MenuItem("menu.playlist.clear"_i18n)) mpv->command("playlist-clear");
     ImGui::Separator();
     if (ImGui::MenuItem("menu.quickview"_i18n)) mpv->command("script-message-to implay quickview playlist");
     if (items.size() > 0) ImGui::Separator();
@@ -336,7 +333,7 @@ void ContextMenu::drawPlaylist(std::vector<Mpv::PlayItem> items) {
 }
 
 void ContextMenu::drawProfilelist() {
-  if (ImGui::BeginMenuEx("menu.tools.profiles"_i18n, ICON_FA_USER)) {
+  if (ImGui::BeginMenuEx("menu.tools.profiles"_i18n, ICON_FA_USER_COG)) {
     for (auto &profile : mpv->profiles) {
       if (ImGui::MenuItem(profile.c_str()))
         mpv->command(format("show-text {}; apply-profile {}", profile, profile).c_str());
@@ -346,7 +343,7 @@ void ContextMenu::drawProfilelist() {
 }
 
 void ContextMenu::drawRecentFiles() {
-  if (ImGui::BeginMenu("menu.open.recent"_i18n)) {
+  if (ImGui::BeginMenuEx("menu.open.recent"_i18n, ICON_FA_HISTORY)) {
     auto files = config->getRecentFiles();
     int i = 0;
     for (auto &file : files) {

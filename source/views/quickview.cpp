@@ -7,9 +7,12 @@ namespace ImPlay::Views {
 Quickview::Quickview(Config *config, Dispatch *dispatch, Mpv *mpv) : View(config, dispatch, mpv) {
   addTab("playlist", "views.quickview.playlist", [this]() { drawPlaylistTabContent(); });
   addTab("chapters", "views.quickview.chapters", [this]() { drawChaptersTabContent(); });
-  addTab("video", "views.quickview.video", [this]() { drawVideoTabContent(); }, true);
-  addTab("audio", "views.quickview.audio", [this]() { drawAudioTabContent(); }, true);
-  addTab("subtitle", "views.quickview.subtitle", [this]() { drawSubtitleTabContent(); }, true);
+  addTab(
+      "video", "views.quickview.video", [this]() { drawVideoTabContent(); }, true);
+  addTab(
+      "audio", "views.quickview.audio", [this]() { drawAudioTabContent(); }, true);
+  addTab(
+      "subtitle", "views.quickview.subtitle", [this]() { drawSubtitleTabContent(); }, true);
 
   mpv->observeEvent(MPV_EVENT_FILE_LOADED, [this](void *data) {
     updateAudioEqChannels();
@@ -153,31 +156,32 @@ void Quickview::drawPlaylistTabContent() {
     auto drawContextmenu = [&](Mpv::PlayItem *item = nullptr) {
       bool enabled = item != nullptr;
       int id = enabled ? item->id : -1;
-      if (ImGui::MenuItem("views.quickview.playlist.menu.play"_i18n, nullptr, nullptr, enabled))
+      if (ImGui::MenuItemEx("views.quickview.playlist.menu.play"_i18n, ICON_FA_PLAY_CIRCLE, nullptr, false, enabled))
         mpv->property<int64_t, MPV_FORMAT_INT64>("playlist-pos", id);
       if (ImGui::MenuItem("views.quickview.playlist.menu.play_next"_i18n, nullptr, nullptr, enabled))
         mpv->commandv("playlist-move", std::to_string(id).c_str(), std::to_string(pos + 1).c_str(), nullptr);
       ImGui::Separator();
-      if (ImGui::MenuItem("views.quickview.playlist.menu.move_first"_i18n, nullptr, nullptr, enabled))
+      if (ImGui::MenuItemEx("views.quickview.playlist.menu.move_first"_i18n, ICON_FA_ARROW_UP, nullptr, false, enabled))
         mpv->commandv("playlist-move", std::to_string(id).c_str(), "0", nullptr);
-      if (ImGui::MenuItem("views.quickview.playlist.menu.move_last"_i18n, nullptr, nullptr, enabled))
+      if (ImGui::MenuItemEx("views.quickview.playlist.menu.move_last"_i18n, ICON_FA_ARROW_DOWN, nullptr, false,
+                            enabled))
         mpv->commandv("playlist-move", std::to_string(id).c_str(), std::to_string(items.size()).c_str(), nullptr);
       if (ImGui::MenuItem("views.quickview.playlist.menu.remove"_i18n, nullptr, nullptr, enabled))
         mpv->commandv("playlist-remove", std::to_string(id).c_str(), nullptr);
       ImGui::Separator();
-      if (ImGui::MenuItem("views.quickview.playlist.menu.copy_path"_i18n, nullptr, nullptr, enabled))
+      if (ImGui::MenuItemEx("views.quickview.playlist.menu.copy_path"_i18n, ICON_FA_COPY, nullptr, false, enabled))
         ImGui::SetClipboardText(item->path.c_str());
       if (ImGui::MenuItem("views.quickview.playlist.menu.reveal"_i18n, nullptr, nullptr, enabled))
         revealInFolder(item->path);
       ImGui::Separator();
-      if (ImGui::MenuItem("views.quickview.playlist.search"_i18n))
+      if (ImGui::MenuItemEx("views.quickview.playlist.search"_i18n, ICON_FA_SEARCH))
         mpv->command("script-message-to implay command-palette playlist");
-      if (ImGui::MenuItem("views.quickview.playlist.shuffle"_i18n)) mpv->command("playlist-shuffle");
+      if (ImGui::MenuItemEx("views.quickview.playlist.shuffle"_i18n, ICON_FA_RANDOM)) mpv->command("playlist-shuffle");
       if (ImGui::MenuItem("views.quickview.playlist.loop"_i18n)) mpv->command("cycle-values loop-playlist inf no");
       ImGui::Separator();
-      if (ImGui::MenuItem("views.quickview.playlist.add_files"_i18n))
+      if (ImGui::MenuItemEx("views.quickview.playlist.add_files"_i18n, ICON_FA_PLUS))
         mpv->command("script-message-to implay playlist-add-files");
-      if (ImGui::MenuItem("views.quickview.playlist.add_folders"_i18n))
+      if (ImGui::MenuItemEx("views.quickview.playlist.add_folders"_i18n, ICON_FA_FOLDER_PLUS))
         mpv->command("script-message-to implay playlist-add-folder");
       if (ImGui::MenuItem("views.quickview.playlist.clear"_i18n)) mpv->command("playlist-clear");
     };
