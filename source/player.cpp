@@ -57,6 +57,7 @@ bool Player::init(OptionParser& parser) {
   initObservers();
   mpv->property<int64_t, MPV_FORMAT_INT64>("volume", config->Data.Mpv.Volume);
   if (config->Data.Recent.SpaceToPlayLast) mpv->command("keybind SPACE 'script-message-to implay play-pause'");
+  if (!mpv->property<int, MPV_FORMAT_FLAG>("force-window")) mpv->command("script-message osc-idlescreen no");
 
   for (auto& path : parser.paths) {
     if (path == "-") mpv->property("input-terminal", "yes");
