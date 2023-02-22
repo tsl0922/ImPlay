@@ -91,6 +91,10 @@ bool Mpv::wantRender() {
   return renderCtx != nullptr && (mpv_render_context_update(renderCtx) & MPV_RENDER_UPDATE_FRAME);
 }
 
+void Mpv::reportSwap() {
+  if (renderCtx != nullptr) mpv_render_context_report_swap(renderCtx);
+}
+
 void Mpv::init() {
   if (mpv_initialize(mpv) < 0) throw std::runtime_error("could not initialize mpv context");
   if (wid == 0) initRender();

@@ -21,7 +21,7 @@ class Mpv {
   void init();
   void render(int w, int h);
   bool wantRender();
-  void requestRender();
+  void reportSwap();
   void waitEvent(double timeout = 0);
   void requestLog(const char *level, LogHandler handler);
   int loadConfig(const char *path);

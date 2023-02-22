@@ -86,14 +86,14 @@ void Player::drawLogo() {
 }
 
 void Player::render(int w, int h) {
+  bool viewports = ImGui::GetIO().ConfigFlags & ImGuiConfigFlags_ViewportsEnable;
+  bool renderGui = renderGui_ || !viewports;
+
   glfwMakeContextCurrent(window);
   glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
   glClear(GL_COLOR_BUFFER_BIT);
 
-  if (!idle || mpv->forceWindow) mpv->render(w, h);
-
-  bool viewports = ImGui::GetIO().ConfigFlags & ImGuiConfigFlags_ViewportsEnable;
-  bool renderGui = renderGui_ || !viewports;
+  mpv->render(w, h);
 
   if (renderGui) {
     ImGui_ImplOpenGL3_NewFrame();
@@ -107,6 +107,8 @@ void Player::render(int w, int h) {
 
   glfwSwapBuffers(window);
   glfwMakeContextCurrent(nullptr);
+
+  mpv->reportSwap();
 
   // This will block main thread, conflict with:
   //   - open file dialog on macOS (must be run in main thread)
