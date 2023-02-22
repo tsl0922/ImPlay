@@ -10,13 +10,13 @@ void Dispatch::push(Dispatch::Item *item) {
   if (wakeupFn) wakeupFn();
 }
 
-void Dispatch::async(Dispatch::Fn func, void *data) {
-  auto item = new Dispatch::Item{std::move(func), data, false, true};
+void Dispatch::async(Dispatch::Fn func) {
+  auto item = new Dispatch::Item{std::move(func), false, true};
   push(item);
 }
 
-void Dispatch::sync(Dispatch::Fn func, void *data) {
-  auto item = new Dispatch::Item{std::move(func), data, false, false};
+void Dispatch::sync(Dispatch::Fn func) {
+  auto item = new Dispatch::Item{std::move(func), false, false};
   push(item);
 
   {
@@ -32,7 +32,7 @@ void Dispatch::process() {
     auto item = queue.front();
     queue.pop();
 
-    item->func(item->data);
+    item->func();
 
     if (item->asynchronous)
       delete item;

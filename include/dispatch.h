@@ -11,13 +11,13 @@ namespace ImPlay {
 
 class Dispatch {
  public:
-  using Fn = std::function<void(void *)>;
+  using Fn = std::function<void()>;
 
   // Submits a block object for execution and returns after that block finishes executing
-  void sync(Fn func, void *data = nullptr);
+  void sync(Fn func);
 
   // Submits a block object for execution (on the next event loop) and returns immediately
-  void async(Fn func, void *data = nullptr);
+  void async(Fn func);
 
   // process all the tasks in the queue, should be called in the main thread only
   void process();
@@ -27,7 +27,6 @@ class Dispatch {
  private:
   struct Item {
     Fn func;
-    void *data;
     bool completed;
     bool asynchronous;
   };

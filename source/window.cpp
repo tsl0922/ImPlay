@@ -127,14 +127,14 @@ void Window::render() {
 
   glfwMakeContextCurrent(nullptr);
 
-  dispatch.async([this](void* data) { updateCursor(); });
+  dispatch.async([this]() { updateCursor(); });
 
   // This will run on main thread, conflict with:
   //   - open file dialog on macOS (block main thread)
   //   - window dragging on windows (block main thread)
   // so, we only call it when viewports are enabled and no conflicts.
   if (ImGui::GetIO().ConfigFlags & ImGuiConfigFlags_ViewportsEnable) {
-    dispatch.sync([](void* data) {
+    dispatch.sync([]() {
       ImGui::UpdatePlatformWindows();
       ImGui::RenderPlatformWindowsDefault();
       glfwMakeContextCurrent(nullptr);

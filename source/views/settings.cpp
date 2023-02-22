@@ -216,7 +216,7 @@ void Settings::drawFontTab() {
     static std::string error;
     if (ImGui::IsWindowAppearing()) error = "";
     if (ImGui::Button(ICON_FA_FOLDER_OPEN)) {
-      dispatch_sync([&](void *) {
+      dispatch_sync([&]() {
         try {
           openFile({{"Font Files", "ttf,ttc,otf"}}, [&](std::string path) {
             strncpy(fontPath, path.c_str(), IM_ARRAYSIZE(fontPath));

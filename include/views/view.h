@@ -16,8 +16,8 @@ class View {
   virtual void draw() = 0;
   virtual void show() { m_open = true; }
 
-  void dispatch_sync(Dispatch::Fn fn, void *data = nullptr);
-  void dispatch_async(Dispatch::Fn fn, void *data = nullptr);
+  inline void dispatch_sync(Dispatch::Fn fn) { dispatch->sync(fn); };
+  inline void dispatch_async(Dispatch::Fn fn) { dispatch->async(fn); };
 
  protected:
   Config *config = nullptr;
