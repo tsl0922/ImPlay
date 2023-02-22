@@ -76,7 +76,6 @@ bool Window::init(OptionParser& parser) {
 
 void Window::run() {
   glfwShowWindow(window);
-  glfwFocusWindow(window);
 
   std::thread render(&Window::renderLoop, this);
   eventLoop();
@@ -95,21 +94,52 @@ void Window::renderLoop() {
       wantRender = false;
     }
 
-    if (config.FontReload) {
-      loadFonts();
-      config.FontReload = false;
-      glfwMakeContextCurrent(window);
-      ImGui_ImplOpenGL3_DestroyFontsTexture();
-      ImGui_ImplOpenGL3_CreateFontsTexture();
-      glfwMakeContextCurrent(nullptr);
-    }
-
-    player->render(width, height);
-
-    dispatch.async([this](void* data) { updateCursor(); });
+    render();
   }
 
   shutdown = true;
+}
+
+void Window::render() {
+  glfwMakeContextCurrent(window);
+
+  // Reload font if changed
+  if (config.FontReload) {
+    loadFonts();
+    config.FontReload = false;
+    ImGui_ImplOpenGL3_DestroyFontsTexture();
+    ImGui_ImplOpenGL3_CreateFontsTexture();
+  }
+
+  ImGui_ImplOpenGL3_NewFrame();
+  ImGui_ImplGlfw_NewFrame();
+  ImGui::NewFrame();
+
+  player->render();
+  ImGui::Render();
+
+  glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+  glClear(GL_COLOR_BUFFER_BIT);
+  mpv->render(width, height);
+  ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+  glfwSwapBuffers(window);
+  mpv->reportSwap();
+
+  glfwMakeContextCurrent(nullptr);
+
+  dispatch.async([this](void* data) { updateCursor(); });
+
+  // This will run on main thread, conflict with:
+  //   - open file dialog on macOS (block main thread)
+  //   - window dragging on windows (block main thread)
+  // so, we only call it when viewports are enabled and no conflicts.
+  if (ImGui::GetIO().ConfigFlags & ImGuiConfigFlags_ViewportsEnable) {
+    dispatch.sync([](void* data) {
+      ImGui::UpdatePlatformWindows();
+      ImGui::RenderPlatformWindowsDefault();
+      glfwMakeContextCurrent(nullptr);
+    });
+  }
 }
 
 void Window::requestRender() {
@@ -211,9 +241,6 @@ void Window::initGLFW(const char* title) {
   glfwSwapInterval(1);
   glfwGetFramebufferSize(window, &width, &height);
   glViewport(0, 0, width, height);
-  glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
-  glClear(GL_COLOR_BUFFER_BIT);
-  glfwSwapBuffers(window);
   glfwMakeContextCurrent(nullptr);
 
   glfwSetFramebufferSizeCallback(window, [](GLFWwindow* window, int w, int h) {
@@ -233,17 +260,13 @@ void Window::initGLFW(const char* title) {
   });
   glfwSetWindowRefreshCallback(window, [](GLFWwindow* window) {
     auto win = static_cast<Window*>(glfwGetWindowUserPointer(window));
-    if (!win->player->isIdle()) win->player->renderGui() = false;
     win->requestRender();
     win->dispatch.process();
-    win->player->renderGui() = true;
   });
   glfwSetWindowPosCallback(window, [](GLFWwindow* window, int x, int y) {
     auto win = static_cast<Window*>(glfwGetWindowUserPointer(window));
-    if (!win->player->isIdle()) win->player->renderGui() = false;
     win->requestRender();
     win->dispatch.process();
-    win->player->renderGui() = true;
   });
   glfwSetCursorEnterCallback(window, [](GLFWwindow* window, int entered) {
     auto win = static_cast<Window*>(glfwGetWindowUserPointer(window));

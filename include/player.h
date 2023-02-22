@@ -5,7 +5,6 @@
 #include <GLFW/glfw3.h>
 #include <map>
 #include <vector>
-#include <atomic>
 #include "mpv.h"
 #include "config.h"
 #include "command.h"
@@ -20,8 +19,7 @@ class Player {
 
   bool init(OptionParser &parser);
   void drawLogo();
-  void render(int w, int h);
-  std::atomic_bool &renderGui() { return renderGui_; }
+  void render();
   void shutdown();
   bool isIdle() { return idle; }
 
@@ -43,7 +41,6 @@ class Player {
   Dispatch *dispatch;
   const char *title;
   bool idle = true;
-  std::atomic_bool renderGui_ = true;
   ImTextureID logoTexture = nullptr;
 
   static void translateMod(std::vector<std::string> &keys, int mods) {

@@ -6,8 +6,6 @@
 #include <romfs/romfs.hpp>
 #include <imgui.h>
 #include <imgui_internal.h>
-#include <imgui_impl_glfw.h>
-#include <imgui_impl_opengl3.h>
 #ifdef IMGUI_IMPL_OPENGL_ES3
 #include <GLES3/gl3.h>
 #else
@@ -85,42 +83,9 @@ void Player::drawLogo() {
   ImGui::PopStyleColor();
 }
 
-void Player::render(int w, int h) {
-  bool viewports = ImGui::GetIO().ConfigFlags & ImGuiConfigFlags_ViewportsEnable;
-  bool renderGui = renderGui_ || !viewports;
-
-  glfwMakeContextCurrent(window);
-  glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
-  glClear(GL_COLOR_BUFFER_BIT);
-
-  mpv->render(w, h);
-
-  if (renderGui) {
-    ImGui_ImplOpenGL3_NewFrame();
-    ImGui_ImplGlfw_NewFrame();
-    ImGui::NewFrame();
-    drawLogo();
-    cmd->draw();
-    ImGui::Render();
-    ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-  }
-
-  glfwSwapBuffers(window);
-  glfwMakeContextCurrent(nullptr);
-
-  mpv->reportSwap();
-
-  // This will block main thread, conflict with:
-  //   - open file dialog on macOS (must be run in main thread)
-  //   - window dragging on windows (blocking main thread)
-  // so, we only call it when viewports are enabled and no conflicts.
-  if (renderGui && viewports) {
-    dispatch->sync([](void* data) {
-      ImGui::UpdatePlatformWindows();
-      ImGui::RenderPlatformWindowsDefault();
-      glfwMakeContextCurrent(nullptr);
-    });
-  }
+void Player::render() {
+  drawLogo();
+  cmd->draw();
 }
 
 void Player::shutdown() { mpv->command(config->Data.Mpv.WatchLater ? "quit-watch-later" : "quit"); }
@@ -216,13 +181,9 @@ void Player::initObservers() {
 
   mpv->observeEvent(MPV_EVENT_CLIENT_MESSAGE, [this](void* data) {
     ImGuiIO& io = ImGui::GetIO();
-    renderGui_ = false;
     io.SetAppAcceptingEvents(false);
-
     auto msg = static_cast<mpv_event_client_message*>(data);
     cmd->execute(msg->num_args, msg->args);
-
-    renderGui_ = true;
     io.SetAppAcceptingEvents(true);
   });
 

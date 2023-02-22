@@ -33,6 +33,7 @@ class Window {
  private:
   void eventLoop();
   void renderLoop();
+  void render();
   void requestRender();
   void updateCursor();
   void saveState();
