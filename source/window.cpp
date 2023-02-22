@@ -10,6 +10,7 @@
 #include <fonts/unifont.h>
 #include <algorithm>
 #include <stdexcept>
+#include <chrono>
 #include <thread>
 #ifdef IMGUI_IMPL_OPENGL_ES3
 #include <GLES3/gl3.h>
@@ -85,11 +86,12 @@ void Window::run() {
 }
 
 void Window::renderLoop() {
+  auto nextFrame = std::chrono::steady_clock::now();
   while (!glfwWindowShouldClose(window)) {
+    nextFrame += std::chrono::milliseconds(waitTimeout);
     {
       std::unique_lock<std::mutex> lk(renderMutex);
-      auto timeout = std::chrono::milliseconds(waitTimeout);
-      renderCond.wait_for(lk, timeout, [&]() { return wantRender; });
+      renderCond.wait_until(lk, nextFrame, [&]() { return wantRender; });
       wantRender = false;
     }
 
