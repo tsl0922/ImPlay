@@ -81,27 +81,31 @@ bool Window::init(OptionParser& parser) {
 void Window::run() {
   glfwShowWindow(window);
 
-  std::thread render(&Window::renderLoop, this);
-  eventLoop();
-  render.join();
-
-  saveState();
-}
-
-void Window::renderLoop() {
-  auto nextFrame = std::chrono::steady_clock::now();
-  while (!glfwWindowShouldClose(window)) {
-    nextFrame += std::chrono::milliseconds(waitTimeout);
-    {
-      std::unique_lock<std::mutex> lk(renderMutex);
-      renderCond.wait_until(lk, nextFrame, [&]() { return wantRender; });
-      wantRender = false;
+  std::thread renderThread([&]() {
+    auto nextFrame = std::chrono::steady_clock::now();
+    while (!glfwWindowShouldClose(window)) {
+      int frameTime = 1000 / config.Data.Interface.Fps;
+      nextFrame += std::chrono::milliseconds(frameTime);
+      {
+        std::unique_lock<std::mutex> lk(renderMutex);
+        renderCond.wait_until(lk, nextFrame, [&]() { return wantRender; });
+        wantRender = false;
+      }
+      render();
     }
+    shutdown = true;
+  });
 
-    render();
+  while (!shutdown) {
+    glfwWaitEvents();
+
+    mpv->waitEvent();
+    dispatch.process();
   }
 
-  shutdown = true;
+  renderThread.join();
+
+  saveState();
 }
 
 void Window::render() {
@@ -151,24 +155,6 @@ void Window::requestRender() {
   wantRender = true;
   lk.unlock();
   renderCond.notify_one();
-}
-
-void Window::eventLoop() {
-  while (!shutdown) {
-    glfwWaitEvents();
-    mpv->waitEvent();
-    dispatch.process();
-
-    int oldWaitTimeout = waitTimeout;
-    bool hasInputEvents = !ImGui::GetCurrentContext()->InputEventsQueue.empty();
-    if ((!glfwGetWindowAttrib(window, GLFW_VISIBLE) || glfwGetWindowAttrib(window, GLFW_ICONIFIED)) &&
-        !hasInputEvents && ImGui::GetCurrentContext()->Viewports.Size == 1) {
-      waitTimeout = INT_MAX;
-    } else {
-      waitTimeout = 1000.0 / config.Data.Interface.Fps;
-    }
-    if (oldWaitTimeout != waitTimeout) requestRender();
-  }
 }
 
 void Window::saveState() {

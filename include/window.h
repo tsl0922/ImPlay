@@ -31,8 +31,6 @@ class Window {
   void run();
 
  private:
-  void eventLoop();
-  void renderLoop();
   void render();
   void requestRender();
   void updateCursor();
@@ -59,7 +57,6 @@ class Window {
   std::mutex renderMutex;
   std::condition_variable renderCond;
   std::atomic_bool shutdown = false;
-  std::atomic_int waitTimeout = 50;
   bool ownCursor = true;
   bool wantRender = true;
   double lastInputAt = 0;
