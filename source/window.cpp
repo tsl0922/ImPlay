@@ -17,6 +17,9 @@
 #else
 #include <GL/gl.h>
 #endif
+#ifdef _WIN32
+#include <windowsx.h>
+#endif
 #include "helpers.h"
 #include "theme.h"
 #include "window.h"
@@ -71,6 +74,18 @@ bool Window::init(OptionParser& parser) {
     while (openedFileNames[count] != nullptr) count++;
     player->onDropEvent(count, openedFileNames);
   }
+#endif
+
+#ifdef _WIN32
+  mpv->observeProperty<int, MPV_FORMAT_FLAG>("border", [this](int flag) {
+    borderless = !static_cast<bool>(flag);
+    HWND hwnd = glfwGetWin32Window(window);
+    if (borderless) {
+      DWORD style = ::GetWindowLong(hwnd, GWL_STYLE);
+      ::SetWindowLongA(hwnd, GWL_STYLE, style | WS_CAPTION | WS_MAXIMIZEBOX | WS_THICKFRAME);
+    }
+    ::SetWindowPos(hwnd, nullptr, 0, 0, 0, 0, SWP_FRAMECHANGED | SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER);
+  });
 #endif
 
   int border = mpv->property<int, MPV_FORMAT_FLAG>("border");
@@ -394,12 +409,11 @@ void Window::exitImGui() {
 }
 
 #ifdef _WIN32
-// workaround for:
-//   - https://github.com/glfw/glfw/issues/2074
-//   - https://github.com/libsdl-org/SDL/issues/1059
-LRESULT CALLBACK Window::wndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
+// workaround for: https://github.com/glfw/glfw/issues/2074
+// borderless window: https://github.com/rossy/borderless-window
+LRESULT CALLBACK Window::wndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
   auto win = reinterpret_cast<Window*>(GetWindowLongPtr(hWnd, GWLP_USERDATA));
-  switch (msg) {
+  switch (uMsg) {
     case WM_ENTERSIZEMOVE:
     case WM_ENTERMENULOOP:
       ::SetTimer(hWnd, reinterpret_cast<UINT_PTR>(win), USER_TIMER_MINIMUM, nullptr);
@@ -414,8 +428,60 @@ LRESULT CALLBACK Window::wndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lPar
     case WM_EXITMENULOOP:
       ::KillTimer(hWnd, reinterpret_cast<UINT_PTR>(win));
       break;
+    case WM_NCACTIVATE:
+    case WM_NCPAINT:
+      if (win->borderless) return DefWindowProcW(hWnd, uMsg, wParam, lParam);
+      break;
+    case WM_NCCALCSIZE: {
+      if (!win->borderless) break;
+
+      RECT& rect = *reinterpret_cast<RECT*>(lParam);
+      RECT client = rect;
+
+      DefWindowProcW(hWnd, uMsg, wParam, lParam);
+
+      if (IsMaximized(hWnd)) {
+        HMONITOR mon = MonitorFromWindow(hWnd, MONITOR_DEFAULTTOPRIMARY);
+        MONITORINFO mi = {.cbSize = sizeof mi};
+        GetMonitorInfoW(mon, &mi);
+        rect = mi.rcWork;
+      } else {
+        rect = client;
+      }
+
+      return 0;
+    }
+    case WM_NCHITTEST: {
+      if (!win->borderless) break;
+      if (IsMaximized(hWnd)) return HTCLIENT;
+
+      POINT mouse = {GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam)};
+      ScreenToClient(hWnd, &mouse);
+      RECT client;
+      GetClientRect(hWnd, &client);
+
+      int frame_size = GetSystemMetrics(SM_CXFRAME) + GetSystemMetrics(SM_CXPADDEDBORDER);
+      int diagonal_width = frame_size * 2 + GetSystemMetrics(SM_CXBORDER);
+
+      if (mouse.y < frame_size) {
+        if (mouse.x < diagonal_width) return HTTOPLEFT;
+        if (mouse.x >= client.right - diagonal_width) return HTTOPRIGHT;
+        return HTTOP;
+      }
+
+      if (mouse.y >= client.bottom - frame_size) {
+        if (mouse.x < diagonal_width) return HTBOTTOMLEFT;
+        if (mouse.x >= client.right - diagonal_width) return HTBOTTOMRIGHT;
+        return HTBOTTOM;
+      }
+
+      if (mouse.x < frame_size) return HTLEFT;
+      if (mouse.x >= client.right - frame_size) return HTRIGHT;
+
+      return HTCLIENT;
+    } break;
   }
-  return ::CallWindowProc(win->wndProcOld, hWnd, msg, wParam, lParam);
+  return ::CallWindowProc(win->wndProcOld, hWnd, uMsg, wParam, lParam);
 }
 #endif
 }  // namespace ImPlay

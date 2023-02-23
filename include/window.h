@@ -27,7 +27,7 @@ class Window {
   Window();
   ~Window();
 
-  bool init(OptionParser& parser);
+  bool init(OptionParser &parser);
   void run();
 
  private:
@@ -50,6 +50,7 @@ class Window {
   int width = 1280;
   int height = 720;
 #ifdef _WIN32
+  bool borderless = false;
   WNDPROC wndProcOld = nullptr;
   static LRESULT CALLBACK wndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 #endif
