@@ -49,7 +49,7 @@ class Quickview : public View {
   void alignRight(const char *label);
   bool iconButton(const char *icon, const char *cmd, const char *tooltip = nullptr, bool sameline = true);
   bool toggleButton(const char *label, bool toggle, const char *tooltip = nullptr, ImGuiCol col = ImGuiCol_Button);
-  bool toggleButton(bool toggle, const char *tooltip = nullptr);
+  bool toggleButton(bool toggle, const char *tooltip = nullptr, const char* id = nullptr);
   void emptyLabel();
   void addTab(std::string name, std::string title, std::function<void()> draw, bool child = false) {
     tabs.push_back({name, title, draw, child});

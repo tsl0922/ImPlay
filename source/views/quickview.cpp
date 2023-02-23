@@ -80,9 +80,10 @@ bool Quickview::toggleButton(const char *label, bool toggle, const char *tooltip
   return ret;
 }
 
-bool Quickview::toggleButton(bool toggle, const char *tooltip) {
+bool Quickview::toggleButton(bool toggle, const char *tooltip, const char *id) {
   ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0, 0, 0, 0));
-  bool ret = toggleButton(toggle ? ICON_FA_TOGGLE_ON : ICON_FA_TOGGLE_OFF, toggle, tooltip, ImGuiCol_Text);
+  const char *label = toggle ? ICON_FA_TOGGLE_ON : ICON_FA_TOGGLE_OFF;
+  bool ret = toggleButton(format("{}##{}", label, id ? id : "").c_str(), toggle, tooltip, ImGuiCol_Text);
   ImGui::PopStyleColor();
   return ret;
 }
@@ -99,7 +100,7 @@ void Quickview::drawTracks(const char *title, const char *type, const char *prop
   bool toggle = !iequals(pos, "no");
   if (strcmp(prop, "sid") == 0) toggle = mpv->sidv;
   if (strcmp(prop, "secondary-sid") == 0) toggle = mpv->sidv2;
-  if (toggleButton(toggle, format("{}##{}", "views.quickview.tracks"_i18n, prop).c_str())) {
+  if (toggleButton(toggle, "views.quickview.tracks.toggle"_i18n, prop)) {
     if (strstr(prop, "sid") != nullptr) {
       const char *prefix = strstr(prop, "secondary") != nullptr ? "secondary-" : "";
       mpv->commandv("set", format("{}sub-visibility", prefix).c_str(), toggle ? "no" : "yes", nullptr);
