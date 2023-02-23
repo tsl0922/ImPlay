@@ -100,7 +100,6 @@ void ContextMenu::draw() {
       if (ImGui::BeginMenuEx("menu.video.scale"_i18n, ICON_FA_GLASSES)) {
         if (ImGui::MenuItemEx("menu.video.scale.in"_i18n, ICON_FA_MINUS_CIRCLE)) mpv->command("add window-scale -0.1");
         if (ImGui::MenuItemEx("menu.video.scale.out"_i18n, ICON_FA_PLUS_CIRCLE)) mpv->command("add window-scale 0.1");
-        if (ImGui::MenuItem("menu.video.scale.reset"_i18n)) mpv->command("set window-scale 0");
         ImGui::Separator();
         if (ImGui::MenuItem("menu.video.scale.1_4"_i18n)) mpv->command("set window-scale 0.25");
         if (ImGui::MenuItem("menu.video.scale.1_2"_i18n)) mpv->command("set window-scale 0.5");
