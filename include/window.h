@@ -51,6 +51,10 @@ class Window {
   Player *player = nullptr;
   int width = 1280;
   int height = 720;
+#ifdef _WIN32
+  WNDPROC wndProcOld = nullptr;
+  static LRESULT CALLBACK wndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
+#endif
 
   std::mutex renderMutex;
   std::condition_variable renderCond;

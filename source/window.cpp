@@ -32,6 +32,10 @@ Window::Window() {
 
 #ifdef _WIN32
   HWND hwnd = glfwGetWin32Window(window);
+  wndProcOld = (WNDPROC)::GetWindowLongPtr(hwnd, GWLP_WNDPROC);
+  ::SetWindowLongPtr(hwnd, GWLP_WNDPROC, reinterpret_cast<LONG_PTR>(wndProc));
+  ::SetWindowLongPtr(hwnd, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(this));
+
   int64_t wid = config.Data.Mpv.UseWid ? static_cast<uint32_t>((intptr_t)hwnd) : 0;
   mpv = new Mpv(wid);
 #else
@@ -402,4 +406,30 @@ void Window::exitImGui() {
   ImGui::DestroyContext();
   glfwMakeContextCurrent(nullptr);
 }
+
+#ifdef _WIN32
+// workaround for:
+//   - https://github.com/glfw/glfw/issues/2074
+//   - https://github.com/libsdl-org/SDL/issues/1059
+LRESULT CALLBACK Window::wndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
+  auto win = reinterpret_cast<Window*>(GetWindowLongPtr(hWnd, GWLP_USERDATA));
+  switch (msg) {
+    case WM_ENTERSIZEMOVE:
+    case WM_ENTERMENULOOP:
+      ::SetTimer(hWnd, reinterpret_cast<UINT_PTR>(win), USER_TIMER_MINIMUM, nullptr);
+      break;
+    case WM_TIMER:
+      if (wParam == reinterpret_cast<UINT_PTR>(win)) {
+        win->mpv->waitEvent();
+        win->dispatch.process();
+      }
+      break;
+    case WM_EXITSIZEMOVE:
+    case WM_EXITMENULOOP:
+      ::KillTimer(hWnd, reinterpret_cast<UINT_PTR>(win));
+      break;
+  }
+  return ::CallWindowProc(win->wndProcOld, hWnd, msg, wParam, lParam);
+}
+#endif
 }  // namespace ImPlay
