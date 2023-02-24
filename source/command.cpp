@@ -66,7 +66,7 @@ void Command::execute(int n_args, const char **args_) {
        [&](int n, const char **args) {
          if (n > 0) mpv->loadConfig(args[0]);
        }},
-      {"quickview", [&](int n, const char **args) { openQuickview(n > 0 ? args[0] : nullptr); }},
+      {"quickview", [&](int n, const char **args) { quickview->show(n > 0 ? args[0] : nullptr); }},
       {"playlist-add-files",
        [&](int n, const char **args) {
          openMediaFiles([&](std::string path, int i) { mpv->commandv("loadfile", path.c_str(), "append", nullptr); });
@@ -92,7 +92,7 @@ void Command::execute(int n_args, const char **args_) {
       {"about", [&](int n, const char **args) { about->show(); }},
       {"settings", [&](int n, const char **args) { settings->show(); }},
       {"metrics", [&](int n, const char **args) { debug->show(); }},
-      {"command-palette", [&](int n, const char **args) { openCommandPalette(n, args); }},
+      {"command-palette", [&](int n, const char **args) { commandPalette->show(n, args); }},
       {"context-menu", [&](int n, const char **args) { contextMenu->show(); }},
       {"show-message",
        [&](int n, const char **args) {
@@ -181,84 +181,6 @@ void Command::openDvd(std::string path) {
 void Command::openBluray(std::string path) {
   mpv->property("bluray-device", path.c_str());
   mpv->commandv("loadfile", "bd://", nullptr);
-}
-
-void Command::openCommandPalette(int n, const char **args) {
-  std::vector<Views::CommandPalette::CommandItem> items;
-  std::string source = "bindings";
-  if (n > 0) source = args[0];
-  if (source == "bindings") {
-    auto bindings = mpv->bindings;
-    for (auto &item : bindings)
-      items.push_back({
-          item.comment,
-          item.cmd,
-          item.key,
-          [=, this]() { mpv->command(item.cmd); },
-      });
-  } else if (source == "playlist") {
-    auto playlist = mpv->playlist;
-    for (auto &item : playlist) {
-      std::string title = item.title;
-      if (title.empty() && !item.filename.empty()) title = item.filename;
-      if (title.empty()) title = format("Item {}", item.id + 1);
-      items.push_back({
-          title,
-          item.path,
-          "",
-          [=, this]() { mpv->property<int64_t, MPV_FORMAT_INT64>("playlist-pos", item.id); },
-      });
-    }
-  } else if (source == "chapters") {
-    auto chapters = mpv->chapters;
-    for (auto &item : chapters) {
-      auto title = item.title.empty() ? format("Chapter {}", item.id + 1) : item.title;
-      auto time = format("{:%H:%M:%S}", std::chrono::duration<int>((int)item.time));
-      items.push_back({
-          title,
-          "",
-          time,
-          [=, this]() { mpv->commandv("seek", std::to_string(item.time).c_str(), "absolute", nullptr); },
-      });
-    }
-  } else if (source == "tracks") {
-    const char *type = n > 1 ? args[1] : "";
-    auto tracks = mpv->tracks;
-    for (auto &item : tracks) {
-      if (type[0] != '\0' && item.type != type) continue;
-      auto title = item.title.empty() ? format("Track {}", item.id) : item.title;
-      if (!item.lang.empty()) title += format(" [{}]", item.lang);
-      items.push_back({
-          title,
-          "",
-          toupper(item.type),
-          [=, this]() {
-            if (item.type == "audio")
-              mpv->property<int64_t, MPV_FORMAT_INT64>("aid", item.id);
-            else if (item.type == "video")
-              mpv->property<int64_t, MPV_FORMAT_INT64>("vid", item.id);
-            else if (item.type == "sub")
-              mpv->property<int64_t, MPV_FORMAT_INT64>("sid", item.id);
-          },
-      });
-    }
-  } else if (source == "history") {
-    for (auto &file : config->getRecentFiles()) {
-      items.push_back({
-          file.title,
-          file.path,
-          "",
-          [=, this]() { mpv->commandv("loadfile", file.path.c_str(), nullptr); },
-      });
-    }
-  }
-  commandPalette->items() = items;
-  commandPalette->show();
-}
-
-void Command::openQuickview(const char *tab) {
-  if (tab != nullptr) quickview->setTab(tab);
-  quickview->show();
 }
 
 void Command::drawOpenURL() {

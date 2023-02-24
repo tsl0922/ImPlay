@@ -7,8 +7,87 @@
 #include "views/command_palette.h"
 
 namespace ImPlay::Views {
+CommandPalette::CommandPalette(Config* config, Dispatch* dispatch, Mpv* mpv) : View(config, dispatch, mpv) {
+  providers["bindings"] = [=, this](const char*) {
+    for (auto& item : mpv->bindings)
+      items.push_back({
+          item.comment,
+          item.cmd,
+          item.key,
+          [=, this]() { mpv->command(item.cmd); },
+      });
+  };
+  providers["chapters"] = [=, this](const char*) {
+    for (auto& item : mpv->chapters) {
+      auto title = item.title.empty() ? format("Chapter {}", item.id + 1) : item.title;
+      auto time = format("{:%H:%M:%S}", std::chrono::duration<int>((int)item.time));
+      items.push_back({
+          title,
+          "",
+          time,
+          [=, this]() { mpv->commandv("seek", std::to_string(item.time).c_str(), "absolute", nullptr); },
+      });
+    }
+  };
+  providers["playlist"] = [=, this](const char*) {
+    for (auto& item : mpv->playlist) {
+      std::string title = item.title;
+      if (title.empty() && !item.filename.empty()) title = item.filename;
+      if (title.empty()) title = format("Item {}", item.id + 1);
+      items.push_back({
+          title,
+          item.path,
+          "",
+          [=, this]() { mpv->property<int64_t, MPV_FORMAT_INT64>("playlist-pos", item.id); },
+      });
+    }
+  };
+  providers["tracks"] = [=, this](const char* type) {
+    for (auto& item : mpv->tracks) {
+      if (type != nullptr && item.type != type) continue;
+      auto title = item.title.empty() ? format("Track {}", item.id) : item.title;
+      if (!item.lang.empty()) title += format(" [{}]", item.lang);
+      items.push_back({
+          title,
+          "",
+          toupper(item.type),
+          [=, this]() {
+            if (item.type == "audio")
+              mpv->property<int64_t, MPV_FORMAT_INT64>("aid", item.id);
+            else if (item.type == "video")
+              mpv->property<int64_t, MPV_FORMAT_INT64>("vid", item.id);
+            else if (item.type == "sub")
+              mpv->property<int64_t, MPV_FORMAT_INT64>("sid", item.id);
+          },
+      });
+    }
+  };
+  providers["history"] = [=, this](const char*) {
+    for (auto& file : config->getRecentFiles()) {
+      items.push_back({
+          file.title,
+          file.path,
+          "",
+          [=, this]() { mpv->commandv("loadfile", file.path.c_str(), nullptr); },
+      });
+    }
+  };
+}
+
+void CommandPalette::show(int n, const char** args) {
+  std::string target = "bindings";
+  if (n > 0) target = args[0];
+  if (!providers.contains(target)) return;
+  auto callback = providers[target];
+
+  items.clear();
+  callback(n > 1 ? args[1] : nullptr);
+
+  View::show();
+}
+
 void CommandPalette::draw() {
-  if (items_.empty()) return;
+  if (items.empty()) return;
   if (m_open) {
     ImGui::OpenPopup("##command_palette");
     m_open = false;
@@ -116,13 +195,13 @@ void CommandPalette::match(const std::string& input) {
   };
 
   if (input.empty()) {
-    matches = items_;
+    matches = items;
     return;
   }
 
   std::vector<std::pair<CommandItem, int>> result;
 
-  for (const auto& item : items_) {
+  for (const auto& item : items) {
     int score = MatchCommand(input, item.title) * 2;
     if (score == 0) score = MatchCommand(input, item.tooltip);
     if (score > 0) result.push_back(std::make_pair(item, score));

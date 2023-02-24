@@ -39,9 +39,6 @@ class Command : public Views::View {
   void openDvd(std::string path);
   void openBluray(std::string path);
 
-  void openCommandPalette(int n, const char **args);
-  void openQuickview(const char* tab);
-
   void drawOpenURL();
   void drawDialog();
   void messageBox(std::string title, std::string msg);

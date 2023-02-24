@@ -5,19 +5,24 @@
 
 namespace ImPlay::Views {
 Quickview::Quickview(Config *config, Dispatch *dispatch, Mpv *mpv) : View(config, dispatch, mpv) {
+  // clang-format off
   addTab("playlist", "views.quickview.playlist", [this]() { drawPlaylistTabContent(); });
   addTab("chapters", "views.quickview.chapters", [this]() { drawChaptersTabContent(); });
-  addTab(
-      "video", "views.quickview.video", [this]() { drawVideoTabContent(); }, true);
-  addTab(
-      "audio", "views.quickview.audio", [this]() { drawAudioTabContent(); }, true);
-  addTab(
-      "subtitle", "views.quickview.subtitle", [this]() { drawSubtitleTabContent(); }, true);
+  addTab("video", "views.quickview.video", [this]() { drawVideoTabContent(); }, true);
+  addTab("audio", "views.quickview.audio", [this]() { drawAudioTabContent(); }, true);
+  addTab("subtitle", "views.quickview.subtitle", [this]() { drawSubtitleTabContent(); }, true);
+  // clang-format on
 
   mpv->observeEvent(MPV_EVENT_FILE_LOADED, [this](void *data) {
     updateAudioEqChannels();
     applyAudioEq(false);
   });
+}
+
+void Quickview::show(const char *tab) {
+  if (tab != nullptr) curTab = tab;
+  tabSwitched = false;
+  View::show();
 }
 
 void Quickview::draw() {

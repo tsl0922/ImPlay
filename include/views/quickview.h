@@ -9,12 +9,8 @@ class Quickview : public View {
  public:
   Quickview(Config *config, Dispatch *dispatch, Mpv *mpv);
 
+  void show(const char* tab);
   void draw() override;
-
-  void setTab(const char *tab) {
-    curTab = tab;
-    tabSwitched = false;
-  }
 
  private:
 #define FREQ_COUNT 10
