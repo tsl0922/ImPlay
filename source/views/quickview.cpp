@@ -405,13 +405,13 @@ void Quickview::drawAudioEq() {
   static float gain[FREQ_COUNT] = {0};
   for (int i = 0; i < pSize; i++) {
     auto item = audioEqPresets[i];
-    if (toggleButton(item.name.c_str(), audioEqIndex == i)) {
+    if (toggleButton(i18n(item.name).c_str(), audioEqIndex == i)) {
       selectAudioEq(i);
       for (int j = 0; j < FREQ_COUNT; j++) gain[j] = (double)item.values[j] / 12;
     }
     lineWidth += ImGui::GetItemRectSize().x + ImGui::GetStyle().ItemSpacing.x;
     if (i < pSize - 1) {
-      auto textSize = ImGui::CalcTextSize(audioEqPresets[i + 1].name.c_str());
+      auto textSize = ImGui::CalcTextSize(i18n(audioEqPresets[i + 1].name).c_str());
       if (lineWidth + textSize.x + 2 * ImGui::GetStyle().ItemInnerSpacing.x < availWidth)
         ImGui::SameLine();
       else
