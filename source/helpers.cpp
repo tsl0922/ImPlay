@@ -83,6 +83,7 @@ struct NFDWrapper {
 }  // namespace ImPlay
 
 bool ImPlay::fileExists(std::string path) {
+  if (path == "") return false;
   auto fp = std::filesystem::path(reinterpret_cast<char8_t*>(path.data()));
   return std::filesystem::exists(fp);
 }

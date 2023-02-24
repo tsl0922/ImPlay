@@ -363,10 +363,10 @@ void Window::loadFonts() {
   io.Fonts->AddFontFromMemoryCompressedTTF(source_code_pro_compressed_data, source_code_pro_compressed_size, 0, &cfg);
   cfg.MergeMode = true;
   io.Fonts->AddFontFromMemoryCompressedTTF(fa_compressed_data, fa_compressed_size, iconSize, &cfg, fa_range);
-  if (config.Data.Font.Path.empty())
-    io.Fonts->AddFontFromMemoryCompressedTTF(unifont_compressed_data, unifont_compressed_size, 0, &cfg, font_range);
-  else
+  if (fileExists(config.Data.Font.Path))
     io.Fonts->AddFontFromFileTTF(config.Data.Font.Path.c_str(), 0, &cfg, font_range);
+  else
+    io.Fonts->AddFontFromMemoryCompressedTTF(unifont_compressed_data, unifont_compressed_size, 0, &cfg, font_range);
 
   io.Fonts->Build();
 }
