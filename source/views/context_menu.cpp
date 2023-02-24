@@ -211,7 +211,7 @@ void ContextMenu::draw() {
         ImGui::EndMenu();
       }
       ImGui::Separator();
-      if (ImGui::MenuItem("menu.tools.debug"_i18n)) mpv->command("script-message-to implay metrics");
+      if (ImGui::MenuItem("menu.tools.debug"_i18n, "`")) mpv->command("script-message-to implay metrics");
       if (ImGui::MenuItem("menu.tools.open_config_dir"_i18n)) openUrl(config->dir());
       ImGui::EndMenu();
     }

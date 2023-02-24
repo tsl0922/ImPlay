@@ -34,6 +34,7 @@ bool Player::init(OptionParser& parser) {
   mpv->option("osc", "yes");
   mpv->option("input-default-bindings", "yes");
   mpv->option("input-vo-keyboard", "yes");
+  mpv->option("load-osd-console", "no");
   mpv->option("osd-playing-msg", "${media-title}");
   mpv->option("screenshot-directory", "~~desktop/");
 
@@ -55,7 +56,6 @@ bool Player::init(OptionParser& parser) {
   initObservers();
   mpv->property<int64_t, MPV_FORMAT_INT64>("volume", config->Data.Mpv.Volume);
   if (config->Data.Recent.SpaceToPlayLast) mpv->command("keybind SPACE 'script-message-to implay play-pause'");
-  if (!mpv->property<int, MPV_FORMAT_FLAG>("force-window")) mpv->command("script-message osc-idlescreen no");
 
   for (auto& path : parser.paths) {
     if (path == "-") mpv->property("input-terminal", "yes");
@@ -273,6 +273,22 @@ void Player::writeMpvConf() {
 #else
     file << "Ctrl+Shift+p script-message-to implay command-palette # show command palette" << std::endl;
 #endif
+    file << "`            script-message-to implay metrics         # open console window" << std::endl;
+  }
+
+  auto scriptOpts = path / "script-opts";
+  auto oscConf = scriptOpts / "osc.conf";
+  float scale = 1.0f;
+#ifndef __APPLE__
+  glfwGetWindowContentScale(window, &scale, nullptr);
+#endif
+
+  std::filesystem::create_directories(scriptOpts);
+  if (!std::filesystem::exists(oscConf)) {
+    std::ofstream file(oscConf);
+    file << format("scalewindowed={}", scale) << std::endl;
+    file << "hidetimeout=2000" << std::endl;
+    file << "idlescreen=no" << std::endl;
   }
 }
 
