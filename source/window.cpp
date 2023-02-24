@@ -198,6 +198,9 @@ void Window::updateCursor() {
 void Window::initGLFW(const char* title) {
   glfwSetErrorCallback(
       [](int error, const char* desc) { fmt::print(fg(fmt::color::red), "GLFW [{}]: {}\n", error, desc); });
+#ifdef GLFW_PATCHED
+  glfwInitHint(GLFW_WIN32_MESSAGES_IN_FIBER, GLFW_TRUE);
+#endif
   if (!glfwInit()) throw std::runtime_error("Failed to initialize GLFW!");
 
 #if defined(IMGUI_IMPL_OPENGL_ES3)
@@ -216,7 +219,6 @@ void Window::initGLFW(const char* title) {
   glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 #endif
   glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
-  glfwWindowHint(GLFW_FOCUSED, GLFW_FALSE);
 
   GLFWmonitor* monitor = glfwGetPrimaryMonitor();
   const GLFWvidmode* mode = glfwGetVideoMode(monitor);
@@ -409,25 +411,10 @@ void Window::exitImGui() {
 }
 
 #ifdef _WIN32
-// workaround for: https://github.com/glfw/glfw/issues/2074
 // borderless window: https://github.com/rossy/borderless-window
 LRESULT CALLBACK Window::wndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
   auto win = reinterpret_cast<Window*>(GetWindowLongPtr(hWnd, GWLP_USERDATA));
   switch (uMsg) {
-    case WM_ENTERSIZEMOVE:
-    case WM_ENTERMENULOOP:
-      ::SetTimer(hWnd, reinterpret_cast<UINT_PTR>(win), USER_TIMER_MINIMUM, nullptr);
-      break;
-    case WM_TIMER:
-      if (wParam == reinterpret_cast<UINT_PTR>(win)) {
-        win->mpv->waitEvent();
-        win->dispatch.process();
-      }
-      break;
-    case WM_EXITSIZEMOVE:
-    case WM_EXITMENULOOP:
-      ::KillTimer(hWnd, reinterpret_cast<UINT_PTR>(win));
-      break;
     case WM_NCACTIVATE:
     case WM_NCPAINT:
       if (win->borderless) return DefWindowProcW(hWnd, uMsg, wParam, lParam);
