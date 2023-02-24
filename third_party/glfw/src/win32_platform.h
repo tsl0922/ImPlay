@@ -328,6 +328,10 @@ typedef struct _GLFWwindowWin32
     int                 lastCursorPosX, lastCursorPosY;
     // The last recevied high surrogate when decoding pairs of UTF-16 messages
     WCHAR               highSurrogate;
+
+    // If user pressed mouse button on window title bar
+    UINT                ncMouseButton;
+    LPARAM              ncMousePos;
 } _GLFWwindowWin32;
 
 // Win32-specific global data
@@ -350,6 +354,8 @@ typedef struct _GLFWlibraryWin32
     RAWINPUT*           rawInput;
     int                 rawInputSize;
     UINT                mouseTrailSize;
+    LPVOID              messageFiber;
+    LPVOID              mainFiber;
 
     struct {
         HINSTANCE                       instance;
@@ -455,4 +461,4 @@ void _glfwPollMonitorsWin32(void);
 void _glfwSetVideoModeWin32(_GLFWmonitor* monitor, const GLFWvidmode* desired);
 void _glfwRestoreVideoModeWin32(_GLFWmonitor* monitor);
 void _glfwGetMonitorContentScaleWin32(HMONITOR handle, float* xscale, float* yscale);
-
+void _glfwPollMessageLoopWin32(void);

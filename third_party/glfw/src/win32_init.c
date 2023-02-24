@@ -336,8 +336,6 @@ static void createKeyTables(void)
 //
 static GLFWbool createHelperWindow(void)
 {
-    MSG msg;
-
     _glfw.win32.helperWindowHandle =
         CreateWindowExW(WS_EX_OVERLAPPEDWINDOW,
                         _GLFW_WNDCLASSNAME,
@@ -373,10 +371,18 @@ static GLFWbool createHelperWindow(void)
                                         DEVICE_NOTIFY_WINDOW_HANDLE);
     }
 
-    while (PeekMessageW(&msg, _glfw.win32.helperWindowHandle, 0, 0, PM_REMOVE))
+    if (_glfw.hints.init.win32.msgInFiber)
     {
-        TranslateMessage(&msg);
-        DispatchMessageW(&msg);
+        SwitchToFiber(_glfw.win32.messageFiber);
+    }
+    else
+    {
+        MSG msg;
+        while (PeekMessageW(&msg, _glfw.win32.helperWindowHandle, 0, 0, PM_REMOVE))
+        {
+            TranslateMessage(&msg);
+            DispatchMessageW(&msg);
+        }
     }
 
    return GLFW_TRUE;
@@ -551,6 +557,44 @@ BOOL _glfwIsWindows10BuildOrGreaterWin32(WORD build)
     return RtlVerifyVersionInfo(&osvi, mask, cond) == 0;
 }
 
+void _glfwPollMessageLoopWin32(void)
+{
+    _GLFWwindow* window;
+    MSG msg;
+    while (PeekMessageW(&msg, NULL, 0, 0, PM_REMOVE))
+    {
+        if (msg.message == WM_QUIT)
+        {
+            // NOTE: While GLFW does not itself post WM_QUIT, other processes
+            //       may post it to this one, for example Task Manager
+            // HACK: Treat WM_QUIT as a close on all windows
+
+            window = _glfw.windowListHead;
+            while (window)
+            {
+                _glfwInputWindowCloseRequest(window);
+                window = window->next;
+            }
+        }
+        else
+        {
+            TranslateMessage(&msg);
+            DispatchMessageW(&msg);
+        }
+    }
+}
+
+// Windows message dispatch fiber
+void CALLBACK messageFiberProc(LPVOID lpFiberParameter)
+{
+    (void)lpFiberParameter;
+
+    for (;;)
+    {
+        _glfwPollMessageLoopWin32();
+        SwitchToFiber(_glfw.win32.mainFiber);
+    }
+}
 
 //////////////////////////////////////////////////////////////////////////
 //////                       GLFW platform API                      //////
@@ -579,6 +623,17 @@ int _glfwPlatformInit(void)
     else if (IsWindowsVistaOrGreater())
         SetProcessDPIAware();
 
+    if (_glfw.hints.init.win32.msgInFiber)
+    {
+        _glfw.win32.mainFiber = ConvertThreadToFiber(NULL);
+        if (!_glfw.win32.mainFiber)
+            return GLFW_FALSE;
+
+        _glfw.win32.messageFiber = CreateFiber(0, &messageFiberProc, NULL);
+        if (!_glfw.win32.messageFiber)
+            return GLFW_FALSE;
+    }
+
     if (!_glfwRegisterWindowClassWin32())
         return GLFW_FALSE;
 
@@ -601,6 +656,12 @@ void _glfwPlatformTerminate(void)
         DestroyWindow(_glfw.win32.helperWindowHandle);
 
     _glfwUnregisterWindowClassWin32();
+
+    if (_glfw.hints.init.win32.msgInFiber)
+    {
+        DeleteFiber(_glfw.win32.messageFiber);
+        ConvertFiberToThread();
+    }
 
     // Restore previous foreground lock timeout system setting
     SystemParametersInfoW(SPI_SETFOREGROUNDLOCKTIMEOUT, 0,

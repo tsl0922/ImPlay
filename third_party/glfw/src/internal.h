@@ -244,6 +244,9 @@ struct _GLFWinitconfig
         GLFWbool  menubar;
         GLFWbool  chdir;
     } ns;
+    struct {
+        GLFWbool  msgInFiber;
+    } win32;
 };
 
 // Window configuration

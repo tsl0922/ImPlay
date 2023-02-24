@@ -1123,6 +1123,12 @@ extern "C" {
  *  macOS specific [init hint](@ref GLFW_COCOA_MENUBAR_hint).
  */
 #define GLFW_COCOA_MENUBAR          0x00051002
+
+/*! @brief Windows specific init hint.
+ *
+ *  Windows specific [init hint](@ref GLFW_WIN32_MESSAGES_IN_FIBER_hint).
+ */
+#define GLFW_WIN32_MESSAGES_IN_FIBER 0x00051003
 /*! @} */
 
 #define GLFW_DONT_CARE              -1
@@ -1234,6 +1240,10 @@ typedef void (* GLFWerrorfun)(int error_code, const char* description);
  *  @param[in] ypos The new y-coordinate, in screen coordinates, of the
  *  upper-left corner of the content area of the window.
  *
+ *  @remark @win32 On Windows moving or resizing of window will block event
+ *  processing. Workaround for this is @ref GLFW_WIN32_MESSAGES_IN_FIBER init
+ *  hint.
+ *
  *  @sa @ref window_pos
  *  @sa @ref glfwSetWindowPosCallback
  *
@@ -1255,6 +1265,10 @@ typedef void (* GLFWwindowposfun)(GLFWwindow* window, int xpos, int ypos);
  *  @param[in] width The new width, in screen coordinates, of the window.
  *  @param[in] height The new height, in screen coordinates, of the window.
  *
+ *  @remark @win32 On Windows moving or resizing of window will block event
+ *  processing. Workaround for this is @ref GLFW_WIN32_MESSAGES_IN_FIBER init
+ *  hint.
+ * 
  *  @sa @ref window_size
  *  @sa @ref glfwSetWindowSizeCallback
  *
