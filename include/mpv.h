@@ -33,9 +33,9 @@ class Mpv {
   Callback &wakeupCb() { return wakeupCb_; }
   Callback &updateCb() { return updateCb_; }
 
-  int command(std::string args) { return mpv_command_string(mpv, args.c_str()); }
-  int command(const char *args) { return mpv_command_string(mpv, args); }
-  int command(const char *args[]) { return mpv_command(mpv, args); }
+  inline int command(std::string args) { return mpv_command_string(mpv, args.c_str()); }
+  inline int command(const char *args) { return mpv_command_string(mpv, args); }
+  inline int command(const char *args[]) { return mpv_command_async(mpv, 0, args); }
   int commandv(const char *arg, ...);
 
   std::string property(const char *name) {

@@ -34,7 +34,7 @@ int Mpv::commandv(const char *arg, ...) {
   for (const char *s = arg; s != nullptr; s = va_arg(ap, const char *)) args.push_back(s);
   va_end(ap);
   args.push_back(nullptr);
-  return mpv_command(mpv, args.data());
+  return mpv_command_async(mpv, 0, args.data());
 }
 
 void Mpv::waitEvent(double timeout) {

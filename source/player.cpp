@@ -112,12 +112,12 @@ void Player::onMouseEvent(int button, int action, int mods) {
 
 void Player::onScrollEvent(double x, double y) {
   if (abs(x) > 0) {
-    mpv->command(x > 0 ? "keypress WHEEL_LEFT" : "keypress WHEEL_RIGH");
-    mpv->command(x > 0 ? "keyup WHEEL_LEFT" : "keyup WHEEL_RIGH");
+    mpv->commandv("keypress", x > 0 ? "WHEEL_LEFT" : "WHEEL_RIGH", nullptr);
+    mpv->commandv("keyup", x > 0 ? "WHEEL_LEFT" : "WHEEL_RIGH", nullptr);
   }
   if (abs(y) > 0) {
-    mpv->command(y > 0 ? "keypress WHEEL_UP" : "keypress WHEEL_DOWN");
-    mpv->command(y > 0 ? "keyup WHEEL_UP" : "keyup WHEEL_DOWN");
+    mpv->commandv("keypress", y > 0 ? "WHEEL_UP" : "WHEEL_DOWN", nullptr);
+    mpv->commandv("keyup", y > 0 ? "WHEEL_UP" : "WHEEL_DOWN", nullptr);
   }
 }
 
