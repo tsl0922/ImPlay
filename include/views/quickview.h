@@ -7,7 +7,7 @@
 namespace ImPlay::Views {
 class Quickview : public View {
  public:
-  Quickview(Config *config, Dispatch *dispatch, Mpv *mpv);
+  Quickview(Config *config, Mpv *mpv);
 
   void show(const char *tab);
   void draw() override;

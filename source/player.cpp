@@ -15,14 +15,13 @@
 #include "player.h"
 
 namespace ImPlay {
-Player::Player(Config* config, Dispatch* dispatch, GLFWwindow* window, Mpv* mpv, const char* title) {
+Player::Player(Config* config, GLFWwindow* window, Mpv* mpv, const char* title) {
   this->config = config;
-  this->dispatch = dispatch;
   this->window = window;
   this->mpv = mpv;
   this->title = title;
 
-  cmd = new Command(config, dispatch, mpv, window);
+  cmd = new Command(config, mpv, window);
 }
 
 Player::~Player() { delete cmd; }

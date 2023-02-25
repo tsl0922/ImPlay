@@ -4,7 +4,7 @@
 #include "views/quickview.h"
 
 namespace ImPlay::Views {
-Quickview::Quickview(Config *config, Dispatch *dispatch, Mpv *mpv) : View(config, dispatch, mpv) {
+Quickview::Quickview(Config *config, Mpv *mpv) : View(config, mpv) {
   // clang-format off
   addTab("playlist", "views.quickview.playlist", [this]() { drawPlaylistTabContent(); });
   addTab("chapters", "views.quickview.chapters", [this]() { drawChaptersTabContent(); });

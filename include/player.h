@@ -8,13 +8,12 @@
 #include "mpv.h"
 #include "config.h"
 #include "command.h"
-#include "dispatch.h"
 #include "helpers.h"
 
 namespace ImPlay {
 class Player {
  public:
-  Player(Config *config, Dispatch *dispatch, GLFWwindow *window, Mpv *mpv, const char *title);
+  Player(Config *config, GLFWwindow *window, Mpv *mpv, const char *title);
   ~Player();
 
   bool init(OptionParser &parser);
@@ -38,7 +37,6 @@ class Player {
   GLFWwindow *window = nullptr;
   Mpv *mpv = nullptr;
   Command *cmd = nullptr;
-  Dispatch *dispatch;
   const char *title;
   bool idle = true;
   ImTextureID logoTexture = nullptr;

@@ -11,7 +11,7 @@
 namespace ImPlay::Views {
 class CommandPalette : public View {
  public:
-  CommandPalette(Config *config, Dispatch *dispatch, Mpv *mpv);
+  CommandPalette(Config *config, Mpv *mpv);
 
   struct CommandItem {
     std::string title;

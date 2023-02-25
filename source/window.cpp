@@ -11,7 +11,6 @@
 #include <algorithm>
 #include <stdexcept>
 #include <chrono>
-#include <thread>
 #ifdef IMGUI_IMPL_OPENGL_ES3
 #include <GLES3/gl3.h>
 #else
@@ -44,7 +43,7 @@ Window::Window() {
 #else
   mpv = new Mpv();
 #endif
-  player = new Player(&config, &dispatch, window, mpv, title);
+  player = new Player(&config, window, mpv, title);
 }
 
 Window::~Window() {
@@ -56,11 +55,10 @@ Window::~Window() {
 }
 
 bool Window::init(OptionParser& parser) {
-  mpv->wakeupCb() = [](Mpv* ctx) { glfwPostEmptyEvent(); };
+  mpv->wakeupCb() = [this](Mpv* ctx) { wakeup(); };
   mpv->updateCb() = [this](Mpv* ctx) {
-    if (ctx->wantRender()) requestRender();
+    if (ctx->wantRender()) wakeup();
   };
-  dispatch.wakeup() = []() { glfwPostEmptyEvent(); };
 
   if (!player->init(parser)) return false;
 #if defined(__APPLE__) && defined(GLFW_PATCHED)
@@ -92,39 +90,35 @@ bool Window::init(OptionParser& parser) {
 void Window::run() {
   glfwShowWindow(window);
 
-  glfwMakeContextCurrent(nullptr);
-  std::thread renderThread([&]() {
-    auto nextFrame = std::chrono::steady_clock::now();
-    while (!glfwWindowShouldClose(window)) {
-      int frameTime = 1000 / config.Data.Interface.Fps;
-      nextFrame += std::chrono::milliseconds(frameTime);
-      {
-        std::unique_lock<std::mutex> lk(renderMutex);
-        renderCond.wait_until(lk, nextFrame, [&]() { return wantRender; });
-        wantRender = false;
-      }
-      render();
+  auto nextFrame = std::chrono::steady_clock::now();
+  while (!glfwWindowShouldClose(window)) {
+    nextFrame += std::chrono::milliseconds(1000 / config.Data.Interface.Fps);
+    if (!glfwGetWindowAttrib(window, GLFW_VISIBLE) || glfwGetWindowAttrib(window, GLFW_ICONIFIED)) {
+      glfwWaitEvents();
+    } else {
+      glfwPollEvents();
+      std::unique_lock<std::mutex> lock(mutex);
+      cv.wait_until(lock, nextFrame, [this] { return notified; });
+      notified = false;
     }
-    shutdown = true;
-  });
-
-  while (!shutdown) {
-    glfwWaitEvents();
 
     mpv->waitEvent();
-    dispatch.process();
+    render();
   }
-
-  renderThread.join();
-  glfwMakeContextCurrent(window);
 
   saveState();
 }
 
-void Window::render() {
-  glfwMakeContextCurrent(window);
+void Window::wakeup() {
+  glfwPostEmptyEvent();
+  {
+    std::lock_guard<std::mutex> lock(mutex);
+    notified = true;
+  }
+  cv.notify_one();
+}
 
-  // Reload font if changed
+void Window::render() {
   if (config.FontReload) {
     loadFonts();
     config.FontReload = false;
@@ -143,7 +137,7 @@ void Window::render() {
   glfwGetFramebufferSize(window, &width, &height);
   glViewport(0, 0, width, height);
 
-  glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+  glClearColor(0, 0, 0, 1);
   glClear(GL_COLOR_BUFFER_BIT);
 
   mpv->render(width, height);
@@ -152,29 +146,14 @@ void Window::render() {
   glfwSwapBuffers(window);
   mpv->reportSwap();
 
-  glfwMakeContextCurrent(nullptr);
+  updateCursor();
 
-  dispatch.async([this]() { updateCursor(); });
-
-  // This will run on main thread, conflict with:
-  //   - open file dialog on macOS (block main thread)
-  //   - window dragging on windows (block main thread)
-  // so, we only call it when viewports are enabled and no conflicts.
   if (ImGui::GetIO().ConfigFlags & ImGuiConfigFlags_ViewportsEnable) {
-    dispatch.sync([]() {
-      ImGui::UpdatePlatformWindows();
-      ImGui::RenderPlatformWindowsDefault();
-      glfwMakeContextCurrent(nullptr);
-    });
+    auto backupCtx = glfwGetCurrentContext();
+    ImGui::UpdatePlatformWindows();
+    ImGui::RenderPlatformWindowsDefault();
+    glfwMakeContextCurrent(backupCtx);
   }
-}
-
-void Window::requestRender() {
-  {
-    std::lock_guard<std::mutex> lk(renderMutex);
-    wantRender = true;
-  }
-  renderCond.notify_one();
 }
 
 void Window::saveState() {
@@ -187,7 +166,7 @@ void Window::saveState() {
 }
 
 void Window::updateCursor() {
-  if (!ownCursor || ImGui::GetIO().WantCaptureMouse) return;
+  if (!ownCursor || mpv->cursorAutohide == "" || ImGui::GetIO().WantCaptureMouse || ImGui::IsMouseDragging(0)) return;
 
   bool cursor = true;
   if (mpv->cursorAutohide == "no")
@@ -251,8 +230,6 @@ void Window::initGLFW(const char* title) {
   if (!gladLoadGL(glfwGetProcAddress)) throw std::runtime_error("Failed to load GL!");
 #endif
   glfwSwapInterval(1);
-  glfwGetFramebufferSize(window, &width, &height);
-  glViewport(0, 0, width, height);
 
   glfwSetWindowContentScaleCallback(window, [](GLFWwindow* window, float x, float y) {
     auto win = static_cast<Window*>(glfwGetWindowUserPointer(window));
@@ -265,13 +242,11 @@ void Window::initGLFW(const char* title) {
   });
   glfwSetWindowRefreshCallback(window, [](GLFWwindow* window) {
     auto win = static_cast<Window*>(glfwGetWindowUserPointer(window));
-    win->requestRender();
-    win->dispatch.process();
+    win->render();
   });
   glfwSetWindowPosCallback(window, [](GLFWwindow* window, int x, int y) {
     auto win = static_cast<Window*>(glfwGetWindowUserPointer(window));
-    win->requestRender();
-    win->dispatch.process();
+    win->render();
   });
   glfwSetCursorEnterCallback(window, [](GLFWwindow* window, int entered) {
     auto win = static_cast<Window*>(glfwGetWindowUserPointer(window));

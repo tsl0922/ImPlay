@@ -216,16 +216,14 @@ void Settings::drawFontTab() {
     static std::string error;
     if (ImGui::IsWindowAppearing()) error = "";
     if (ImGui::Button(ICON_FA_FOLDER_OPEN)) {
-      dispatch_sync([&]() {
-        try {
-          if (const auto [path, ok] = openFile({{"Font Files", "ttf,ttc,otf"}}); ok) {
-            strncpy(fontPath, path.string().c_str(), IM_ARRAYSIZE(fontPath));
-            data.Font.Path = path.string();
-          }
-        } catch (const std::exception &e) {
-          error = e.what();
+      try {
+        if (const auto [path, ok] = openFile({{"Font Files", "ttf,ttc,otf"}}); ok) {
+          strncpy(fontPath, path.string().c_str(), IM_ARRAYSIZE(fontPath));
+          data.Font.Path = path.string();
         }
-      });
+      } catch (const std::exception &e) {
+        error = e.what();
+      }
     }
     if (error != "") ImGui::TextWrapped("Error: %s", error.c_str());
     ImGui::Unindent();

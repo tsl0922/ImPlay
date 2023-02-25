@@ -61,7 +61,6 @@ set(SOURCE_FILES
   source/helpers.cpp
   source/command.cpp
   source/config.cpp
-  source/dispatch.cpp
   source/mpv.cpp
   source/player.cpp
   source/window.cpp

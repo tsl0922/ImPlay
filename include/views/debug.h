@@ -11,7 +11,7 @@
 namespace ImPlay::Views {
 class Debug : public View {
  public:
-  Debug(Config *config, Dispatch *dispatch, Mpv *mpv);
+  Debug(Config *config, Mpv *mpv);
   ~Debug();
 
   void init();

@@ -190,6 +190,12 @@ std::vector<std::string> ImPlay::split(const std::string& str, const std::string
   return v;
 }
 
+bool ImGui::IsAnyKeyPressed() {
+  for (int key = ImGuiKey_NamedKey_BEGIN; key < ImGuiKey_NamedKey_END; ++key)
+    if (ImGui::IsKeyPressed((ImGuiKey)key)) return true;
+  return false;
+}
+
 void ImGui::HalignCenter(const char* text) {
   ImGui::SetCursorPosX((ImGui::GetWindowWidth() - ImGui::CalcTextSize(text).x) * 0.5f);
 }

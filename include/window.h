@@ -5,7 +5,6 @@
 #include <string>
 #include <vector>
 #include <array>
-#include <atomic>
 #include <mutex>
 #include <condition_variable>
 #ifdef _WIN32
@@ -19,7 +18,6 @@
 #include <GLFW/glfw3native.h>
 #include "player.h"
 #include "config.h"
-#include "dispatch.h"
 
 namespace ImPlay {
 class Window {
@@ -31,8 +29,8 @@ class Window {
   void run();
 
  private:
+  void wakeup();
   void render();
-  void requestRender();
   void updateCursor();
   void saveState();
 
@@ -43,7 +41,6 @@ class Window {
   void exitImGui();
 
   Config config;
-  Dispatch dispatch;
   GLFWwindow *window = nullptr;
   Mpv *mpv = nullptr;
   Player *player = nullptr;
@@ -53,11 +50,10 @@ class Window {
   static LRESULT CALLBACK wndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 #endif
 
-  std::mutex renderMutex;
-  std::condition_variable renderCond;
-  std::atomic_bool shutdown = false;
+  std::mutex mutex;
+  std::condition_variable cv;
+  bool notified = false;
   bool ownCursor = true;
-  bool wantRender = true;
   double lastInputAt = 0;
 };
 }  // namespace ImPlay

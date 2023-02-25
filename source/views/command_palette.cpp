@@ -7,7 +7,7 @@
 #include "views/command_palette.h"
 
 namespace ImPlay::Views {
-CommandPalette::CommandPalette(Config* config, Dispatch* dispatch, Mpv* mpv) : View(config, dispatch, mpv) {
+CommandPalette::CommandPalette(Config* config, Mpv* mpv) : View(config, mpv) {
   providers["bindings"] = [=, this](const char*) {
     for (auto& item : mpv->bindings)
       items.push_back({

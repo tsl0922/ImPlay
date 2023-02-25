@@ -6,7 +6,7 @@
 #include "views/debug.h"
 
 namespace ImPlay::Views {
-Debug::Debug(Config* config, Dispatch* dispatch, Mpv* mpv) : View(config, dispatch, mpv) { console = new Console(mpv); }
+Debug::Debug(Config* config, Mpv* mpv) : View(config, mpv) { console = new Console(mpv); }
 
 Debug::~Debug() { delete console; }
 

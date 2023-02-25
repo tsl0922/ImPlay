@@ -5,9 +5,8 @@
 #include "views/view.h"
 
 namespace ImPlay::Views {
-View::View(Config *config, Dispatch *dispatch, Mpv *mpv) {
+View::View(Config *config, Mpv *mpv) {
   this->config = config;
-  this->dispatch = dispatch;
   this->mpv = mpv;
 }
 }  // namespace ImPlay::Views

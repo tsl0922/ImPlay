@@ -95,6 +95,7 @@ std::vector<std::string> split(const std::string& str, const std::string& sep);
 }  // namespace ImPlay
 
 namespace ImGui {
+bool IsAnyKeyPressed();
 void HalignCenter(const char* text);
 void TextCentered(const char* text, bool disabled = false);
 void TextEllipsis(const char* text, float maxWidth = 0);

@@ -9,14 +9,13 @@
 #include "command.h"
 
 namespace ImPlay {
-Command::Command(Config *config, Dispatch *dispatch, Mpv *mpv, GLFWwindow *window)
-    : View(config, dispatch, mpv), window(window) {
+Command::Command(Config *config, Mpv *mpv, GLFWwindow *window) : View(config, mpv), window(window) {
   about = new Views::About();
-  debug = new Views::Debug(config, dispatch, mpv);
-  quickview = new Views::Quickview(config, dispatch, mpv);
-  settings = new Views::Settings(config, dispatch, mpv);
-  contextMenu = new Views::ContextMenu(config, dispatch, mpv);
-  commandPalette = new Views::CommandPalette(config, dispatch, mpv);
+  debug = new Views::Debug(config, mpv);
+  quickview = new Views::Quickview(config, mpv);
+  settings = new Views::Settings(config, mpv);
+  contextMenu = new Views::ContextMenu(config, mpv);
+  commandPalette = new Views::CommandPalette(config, mpv);
 }
 
 Command::~Command() {
