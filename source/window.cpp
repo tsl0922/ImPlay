@@ -138,7 +138,7 @@ void Window::render() {
   ImGui_ImplGlfw_NewFrame();
   ImGui::NewFrame();
 
-  player->render();
+  player->draw();
   ImGui::Render();
 
   glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
@@ -166,9 +166,10 @@ void Window::render() {
 }
 
 void Window::requestRender() {
-  std::unique_lock<std::mutex> lk(renderMutex);
-  wantRender = true;
-  lk.unlock();
+  {
+    std::lock_guard<std::mutex> lk(renderMutex);
+    wantRender = true;
+  }
   renderCond.notify_one();
 }
 

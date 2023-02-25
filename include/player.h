@@ -18,8 +18,8 @@ class Player {
   ~Player();
 
   bool init(OptionParser &parser);
+  void draw();
   void drawLogo();
-  void render();
   void shutdown();
   bool isIdle() { return idle; }
 

@@ -65,6 +65,11 @@ bool Player::init(OptionParser& parser) {
   return true;
 }
 
+void Player::draw() {
+  drawLogo();
+  cmd->draw();
+}
+
 void Player::drawLogo() {
   if (logoTexture == nullptr || mpv->forceWindow || !idle) return;
 
@@ -81,11 +86,6 @@ void Player::drawLogo() {
   ImGui::Image(logoTexture, imageSize);
   ImGui::End();
   ImGui::PopStyleColor();
-}
-
-void Player::render() {
-  drawLogo();
-  cmd->draw();
 }
 
 void Player::shutdown() { mpv->command(config->Data.Mpv.WatchLater ? "quit-watch-later" : "quit"); }
