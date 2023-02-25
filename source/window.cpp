@@ -49,9 +49,7 @@ Window::Window() {
 
 Window::~Window() {
   delete player;
-  glfwMakeContextCurrent(window);
   delete mpv;
-  glfwMakeContextCurrent(nullptr);
 
   exitImGui();
   exitGLFW();
@@ -64,9 +62,7 @@ bool Window::init(OptionParser& parser) {
   };
   dispatch.wakeup() = []() { glfwPostEmptyEvent(); };
 
-  glfwMakeContextCurrent(window);
   if (!player->init(parser)) return false;
-  glfwMakeContextCurrent(nullptr);
 #if defined(__APPLE__) && defined(GLFW_PATCHED)
   const char** openedFileNames = glfwGetOpenedFilenames();
   if (openedFileNames != nullptr) {
@@ -96,6 +92,7 @@ bool Window::init(OptionParser& parser) {
 void Window::run() {
   glfwShowWindow(window);
 
+  glfwMakeContextCurrent(nullptr);
   std::thread renderThread([&]() {
     auto nextFrame = std::chrono::steady_clock::now();
     while (!glfwWindowShouldClose(window)) {
@@ -119,6 +116,7 @@ void Window::run() {
   }
 
   renderThread.join();
+  glfwMakeContextCurrent(window);
 
   saveState();
 }
@@ -249,7 +247,6 @@ void Window::initGLFW(const char* title) {
   glfwSwapInterval(1);
   glfwGetFramebufferSize(window, &width, &height);
   glViewport(0, 0, width, height);
-  glfwMakeContextCurrent(nullptr);
 
   glfwSetFramebufferSizeCallback(window, [](GLFWwindow* window, int w, int h) {
     auto win = static_cast<Window*>(glfwGetWindowUserPointer(window));
@@ -386,7 +383,6 @@ void Window::initImGui() {
 
   loadFonts();
 
-  glfwMakeContextCurrent(window);
   ImGui_ImplGlfw_InitForOpenGL(window, true);
 #ifdef IMGUI_IMPL_OPENGL_ES3
   ImGui_ImplOpenGL3_Init("#version 300 es");
@@ -395,7 +391,6 @@ void Window::initImGui() {
 #else
   ImGui_ImplOpenGL3_Init("#version 130");
 #endif
-  glfwMakeContextCurrent(nullptr);
 }
 
 void Window::exitGLFW() {
@@ -404,11 +399,9 @@ void Window::exitGLFW() {
 }
 
 void Window::exitImGui() {
-  glfwMakeContextCurrent(window);
   ImGui_ImplOpenGL3_Shutdown();
   ImGui_ImplGlfw_Shutdown();
   ImGui::DestroyContext();
-  glfwMakeContextCurrent(nullptr);
 }
 
 #ifdef _WIN32
