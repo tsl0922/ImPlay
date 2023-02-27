@@ -12,6 +12,7 @@ function(get_mpv_win_bin name)
     CONFIGURE_COMMAND ""
     BUILD_COMMAND ""
     INSTALL_COMMAND ${CMAKE_COMMAND} -E copy <SOURCE_DIR>/mpv.com ${CMAKE_BINARY_DIR}/ImPlay.com
+            COMMAND ${CMAKE_COMMAND} -E copy_directory <SOURCE_DIR>/doc ${CMAKE_BINARY_DIR}/doc
   )
 endfunction()
 
@@ -53,6 +54,7 @@ macro(prepare_package)
 
     target_link_options(${PROJECT_NAME} PRIVATE -mwindows)
     install(TARGETS ${PROJECT_NAME} RUNTIME DESTINATION .)
+    install(DIRECTORY ${CMAKE_BINARY_DIR}/doc DESTINATION .)
     install(FILES ${CMAKE_BINARY_DIR}/ImPlay.com DESTINATION .)
     install(FILES ${CMAKE_BINARY_DIR}/yt-dlp.exe DESTINATION .)
     
