@@ -54,8 +54,10 @@ jobs:
           HOMEBREW_NO_INSTALL_CLEANUP: 1
         run: |
           brew update
-          brew install cmake ninja git mpv freetype2 pkg-config || brew link --overwrite python@3.11
+          brew install cmake ninja git mpv freetype2 pkg-config
       - name: Build ImPlay
+        env:
+          PKG_CONFIG_PATH: /usr/local/opt/libarchive/lib/pkgconfig
         run: |
           mkdir build && cd build
           cmake -DCMAKE_BUILD_TYPE=RELEASE -DUSE_PATCHED_GLFW=ON -DCREATE_PACKAGE=ON -G Ninja ..

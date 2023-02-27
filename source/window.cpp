@@ -309,7 +309,7 @@ void Window::initGLFW(const char* title) {
     win->lastInputAt = glfwGetTime();
     if (!ImGui::GetIO().WantCaptureKeyboard) win->player->onKeyEvent(key, scancode, action, mods);
   });
-  glfwSetDropCallback(window, [](GLFWwindow* window, int count, const char* paths[]) {
+  glfwSetDropCallback(window, [](GLFWwindow* window, int count, const char** paths) {
     auto win = static_cast<Window*>(glfwGetWindowUserPointer(window));
     if (!ImGui::GetIO().WantCaptureMouse) win->player->onDropEvent(count, paths);
   });

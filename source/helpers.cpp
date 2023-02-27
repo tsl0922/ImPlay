@@ -82,39 +82,41 @@ static bool checkNFDError(nfdresult_t result) {
   return result == NFD_OKAY;
 }
 
-void ImPlay::openFile(std::vector<std::pair<std::string, std::string>> filters,
-                      std::function<void(std::string)> callback) {
+std::pair<std::filesystem::path, bool> ImPlay::openFile(std::vector<std::pair<std::string, std::string>> filters) {
   NFD::Guard nfdGuard;
   NFD::UniquePath outPath;
   std::vector<nfdu8filteritem_t> items;
   for (auto& [n, s] : filters) items.emplace_back(nfdu8filteritem_t{n.c_str(), s.c_str()});
   nfdresult_t result = NFD::OpenDialog(outPath, items.data(), items.size());
-  if (checkNFDError(result)) callback(outPath.get());
+  return std::make_pair(reinterpret_cast<char8_t*>(outPath.get()), checkNFDError(result));
 }
 
-void ImPlay::openFiles(std::vector<std::pair<std::string, std::string>> filters,
-                       std::function<void(std::string, int)> callback) {
+std::pair<std::vector<std::filesystem::path>, bool> ImPlay::openFiles(
+    std::vector<std::pair<std::string, std::string>> filters) {
   NFD::Guard nfdGuard;
   NFD::UniquePathSet outPaths;
   std::vector<nfdu8filteritem_t> items;
   for (auto& [n, s] : filters) items.emplace_back(nfdu8filteritem_t{n.c_str(), s.c_str()});
   nfdresult_t result = NFD::OpenDialogMultiple(outPaths, items.data(), items.size());
-  if (checkNFDError(result)) {
+  std::vector<std::filesystem::path> paths;
+  bool ok = checkNFDError(result);
+  if (ok) {
     nfdpathsetsize_t numPaths;
     NFD::PathSet::Count(outPaths, numPaths);
     for (auto i = 0; i < numPaths; i++) {
       NFD::UniquePathSetPath path;
       NFD::PathSet::GetPath(outPaths, i, path);
-      callback(path.get(), i);
+      paths.emplace_back(reinterpret_cast<char8_t*>(path.get()));
     }
   }
+  return std::make_pair(paths, ok);
 }
 
-void ImPlay::openFolder(std::function<void(std::string)> callback) {
+std::pair<std::filesystem::path, bool> ImPlay::openFolder() {
   NFD::Guard nfdGuard;
   NFD::UniquePath outPath;
   nfdresult_t result = NFD::PickFolder(outPath);
-  if (checkNFDError(result)) callback(outPath.get());
+  return std::make_pair(reinterpret_cast<char8_t*>(outPath.get()), checkNFDError(result));
 }
 
 int ImPlay::openUrl(std::string url) {

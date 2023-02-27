@@ -149,12 +149,9 @@ void Player::onKeyEvent(int key, int scancode, int action, int mods) {
 
 void Player::onDropEvent(int count, const char** paths) {
   std::sort(paths, paths + count, [](const auto& a, const auto& b) { return strcmp(a, b) < 0; });
-  for (int i = 0; i < count; i++) {
-    if (cmd->isSubtitleFile(paths[i]))
-      mpv->commandv("sub-add", paths[i], i > 0 ? "auto" : "select", nullptr);
-    else
-      mpv->commandv("loadfile", paths[i], i > 0 ? "append-play" : "replace", nullptr);
-  }
+  std::vector<std::filesystem::path> files;
+  for (int i = 0; i < count; i++) files.emplace_back(reinterpret_cast<char8_t*>(const_cast<char*>(paths[i])));
+  cmd->load(files);
 }
 
 void Player::initObservers() {

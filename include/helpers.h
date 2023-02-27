@@ -37,10 +37,9 @@ inline ImVec2 scaled(const ImVec2& vector) { return vector * ImGui::GetFontSize(
 
 bool fileExists(std::string path);
 
-void openFile(std::vector<std::pair<std::string, std::string>> filters, std::function<void(std::string)> callback);
-void openFiles(std::vector<std::pair<std::string, std::string>> filters,
-               std::function<void(std::string, int)> callback);
-void openFolder(std::function<void(std::string)> callback);
+std::pair<std::filesystem::path, bool> openFile(std::vector<std::pair<std::string, std::string>> filters);
+std::pair<std::vector<std::filesystem::path>, bool> openFiles(std::vector<std::pair<std::string, std::string>> filters);
+std::pair<std::filesystem::path, bool> openFolder();
 
 int openUrl(std::string url);
 void revealInFolder(std::string path);

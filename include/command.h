@@ -22,12 +22,13 @@ class Command : public Views::View {
   void draw() override;
   void execute(int n_args, const char **args_);
 
+  void load(std::vector<std::filesystem::path> files, bool append = false);
   bool isMediaFile(std::string file);
   bool isSubtitleFile(std::string file);
 
  private:
-  void openMediaFiles(std::function<void(std::string, int)> callback);
-  void openMediaFolder(std::function<void(std::string, int)> callback);
+  void openMediaFiles(bool append = false);
+  void openMediaFolder(bool append = false);
 
   void openDisk();
   void openIso();
@@ -36,8 +37,8 @@ class Command : public Views::View {
 
   void loadSubtitles();
 
-  void openDvd(std::string path);
-  void openBluray(std::string path);
+  void openDvd(std::filesystem::path path);
+  void openBluray(std::filesystem::path path);
 
   void drawOpenURL();
   void drawDialog();
