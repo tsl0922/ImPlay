@@ -139,10 +139,16 @@ void Window::render() {
   player->draw();
   ImGui::Render();
 
+  int width, height;
+  glfwGetFramebufferSize(window, &width, &height);
+  glViewport(0, 0, width, height);
+
   glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
   glClear(GL_COLOR_BUFFER_BIT);
+
   mpv->render(width, height);
   ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+
   glfwSwapBuffers(window);
   mpv->reportSwap();
 
@@ -221,8 +227,8 @@ void Window::initGLFW(const char* title) {
 
   GLFWmonitor* monitor = glfwGetPrimaryMonitor();
   const GLFWvidmode* mode = glfwGetVideoMode(monitor);
-  width = std::max((int)(mode->width * 0.4), 600);
-  height = std::max((int)(mode->height * 0.4), 400);
+  int width = std::max((int)(mode->width * 0.4), 600);
+  int height = std::max((int)(mode->height * 0.4), 400);
   int posX = (mode->width - width) / 2;
   int posY = (mode->height - height) / 2;
   if (config.Data.Window.Save) {
@@ -248,12 +254,6 @@ void Window::initGLFW(const char* title) {
   glfwGetFramebufferSize(window, &width, &height);
   glViewport(0, 0, width, height);
 
-  glfwSetFramebufferSizeCallback(window, [](GLFWwindow* window, int w, int h) {
-    auto win = static_cast<Window*>(glfwGetWindowUserPointer(window));
-    win->width = w;
-    win->height = h;
-    glViewport(0, 0, w, h);
-  });
   glfwSetWindowContentScaleCallback(window, [](GLFWwindow* window, float x, float y) {
     auto win = static_cast<Window*>(glfwGetWindowUserPointer(window));
     win->config.Data.Interface.Scale = std::max(x, y);
@@ -289,7 +289,7 @@ void Window::initGLFW(const char* title) {
 #endif
     win->player->onCursorEvent(x, y);
 #ifdef GLFW_PATCHED
-    if (win->mpv->allowDrag() && win->height - y > 150 && glfwGetTime() - win->lastMousePressAt > 0.01) {
+    if (win->mpv->allowDrag()) {
       if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS) glfwDragWindow(window);
     }
 #endif
@@ -297,7 +297,6 @@ void Window::initGLFW(const char* title) {
   glfwSetMouseButtonCallback(window, [](GLFWwindow* window, int button, int action, int mods) {
     auto win = static_cast<Window*>(glfwGetWindowUserPointer(window));
     win->lastInputAt = glfwGetTime();
-    if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS) win->lastMousePressAt = glfwGetTime();
     if (!ImGui::GetIO().WantCaptureMouse) win->player->onMouseEvent(button, action, mods);
   });
   glfwSetScrollCallback(window, [](GLFWwindow* window, double x, double y) {

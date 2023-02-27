@@ -47,8 +47,6 @@ class Window {
   GLFWwindow *window = nullptr;
   Mpv *mpv = nullptr;
   Player *player = nullptr;
-  int width = 1280;
-  int height = 720;
 #ifdef _WIN32
   bool borderless = false;
   WNDPROC wndProcOld = nullptr;
@@ -61,6 +59,5 @@ class Window {
   bool ownCursor = true;
   bool wantRender = true;
   double lastInputAt = 0;
-  double lastMousePressAt = 0;
 };
 }  // namespace ImPlay
