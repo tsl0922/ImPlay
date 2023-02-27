@@ -68,66 +68,53 @@ bool ImPlay::OptionParser::check(std::string key, std::string value) {
   return it != options.end() && it->second == value;
 }
 
-namespace ImPlay {
-struct NFDWrapper {
-  NFDWrapper() { init = check(NFD::Init()) == NFD_OKAY; }
-  ~NFDWrapper() {
-    if (init) NFD::Quit();
-  }
-  nfdresult_t check(nfdresult_t result) {
-    if (result == NFD_ERROR) throw nfd_error(NFD::GetError());
-    return result;
-  }
-  bool init = false;
-};
-}  // namespace ImPlay
-
 bool ImPlay::fileExists(std::string path) {
   if (path == "") return false;
   auto fp = std::filesystem::path(reinterpret_cast<char8_t*>(path.data()));
   return std::filesystem::exists(fp);
 }
 
+static bool checkNFDError(nfdresult_t result) {
+  if (result == NFD_ERROR) {
+    const char* err = NFD::GetError();
+    throw std::runtime_error(fmt::format("NFD Error: {}", err ? err : "unknown"));
+  }
+  return result == NFD_OKAY;
+}
+
 void ImPlay::openFile(std::vector<std::pair<std::string, std::string>> filters,
                       std::function<void(std::string)> callback) {
-  ImPlay::NFDWrapper w;
-  nfdchar_t* outPath;
+  NFD::Guard nfdGuard;
+  NFD::UniquePath outPath;
   std::vector<nfdu8filteritem_t> items;
   for (auto& [n, s] : filters) items.emplace_back(nfdu8filteritem_t{n.c_str(), s.c_str()});
-  auto result = NFD::OpenDialog(outPath, items.data(), items.size());
-  if (w.check(result) == NFD_OKAY) {
-    callback(outPath);
-    NFD::FreePath(outPath);
-  }
+  nfdresult_t result = NFD::OpenDialog(outPath, items.data(), items.size());
+  if (checkNFDError(result)) callback(outPath.get());
 }
 
 void ImPlay::openFiles(std::vector<std::pair<std::string, std::string>> filters,
                        std::function<void(std::string, int)> callback) {
-  ImPlay::NFDWrapper w;
-  const nfdpathset_t* outPaths;
+  NFD::Guard nfdGuard;
+  NFD::UniquePathSet outPaths;
   std::vector<nfdu8filteritem_t> items;
   for (auto& [n, s] : filters) items.emplace_back(nfdu8filteritem_t{n.c_str(), s.c_str()});
-  auto result = NFD::OpenDialogMultiple(outPaths, items.data(), items.size());
-  if (w.check(result) == NFD_OKAY) {
+  nfdresult_t result = NFD::OpenDialogMultiple(outPaths, items.data(), items.size());
+  if (checkNFDError(result)) {
     nfdpathsetsize_t numPaths;
     NFD::PathSet::Count(outPaths, numPaths);
     for (auto i = 0; i < numPaths; i++) {
-      nfdchar_t* path;
+      NFD::UniquePathSetPath path;
       NFD::PathSet::GetPath(outPaths, i, path);
-      callback(path, i);
+      callback(path.get(), i);
     }
-    NFD::PathSet::Free(outPaths);
   }
 }
 
 void ImPlay::openFolder(std::function<void(std::string)> callback) {
-  ImPlay::NFDWrapper w;
-  nfdchar_t* outPath;
-  auto result = NFD::PickFolder(outPath);
-  if (w.check(result) == NFD_OKAY) {
-    callback(outPath);
-    NFD::FreePath(outPath);
-  }
+  NFD::Guard nfdGuard;
+  NFD::UniquePath outPath;
+  nfdresult_t result = NFD::PickFolder(outPath);
+  if (checkNFDError(result)) callback(outPath.get());
 }
 
 int ImPlay::openUrl(std::string url) {

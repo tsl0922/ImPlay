@@ -222,8 +222,8 @@ void Settings::drawFontTab() {
             strncpy(fontPath, path.c_str(), IM_ARRAYSIZE(fontPath));
             data.Font.Path = path;
           });
-        } catch (nfd_error &e) {
-          error = format("NFD: {}", e.what());
+        } catch (const std::exception &e) {
+          error = e.what();
         }
       });
     }

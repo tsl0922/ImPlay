@@ -17,6 +17,7 @@
 #include <fmt/color.h>
 #include <imgui.h>
 #include <imgui_internal.h>
+#define NFD_THROWS_EXCEPTIONS
 #include <nfd.hpp>
 #include "lang.h"
 
@@ -33,15 +34,6 @@ inline LangStr operator""_i18n(const char* key, size_t) { return LangStr(key); }
 
 inline float scaled(float n) { return n * ImGui::GetFontSize(); }
 inline ImVec2 scaled(const ImVec2& vector) { return vector * ImGui::GetFontSize(); }
-
-class nfd_error : public std::exception {
- public:
-  explicit nfd_error(const std::string message) : m(message) {}
-  const char* what() const noexcept override { return m.what(); }
-
- private:
-  std::runtime_error m;
-};
 
 bool fileExists(std::string path);
 

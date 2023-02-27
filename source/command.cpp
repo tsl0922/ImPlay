@@ -108,9 +108,7 @@ void Command::execute(int n_args, const char **args_) {
   auto it = commands.find(cmd);
   try {
     if (it != commands.end()) it->second(n_args - 1, args_ + 1);
-  } catch (nfd_error &e) {
-    messageBox("Error", format("NFD: {}", e.what()));
-  } catch (std::exception &e) {
+  } catch (const std::exception& e) {
     messageBox("Error", format("{}: {}", cmd, e.what()));
   }
 }
