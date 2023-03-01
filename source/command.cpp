@@ -45,20 +45,20 @@ void Command::execute(int n_args, const char **args_) {
   if (n_args == 0) return;
 
   static std::map<std::string, std::function<void(int, const char **)>> commands = {
-      {"open", [&](int n, const char **args) { openMediaFiles(); }},
-      {"open-folder", [&](int n, const char **args) { openMediaFolder(); }},
-      {"open-disk", [&](int n, const char **args) { openDisk(); }},
-      {"open-iso", [&](int n, const char **args) { openIso(); }},
+      {"open", [&](int n, const char **args) { openFilesDlg(mediaFilters); }},
+      {"open-folder", [&](int n, const char **args) { openFolderDlg(); }},
+      {"open-disk", [&](int n, const char **args) { openFolderDlg(false, true); }},
+      {"open-iso", [&](int n, const char **args) { openFileDlg(isoFilters); }},
       {"open-clipboard", [&](int n, const char **args) { openClipboard(); }},
       {"open-url", [&](int n, const char **args) { openURL(); }},
-      {"load-sub", [&](int n, const char **args) { loadSubtitles(); }},
+      {"load-sub", [&](int n, const char **args) { openFilesDlg(subtitleFilters); }},
       {"load-conf",
        [&](int n, const char **args) {
          if (n > 0) mpv->loadConfig(args[0]);
        }},
       {"quickview", [&](int n, const char **args) { quickview->show(n > 0 ? args[0] : nullptr); }},
-      {"playlist-add-files", [&](int n, const char **args) { openMediaFiles(true); }},
-      {"playlist-add-folder", [&](int n, const char **args) { openMediaFolder(true); }},
+      {"playlist-add-files", [&](int n, const char **args) { openFilesDlg(mediaFilters, true); }},
+      {"playlist-add-folder", [&](int n, const char **args) { openFolderDlg(true); }},
       {"play-pause",
        [&](int n, const char **args) {
          auto count = mpv->property<int64_t, MPV_FORMAT_INT64>("playlist-count");
@@ -97,40 +97,22 @@ void Command::execute(int n_args, const char **args_) {
   }
 }
 
-void Command::openMediaFiles(bool append) {
-  static std::vector<std::pair<std::string, std::string>> filters = {
-      {"Videos Files", format("{}", join(videoTypes, ","))},
-      {"Audio Files", format("{}", join(audioTypes, ","))},
-      {"Image Files", format("{}", join(imageTypes, ","))},
-  };
+void Command::openFileDlg(std::vector<std::pair<std::string, std::string>> filters, bool append) {
+  mpv->command("set pause yes");
+  if (const auto [path, ok] = openFile(filters); ok) load({path}, append);
+  mpv->command("set pause no");
+}
+
+void Command::openFilesDlg(std::vector<std::pair<std::string, std::string>> filters, bool append) {
+  mpv->command("set pause yes");
   if (const auto [paths, ok] = openFiles(filters); ok) load(paths, append);
+  mpv->command("set pause no");
 }
 
-void Command::openMediaFolder(bool append) {
-  if (const auto [path, ok] = openFolder(); ok) load({path}, append);
-}
-
-void Command::openDisk() {
-  if (const auto [path, ok] = openFolder(); ok) {
-    if (std::filesystem::exists(path / u8"BDMV"))
-      openBluray(path);
-    else
-      openDvd(path);
-  }
-}
-
-void Command::openIso() {
-  static std::vector<std::pair<std::string, std::string>> filters = {
-      {"ISO Image Files", "iso"},
-  };
-  if (const auto [path, ok] = openFile(filters); ok) load({path});
-}
-
-void Command::loadSubtitles() {
-  static std::vector<std::pair<std::string, std::string>> filters = {
-      {"Subtitle Files", format("{}", join(subtitleTypes, ","))},
-  };
-  if (const auto [paths, ok] = openFiles(filters); ok) load(paths);
+void Command::openFolderDlg(bool append, bool disk) {
+  mpv->command("set pause yes");
+  if (const auto [path, ok] = openFolder(); ok) load({path}, append, disk);
+  mpv->command("set pause no");
 }
 
 void Command::openClipboard() {
@@ -154,10 +136,17 @@ void Command::openBluray(std::filesystem::path path) {
   mpv->commandv("loadfile", "bd://", nullptr);
 }
 
-void Command::load(std::vector<std::filesystem::path> files, bool append) {
+void Command::load(std::vector<std::filesystem::path> files, bool append, bool disk) {
   int i = 0;
   for (auto &file : files) {
     if (std::filesystem::is_directory(file)) {
+      if (disk) {
+        if (std::filesystem::exists(file / u8"BDMV"))
+          openBluray(file);
+        else
+          openDvd(file);
+        break;
+      }
       for (const auto &entry : std::filesystem::recursive_directory_iterator(file)) {
         auto path = entry.path().string();
         if (isMediaFile(path)) {

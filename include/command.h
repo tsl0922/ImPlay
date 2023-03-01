@@ -22,20 +22,17 @@ class Command : public Views::View {
   void draw() override;
   void execute(int n_args, const char **args_);
 
-  void load(std::vector<std::filesystem::path> files, bool append = false);
+  void load(std::vector<std::filesystem::path> files, bool append = false, bool disk = false);
   bool isMediaFile(std::string file);
   bool isSubtitleFile(std::string file);
 
  private:
-  void openMediaFiles(bool append = false);
-  void openMediaFolder(bool append = false);
+  void openFileDlg(std::vector<std::pair<std::string, std::string>> filters, bool append = false);
+  void openFilesDlg(std::vector<std::pair<std::string, std::string>> filters, bool append = false);
+  void openFolderDlg(bool append = false, bool disk = false);
 
-  void openDisk();
-  void openIso();
   void openClipboard();
   void openURL();
-
-  void loadSubtitles();
 
   void openDvd(std::filesystem::path path);
   void openBluray(std::filesystem::path path);
@@ -73,5 +70,17 @@ class Command : public Views::View {
   const std::vector<std::string> imageTypes = {"jpg", "bmp", "png", "gif", "webp"};
   const std::vector<std::string> subtitleTypes = {"srt",  "ass", "idx", "sub", "sup",
                                                   "ttxt", "txt", "ssa", "smi", "mks"};
+  
+  const std::vector<std::pair<std::string, std::string>> mediaFilters = {
+      {"Videos Files", format("{}", join(videoTypes, ","))},
+      {"Audio Files", format("{}", join(audioTypes, ","))},
+      {"Image Files", format("{}", join(imageTypes, ","))},
+  };
+  const std::vector<std::pair<std::string, std::string>> subtitleFilters = {
+      {"Subtitle Files", format("{}", join(subtitleTypes, ","))},
+  };
+  const std::vector<std::pair<std::string, std::string>> isoFilters = {
+      {"ISO Image Files", "iso"},
+  };
 };
 }  // namespace ImPlay
