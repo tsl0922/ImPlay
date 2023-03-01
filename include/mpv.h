@@ -2,11 +2,11 @@
 // SPDX-License-Identifier: GPL-2.0-only
 
 #pragma once
-#include <mpv/client.h>
-#include <mpv/render_gl.h>
 #include <string>
 #include <vector>
 #include <functional>
+#include <mpv/client.h>
+#include <mpv/render_gl.h>
 
 namespace ImPlay {
 class Mpv {
@@ -19,7 +19,7 @@ class Mpv {
   using Callback = std::function<void(Mpv *)>;
 
   void init();
-  void render(int w, int h);
+  void render(int w, int h, int fbo = 0, bool flip = true);
   bool wantRender();
   void reportSwap();
   void waitEvent(double timeout = 0);

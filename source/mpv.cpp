@@ -74,11 +74,11 @@ void Mpv::eventLoop() {
   }
 }
 
-void Mpv::render(int w, int h) {
+void Mpv::render(int w, int h, int fbo, bool flip) {
   if (renderCtx == nullptr) return;
 
-  int flip_y{1};
-  mpv_opengl_fbo mpfbo{0, w, h};
+  int flip_y{flip ? 1 : 0};
+  mpv_opengl_fbo mpfbo{fbo, w, h};
   mpv_render_param params[]{
       {MPV_RENDER_PARAM_OPENGL_FBO, &mpfbo},
       {MPV_RENDER_PARAM_FLIP_Y, &flip_y},
