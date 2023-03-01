@@ -73,19 +73,13 @@ void Player::draw() {
 void Player::drawLogo() {
   if (logoTexture == nullptr || mpv->forceWindow || !idle) return;
 
-  const ImGuiViewport* viewport = ImGui::GetMainViewport();
-  ImGuiWindowFlags flags = ImGuiWindowFlags_NoNav | ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoInputs |
-                           ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoFocusOnAppearing;
-  const float imageWidth = std::min(viewport->WorkSize.x, viewport->WorkSize.y) * 0.2f;
-  const ImVec2 imageSize(imageWidth, imageWidth);
-  ImGui::SetNextWindowSize(imageSize * 1.5f, ImGuiCond_Always);
-  ImGui::SetNextWindowPos(viewport->GetCenter(), ImGuiCond_Always, ImVec2(0.5f, 0.5f));
-  ImGui::PushStyleColor(ImGuiCol_WindowShadow, ImVec4(0, 0, 0, 0));
-  ImGui::Begin("Logo", nullptr, flags);
-  ImGui::SetCursorPos((ImGui::GetWindowSize() - imageSize) * 0.5f);
-  ImGui::Image(logoTexture, imageSize);
-  ImGui::End();
-  ImGui::PopStyleColor();
+  ImGuiViewport* vp = ImGui::GetMainViewport();
+  const float width = std::min(vp->WorkSize.x, vp->WorkSize.y) * 0.1f;
+  const ImVec2 delta(width, width);
+  const ImVec2 center = vp->GetCenter();
+  ImRect bb(center - delta, center + delta);
+
+  ImGui::GetBackgroundDrawList(vp)->AddImage(logoTexture, bb.Min, bb.Max);
 }
 
 void Player::shutdown() { mpv->command(config->Data.Mpv.WatchLater ? "quit-watch-later" : "quit"); }

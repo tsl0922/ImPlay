@@ -235,7 +235,7 @@ void ImGui::HelpMarker(const char* desc) {
   }
 }
 
-ImTextureID ImGui::LoadTexture(const char* path, int* width, int* height) {
+ImTextureID ImGui::LoadTexture(const char* path, ImVec2* size) {
   int w, h;
   auto icon = romfs::get(path);
   auto data = stbi_load_from_memory(reinterpret_cast<const stbi_uc*>(icon.data()), icon.size(), &w, &h, NULL, 4);
@@ -254,8 +254,10 @@ ImTextureID ImGui::LoadTexture(const char* path, int* width, int* height) {
   glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
   stbi_image_free(data);
 
-  if (width != nullptr) *width = w;
-  if (height != nullptr) *height = h;
+  if (size != nullptr) {
+    size->x = w;
+    size->y = h;
+  }
 
   return reinterpret_cast<ImTextureID>(static_cast<intptr_t>(texture));
 }
