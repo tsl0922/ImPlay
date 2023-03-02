@@ -133,6 +133,14 @@ void Window::render() {
 
   {
     GLCtxGuard guard(window, &glCtxLock);
+
+    if (player->isIdle()) {
+      glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+      glClearColor(0, 0, 0, 1);
+      glClear(GL_COLOR_BUFFER_BIT);
+      glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    }
+
     reloadFonts();
     ImGui_ImplOpenGL3_NewFrame();
   }
