@@ -87,8 +87,8 @@ std::pair<std::filesystem::path, bool> ImPlay::openFile(std::vector<std::pair<st
   NFD::UniquePath outPath;
   std::vector<nfdu8filteritem_t> items;
   for (auto& [n, s] : filters) items.emplace_back(nfdu8filteritem_t{n.c_str(), s.c_str()});
-  nfdresult_t result = NFD::OpenDialog(outPath, items.data(), items.size());
-  return std::make_pair(reinterpret_cast<char8_t*>(outPath.get()), checkNFDError(result));
+  bool ok = checkNFDError(NFD::OpenDialog(outPath, items.data(), items.size()));
+  return std::make_pair(ok ? reinterpret_cast<char8_t*>(outPath.get()) : u8"", ok);
 }
 
 std::pair<std::vector<std::filesystem::path>, bool> ImPlay::openFiles(
@@ -97,9 +97,8 @@ std::pair<std::vector<std::filesystem::path>, bool> ImPlay::openFiles(
   NFD::UniquePathSet outPaths;
   std::vector<nfdu8filteritem_t> items;
   for (auto& [n, s] : filters) items.emplace_back(nfdu8filteritem_t{n.c_str(), s.c_str()});
-  nfdresult_t result = NFD::OpenDialogMultiple(outPaths, items.data(), items.size());
+  bool ok = checkNFDError(NFD::OpenDialogMultiple(outPaths, items.data(), items.size()));
   std::vector<std::filesystem::path> paths;
-  bool ok = checkNFDError(result);
   if (ok) {
     nfdpathsetsize_t numPaths;
     NFD::PathSet::Count(outPaths, numPaths);
@@ -115,8 +114,8 @@ std::pair<std::vector<std::filesystem::path>, bool> ImPlay::openFiles(
 std::pair<std::filesystem::path, bool> ImPlay::openFolder() {
   NFD::Guard nfdGuard;
   NFD::UniquePath outPath;
-  nfdresult_t result = NFD::PickFolder(outPath);
-  return std::make_pair(reinterpret_cast<char8_t*>(outPath.get()), checkNFDError(result));
+  bool ok = checkNFDError(NFD::PickFolder(outPath));
+  return std::make_pair(ok ? reinterpret_cast<char8_t*>(outPath.get()) : u8"", ok);
 }
 
 int ImPlay::openUrl(std::string url) {
