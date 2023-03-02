@@ -171,9 +171,10 @@ void Window::render() {
   }
 
   if (ImGui::GetIO().ConfigFlags & ImGuiConfigFlags_ViewportsEnable) {
+    ImGui::UpdatePlatformWindows();
+
     std::lock_guard<std::mutex> lock(glCtxLock);
     auto backupCtx = glfwGetCurrentContext();
-    ImGui::UpdatePlatformWindows();
     ImGui::RenderPlatformWindowsDefault();
     glfwMakeContextCurrent(backupCtx);
   }
@@ -294,7 +295,7 @@ void Window::initGLFW(const char* title) {
     auto win = static_cast<Window*>(glfwGetWindowUserPointer(window));
     win->player->shutdown();
   });
-  glfwSetWindowRefreshCallback(window, [](GLFWwindow* window) {
+  glfwSetWindowSizeCallback(window, [](GLFWwindow* window, int w, int h) {
     auto win = static_cast<Window*>(glfwGetWindowUserPointer(window));
     win->render();
   });
