@@ -11,11 +11,7 @@
 #include <algorithm>
 #include <stdexcept>
 #include <chrono>
-#ifdef IMGUI_IMPL_OPENGL_ES3
-#include <GLES3/gl3.h>
-#else
-#include <GL/gl.h>
-#endif
+#include <thread>
 #ifdef _WIN32
 #include <windowsx.h>
 #endif
@@ -57,7 +53,7 @@ Window::~Window() {
 bool Window::init(OptionParser& parser) {
   mpv->wakeupCb() = [this](Mpv* ctx) { wakeup(); };
   mpv->updateCb() = [this](Mpv* ctx) {
-    if (ctx->wantRender()) wakeup();
+    if (ctx->wantRender()) videoWaiter.notify();
   };
 
   if (!player->init(parser)) return false;
@@ -89,6 +85,19 @@ bool Window::init(OptionParser& parser) {
 
 void Window::run() {
   glfwShowWindow(window);
+  glfwMakeContextCurrent(nullptr);
+
+  bool shutdown = false;
+
+  std::thread videoRenderer([&]() {
+    while (!shutdown) {
+      videoWaiter.wait();
+      if (shutdown) break;
+
+      renderVideo();
+      wakeup();
+    }
+  });
 
   auto nextFrame = std::chrono::steady_clock::now();
   while (!glfwWindowShouldClose(window)) {
@@ -97,63 +106,94 @@ void Window::run() {
       glfwWaitEvents();
     } else {
       glfwPollEvents();
-      std::unique_lock<std::mutex> lock(mutex);
-      cv.wait_until(lock, nextFrame, [this] { return notified; });
-      notified = false;
+      eventWaiter.wait_until(nextFrame);
     }
 
     mpv->waitEvent();
     render();
   }
 
+  shutdown = true;
+  videoWaiter.notify();
+
+  videoRenderer.join();
+
+  glfwMakeContextCurrent(window);
   saveState();
 }
 
 void Window::wakeup() {
   glfwPostEmptyEvent();
-  {
-    std::lock_guard<std::mutex> lock(mutex);
-    notified = true;
-  }
-  cv.notify_one();
+  eventWaiter.notify();
 }
 
 void Window::render() {
-  if (config.FontReload) {
-    loadFonts();
-    config.FontReload = false;
-    ImGui_ImplOpenGL3_DestroyFontsTexture();
-    ImGui_ImplOpenGL3_CreateFontsTexture();
+  {
+    GLCtxGuard guard(window, &glCtxLock);
+    reloadFonts();
+    ImGui_ImplOpenGL3_NewFrame();
   }
 
-  ImGui_ImplOpenGL3_NewFrame();
   ImGui_ImplGlfw_NewFrame();
   ImGui::NewFrame();
+
+  if (!player->isIdle()) {
+    ImGuiViewport* vp = ImGui::GetMainViewport();
+    ImTextureID texture = reinterpret_cast<ImTextureID>(static_cast<intptr_t>(tex));
+    ImGui::GetBackgroundDrawList(vp)->AddImage(texture, vp->Pos, vp->Pos + vp->Size);
+  }
 
   player->draw();
   ImGui::Render();
 
-  int width, height;
-  glfwGetFramebufferSize(window, &width, &height);
-  glViewport(0, 0, width, height);
+  {
+    GLCtxGuard guard(window, &glCtxLock);
+    glfwGetFramebufferSize(window, &width, &height);
+    glViewport(0, 0, width, height);
 
-  glClearColor(0, 0, 0, 1);
-  glClear(GL_COLOR_BUFFER_BIT);
+    glClearColor(0, 0, 0, 1);
+    glClear(GL_COLOR_BUFFER_BIT);
 
-  mpv->render(width, height);
-  ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-
-  glfwSwapBuffers(window);
-  mpv->reportSwap();
-
-  updateCursor();
+    ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+    glfwSwapBuffers(window);
+    mpv->reportSwap();
+  }
 
   if (ImGui::GetIO().ConfigFlags & ImGuiConfigFlags_ViewportsEnable) {
+    std::lock_guard<std::mutex> lock(glCtxLock);
     auto backupCtx = glfwGetCurrentContext();
     ImGui::UpdatePlatformWindows();
     ImGui::RenderPlatformWindowsDefault();
     glfwMakeContextCurrent(backupCtx);
   }
+
+  updateCursor();
+}
+
+void Window::reloadFonts() {
+  if (!config.FontReload) return;
+
+  loadFonts();
+  config.FontReload = false;
+  ImGui_ImplOpenGL3_DestroyFontsTexture();
+  ImGui_ImplOpenGL3_CreateFontsTexture();
+}
+
+void Window::renderVideo() {
+  GLCtxGuard guard(window, &glCtxLock);
+
+  glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+  glBindTexture(GL_TEXTURE_2D, tex);
+
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+  glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, tex, 0);
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
+
+  glBindTexture(GL_TEXTURE_2D, 0);
+  glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+  mpv->render(width, height, fbo, false);
 }
 
 void Window::saveState() {
@@ -230,6 +270,9 @@ void Window::initGLFW(const char* title) {
   if (!gladLoadGL(glfwGetProcAddress)) throw std::runtime_error("Failed to load GL!");
 #endif
   glfwSwapInterval(1);
+
+  glGenFramebuffers(1, &fbo);
+  glGenTextures(1, &tex);
 
   glfwSetWindowContentScaleCallback(window, [](GLFWwindow* window, float x, float y) {
     auto win = static_cast<Window*>(glfwGetWindowUserPointer(window));
@@ -439,4 +482,24 @@ LRESULT CALLBACK Window::wndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPa
   return ::CallWindowProc(win->wndProcOld, hWnd, uMsg, wParam, lParam);
 }
 #endif
+
+void Window::Waiter::wait() {
+  std::unique_lock<std::mutex> l(lock);
+  cond.wait(l, [this] { return notified; });
+  notified = false;
+}
+
+void Window::Waiter::wait_until(std::chrono::steady_clock::time_point time) {
+  std::unique_lock<std::mutex> l(lock);
+  cond.wait_until(l, time, [this] { return notified; });
+  notified = false;
+}
+
+void Window::Waiter::notify() {
+  {
+    std::lock_guard<std::mutex> l(lock);
+    notified = true;
+  }
+  cond.notify_one();
+}
 }  // namespace ImPlay

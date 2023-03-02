@@ -7,6 +7,11 @@
 #include <array>
 #include <mutex>
 #include <condition_variable>
+#ifdef IMGUI_IMPL_OPENGL_ES3
+#include <GLES3/gl3.h>
+#else
+#include <GL/gl.h>
+#endif
 #ifdef _WIN32
 #define GLFW_EXPOSE_NATIVE_WIN32
 #elif defined(__APPLE__)
@@ -31,10 +36,12 @@ class Window {
  private:
   void wakeup();
   void render();
+  void renderVideo();
   void updateCursor();
   void saveState();
 
   void loadFonts();
+  void reloadFonts();
   void initGLFW(const char *title);
   void initImGui();
   void exitGLFW();
@@ -44,16 +51,45 @@ class Window {
   GLFWwindow *window = nullptr;
   Mpv *mpv = nullptr;
   Player *player = nullptr;
+  int width = 1280, height = 720;
+  bool ownCursor = true;
+  double lastInputAt = 0;
+  GLuint fbo, tex;
+  std::mutex glCtxLock;
 #ifdef _WIN32
   bool borderless = false;
   WNDPROC wndProcOld = nullptr;
   static LRESULT CALLBACK wndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 #endif
 
-  std::mutex mutex;
-  std::condition_variable cv;
-  bool notified = false;
-  bool ownCursor = true;
-  double lastInputAt = 0;
+  struct GLCtxGuard {
+   public:
+    inline GLCtxGuard(GLFWwindow *ctx, std::mutex *lock) : ctx(ctx), lk(lock) {
+      lk->lock();
+      glfwMakeContextCurrent(ctx);
+    }
+    inline ~GLCtxGuard() {
+      glfwMakeContextCurrent(nullptr);
+      lk->unlock();
+    }
+
+   private:
+    GLFWwindow *ctx;
+    std::mutex *lk;
+  };
+
+  struct Waiter {
+   public:
+    void wait();
+    void wait_until(std::chrono::steady_clock::time_point time);
+    void notify();
+
+   private:
+    std::mutex lock;
+    std::condition_variable cond;
+    bool notified = false;
+  };
+
+  struct Waiter eventWaiter, videoWaiter;
 };
 }  // namespace ImPlay
