@@ -319,7 +319,7 @@ void Window::initGLFW(const char* title) {
 #endif
     win->player->onCursorEvent(x, y);
 #ifdef GLFW_PATCHED
-    if (win->mpv->allowDrag()) {
+    if (win->mpv->allowDrag() && win->height - y > 150) {  // 150: height of the OSC bar
       if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS) glfwDragWindow(window);
     }
 #endif
