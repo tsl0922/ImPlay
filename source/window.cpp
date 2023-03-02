@@ -422,6 +422,9 @@ void Window::initImGui() {
 }
 
 void Window::exitGLFW() {
+  glDeleteTextures(1, &tex);
+  glDeleteFramebuffers(1, &fbo);
+
   glfwDestroyWindow(window);
   glfwTerminate();
 }
