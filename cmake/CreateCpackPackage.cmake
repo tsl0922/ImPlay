@@ -5,8 +5,8 @@ endif()
 
 function(get_mpv_win_bin name)
   ExternalProject_Add(${name}
-    URL https://github.com/shinchiro/mpv-winbuild-cmake/releases/download/20230131/mpv-x86_64-20230131-git-9659555.7z
-    URL_HASH SHA1=c71aabeed4f554bade824a4353c6a85e299bb681
+    URL https://github.com/shinchiro/mpv-winbuild-cmake/releases/download/20230302/mpv-x86_64-20230302-git-779d4f9.7z
+    URL_HASH SHA256=9f0a57dd76439dd79fc334efb3b33bfdc8089288716860b3b218a5307e2fe1e1
     DOWNLOAD_NO_PROGRESS ON
     UPDATE_COMMAND ""
     CONFIGURE_COMMAND ""
@@ -18,8 +18,8 @@ endfunction()
 
 function(get_yt_dlp_bin name)
   ExternalProject_Add(${name}
-    URL https://github.com/yt-dlp/yt-dlp/releases/download/2023.01.06/yt-dlp.exe
-    URL_HASH SHA1=adf872bcb1755ccb3e1d273e9bbe145540ac897d
+    URL https://github.com/yt-dlp/yt-dlp/releases/download/2023.02.17/yt-dlp.exe
+    URL_HASH SHA256=351777b6fa3cf2d375e11b6840995132fd0d91f1b377f8ca8fe4252bc7135e7b
     DOWNLOAD_NO_PROGRESS ON
     DOWNLOAD_NO_EXTRACT ON
     UPDATE_COMMAND ""
@@ -31,8 +31,8 @@ endfunction()
 
 function(get_electron_bin name)
   ExternalProject_Add(${name}
-    URL https://github.com/electron/electron/releases/download/v22.1.0/electron-v22.1.0-win32-x64.zip
-    URL_HASH SHA1=8ef676e72849b32cc246d31ed6329cadae8740c0
+    URL https://github.com/electron/electron/releases/download/v22.3.1/electron-v22.3.1-win32-x64.zip
+    URL_HASH SHA256=6efe8f37e2a588947f6e4e62838bc3699bdf919a4ade2fe6104a3f0fd1c07a9b
     DOWNLOAD_NO_PROGRESS ON
     UPDATE_COMMAND ""
     CONFIGURE_COMMAND ""
