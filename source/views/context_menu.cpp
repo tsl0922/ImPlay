@@ -347,7 +347,10 @@ void ContextMenu::drawRecentFiles() {
     int i = 0;
     for (auto &file : files) {
       if (i == 10) break;
-      if (ImGui::MenuItem(file.title.c_str())) mpv->commandv("loadfile", file.path.c_str(), nullptr);
+      if (ImGui::MenuItem(file.title.c_str())) {
+        mpv->commandv("loadfile", file.path.c_str(), nullptr);
+        mpv->commandv("set", "force-media-title", file.title.c_str(), nullptr);
+      }
       i++;
     }
     if (files.size() > 10) {

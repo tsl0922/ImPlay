@@ -67,6 +67,7 @@ void Command::execute(int n_args, const char **args_) {
            for (auto &file : config->getRecentFiles()) {
              if (fileExists(file.path) || file.path.find("://") != std::string::npos) {
                mpv->commandv("loadfile", file.path.c_str(), nullptr);
+               mpv->commandv("set", "force-media-title", file.title.c_str(), nullptr);
                break;
              }
            }
