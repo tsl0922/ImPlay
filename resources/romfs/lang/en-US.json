@@ -250,6 +250,8 @@
         "views.settings.general.mpv.watch_later": "Remember playback progress on exit",
         "views.settings.general.mpv.watch_later.help": "Will exit mpv with the quit-watch-later command.",
         "views.settings.general.window.save": "Remember window position and size on exit",
+        "views.settings.general.window.single": "Single instance mode*",
+        "views.settings.general.window.single.help": "Force a single player process, always open files in the existing window.",
         "views.settings.general.recent.limit": "Recent Files Limit",
         "views.settings.general.recent.play_last": "Space to play last file on IDLE*",
         "views.settings.general.debug": "Debug",

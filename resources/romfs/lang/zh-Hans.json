@@ -263,6 +263,8 @@
         "views.settings.general.mpv.watch_later": "退出时记住播放进度",
         "views.settings.general.mpv.watch_later.help": "将会使用 quit-watch-later 来退出 mpv.",
         "views.settings.general.window.save": "退出时记住窗口位置和大小",
+        "views.settings.general.window.single": "单实例模式*",
+        "views.settings.general.window.single.help": "强制使用单个播放器实例, 总在已有的播放器窗口打开文件.",
         "views.settings.general.recent.limit": "最近打开文件数量",
         "views.settings.general.recent.play_last": "空闲状态下, 按空格键播放最近打开的文件*",
         "views.settings.general.debug": "调试",

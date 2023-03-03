@@ -42,6 +42,8 @@ bool Player::init(OptionParser& parser) {
     mpv->option("config-dir", config->dir().c_str());
   }
 
+  if (config->Data.Window.Single) mpv->option("input-ipc-server", config->ipcSocket().c_str());
+
   for (const auto& [key, value] : parser.options) {
     if (int err = mpv->option(key.c_str(), value.c_str()); err < 0) {
       fmt::print(fg(fmt::color::red), "mpv: {} [{}={}]\n", mpv_error_string(err), key, value);

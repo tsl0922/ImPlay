@@ -5,7 +5,13 @@
 #include <stdexcept>
 #ifdef _WIN32
 #include <windows.h>
+#else
+#include <unistd.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <sys/un.h>
 #endif
+#include <nlohmann/json.hpp>
 #include "window.h"
 
 static const char* usage =
@@ -48,6 +54,52 @@ static int run_headless(ImPlay::OptionParser& parser) {
   return 0;
 }
 
+static std::string build_ipc_cmd(std::string path) {
+  nlohmann::json j = {{"command", {"loadfile", path, "append-play"}}};
+  return fmt::format("{}\n", j.dump());
+}
+
+#ifdef _WIN32
+static bool send_ipc(std::string sock, std::vector<std::string> paths) {
+  HANDLE hPipe = CreateFile(sock.c_str(), GENERIC_WRITE, 0, NULL, OPEN_EXISTING, 0, NULL);
+  if (hPipe == INVALID_HANDLE_VALUE) return false;
+
+  for (auto& path : paths) {
+    std::string payload = build_ipc_cmd(path);
+    if (!WriteFile(hPipe, payload.c_str(), payload.size(), NULL, NULL)) {
+      fmt::print("WriteFile failed: {}, payload: {}\n", GetLastError(), payload);
+    }
+  }
+
+  CloseHandle(hPipe);
+  return true;
+}
+#else
+static bool send_ipc(std::string sock, std::vector<std::string> paths) {
+  int fd = socket(AF_UNIX, SOCK_STREAM, 0);
+  if (fd == -1) return false;
+
+  struct sockaddr_un addr;
+  addr.sun_family = AF_UNIX;
+  strncpy(addr.sun_path, sock.c_str(), sizeof(addr.sun_path) - 1);
+
+  if ((connect(fd, (struct sockaddr*)&addr, sizeof(addr))) == -1) {
+    close(fd);
+    return false;
+  }
+
+  for (auto& path : paths) {
+    std::string payload = build_ipc_cmd(path);
+    if (write(fd, payload.c_str(), payload.size()) == -1) {
+      fmt::print("write failed: {}, payload: {}\n", errno, payload);
+    }
+  }
+
+  close(fd);
+  return true;
+}
+#endif
+
 int main(int argc, char* argv[]) {
 #ifdef _WIN32
   char* console = getenv("_started_from_console");
@@ -71,9 +123,14 @@ int main(int argc, char* argv[]) {
     if (parser.options.contains("o") || parser.check("video", "no") || parser.check("vid", "no"))
       return run_headless(parser);
 
-    ImPlay::Window window;
+    ImPlay::Config config;
+    config.load();
+
+    if (config.Data.Window.Single && send_ipc(config.ipcSocket(), parser.paths)) return 0;
+
+    ImPlay::Window window(&config);
     if (!window.init(parser)) return 1;
-    
+
     window.run();
     return 0;
   } catch (const std::exception& e) {

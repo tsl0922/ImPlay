@@ -28,6 +28,7 @@ struct ConfigData {
   } Mpv;
   struct Window_ {
     bool Save = false;
+    bool Single = false;
     int X = 0, Y = 0;
     int W = 0, H = 0;
     bool operator==(const Window_&) const = default;
@@ -76,6 +77,7 @@ class Config {
   void save();
 
   std::string dir() const { return configDir; }
+  std::string ipcSocket();
   std::vector<RecentItem> &getRecentFiles();
   void addRecentFile(const std::string& path, const std::string& title);
   void clearRecentFiles();

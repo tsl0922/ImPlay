@@ -27,7 +27,7 @@
 namespace ImPlay {
 class Window {
  public:
-  Window();
+  explicit Window(Config *config);
   ~Window();
 
   bool init(OptionParser &parser);
@@ -47,7 +47,7 @@ class Window {
   void exitGLFW();
   void exitImGui();
 
-  Config config;
+  Config *config;
   GLFWwindow *window = nullptr;
   Mpv *mpv = nullptr;
   Player *player = nullptr;

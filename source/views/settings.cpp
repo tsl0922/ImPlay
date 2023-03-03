@@ -82,6 +82,9 @@ void Settings::drawGeneralTab() {
   if (ImGui::BeginTabItem("views.settings.general"_i18n)) {
     ImGui::TextUnformatted("views.settings.general.core"_i18n);
     ImGui::Indent();
+    ImGui::Checkbox("views.settings.general.window.single"_i18n, &data.Window.Single);
+    ImGui::SameLine();
+    ImGui::HelpMarker("views.settings.general.window.single.help"_i18n);
     ImGui::Checkbox("views.settings.general.mpv.config"_i18n, &data.Mpv.UseConfig);
     ImGui::SameLine();
     ImGui::HelpMarker("views.settings.general.mpv.config.help"_i18n);

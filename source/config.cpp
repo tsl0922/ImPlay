@@ -35,6 +35,7 @@ void Config::load() {
   inipp::get_value(ini.sections["mpv"], "watch-later", Data.Mpv.WatchLater);
   inipp::get_value(ini.sections["mpv"], "volume", Data.Mpv.Volume);
   inipp::get_value(ini.sections["window"], "save", Data.Window.Save);
+  inipp::get_value(ini.sections["window"], "single", Data.Window.Single);
   inipp::get_value(ini.sections["window"], "x", Data.Window.X);
   inipp::get_value(ini.sections["window"], "y", Data.Window.Y);
   inipp::get_value(ini.sections["window"], "w", Data.Window.W);
@@ -72,6 +73,7 @@ void Config::save() {
   ini.sections["mpv"]["watch-later"] = format("{}", Data.Mpv.WatchLater);
   ini.sections["mpv"]["volume"] = std::to_string(Data.Mpv.Volume);
   ini.sections["window"]["save"] = format("{}", Data.Window.Save);
+  ini.sections["window"]["single"] = format("{}", Data.Window.Single);
   ini.sections["window"]["x"] = std::to_string(Data.Window.X);
   ini.sections["window"]["y"] = std::to_string(Data.Window.Y);
   ini.sections["window"]["w"] = std::to_string(Data.Window.W);
@@ -122,4 +124,12 @@ void Config::addRecentFile(const std::string& path, const std::string& title) {
 void Config::clearRecentFiles() { recentFiles.clear(); }
 
 std::vector<Config::RecentItem>& Config::getRecentFiles() { return recentFiles; }
+
+std::string Config::ipcSocket() {
+#ifdef _WIN32
+  return "\\\\.\\pipe\\mpv-ipc-socket";
+#else
+  return configDir + "/mpv-ipc-socket";
+#endif
+}
 }  // namespace ImPlay

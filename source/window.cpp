@@ -20,10 +20,8 @@
 #include "window.h"
 
 namespace ImPlay {
-Window::Window() {
+Window::Window(Config *config) : config(config) {
   const char* title = "ImPlay";
-
-  config.load();
 
   initGLFW(title);
   initImGui();
@@ -34,12 +32,12 @@ Window::Window() {
   ::SetWindowLongPtr(hwnd, GWLP_WNDPROC, reinterpret_cast<LONG_PTR>(wndProc));
   ::SetWindowLongPtr(hwnd, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(this));
 
-  int64_t wid = config.Data.Mpv.UseWid ? static_cast<uint32_t>((intptr_t)hwnd) : 0;
+  int64_t wid = config->Data.Mpv.UseWid ? static_cast<uint32_t>((intptr_t)hwnd) : 0;
   mpv = new Mpv(wid);
 #else
   mpv = new Mpv();
 #endif
-  player = new Player(&config, window, mpv, title);
+  player = new Player(config, window, mpv, title);
 }
 
 Window::~Window() {
@@ -126,7 +124,7 @@ void Window::wakeup() {
 
 void Window::render() {
   static auto nextFrame = std::chrono::steady_clock::now();
-  nextFrame += std::chrono::milliseconds(1000 / config.Data.Interface.Fps);
+  nextFrame += std::chrono::milliseconds(1000 / config->Data.Interface.Fps);
   if (player->isIdle() || mpv->paused()) eventWaiter.wait_until(nextFrame);
 
   {
@@ -181,10 +179,10 @@ void Window::render() {
 }
 
 void Window::reloadFonts() {
-  if (!config.FontReload) return;
+  if (!config->FontReload) return;
 
   loadFonts();
-  config.FontReload = false;
+  config->FontReload = false;
   ImGui_ImplOpenGL3_DestroyFontsTexture();
   ImGui_ImplOpenGL3_CreateFontsTexture();
 }
@@ -207,12 +205,12 @@ void Window::renderVideo() {
 }
 
 void Window::saveState() {
-  if (config.Data.Window.Save) {
-    glfwGetWindowPos(window, &config.Data.Window.X, &config.Data.Window.Y);
-    glfwGetWindowSize(window, &config.Data.Window.W, &config.Data.Window.H);
+  if (config->Data.Window.Save) {
+    glfwGetWindowPos(window, &config->Data.Window.X, &config->Data.Window.Y);
+    glfwGetWindowSize(window, &config->Data.Window.W, &config->Data.Window.H);
   }
-  config.Data.Mpv.Volume = mpv->volume;
-  config.save();
+  config->Data.Mpv.Volume = mpv->volume;
+  config->save();
 }
 
 void Window::updateCursor() {
@@ -260,11 +258,11 @@ void Window::initGLFW(const char* title) {
   int height = std::max((int)(mode->height * 0.4), 400);
   int posX = (mode->width - width) / 2;
   int posY = (mode->height - height) / 2;
-  if (config.Data.Window.Save) {
-    if (config.Data.Window.W > 0) width = config.Data.Window.W;
-    if (config.Data.Window.H > 0) height = config.Data.Window.H;
-    if (config.Data.Window.X >= 0) posX = config.Data.Window.X;
-    if (config.Data.Window.Y >= 0) posY = config.Data.Window.Y;
+  if (config->Data.Window.Save) {
+    if (config->Data.Window.W > 0) width = config->Data.Window.W;
+    if (config->Data.Window.H > 0) height = config->Data.Window.H;
+    if (config->Data.Window.X >= 0) posX = config->Data.Window.X;
+    if (config->Data.Window.Y >= 0) posY = config->Data.Window.Y;
   }
 
   window = glfwCreateWindow(width, height, title, nullptr, nullptr);
@@ -286,8 +284,8 @@ void Window::initGLFW(const char* title) {
 
   glfwSetWindowContentScaleCallback(window, [](GLFWwindow* window, float x, float y) {
     auto win = static_cast<Window*>(glfwGetWindowUserPointer(window));
-    win->config.Data.Interface.Scale = std::max(x, y);
-    win->config.FontReload = true;
+    win->config->Data.Interface.Scale = std::max(x, y);
+    win->config->FontReload = true;
   });
   glfwSetWindowCloseCallback(window, [](GLFWwindow* window) {
     auto win = static_cast<Window*>(glfwGetWindowUserPointer(window));
@@ -344,9 +342,9 @@ void Window::initGLFW(const char* title) {
 }
 
 void Window::loadFonts() {
-  float fontSize = config.Data.Font.Size;
+  float fontSize = config->Data.Font.Size;
   float iconSize = fontSize - 2;
-  float scale = config.Data.Interface.Scale;
+  float scale = config->Data.Interface.Scale;
   if (scale == 0) {
     float xscale, yscale;
     glfwGetWindowContentScale(window, &xscale, &yscale);
@@ -358,7 +356,7 @@ void Window::loadFonts() {
 
   ImGuiIO& io = ImGui::GetIO();
   ImGuiStyle style;
-  std::string theme = config.Data.Interface.Theme;
+  std::string theme = config->Data.Interface.Theme;
 
   {
     ImGui::SetTheme(theme.c_str(), &style);
@@ -386,12 +384,12 @@ void Window::loadFonts() {
   ImFontConfig cfg;
   cfg.SizePixels = fontSize;
   ImWchar fa_range[] = {ICON_MIN_FA, ICON_MAX_FA, 0};
-  const ImWchar* font_range = config.buildGlyphRanges();
+  const ImWchar* font_range = config->buildGlyphRanges();
   io.Fonts->AddFontFromMemoryCompressedTTF(source_code_pro_compressed_data, source_code_pro_compressed_size, 0, &cfg);
   cfg.MergeMode = true;
   io.Fonts->AddFontFromMemoryCompressedTTF(fa_compressed_data, fa_compressed_size, iconSize, &cfg, fa_range);
-  if (fileExists(config.Data.Font.Path))
-    io.Fonts->AddFontFromFileTTF(config.Data.Font.Path.c_str(), 0, &cfg, font_range);
+  if (fileExists(config->Data.Font.Path))
+    io.Fonts->AddFontFromFileTTF(config->Data.Font.Path.c_str(), 0, &cfg, font_range);
   else
     io.Fonts->AddFontFromMemoryCompressedTTF(unifont_compressed_data, unifont_compressed_size, 0, &cfg, font_range);
 
@@ -405,8 +403,8 @@ void Window::initImGui() {
   ImGuiIO& io = ImGui::GetIO();
   io.IniFilename = nullptr;
   io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
-  if (config.Data.Interface.Docking) io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
-  if (config.Data.Interface.Viewports) io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
+  if (config->Data.Interface.Docking) io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
+  if (config->Data.Interface.Viewports) io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
 
   loadFonts();
 
