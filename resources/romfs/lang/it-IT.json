@@ -1,7 +1,7 @@
 {
     "code": "it-IT",
     "title": "Italiano",
-    "fallback": true,
+    "fallback": false,
     "entries": {
         "menu.play": "Riproduci",
         "menu.pause": "Pausa",
