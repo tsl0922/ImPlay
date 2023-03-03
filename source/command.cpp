@@ -182,6 +182,7 @@ void Command::drawOpenURL() {
     if (ImGui::IsKeyDown(ImGuiKey_Escape)) m_openURL = false;
     static char url[256] = {0};
     bool loadfile = false;
+    if (ImGui::IsWindowAppearing()) ImGui::SetKeyboardFocusHere();
     ImGui::SetNextItemWidth(-1);
     if (ImGui::InputTextWithHint("##Input URL", "views.dialog.open_url.hint"_i18n, url, IM_ARRAYSIZE(url),
                                  ImGuiInputTextFlags_EnterReturnsTrue)) {
