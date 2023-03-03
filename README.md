@@ -25,12 +25,16 @@ ImPlay aims to be mpv compatible, which means almost all mpv features from the [
   - Context Menu with most commonly used commands
   - Command Palette to quickly search commands and keys
   - Quick Settings View with convenient controls
-  - Visual Audio / Video Equalizer Settings
+    - Playlist / Chapter Manager
+    - Audio / Video / Subtitle Settings
+    - Audio / Video Equalizer Support
   - Open Dialog for Media Files / Folders
-  - Open URL / Path from Clipboard
-  - Open DVD / Blu-ray Folder and ISO Image
-  - Playlist Editing: Add, Clear, Shuffle
+  - Open Clipboard / DVD / Blu-ray / ISO Image
   - Shadow and Rounding effect for Interface
+- Notable additional features
+  - Single Instance Mode
+  - Space to play last file on IDLE
+  - Play recently opened files
 - Scripting Developer Friendly
   - Visual view of mpv's internal properties
   - Console with completion, history support
