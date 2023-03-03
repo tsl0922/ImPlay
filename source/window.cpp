@@ -20,7 +20,7 @@
 #include "window.h"
 
 namespace ImPlay {
-Window::Window(Config *config) : config(config) {
+Window::Window(Config* config) : config(config) {
   const char* title = "ImPlay";
 
   initGLFW(title);
@@ -143,6 +143,13 @@ void Window::render() {
 
   ImGui_ImplGlfw_NewFrame();
   ImGui::NewFrame();
+
+#ifdef _WIN32
+  if (config->Data.Mpv.UseWid) {
+    ImGuiViewport* vp = ImGui::GetMainViewport();
+    vp->Flags &= ~ImGuiViewportFlags_CanHostOtherWindows;  // HACK: disable main viewport merge
+  }
+#endif
 
   if (!player->isIdle()) {
     ImGuiViewport* vp = ImGui::GetMainViewport();
@@ -354,7 +361,6 @@ void Window::loadFonts() {
   fontSize = std::floor(fontSize * scale);
   iconSize = std::floor(iconSize * scale);
 
-  ImGuiIO& io = ImGui::GetIO();
   ImGuiStyle style;
   std::string theme = config->Data.Interface.Theme;
 
@@ -371,6 +377,11 @@ void Window::loadFonts() {
     style.ScrollbarSize = 10.0f;
     style.Colors[ImGuiCol_WindowShadow] = ImVec4(0, 0, 0, 1.0f);
   }
+
+  ImGuiIO& io = ImGui::GetIO();
+#ifdef _WIN32
+  if (config->Data.Mpv.UseWid) io.ConfigViewportsNoAutoMerge = true;
+#endif
 
 #ifdef __APPLE__
   io.FontGlobalScale = 1.0f / scale;
