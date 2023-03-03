@@ -99,16 +99,14 @@ void Window::run() {
     }
   });
 
-  auto nextFrame = std::chrono::steady_clock::now();
   while (!glfwWindowShouldClose(window)) {
-    nextFrame += std::chrono::milliseconds(1000 / config.Data.Interface.Fps);
-    if (!glfwGetWindowAttrib(window, GLFW_VISIBLE) || glfwGetWindowAttrib(window, GLFW_ICONIFIED)) {
+    if (!glfwGetWindowAttrib(window, GLFW_VISIBLE) || glfwGetWindowAttrib(window, GLFW_ICONIFIED))
       glfwWaitEvents();
-    } else {
+    else
       glfwPollEvents();
-    }
 
     mpv->waitEvent();
+
     render();
   }
 

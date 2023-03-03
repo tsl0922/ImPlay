@@ -187,11 +187,10 @@ void Player::initObservers() {
 
   mpv->observeProperty<char*, MPV_FORMAT_STRING>("media-title",
                                                  [this](char* data) { glfwSetWindowTitle(window, data); });
-
-  mpv->observeProperty<int, MPV_FORMAT_FLAG>("border", [this](int flag) {
-    bool enable = static_cast<bool>(flag);
-    glfwSetWindowAttrib(window, GLFW_DECORATED, enable);
-  });
+  mpv->observeProperty<int, MPV_FORMAT_FLAG>("border",
+                                             [this](int flag) { glfwSetWindowAttrib(window, GLFW_DECORATED, flag); });
+  mpv->observeProperty<int, MPV_FORMAT_FLAG>("ontop",
+                                             [this](int flag) { glfwSetWindowAttrib(window, GLFW_FLOATING, flag); });
 
   mpv->observeProperty<int, MPV_FORMAT_FLAG>("window-maximized", [this](int flag) {
     bool enable = static_cast<bool>(flag);
@@ -229,11 +228,6 @@ void Player::initObservers() {
       glfwSetWindowMonitor(window, monitor, 0, 0, mode->width, mode->height, mode->refreshRate);
     } else
       glfwSetWindowMonitor(window, nullptr, x, y, w, h, 0);
-  });
-
-  mpv->observeProperty<int, MPV_FORMAT_FLAG>("ontop", [this](int flag) {
-    bool enable = static_cast<bool>(flag);
-    glfwSetWindowAttrib(window, GLFW_FLOATING, enable);
   });
 }
 
