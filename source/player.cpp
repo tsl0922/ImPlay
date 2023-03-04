@@ -242,25 +242,25 @@ void Player::writeMpvConf() {
   if (!std::filesystem::exists(mpvConf)) {
     std::ofstream file(mpvConf);
     auto content = romfs::get("mpv/mpv.conf");
-    file.write(reinterpret_cast<const char*>(content.data()), content.size()) << std::endl;
-    file << "# use opengl-hq video output for high-quality video rendering." << std::endl;
-    file << "profile=gpu-hq" << std::endl;
-    file << "deband=no" << std::endl << std::endl;
-    file << "# Enable hardware decoding if available." << std::endl;
-    file << "hwdec=auto" << std::endl;
+    file.write(reinterpret_cast<const char*>(content.data()), content.size()) << "\n";
+    file << "# use opengl-hq video output for high-quality video rendering.\n";
+    file << "profile=gpu-hq\n";
+    file << "deband=no\n\n";
+    file << "# Enable hardware decoding if available.\n";
+    file << "hwdec=auto\n";
   }
 
   if (!std::filesystem::exists(inputConf)) {
     std::ofstream file(inputConf);
     auto content = romfs::get("mpv/input.conf");
-    file.write(reinterpret_cast<const char*>(content.data()), content.size()) << std::endl;
-    file << "MBTN_RIGHT   script-message-to implay context-menu    # show context menu" << std::endl;
+    file.write(reinterpret_cast<const char*>(content.data()), content.size()) << "\n";
+    file << "MBTN_RIGHT   script-message-to implay context-menu    # show context menu\n";
 #ifdef __APPLE__
-    file << "Meta+Shift+p script-message-to implay command-palette # show command palette" << std::endl;
+    file << "Meta+Shift+p script-message-to implay command-palette # show command palette\n";
 #else
-    file << "Ctrl+Shift+p script-message-to implay command-palette # show command palette" << std::endl;
+    file << "Ctrl+Shift+p script-message-to implay command-palette # show command palette\n";
 #endif
-    file << "`            script-message-to implay metrics         # open console window" << std::endl;
+    file << "`            script-message-to implay metrics         # open console window\n";
   }
 
   auto scriptOpts = path / "script-opts";
@@ -273,9 +273,9 @@ void Player::writeMpvConf() {
   std::filesystem::create_directories(scriptOpts);
   if (!std::filesystem::exists(oscConf)) {
     std::ofstream file(oscConf);
-    file << format("scalewindowed={}", scale) << std::endl;
-    file << "hidetimeout=2000" << std::endl;
-    file << "idlescreen=no" << std::endl;
+    file << format("scalewindowed={}\n", scale);
+    file << "hidetimeout=2000\n";
+    file << "idlescreen=no\n";
   }
 }
 
