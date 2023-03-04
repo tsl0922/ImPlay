@@ -34,9 +34,11 @@ int main() {
     std::printf("libromfs: Resource Folder: %s\n", RESOURCE_LOCATION);
 
     outputFile << "#include <romfs/romfs.hpp>\n\n";
+    outputFile << "#include <array>\n";
+    outputFile << "#include <cstdint>\n";
+    outputFile << "#include <filesystem>\n";
     outputFile << "#include <map>\n";
     outputFile << "#include <string>\n";
-    outputFile << "#include <filesystem>\n";
     outputFile << "#include <vector>\n";
 
     outputFile << "\n\n";
@@ -50,7 +52,7 @@ int main() {
         auto path = fs::canonical(fs::absolute(entry.path()));
         auto relativePath = fs::relative(entry.path(), fs::absolute(RESOURCE_LOCATION));
 
-        outputFile << "static std::array<uint8_t, " << entry.file_size() + 1 << "> " << "resource_" LIBROMFS_PROJECT_NAME "_" << identifierCount << " = {\n";
+        outputFile << "static std::array<std::uint8_t, " << entry.file_size() + 1 << "> " << "resource_" LIBROMFS_PROJECT_NAME "_" << identifierCount << " = {\n";
         outputFile << "    ";
 
         std::vector<std::byte> bytes;
