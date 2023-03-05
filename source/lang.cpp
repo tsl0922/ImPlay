@@ -1,8 +1,10 @@
 // Copyright (c) 2022 tsl0922. All rights reserved.
 // SPDX-License-Identifier: GPL-2.0-only
 
+#include <fstream>
 #include <romfs/romfs.hpp>
 #include <nlohmann/json.hpp>
+#include "helpers.h"
 #include "lang.h"
 
 namespace ImPlay {
@@ -33,38 +35,55 @@ const ImWchar* getLangGlyphRanges() {
   return &glyphRanges[0];
 }
 
+static std::pair<LangData, bool> parseLang(nlohmann::json& j) {
+  LangData lang;
+  const auto& code = j["code"];
+  const auto& title = j["title"];
+  const auto& fonts = j["fonts"];
+  const auto& entries = j["entries"];
+  if (!code.is_string() && !title.is_string() && !entries.is_object()) return {lang, false};
+  if (j.contains("fallback")) {
+    const auto& fallback = j["fallback"];
+    if (fallback.is_boolean() && fallback.get<bool>()) getLangFallback() = code.get<std::string>();
+  }
+  lang.code = code.get<std::string>();
+  lang.title = title.get<std::string>();
+  if (fonts.is_array()) {
+    for (auto& [key, value] : fonts.items()) {
+      auto& path = value["path"];
+      auto& size = value["size"];
+      if (path.is_string() && size.is_number_integer())
+        lang.fonts.push_back({path.get<std::string>(), size.get<int>()});
+    }
+  }
+  for (auto& [key, value] : entries.items()) {
+    if (!value.is_string()) continue;
+    lang.entries[key] = value.get<std::string>();
+  }
+  return {lang, true};
+}
+
 std::map<std::string, LangData>& getLangs() {
   static std::map<std::string, LangData> langs;
   static bool loaded = false;
   if (loaded) return langs;
 
+  auto langDir = dataPath() / "lang";
+  if (std::filesystem::exists(langDir)) {
+    for (auto& entry : std::filesystem::directory_iterator(langDir)) {
+      if (entry.is_directory() || entry.path().extension() != ".json") continue;
+      std::ifstream f(entry.path());
+      auto j = nlohmann::json::parse(f);
+      if (auto [lang, ok] = parseLang(j); ok) langs.insert({lang.code, lang});
+    }
+  }
+
   for (auto& path : romfs::list("lang")) {
     auto file = romfs::get(path);
     auto j = nlohmann::json::parse(file.data(), file.data() + file.size());
-    const auto& code = j["code"];
-    const auto& title = j["title"];
-    const auto& fonts = j["fonts"];
-    const auto& entries = j["entries"];
-    if (!code.is_string() && !title.is_string() && !entries.is_object()) continue;
-    if (j.contains("fallback")) {
-      const auto& fallback = j["fallback"];
-      if (fallback.is_boolean() && fallback.get<bool>()) getLangFallback() = code.get<std::string>();
-    }
-    auto lang = LangData{code.get<std::string>(), title.get<std::string>()};
-    if (fonts.is_array()) {
-      for (auto& [key, value] : fonts.items()) {
-        auto& path = value["path"];
-        auto& size = value["size"];
-        if (path.is_string() && size.is_number_integer())
-          lang.fonts.push_back({path.get<std::string>(), size.get<int>()});
-      }
-    }
-    for (auto& [key, value] : entries.items()) {
-      if (!value.is_string()) continue;
-      lang.entries[key] = value.get<std::string>();
-    }
-    langs.insert({lang.code, lang});
+    if (auto [lang, ok] = parseLang(j); ok) langs.insert({lang.code, lang});
   }
+
   loaded = true;
   return langs;
 }

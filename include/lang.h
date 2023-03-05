@@ -1,6 +1,7 @@
 // Copyright (c) 2022 tsl0922. All rights reserved.
 // SPDX-License-Identifier: GPL-2.0-only
 
+#pragma once
 #include <string>
 #include <map>
 #include <imgui.h>
@@ -12,7 +13,6 @@ struct LangData {
   std::vector<std::pair<std::string, int>> fonts;
   std::map<std::string, std::string> entries;
 
-  LangData(std::string code, std::string title) : code(code), title(title) {}
   std::string get(std::string& key);
 };
 
