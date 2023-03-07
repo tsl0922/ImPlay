@@ -61,7 +61,7 @@ static std::pair<LangData, bool> parseLang(nlohmann::json& j) {
     }
   }
   for (auto& [key, value] : entries.items()) {
-    if (!value.is_string()) continue;
+    if (key == "" || !value.is_string()) continue;
     lang.entries[key] = value.get<std::string>();
   }
   return {lang, true};
@@ -110,11 +110,15 @@ std::string i18n(std::string key) {
     auto langs = getLangs();
     auto it = langs.find(getLang());
     if (it != langs.end()) {
-      for (auto& [key, value] : it->second.entries) entries.insert({key, value});
+      for (auto& [key, value] : it->second.entries) {
+        if (value != "") entries.insert({key, value});
+      }
     }
     it = langs.find(getLangFallback());
     if (it != langs.end()) {
-      for (auto& [key, value] : it->second.entries) entries.insert({key, value});
+      for (auto& [key, value] : it->second.entries) {
+        if (value != "") entries.insert({key, value});
+      }
     }
     lang = getLang();
   }
