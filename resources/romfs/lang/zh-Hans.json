@@ -4,15 +4,18 @@
     "fonts": [
         {
             "path": "C:\\Windows\\Fonts\\msyh.ttc",
-            "size": 14
+            "size": 14,
+            "glyph-range": 1
         },
         {
             "path": "/System/Library/Fonts/PingFang.ttc",
-            "size": 15
+            "size": 15,
+            "glyph-range": 1
         },
         {
             "path": "/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc",
-            "size": 15
+            "size": 15,
+            "glyph-range": 1
         }
     ],
     "entries": {

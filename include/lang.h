@@ -7,10 +7,16 @@
 #include <imgui.h>
 
 namespace ImPlay {
+struct LangFont {
+  std::string path;
+  int size = 0;
+  int glyph_range = 0;
+};
+
 struct LangData {
   std::string code;
   std::string title;
-  std::vector<std::pair<std::string, int>> fonts;
+  std::vector<LangFont> fonts;
   std::map<std::string, std::string> entries;
 
   std::string get(std::string& key);

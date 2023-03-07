@@ -51,9 +51,13 @@ static std::pair<LangData, bool> parseLang(nlohmann::json& j) {
   if (fonts.is_array()) {
     for (auto& [key, value] : fonts.items()) {
       auto& path = value["path"];
+      if (!path.is_string()) continue;
+      LangFont font{path.get<std::string>()};
       auto& size = value["size"];
-      if (path.is_string() && size.is_number_integer())
-        lang.fonts.push_back({path.get<std::string>(), size.get<int>()});
+      auto& glyph_range = value["glyph-range"];
+      if (size.is_number_integer()) font.size = size.get<int>();
+      if (glyph_range.is_number_integer()) font.glyph_range = glyph_range.get<int>();
+      lang.fonts.emplace_back(font);
     }
   }
   for (auto& [key, value] : entries.items()) {

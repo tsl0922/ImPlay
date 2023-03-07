@@ -61,12 +61,12 @@ void Settings::drawButtons() {
       auto it = getLangs().find(data.Interface.Lang);
       if (it != getLangs().end()) {
         auto lang = it->second;
-        for (auto &[path, size] : lang.fonts) {
-          if (path != "" && fileExists(path)) {
-            data.Font.Path = path;
-            data.Font.Size = size > 0 ? size : 13;
-            break;
-          }
+        for (auto &font : lang.fonts) {
+          if (!fileExists(font.path)) continue;
+          data.Font.Path = font.path;
+          if (font.size > 0) data.Font.Size = font.size;
+          if (font.glyph_range > 0) data.Font.GlyphRange = font.glyph_range;
+          break;
         }
       }
     }
