@@ -13,6 +13,11 @@ void ContextMenu::draw() {
     m_open = false;
   }
 
+  if (ImGui::GetIO().ConfigFlags & ImGuiConfigFlags_ViewportsEnable) {
+    ImGuiWindowClass windowClass;
+    windowClass.ViewportFlagsOverrideSet = ImGuiViewportFlags_TopMost;
+    ImGui::SetNextWindowClass(&windowClass);
+  }
   if (ImGui::BeginPopup("##context_menu", ImGuiWindowFlags_NoMove)) {
     bool paused = mpv->paused();
     bool playing = mpv->playing();
