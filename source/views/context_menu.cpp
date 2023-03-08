@@ -191,7 +191,8 @@ void ContextMenu::draw() {
       mpv->command("script-message-to implay command-palette");
     ImGui::Separator();
     if (ImGui::BeginMenuEx("menu.tools"_i18n, ICON_FA_TOOLS)) {
-      if (ImGui::MenuItemEx("menu.tools.screenshot"_i18n, ICON_FA_FILE_IMAGE, "s")) mpv->command("async screenshot");
+      if (ImGui::MenuItemEx("menu.tools.screenshot"_i18n, ICON_FA_FILE_IMAGE, "s", false, playing))
+        mpv->command("async screenshot");
       if (ImGui::MenuItemEx("menu.tools.window_border"_i18n, ICON_FA_BORDER_NONE)) mpv->command("cycle border");
       if (ImGui::MenuItemEx("menu.tools.window_dragging"_i18n, ICON_FA_HAND_POINTER))
         mpv->command("cycle window-dragging");
