@@ -326,7 +326,7 @@ void ContextMenu::drawPlaylist(std::vector<Mpv::PlayItem> items) {
       if (title.empty() && !item.filename.empty()) title = item.filename;
       if (title.empty()) title = format("menu.playlist.item"_i18n, item.id + 1);
       if (ImGui::MenuItemEx(title.c_str(), nullptr, nullptr, item.id == pos))
-        mpv->property<int64_t, MPV_FORMAT_INT64>("playlist-pos", item.id);
+        mpv->commandv("playlist-play-index", std::to_string(item.id).c_str(), nullptr);
       i++;
     }
     if (items.size() > 10) {

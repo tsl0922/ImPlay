@@ -163,7 +163,7 @@ void Quickview::drawPlaylistTabContent() {
       bool enabled = item != nullptr;
       int id = enabled ? item->id : -1;
       if (ImGui::MenuItemEx("views.quickview.playlist.menu.play"_i18n, ICON_FA_PLAY_CIRCLE, nullptr, false, enabled))
-        mpv->property<int64_t, MPV_FORMAT_INT64>("playlist-pos", id);
+        mpv->commandv("playlist-play-index", std::to_string(id).c_str(), nullptr);
       if (ImGui::MenuItem("views.quickview.playlist.menu.play_next"_i18n, nullptr, nullptr, enabled))
         mpv->commandv("playlist-move", std::to_string(id).c_str(), std::to_string(pos + 1).c_str(), nullptr);
       ImGui::Separator();
@@ -199,7 +199,7 @@ void Quickview::drawPlaylistTabContent() {
       ImGui::PushID(item.id);
       if (ImGui::Selectable("", selected == item.id)) selected = item.id;
       if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(0))
-        mpv->property<int64_t, MPV_FORMAT_INT64>("playlist-pos", item.id);
+        mpv->commandv("playlist-play-index", std::to_string(item.id).c_str(), nullptr);
       if (ImGui::IsItemHovered(ImGuiHoveredFlags_DelayNormal)) ImGui::SetTooltip("%s", title.c_str());
       if (ImGui::BeginPopupContextItem()) {
         drawContextmenu(&item);

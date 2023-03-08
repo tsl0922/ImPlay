@@ -38,7 +38,7 @@ CommandPalette::CommandPalette(Config* config, Mpv* mpv) : View(config, mpv) {
           title,
           item.path,
           "",
-          [=, this]() { mpv->property<int64_t, MPV_FORMAT_INT64>("playlist-pos", item.id); },
+          [=, this]() { mpv->commandv("playlist-play-index", std::to_string(item.id).c_str(), nullptr); },
       });
     }
   };
