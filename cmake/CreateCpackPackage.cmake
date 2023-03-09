@@ -5,8 +5,8 @@ endif()
 
 function(get_mpv_win_bin name)
   ExternalProject_Add(${name}
-    URL https://github.com/shinchiro/mpv-winbuild-cmake/releases/download/20230302/mpv-x86_64-20230302-git-779d4f9.7z
-    URL_HASH SHA256=9f0a57dd76439dd79fc334efb3b33bfdc8089288716860b3b218a5307e2fe1e1
+    URL https://github.com/shinchiro/mpv-winbuild-cmake/releases/download/20230309/mpv-x86_64-20230309-git-9880b06.7z
+    URL_HASH SHA256=334815cfcdac0d1ffa370d1725eaf8257e64fd3b950ed79ed75504e2e9a29472
     DOWNLOAD_NO_PROGRESS ON
     UPDATE_COMMAND ""
     CONFIGURE_COMMAND ""
@@ -18,8 +18,8 @@ endfunction()
 
 function(get_yt_dlp_bin name)
   ExternalProject_Add(${name}
-    URL https://github.com/yt-dlp/yt-dlp/releases/download/2023.02.17/yt-dlp.exe
-    URL_HASH SHA256=351777b6fa3cf2d375e11b6840995132fd0d91f1b377f8ca8fe4252bc7135e7b
+    URL https://github.com/yt-dlp/yt-dlp/releases/download/2023.03.04/yt-dlp.exe
+    URL_HASH SHA256=5590c57bd0433ed239a2deaaf92e2ad6f37fe50f53664c821575cafe106a9421
     DOWNLOAD_NO_PROGRESS ON
     DOWNLOAD_NO_EXTRACT ON
     UPDATE_COMMAND ""
