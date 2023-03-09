@@ -35,6 +35,11 @@ void Quickview::draw() {
 
   ImGui::SetNextWindowSize(ImVec2(width, viewport->WorkSize.y));
   ImGui::SetNextWindowPos(ImVec2(viewport->WorkPos.x + viewport->WorkSize.x - width, viewport->WorkPos.y));
+  if (ImGui::GetIO().ConfigFlags & ImGuiConfigFlags_ViewportsEnable) {
+    ImGuiWindowClass windowClass;
+    windowClass.ViewportFlagsOverrideSet = ImGuiViewportFlags_TopMost;
+    ImGui::SetNextWindowClass(&windowClass);
+  }
   if (ImGui::BeginPopup("##quickview")) {
     if (ImGui::GetIO().AppFocusLost || ImGui::GetWindowViewport()->Flags & ImGuiViewportFlags_Minimized)
       ImGui::CloseCurrentPopup();
