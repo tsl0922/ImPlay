@@ -132,6 +132,8 @@
         "views.quickview.playlist.clear": "Clear",
         "views.quickview.playlist.menu.play": "Play",
         "views.quickview.playlist.menu.play_next": "Play Next",
+        "views.quickview.playlist.menu.move_up": "Move Up",
+        "views.quickview.playlist.menu.move_down": "Move Down",
         "views.quickview.playlist.menu.move_first": "Move to first",
         "views.quickview.playlist.menu.move_last": "Move to last",
         "views.quickview.playlist.menu.remove": "Remove",

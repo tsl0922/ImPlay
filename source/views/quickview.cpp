@@ -167,12 +167,17 @@ void Quickview::drawPlaylistTabContent() {
       if (ImGui::MenuItem("views.quickview.playlist.menu.play_next"_i18n, nullptr, nullptr, enabled))
         mpv->commandv("playlist-move", std::to_string(id).c_str(), std::to_string(pos + 1).c_str(), nullptr);
       ImGui::Separator();
-      if (ImGui::MenuItemEx("views.quickview.playlist.menu.move_first"_i18n, ICON_FA_ARROW_UP, nullptr, false, enabled))
+      if (ImGui::MenuItemEx("views.quickview.playlist.menu.move_up"_i18n, ICON_FA_ARROW_UP, nullptr, false,
+                            enabled && id > 0))
+        mpv->commandv("playlist-move", std::to_string(id).c_str(), std::to_string(id - 1).c_str(), nullptr);
+      if (ImGui::MenuItemEx("views.quickview.playlist.menu.move_down"_i18n, ICON_FA_ARROW_DOWN, nullptr, false,
+                            enabled && id < (int)items.size() - 1))
+        mpv->commandv("playlist-move", std::to_string(id + 1).c_str(), std::to_string(id).c_str(), nullptr);
+      if (ImGui::MenuItem("views.quickview.playlist.menu.move_first"_i18n, nullptr, false, enabled))
         mpv->commandv("playlist-move", std::to_string(id).c_str(), "0", nullptr);
-      if (ImGui::MenuItemEx("views.quickview.playlist.menu.move_last"_i18n, ICON_FA_ARROW_DOWN, nullptr, false,
-                            enabled))
+      if (ImGui::MenuItem("views.quickview.playlist.menu.move_last"_i18n, nullptr, false, enabled))
         mpv->commandv("playlist-move", std::to_string(id).c_str(), std::to_string(items.size()).c_str(), nullptr);
-      if (ImGui::MenuItem("views.quickview.playlist.menu.remove"_i18n, nullptr, nullptr, enabled))
+      if (ImGui::MenuItem("views.quickview.playlist.menu.remove"_i18n, nullptr, false, enabled))
         mpv->commandv("playlist-remove", std::to_string(id).c_str(), nullptr);
       ImGui::Separator();
       if (ImGui::MenuItemEx("views.quickview.playlist.menu.copy_path"_i18n, ICON_FA_COPY, nullptr, false, enabled))

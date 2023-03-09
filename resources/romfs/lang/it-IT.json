@@ -132,6 +132,8 @@
         "views.quickview.playlist.clear": "Azzera",
         "views.quickview.playlist.menu.play": "Riproduci",
         "views.quickview.playlist.menu.play_next": "Riproduci successivo",
+        "views.quickview.playlist.menu.move_up": "",
+        "views.quickview.playlist.menu.move_down": "",
         "views.quickview.playlist.menu.move_first": "Sposta all'inizio",
         "views.quickview.playlist.menu.move_last": "Sposta alla fine",
         "views.quickview.playlist.menu.remove": "Rimuovi",

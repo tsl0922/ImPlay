@@ -148,6 +148,8 @@
         "views.quickview.playlist.clear": "清空列表",
         "views.quickview.playlist.menu.play": "播放",
         "views.quickview.playlist.menu.play_next": "下一个播放",
+        "views.quickview.playlist.menu.move_up": "上移",
+        "views.quickview.playlist.menu.move_down": "下移",
         "views.quickview.playlist.menu.move_first": "移到顶部",
         "views.quickview.playlist.menu.move_last": "移到底部",
         "views.quickview.playlist.menu.remove": "移除",
