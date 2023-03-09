@@ -26,19 +26,18 @@ void Quickview::show(const char *tab) {
 }
 
 void Quickview::draw() {
-  if (!m_open) return;
-  static bool pin = false;
+  if (m_open) {
+    ImGui::OpenPopup("##quickview");
+    m_open = false;
+  }
   auto viewport = ImGui::GetMainViewport();
   float width = std::min(viewport->WorkSize.x * 0.5f, scaled(30));
-  ImGuiWindowFlags flags = ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize;
 
   ImGui::SetNextWindowSize(ImVec2(width, viewport->WorkSize.y));
   ImGui::SetNextWindowPos(ImVec2(viewport->WorkPos.x + viewport->WorkSize.x - width, viewport->WorkPos.y));
-  ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
-  ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
-  if (ImGui::Begin("Quickview Panel", &m_open, flags)) {
-    if (ImGui::IsKeyDown(ImGuiKey_Escape) || (!pin && !ImGui::IsWindowFocused(ImGuiFocusedFlags_ChildWindows)))
-      m_open = false;
+  if (ImGui::BeginPopup("##quickview")) {
+    if (ImGui::GetIO().AppFocusLost || ImGui::GetWindowViewport()->Flags & ImGuiViewportFlags_Minimized)
+      ImGui::CloseCurrentPopup();
     if (ImGui::BeginTabBar("Quickviewview")) {
       for (auto &[name, title, draw, child] : tabs) {
         ImGuiTabItemFlags flags = ImGuiTabItemFlags_None;
@@ -53,15 +52,10 @@ void Quickview::draw() {
           ImGui::EndTabItem();
         }
       }
-      ImGui::PushStyleColor(ImGuiCol_Tab, ImGui::GetStyleColorVec4(pin ? ImGuiCol_CheckMark : ImGuiCol_Tab));
-      if (ImGui::TabItemButton(ICON_FA_THUMBTACK)) pin = !pin;
-      ImGui::PopStyleColor();
-      if (ImGui::TabItemButton(ICON_FA_TIMES)) m_open = false;
       ImGui::EndTabBar();
     }
-    ImGui::End();
+    ImGui::EndPopup();
   }
-  ImGui::PopStyleVar(2);
 }
 
 void Quickview::alignRight(const char *label) {
