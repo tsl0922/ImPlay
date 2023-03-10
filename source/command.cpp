@@ -150,7 +150,8 @@ void Command::load(std::vector<std::filesystem::path> files, bool append, bool d
       for (const auto &entry : std::filesystem::recursive_directory_iterator(file)) {
         auto path = entry.path().string();
         if (isMediaFile(path)) {
-          mpv->commandv("loadfile", path.c_str(), append || i > 0 ? "append-play" : "replace", nullptr);
+          const char *action = append ? "append" : (i > 0 ? "append-play" : "replace");
+          mpv->commandv("loadfile", path.c_str(), action, nullptr);
           i++;
         }
       }
@@ -164,7 +165,8 @@ void Command::load(std::vector<std::filesystem::path> files, bool append, bool d
       } else if (isSubtitleFile(file.string())) {
         mpv->commandv("sub-add", file.string().c_str(), append ? "auto" : "select", nullptr);
       } else {
-        mpv->commandv("loadfile", file.string().c_str(), append || i > 0 ? "append-play" : "replace", nullptr);
+        const char *action = append ? "append" : (i > 0 ? "append-play" : "replace");
+        mpv->commandv("loadfile", file.string().c_str(), action, nullptr);
       }
       i++;
     }
