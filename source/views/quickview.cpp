@@ -165,13 +165,13 @@ void Quickview::drawPlaylistTabContent() {
         mpv->commandv("playlist-remove", std::to_string(item->id).c_str(), nullptr);
       ImGui::Separator();
       if (ImGui::MenuItemEx("views.quickview.playlist.menu.copy_path"_i18n, ICON_FA_COPY))
-        ImGui::SetClipboardText(item->path.c_str());
-      if (ImGui::MenuItem("views.quickview.playlist.menu.reveal"_i18n)) revealInFolder(item->path);
+        ImGui::SetClipboardText(item->path.string().c_str());
+      if (ImGui::MenuItem("views.quickview.playlist.menu.reveal"_i18n)) revealInFolder(item->path.string());
     };
     if (items.empty()) emptyLabel();
     for (auto &item : items) {
       std::string title = item.title;
-      if (title.empty() && !item.filename.empty()) title = item.filename;
+      if (title.empty() && !item.filename().empty()) title = item.filename();
       if (title.empty()) title = format("views.quickview.playlist.item"_i18n, item.id + 1);
       ImGui::PushID(item.id);
       if (ImGui::Selectable("", selected == item.id)) selected = item.id;
@@ -196,6 +196,9 @@ void Quickview::drawPlaylistTabContent() {
              "views.quickview.playlist.search"_i18n, false);
   iconButton(ICON_FA_SYNC, "cycle-values loop-playlist inf no", "views.quickview.playlist.loop"_i18n);
   iconButton(ICON_FA_RANDOM, "playlist-shuffle", "views.quickview.playlist.shuffle"_i18n);
+  iconButton(ICON_FA_SORT_ALPHA_UP, "script-message-to implay playlist-sort", "views.quickview.playlist.sort"_i18n);
+  iconButton(ICON_FA_SORT_ALPHA_DOWN, "script-message-to implay playlist-sort true",
+             "views.quickview.playlist.sort"_i18n);
   ImGui::SameLine(ImGui::GetContentRegionAvail().x -
                   3 * (ImGui::CalcTextSize(ICON_FA_PLUS).x + style.FramePadding.x + style.ItemSpacing.x));
   iconButton(ICON_FA_PLUS, "script-message-to implay playlist-add-files", "views.quickview.playlist.add_files"_i18n,

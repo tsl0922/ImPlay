@@ -42,6 +42,7 @@ set(OPENGL_LIBRARIES "glad")
 
 add_subdirectory(third_party/glad)
 add_subdirectory(third_party/fmt)
+add_subdirectory(third_party/natsort)
 add_subdirectory(third_party/json)
 add_subdirectory(third_party/inipp)
 add_subdirectory(third_party/imgui)
@@ -69,7 +70,7 @@ set(SOURCE_FILES
   source/main.cpp
 )
 set(INCLUDE_DIRS include ${MPV_INCLUDE_DIRS} ${GLFW_INCLUDE_DIRS} ${OPENGL_INCLUDE_DIR})
-set(LINK_LIBS glad fmt json inipp nfd imgui ${CMAKE_THREAD_LIBS_INIT} ${MPV_LIBRARIES} ${GLFW_LIBRARIES} ${LIBROMFS_LIBRARY})
+set(LINK_LIBS glad fmt natsort json inipp nfd imgui ${CMAKE_THREAD_LIBS_INIT} ${MPV_LIBRARIES} ${GLFW_LIBRARIES} ${LIBROMFS_LIBRARY})
 
 if(WIN32)
   configure_file(${PROJECT_SOURCE_DIR}/resources/win32/app.rc.in ${PROJECT_BINARY_DIR}/app.rc @ONLY)

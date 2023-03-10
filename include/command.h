@@ -37,6 +37,8 @@ class Command : public Views::View {
   void openDvd(std::filesystem::path path);
   void openBluray(std::filesystem::path path);
 
+  void playlistSort(bool reverse = false);
+
   void drawOpenURL();
   void drawDialog();
   void messageBox(std::string title, std::string msg);

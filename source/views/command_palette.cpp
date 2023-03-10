@@ -33,11 +33,11 @@ CommandPalette::CommandPalette(Config* config, Mpv* mpv) : View(config, mpv) {
   providers["playlist"] = [=, this](const char*) {
     for (auto& item : mpv->playlist) {
       std::string title = item.title;
-      if (title.empty() && !item.filename.empty()) title = item.filename;
+      if (title.empty() && !item.filename().empty()) title = item.filename();
       if (title.empty()) title = format("Item {}", item.id + 1);
       items.push_back({
           title,
-          item.path,
+          item.path.string(),
           "",
           [=, this]() { mpv->commandv("playlist-play-index", std::to_string(item.id).c_str(), nullptr); },
       });

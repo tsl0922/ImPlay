@@ -6,7 +6,6 @@
 #include <thread>
 #include <cstdarg>
 #include <cstring>
-#include <filesystem>
 #include <nlohmann/json.hpp>
 #include <GLFW/glfw3.h>
 #include "mpv.h"
@@ -165,6 +164,7 @@ void Mpv::observeProperties() {
   observeProperty<int64_t, MPV_FORMAT_INT64>("chapter", [this](int64_t val) { chapter = val; });
   observeProperty<int64_t, MPV_FORMAT_INT64>("playlist-pos", [this](int64_t val) { playlistPos = val; });
   observeProperty<int64_t, MPV_FORMAT_INT64>("playlist-playing-pos", [this](int64_t val) { playlistPlayingPos = val; });
+  observeProperty<int64_t, MPV_FORMAT_INT64>("time-pos", [this](int64_t val) { timePos = val; });
 }
 
 void Mpv::initPlaylist(mpv_node &node) {
@@ -180,8 +180,7 @@ void Mpv::initPlaylist(mpv_node &node) {
       if (strcmp(key, "title") == 0) {
         t.title = value.u.string;
       } else if (strcmp(key, "filename") == 0) {
-        t.path = value.u.string;
-        t.filename = std::filesystem::path(reinterpret_cast<char8_t *>(t.path.data())).filename().string();
+        t.path = reinterpret_cast<char8_t *>(value.u.string);
       }
     }
     playlist.emplace_back(t);

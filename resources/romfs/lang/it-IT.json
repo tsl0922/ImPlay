@@ -127,6 +127,7 @@
         "views.quickview.playlist.search": "Cerca",
         "views.quickview.playlist.loop": "Loop",
         "views.quickview.playlist.shuffle": "Casuale",
+        "views.quickview.playlist.sort": "",
         "views.quickview.playlist.add_files": "Aggiungi file...",
         "views.quickview.playlist.add_folders": "Aggiungi cartella...",
         "views.quickview.playlist.clear": "Azzera",

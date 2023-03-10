@@ -143,6 +143,7 @@
         "views.quickview.playlist.search": "搜索",
         "views.quickview.playlist.loop": "循环播放",
         "views.quickview.playlist.shuffle": "随机播放",
+        "views.quickview.playlist.sort": "排序",
         "views.quickview.playlist.add_files": "添加文件..",
         "views.quickview.playlist.add_folders": "添加文件夹..",
         "views.quickview.playlist.clear": "清空列表",

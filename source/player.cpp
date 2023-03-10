@@ -3,6 +3,7 @@
 
 #include <filesystem>
 #include <fstream>
+#include <strnatcmp.h>
 #include <romfs/romfs.hpp>
 #include <imgui.h>
 #include <imgui_internal.h>
@@ -144,7 +145,7 @@ void Player::onKeyEvent(int key, int scancode, int action, int mods) {
 }
 
 void Player::onDropEvent(int count, const char** paths) {
-  std::sort(paths, paths + count, [](const auto& a, const auto& b) { return strcmp(a, b) < 0; });
+  std::sort(paths, paths + count, [](const auto& a, const auto& b) { return strnatcasecmp(a, b) < 0; });
   std::vector<std::filesystem::path> files;
   for (int i = 0; i < count; i++) files.emplace_back(reinterpret_cast<char8_t*>(const_cast<char*>(paths[i])));
   cmd->load(files);
@@ -171,6 +172,7 @@ void Player::initObservers() {
     auto path = mpv->property("path");
     if (path != "" && path != "bd://" && path != "dvd://") config->addRecentFile(path, mpv->property("media-title"));
     mpv->property("force-media-title", "");
+    mpv->property("start", "none");
   });
 
   mpv->observeEvent(MPV_EVENT_CLIENT_MESSAGE, [this](void* data) {

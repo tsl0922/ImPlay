@@ -5,6 +5,7 @@
 #include <string>
 #include <vector>
 #include <functional>
+#include <filesystem>
 #include <mpv/client.h>
 #include <mpv/render_gl.h>
 
@@ -80,8 +81,9 @@ class Mpv {
   struct PlayItem {
     int64_t id = -1;
     std::string title;
-    std::string path;
-    std::string filename;
+    std::filesystem::path path;
+
+    inline std::string filename() const { return path.filename().string(); }
   };
 
   struct ChapterItem {
@@ -109,7 +111,7 @@ class Mpv {
   std::vector<BindingItem> bindings;
   std::vector<std::string> profiles;
   std::string aid, vid, sid, sid2, audioDevice, cursorAutohide;
-  int64_t chapter, volume, playlistPos, playlistPlayingPos;
+  int64_t chapter = 0, volume = 100, playlistPos = -1, playlistPlayingPos = -1, timePos = 0;
   bool pause, mute, fullscreen, sidv, sidv2, windowDragging, forceWindow;
 
  private:

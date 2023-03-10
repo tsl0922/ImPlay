@@ -4,6 +4,7 @@
 #include <map>
 #include <algorithm>
 #include <filesystem>
+#include <strnatcmp.h>
 #include <functional>
 #include "helpers/utils.h"
 #include "theme.h"
@@ -59,6 +60,7 @@ void Command::execute(int n_args, const char **args_) {
       {"quickview", [&](int n, const char **args) { quickview->show(n > 0 ? args[0] : nullptr); }},
       {"playlist-add-files", [&](int n, const char **args) { openFilesDlg(mediaFilters, true); }},
       {"playlist-add-folder", [&](int n, const char **args) { openFolderDlg(true); }},
+      {"playlist-sort", [&](int n, const char **args) { playlistSort(n > 0 && strcmp(args[0], "true") == 0); }},
       {"play-pause",
        [&](int n, const char **args) {
          auto count = mpv->property<int64_t, MPV_FORMAT_INT64>("playlist-count");
@@ -135,6 +137,36 @@ void Command::openDvd(std::filesystem::path path) {
 void Command::openBluray(std::filesystem::path path) {
   mpv->property("bluray-device", path.string().c_str());
   mpv->commandv("loadfile", "bd://", nullptr);
+}
+
+void Command::playlistSort(bool reverse) {
+  if (mpv->playlist.empty()) return;
+  std::vector<Mpv::PlayItem> items(mpv->playlist);
+  std::sort(items.begin(), items.end(), [&](const auto &a, const auto &b) {
+    std::string str1 = a.title != "" ? a.title : a.filename();
+    std::string str2 = b.title != "" ? b.title : b.filename();
+    return strnatcasecmp(str1.c_str(), str2.c_str()) < 0;
+  });
+  if (reverse) std::reverse(items.begin(), items.end());
+
+  int64_t timePos = mpv->timePos;
+  int64_t pos = -1;
+  for (int i = 0; i < items.size(); i++) {
+    if (items[i].id == mpv->playlistPos) {
+      pos = i;
+      break;
+    }
+  }
+  std::vector<std::string> playlist = {"#EXTM3U"};
+  for (auto &item : items) {
+    if (item.title != "") playlist.push_back(format("#EXTINF:-1,{}", item.title));
+    playlist.push_back(item.path.string());
+  }
+  mpv->property<int64_t, MPV_FORMAT_INT64>("playlist-start", pos);
+  mpv->property("start", format("+{}", timePos).c_str());
+  if (!mpv->playing()) mpv->command("playlist-clear");
+  mpv->commandv("loadlist", format("memory://{}", join(playlist, "\n")).c_str(), mpv->playing() ? "replace" : "append",
+                nullptr);
 }
 
 void Command::load(std::vector<std::filesystem::path> files, bool append, bool disk) {
