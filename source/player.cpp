@@ -11,7 +11,8 @@
 #else
 #include <GL/gl.h>
 #endif
-#include "helpers.h"
+#include "helpers/utils.h"
+#include "helpers/imgui.h"
 #include "player.h"
 
 namespace ImPlay {
@@ -173,11 +174,8 @@ void Player::initObservers() {
   });
 
   mpv->observeEvent(MPV_EVENT_CLIENT_MESSAGE, [this](void* data) {
-    ImGuiIO& io = ImGui::GetIO();
-    io.SetAppAcceptingEvents(false);
     auto msg = static_cast<mpv_event_client_message*>(data);
     cmd->execute(msg->num_args, msg->args);
-    io.SetAppAcceptingEvents(true);
   });
 
   mpv->observeProperty<int, MPV_FORMAT_FLAG>("idle-active", [this](int flag) {

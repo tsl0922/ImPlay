@@ -15,7 +15,7 @@
 #ifdef _WIN32
 #include <windowsx.h>
 #endif
-#include "helpers.h"
+#include "helpers/utils.h"
 #include "theme.h"
 #include "window.h"
 

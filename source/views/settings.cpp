@@ -5,7 +5,9 @@
 #include <filesystem>
 #include <string>
 #include <fonts/fontawesome.h>
-#include "helpers.h"
+#include "helpers/utils.h"
+#include "helpers/imgui.h"
+#include "helpers/nfd.h"
 #include "theme.h"
 #include "views/settings.h"
 
@@ -220,9 +222,9 @@ void Settings::drawFontTab() {
     if (ImGui::IsWindowAppearing()) error = "";
     if (ImGui::Button(ICON_FA_FOLDER_OPEN)) {
       try {
-        if (const auto [path, ok] = openFile({{"Font Files", "ttf,ttc,otf"}}); ok) {
-          strncpy(fontPath, path.string().c_str(), IM_ARRAYSIZE(fontPath));
-          data.Font.Path = path.string();
+        if (auto res = NFD::openFile({{"Font Files", "ttf,ttc,otf"}})) {
+          data.Font.Path = res->string();
+          strncpy(fontPath, data.Font.Path.c_str(), IM_ARRAYSIZE(fontPath));
         }
       } catch (const std::exception &e) {
         error = e.what();

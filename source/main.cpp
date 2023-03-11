@@ -12,6 +12,7 @@
 #include <sys/un.h>
 #endif
 #include <nlohmann/json.hpp>
+#include "helpers/utils.h"
 #include "window.h"
 
 static const char* usage =

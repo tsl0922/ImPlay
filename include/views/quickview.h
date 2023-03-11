@@ -1,7 +1,6 @@
 #pragma once
 #include <functional>
 #include <vector>
-#include "helpers.h"
 #include "view.h"
 
 namespace ImPlay::Views {

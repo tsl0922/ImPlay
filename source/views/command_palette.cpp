@@ -3,7 +3,8 @@
 
 #include <algorithm>
 #include <cstring>
-#include "helpers.h"
+#include "helpers/utils.h"
+#include "helpers/imgui.h"
 #include "views/command_palette.h"
 
 namespace ImPlay::Views {

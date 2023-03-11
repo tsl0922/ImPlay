@@ -2,7 +2,8 @@
 // SPDX-License-Identifier: GPL-2.0-only
 
 #include <map>
-#include "helpers.h"
+#include "helpers/utils.h"
+#include "helpers/imgui.h"
 #include "views/debug.h"
 
 namespace ImPlay::Views {

@@ -4,21 +4,15 @@
 #pragma once
 #include <codecvt>
 #include <locale>
-#include <algorithm>
 #include <filesystem>
-#include <functional>
 #include <string>
 #include <map>
 #include <vector>
-#include <stdexcept>
-#include <utility>
 #include <fmt/format.h>
 #include <fmt/chrono.h>
 #include <fmt/color.h>
 #include <imgui.h>
 #include <imgui_internal.h>
-#define NFD_THROWS_EXCEPTIONS
-#include <nfd.hpp>
 #include "lang.h"
 
 namespace ImPlay {
@@ -36,10 +30,6 @@ inline float scaled(float n) { return n * ImGui::GetFontSize(); }
 inline ImVec2 scaled(const ImVec2& vector) { return vector * ImGui::GetFontSize(); }
 
 bool fileExists(std::string path);
-
-std::pair<std::filesystem::path, bool> openFile(std::vector<std::pair<std::string, std::string>> filters);
-std::pair<std::vector<std::filesystem::path>, bool> openFiles(std::vector<std::pair<std::string, std::string>> filters);
-std::pair<std::filesystem::path, bool> openFolder();
 
 int openUrl(std::string url);
 void revealInFolder(std::string path);
@@ -94,12 +84,3 @@ inline std::string join(std::vector<std::string> v, std::string_view sep) {
 std::vector<std::string> split(const std::string& str, const std::string& sep);
 }  // namespace ImPlay
 
-namespace ImGui {
-bool IsAnyKeyPressed();
-void HalignCenter(const char* text);
-void TextCentered(const char* text, bool disabled = false);
-void TextEllipsis(const char* text, float maxWidth = 0);
-void Hyperlink(const char* label, const char* url);
-void HelpMarker(const char* desc);
-ImTextureID LoadTexture(const char* path, ImVec2* size = nullptr);
-}  // namespace ImGui

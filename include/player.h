@@ -8,7 +8,6 @@
 #include "mpv.h"
 #include "config.h"
 #include "command.h"
-#include "helpers.h"
 
 namespace ImPlay {
 class Player {

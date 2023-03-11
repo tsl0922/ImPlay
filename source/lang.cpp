@@ -4,7 +4,7 @@
 #include <fstream>
 #include <romfs/romfs.hpp>
 #include <nlohmann/json.hpp>
-#include "helpers.h"
+#include "helpers/utils.h"
 #include "lang.h"
 
 namespace ImPlay {

@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: GPL-2.0-only
 
 #pragma once
-#include <functional>
 #include <GLFW/glfw3.h>
 #include "views/view.h"
 #include "views/about.h"
@@ -11,6 +10,7 @@
 #include "views/settings.h"
 #include "views/context_menu.h"
 #include "views/command_palette.h"
+#include "helpers/nfd.h"
 
 namespace ImPlay {
 class Command : public Views::View {
@@ -27,8 +27,8 @@ class Command : public Views::View {
   bool isSubtitleFile(std::string file);
 
  private:
-  void openFileDlg(std::vector<std::pair<std::string, std::string>> filters, bool append = false);
-  void openFilesDlg(std::vector<std::pair<std::string, std::string>> filters, bool append = false);
+  void openFileDlg(NFD::Filters filters, bool append = false);
+  void openFilesDlg(NFD::Filters filters, bool append = false);
   void openFolderDlg(bool append = false, bool disk = false);
 
   void openClipboard();
@@ -70,7 +70,7 @@ class Command : public Views::View {
   const std::vector<std::string> imageTypes = {"jpg", "bmp", "png", "gif", "webp"};
   const std::vector<std::string> subtitleTypes = {"srt",  "ass", "idx", "sub", "sup",
                                                   "ttxt", "txt", "ssa", "smi", "mks"};
-  
+
   const std::vector<std::pair<std::string, std::string>> mediaFilters = {
       {"Videos Files", format("{}", join(videoTypes, ","))},
       {"Audio Files", format("{}", join(audioTypes, ","))},

@@ -1,6 +1,7 @@
 #include <algorithm>
 #include <fonts/fontawesome.h>
-#include "helpers.h"
+#include "helpers/utils.h"
+#include "helpers/imgui.h"
 #include "views/quickview.h"
 
 namespace ImPlay::Views {

@@ -1,8 +1,9 @@
 // Copyright (c) 2022 tsl0922. All rights reserved.
 // SPDX-License-Identifier: GPL-2.0-only
 
+#include "helpers/utils.h"
+#include "helpers/imgui.h"
 #include "views/about.h"
-#include "helpers.h"
 
 namespace ImPlay::Views {
 void About::draw() {

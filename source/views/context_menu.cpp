@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: GPL-2.0-only
 
 #include <fonts/fontawesome.h>
-#include "helpers.h"
+#include "helpers/utils.h"
 #include "theme.h"
 #include "views/context_menu.h"
 

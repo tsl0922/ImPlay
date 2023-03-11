@@ -4,7 +4,7 @@
 #include <filesystem>
 #include <fstream>
 #include "config.h"
-#include "helpers.h"
+#include "helpers/utils.h"
 
 namespace ImPlay {
 Config::Config() {

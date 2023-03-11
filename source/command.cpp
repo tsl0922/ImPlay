@@ -4,7 +4,8 @@
 #include <map>
 #include <algorithm>
 #include <filesystem>
-#include "helpers.h"
+#include <functional>
+#include "helpers/utils.h"
 #include "theme.h"
 #include "command.h"
 
@@ -97,21 +98,21 @@ void Command::execute(int n_args, const char **args_) {
   }
 }
 
-void Command::openFileDlg(std::vector<std::pair<std::string, std::string>> filters, bool append) {
+void Command::openFileDlg(NFD::Filters filters, bool append) {
   mpv->command("set pause yes");
-  if (const auto [path, ok] = openFile(filters); ok) load({path}, append);
+  if (auto res = NFD::openFile(filters)) load({*res}, append);
   mpv->command("set pause no");
 }
 
-void Command::openFilesDlg(std::vector<std::pair<std::string, std::string>> filters, bool append) {
+void Command::openFilesDlg(NFD::Filters filters, bool append) {
   mpv->command("set pause yes");
-  if (const auto [paths, ok] = openFiles(filters); ok) load(paths, append);
+  if (auto res = NFD::openFiles(filters)) load(*res, append);
   mpv->command("set pause no");
 }
 
 void Command::openFolderDlg(bool append, bool disk) {
   mpv->command("set pause yes");
-  if (const auto [path, ok] = openFolder(); ok) load({path}, append, disk);
+  if (auto res = NFD::openFolder()) load({*res}, append, disk);
   mpv->command("set pause no");
 }
 
