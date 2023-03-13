@@ -142,59 +142,31 @@ void Quickview::drawTracks(const char *type, const char *prop, std::string pos) 
 void Quickview::drawPlaylistTabContent() {
   auto style = ImGui::GetStyle();
   auto pos = mpv->playlistPos;
-
-  iconButton(ICON_FA_SEARCH, "script-message-to implay command-palette playlist",
-             "views.quickview.playlist.search"_i18n, false);
-  iconButton(ICON_FA_SYNC, "cycle-values loop-playlist inf no", "views.quickview.playlist.loop"_i18n);
-  iconButton(ICON_FA_RANDOM, "playlist-shuffle", "views.quickview.playlist.shuffle"_i18n);
-  ImGui::SameLine(ImGui::GetContentRegionAvail().x -
-                  3 * (ImGui::CalcTextSize(ICON_FA_PLUS).x + style.FramePadding.x + style.ItemSpacing.x));
-  iconButton(ICON_FA_PLUS, "script-message-to implay playlist-add-files", "views.quickview.playlist.add_files"_i18n,
-             false);
-  iconButton(ICON_FA_FOLDER_PLUS, "script-message-to implay playlist-add-folder",
-             "views.quickview.playlist.add_folders"_i18n);
-  iconButton(ICON_FA_TRASH_ALT, "playlist-clear", "views.quickview.playlist.clear"_i18n);
-  ImGui::Separator();
-
-  if (ImGui::BeginListBox("##playlist", ImVec2(-FLT_MIN, -FLT_MIN))) {
+  if (ImGui::BeginListBox("##playlist", ImVec2(-FLT_MIN, -ImGui::GetFrameHeightWithSpacing()))) {
     auto items = mpv->playlist;
     static int selected = pos;
-    auto drawContextmenu = [&](Mpv::PlayItem *item = nullptr) {
-      bool enabled = item != nullptr;
-      int id = enabled ? item->id : -1;
-      if (ImGui::MenuItemEx("views.quickview.playlist.menu.play"_i18n, ICON_FA_PLAY_CIRCLE, nullptr, false, enabled))
-        mpv->commandv("playlist-play-index", std::to_string(id).c_str(), nullptr);
-      if (ImGui::MenuItem("views.quickview.playlist.menu.play_next"_i18n, nullptr, nullptr, enabled))
-        mpv->commandv("playlist-move", std::to_string(id).c_str(), std::to_string(pos + 1).c_str(), nullptr);
+    auto drawContextmenu = [&](Mpv::PlayItem *item) {
+      if (ImGui::MenuItemEx("views.quickview.playlist.menu.play"_i18n, ICON_FA_PLAY_CIRCLE))
+        mpv->commandv("playlist-play-index", std::to_string(item->id).c_str(), nullptr);
+      if (ImGui::MenuItem("views.quickview.playlist.menu.play_next"_i18n))
+        mpv->commandv("playlist-move", std::to_string(item->id).c_str(), std::to_string(pos + 1).c_str(), nullptr);
       ImGui::Separator();
       if (ImGui::MenuItemEx("views.quickview.playlist.menu.move_up"_i18n, ICON_FA_ARROW_UP, nullptr, false,
-                            enabled && id > 0))
-        mpv->commandv("playlist-move", std::to_string(id).c_str(), std::to_string(id - 1).c_str(), nullptr);
+                            item->id > 0))
+        mpv->commandv("playlist-move", std::to_string(item->id).c_str(), std::to_string(item->id - 1).c_str(), nullptr);
       if (ImGui::MenuItemEx("views.quickview.playlist.menu.move_down"_i18n, ICON_FA_ARROW_DOWN, nullptr, false,
-                            enabled && id < (int)items.size() - 1))
-        mpv->commandv("playlist-move", std::to_string(id + 1).c_str(), std::to_string(id).c_str(), nullptr);
-      if (ImGui::MenuItem("views.quickview.playlist.menu.move_first"_i18n, nullptr, false, enabled))
-        mpv->commandv("playlist-move", std::to_string(id).c_str(), "0", nullptr);
-      if (ImGui::MenuItem("views.quickview.playlist.menu.move_last"_i18n, nullptr, false, enabled))
-        mpv->commandv("playlist-move", std::to_string(id).c_str(), std::to_string(items.size()).c_str(), nullptr);
-      if (ImGui::MenuItem("views.quickview.playlist.menu.remove"_i18n, nullptr, false, enabled))
-        mpv->commandv("playlist-remove", std::to_string(id).c_str(), nullptr);
+                            item->id < (int)items.size() - 1))
+        mpv->commandv("playlist-move", std::to_string(item->id + 1).c_str(), std::to_string(item->id).c_str(), nullptr);
+      if (ImGui::MenuItem("views.quickview.playlist.menu.move_first"_i18n))
+        mpv->commandv("playlist-move", std::to_string(item->id).c_str(), "0", nullptr);
+      if (ImGui::MenuItem("views.quickview.playlist.menu.move_last"_i18n))
+        mpv->commandv("playlist-move", std::to_string(item->id).c_str(), std::to_string(items.size()).c_str(), nullptr);
+      if (ImGui::MenuItem("views.quickview.playlist.menu.remove"_i18n))
+        mpv->commandv("playlist-remove", std::to_string(item->id).c_str(), nullptr);
       ImGui::Separator();
-      if (ImGui::MenuItemEx("views.quickview.playlist.menu.copy_path"_i18n, ICON_FA_COPY, nullptr, false, enabled))
+      if (ImGui::MenuItemEx("views.quickview.playlist.menu.copy_path"_i18n, ICON_FA_COPY))
         ImGui::SetClipboardText(item->path.c_str());
-      if (ImGui::MenuItem("views.quickview.playlist.menu.reveal"_i18n, nullptr, nullptr, enabled))
-        revealInFolder(item->path);
-      ImGui::Separator();
-      if (ImGui::MenuItemEx("views.quickview.playlist.search"_i18n, ICON_FA_SEARCH))
-        mpv->command("script-message-to implay command-palette playlist");
-      if (ImGui::MenuItemEx("views.quickview.playlist.shuffle"_i18n, ICON_FA_RANDOM)) mpv->command("playlist-shuffle");
-      if (ImGui::MenuItem("views.quickview.playlist.loop"_i18n)) mpv->command("cycle-values loop-playlist inf no");
-      ImGui::Separator();
-      if (ImGui::MenuItemEx("views.quickview.playlist.add_files"_i18n, ICON_FA_PLUS))
-        mpv->command("script-message-to implay playlist-add-files");
-      if (ImGui::MenuItemEx("views.quickview.playlist.add_folders"_i18n, ICON_FA_FOLDER_PLUS))
-        mpv->command("script-message-to implay playlist-add-folder");
-      if (ImGui::MenuItem("views.quickview.playlist.clear"_i18n)) mpv->command("playlist-clear");
+      if (ImGui::MenuItem("views.quickview.playlist.menu.reveal"_i18n)) revealInFolder(item->path);
     };
     if (items.empty()) emptyLabel();
     for (auto &item : items) {
@@ -217,12 +189,20 @@ void Quickview::drawPlaylistTabContent() {
       ImGui::PopStyleColor();
       ImGui::PopID();
     }
-    if (ImGui::BeginPopupContextWindow(nullptr, ImGuiPopupFlags_MouseButtonRight | ImGuiPopupFlags_NoOpenOverItems)) {
-      drawContextmenu();
-      ImGui::EndPopup();
-    }
     ImGui::EndListBox();
   }
+
+  iconButton(ICON_FA_SEARCH, "script-message-to implay command-palette playlist",
+             "views.quickview.playlist.search"_i18n, false);
+  iconButton(ICON_FA_SYNC, "cycle-values loop-playlist inf no", "views.quickview.playlist.loop"_i18n);
+  iconButton(ICON_FA_RANDOM, "playlist-shuffle", "views.quickview.playlist.shuffle"_i18n);
+  ImGui::SameLine(ImGui::GetContentRegionAvail().x -
+                  3 * (ImGui::CalcTextSize(ICON_FA_PLUS).x + style.FramePadding.x + style.ItemSpacing.x));
+  iconButton(ICON_FA_PLUS, "script-message-to implay playlist-add-files", "views.quickview.playlist.add_files"_i18n,
+             false);
+  iconButton(ICON_FA_FOLDER_PLUS, "script-message-to implay playlist-add-folder",
+             "views.quickview.playlist.add_folders"_i18n);
+  iconButton(ICON_FA_TRASH_ALT, "playlist-clear", "views.quickview.playlist.clear"_i18n);
 }
 
 void Quickview::drawChaptersTabContent() {
