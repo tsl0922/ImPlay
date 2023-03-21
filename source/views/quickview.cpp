@@ -168,6 +168,7 @@ void Quickview::drawPlaylistTabContent() {
         ImGui::SetClipboardText(item->path.string().c_str());
       if (ImGui::MenuItem("views.quickview.playlist.menu.reveal"_i18n)) revealInFolder(item->path.string());
     };
+
     if (items.empty()) emptyLabel();
     for (auto &item : items) {
       std::string title = item.title;
@@ -192,13 +193,15 @@ void Quickview::drawPlaylistTabContent() {
     ImGui::EndListBox();
   }
 
+  static bool sort = true;
   iconButton(ICON_FA_SEARCH, "script-message-to implay command-palette playlist",
              "views.quickview.playlist.search"_i18n, false);
   iconButton(ICON_FA_SYNC, "cycle-values loop-playlist inf no", "views.quickview.playlist.loop"_i18n);
   iconButton(ICON_FA_RANDOM, "playlist-shuffle", "views.quickview.playlist.shuffle"_i18n);
-  iconButton(ICON_FA_SORT_ALPHA_UP, "script-message-to implay playlist-sort", "views.quickview.playlist.sort"_i18n);
-  iconButton(ICON_FA_SORT_ALPHA_DOWN, "script-message-to implay playlist-sort true",
-             "views.quickview.playlist.sort"_i18n);
+  if (iconButton(sort ? ICON_FA_SORT_ALPHA_DOWN : ICON_FA_SORT_ALPHA_UP,
+                 format("script-message-to implay playlist-sort {}", sort).c_str(),
+                 "views.quickview.playlist.sort"_i18n))
+    sort = !sort;
   ImGui::SameLine(ImGui::GetContentRegionAvail().x -
                   3 * (ImGui::CalcTextSize(ICON_FA_PLUS).x + style.FramePadding.x + style.ItemSpacing.x));
   iconButton(ICON_FA_PLUS, "script-message-to implay playlist-add-files", "views.quickview.playlist.add_files"_i18n,
