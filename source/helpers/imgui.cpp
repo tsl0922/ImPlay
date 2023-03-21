@@ -54,8 +54,7 @@ void ImGui::Hyperlink(const char* label, const char* url) {
 
 void ImGui::HelpMarker(const char* desc) {
   ImGui::TextDisabled("(?)");
-  if (ImGui::IsItemHovered(ImGuiHoveredFlags_DelayShort)) {
-    ImGui::BeginTooltip();
+  if (ImGui::IsItemHovered(ImGuiHoveredFlags_DelayShort) && ImGui::BeginTooltip()) {
     ImGui::PushTextWrapPos(35 * ImGui::GetFontSize());
     ImGui::TextUnformatted(desc);
     ImGui::PopTextWrapPos();
