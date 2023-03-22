@@ -64,7 +64,7 @@ class Window {
 
   struct GLCtxGuard {
    public:
-    inline GLCtxGuard(GLFWwindow *ctx, std::mutex *lock) : ctx(ctx), lk(lock) {
+    inline GLCtxGuard(GLFWwindow *ctx, std::mutex *lock) : lk(lock) {
       lk->lock();
       glfwMakeContextCurrent(ctx);
     }
@@ -74,7 +74,6 @@ class Window {
     }
 
    private:
-    GLFWwindow *ctx;
     std::mutex *lk;
   };
 
