@@ -58,10 +58,10 @@ set(SOURCE_FILES
   source/views/quickview.cpp
   source/views/settings.cpp
   source/helpers/imgui.cpp
+  source/helpers/lang.cpp
   source/helpers/nfd.cpp
   source/helpers/utils.cpp
   source/theme.cpp
-  source/lang.cpp
   source/command.cpp
   source/config.cpp
   source/mpv.cpp

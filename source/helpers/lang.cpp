@@ -5,7 +5,7 @@
 #include <romfs/romfs.hpp>
 #include <nlohmann/json.hpp>
 #include "helpers/utils.h"
-#include "lang.h"
+#include "helpers/lang.h"
 
 namespace ImPlay {
 std::string LangData::get(std::string& key) {
