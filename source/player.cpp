@@ -265,15 +265,10 @@ void Player::writeMpvConf() {
 
   auto scriptOpts = path / "script-opts";
   auto oscConf = scriptOpts / "osc.conf";
-  float scale = 1.0f;
-#ifndef __APPLE__
-  glfwGetWindowContentScale(window, &scale, nullptr);
-#endif
 
   std::filesystem::create_directories(scriptOpts);
   if (!std::filesystem::exists(oscConf)) {
     std::ofstream file(oscConf);
-    file << format("scalewindowed={}\n", scale);
     file << "hidetimeout=2000\n";
     file << "idlescreen=no\n";
   }
