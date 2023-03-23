@@ -79,13 +79,14 @@ int openUrl(std::string url) {
 }
 
 void revealInFolder(std::string path) {
+  auto fp = std::filesystem::path(reinterpret_cast<char8_t*>(path.data()));
+  if (!std::filesystem::exists(fp)) return;
 #ifdef __APPLE__
   system(format("open -R '{}'", path).c_str());
 #elif defined(_WIN32) || defined(__CYGWIN__)
   std::string arg = format("/select,\"{}\"", path);
   ShellExecuteW(0, 0, L"explorer", UTF8ToWide(arg).c_str(), 0, SW_SHOW);
 #else
-  auto fp = std::filesystem::path(reinterpret_cast<char8_t*>(path.data()));
   auto status = std::filesystem::status(fp);
   auto target = std::filesystem::is_directory(status) ? path : fp.parent_path().string();
   system(format("xdg-open '{}'", target).c_str());

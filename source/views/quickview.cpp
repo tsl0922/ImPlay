@@ -146,16 +146,15 @@ void Quickview::drawPlaylistTabContent() {
     auto items = mpv->playlist;
     static int selected = pos;
     auto drawContextmenu = [&](Mpv::PlayItem *item) {
-      if (ImGui::MenuItemEx("views.quickview.playlist.menu.play"_i18n, ICON_FA_PLAY_CIRCLE))
+      if (ImGui::MenuItem("views.quickview.playlist.menu.play"_i18n))
         mpv->commandv("playlist-play-index", std::to_string(item->id).c_str(), nullptr);
       if (ImGui::MenuItem("views.quickview.playlist.menu.play_next"_i18n))
         mpv->commandv("playlist-move", std::to_string(item->id).c_str(), std::to_string(pos + 1).c_str(), nullptr);
       ImGui::Separator();
-      if (ImGui::MenuItemEx("views.quickview.playlist.menu.move_up"_i18n, ICON_FA_ARROW_UP, nullptr, false,
-                            item->id > 0))
+      if (ImGui::MenuItem("views.quickview.playlist.menu.move_up"_i18n, nullptr, false, item->id > 0))
         mpv->commandv("playlist-move", std::to_string(item->id).c_str(), std::to_string(item->id - 1).c_str(), nullptr);
-      if (ImGui::MenuItemEx("views.quickview.playlist.menu.move_down"_i18n, ICON_FA_ARROW_DOWN, nullptr, false,
-                            item->id < (int)items.size() - 1))
+      if (ImGui::MenuItem("views.quickview.playlist.menu.move_down"_i18n, nullptr, false,
+                          item->id < (int)items.size() - 1))
         mpv->commandv("playlist-move", std::to_string(item->id + 1).c_str(), std::to_string(item->id).c_str(), nullptr);
       if (ImGui::MenuItem("views.quickview.playlist.menu.move_first"_i18n))
         mpv->commandv("playlist-move", std::to_string(item->id).c_str(), "0", nullptr);
@@ -164,7 +163,7 @@ void Quickview::drawPlaylistTabContent() {
       if (ImGui::MenuItem("views.quickview.playlist.menu.remove"_i18n))
         mpv->commandv("playlist-remove", std::to_string(item->id).c_str(), nullptr);
       ImGui::Separator();
-      if (ImGui::MenuItemEx("views.quickview.playlist.menu.copy_path"_i18n, ICON_FA_COPY))
+      if (ImGui::MenuItem("views.quickview.playlist.menu.copy_path"_i18n))
         ImGui::SetClipboardText(item->path.string().c_str());
       if (ImGui::MenuItem("views.quickview.playlist.menu.reveal"_i18n)) revealInFolder(item->path.string());
     };
