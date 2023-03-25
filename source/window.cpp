@@ -125,7 +125,7 @@ void Window::wakeup() {
 void Window::render() {
   static auto nextFrame = std::chrono::steady_clock::now();
   nextFrame += std::chrono::milliseconds(1000 / config->Data.Interface.Fps);
-  if (player->isIdle() || mpv->paused()) eventWaiter.wait_until(nextFrame);
+  if (player->isIdle() || mpv->pause) eventWaiter.wait_until(nextFrame);
 
   {
     GLCtxGuard guard(window, &glCtxLock);

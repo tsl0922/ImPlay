@@ -27,7 +27,7 @@
         "menu.playback.seek_back.10s": "快退10秒",
         "menu.playback.seek_forward.1m": "快进1分",
         "menu.playback.seek_back.1m": "快退1分",
-        "menu.playback.speed": "速度",
+        "menu.playback.speed": "播放速度",
         "menu.playback.next_frame": "下一帧",
         "menu.playback.previous_frame": "上一帧",
         "menu.playback.next_media": "下一媒体",

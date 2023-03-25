@@ -27,7 +27,6 @@ class Mpv {
   void requestLog(const char *level, LogHandler handler);
   int loadConfig(const char *path);
 
-  bool paused() { return pause; }
   bool playing() { return playlistPlayingPos != -1; }
   bool allowDrag() { return windowDragging && !fullscreen; }
 

@@ -52,6 +52,7 @@ void Command::execute(int n_args, const char **args_) {
       {"open-iso", [&](int n, const char **args) { openFileDlg(isoFilters); }},
       {"open-clipboard", [&](int n, const char **args) { openClipboard(); }},
       {"open-url", [&](int n, const char **args) { openURL(); }},
+      {"open-config-dir", [&](int n, const char **args) { openUrl(config->dir()); }},
       {"load-sub", [&](int n, const char **args) { openFilesDlg(subtitleFilters); }},
       {"load-conf",
        [&](int n, const char **args) {
