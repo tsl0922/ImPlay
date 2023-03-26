@@ -11,12 +11,8 @@ namespace ImPlay::Views {
 class ContextMenu : public View {
  public:
   using View::View;
-
-  void draw() override;
-
- private:
   enum ItemType { TYPE_NORMAL, TYPE_SEPARATOR, TYPE_SUBMENU, TYPE_CALLBACK };
-  struct MenuItem {
+  struct Item {
     ItemType type;
     std::string cmd;
     std::string label;
@@ -24,12 +20,15 @@ class ContextMenu : public View {
     std::string shortcut;
     bool enabled = true;
     bool selected = false;
-    std::vector<MenuItem> submenu;
+    std::vector<Item> submenu;
     std::function<void()> callback;
   };
 
-  void draw(std::vector<MenuItem> items);
-  std::vector<MenuItem> build();
+  void draw() override;
+  std::vector<Item> build();
+
+ private:
+  void draw(std::vector<Item> items);
 
   void drawPlaylist(std::vector<Mpv::PlayItem> items);
   void drawChapterlist(std::vector<Mpv::ChapterItem> items);

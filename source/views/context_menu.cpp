@@ -28,7 +28,7 @@ void ContextMenu::draw() {
   }
 }
 
-void ContextMenu::draw(std::vector<MenuItem> items) {
+void ContextMenu::draw(std::vector<ContextMenu::Item> items) {
   for (auto &item : items) {
     switch (item.type) {
       case TYPE_SEPARATOR:
@@ -54,7 +54,7 @@ void ContextMenu::draw(std::vector<MenuItem> items) {
   }
 }
 
-std::vector<ContextMenu::MenuItem> ContextMenu::build() {
+std::vector<ContextMenu::Item> ContextMenu::build() {
   bool stp = config->Data.Recent.SpaceToPlayLast;
   bool playing = mpv->playing();
   bool paused = (stp && !playing) || mpv->pause;
@@ -66,7 +66,7 @@ std::vector<ContextMenu::MenuItem> ContextMenu::build() {
 #define CTRL "Ctrl"
 #endif
   // clang-format off
-  std::vector<ContextMenu::MenuItem> items = {
+  std::vector<ContextMenu::Item> items = {
       {TYPE_NORMAL, stp ? "script-message-to implay play-pause" : "cycle pause",
         paused ? "menu.play" : "menu.pause", paused ? ICON_FA_PLAY : ICON_FA_PAUSE, "Space", stp || playing},
       {TYPE_NORMAL, "stop", "menu.stop", ICON_FA_STOP, "", playing},
