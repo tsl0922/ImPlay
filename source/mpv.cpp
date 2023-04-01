@@ -7,16 +7,14 @@
 #include <cstdarg>
 #include <cstring>
 #include <nlohmann/json.hpp>
-#include <GLFW/glfw3.h>
 #include "mpv.h"
 
 namespace ImPlay {
-Mpv::Mpv(int64_t wid) : wid(wid) {
+Mpv::Mpv() {
   main = mpv_create();
   if (!main) throw std::runtime_error("could not create mpv handle");
   mpv = mpv_create_client(main, "implay");
   if (!mpv) throw std::runtime_error("could not create mpv client");
-  if (mpv_set_property(mpv, "wid", MPV_FORMAT_INT64, &wid) < 0) throw std::runtime_error("could not set mpv wid");
 }
 
 Mpv::~Mpv() {
@@ -94,9 +92,30 @@ void Mpv::reportSwap() {
   if (renderCtx != nullptr) mpv_render_context_report_swap(renderCtx);
 }
 
-void Mpv::init() {
+static void *get_proc_address(void *ctx, const char *name) { return ((GLAddrLoadFunc)ctx)(name); }
+
+void Mpv::init(GLAddrLoadFunc load, int64_t wid) {
+  if (mpv_set_property(mpv, "wid", MPV_FORMAT_INT64, &wid) < 0) throw std::runtime_error("could not set mpv wid");
   if (mpv_initialize(mpv) < 0) throw std::runtime_error("could not initialize mpv context");
-  if (wid == 0) initRender();
+  if (wid == 0) {
+    mpv_opengl_init_params gl_init_params{get_proc_address, (void *)load};
+    mpv_render_param params[]{
+        {MPV_RENDER_PARAM_API_TYPE, const_cast<char *>(MPV_RENDER_API_TYPE_OPENGL)},
+        {MPV_RENDER_PARAM_OPENGL_INIT_PARAMS, &gl_init_params},
+        {MPV_RENDER_PARAM_INVALID, nullptr},
+    };
+
+    if (mpv_render_context_create(&renderCtx, mpv, params) < 0)
+      throw std::runtime_error("failed to initialize mpv GL context");
+
+    mpv_render_context_set_update_callback(
+        renderCtx,
+        [](void *ctx) {
+          Mpv *mpv = static_cast<Mpv *>(ctx);
+          if (mpv->updateCb_) mpv->updateCb_(mpv);
+        },
+        this);
+  }
 
   mpv_request_log_messages(main, "no");
 
@@ -111,29 +130,6 @@ void Mpv::init() {
 
   forceWindow = property<int, MPV_FORMAT_FLAG>("force-window");
   observeProperties();
-}
-
-void Mpv::initRender() {
-  mpv_opengl_init_params gl_init_params{
-      [](void *ctx, const char *name) { return (void *)glfwGetProcAddress(name); },
-      nullptr,
-  };
-  mpv_render_param params[]{
-      {MPV_RENDER_PARAM_API_TYPE, const_cast<char *>(MPV_RENDER_API_TYPE_OPENGL)},
-      {MPV_RENDER_PARAM_OPENGL_INIT_PARAMS, &gl_init_params},
-      {MPV_RENDER_PARAM_INVALID, nullptr},
-  };
-
-  if (mpv_render_context_create(&renderCtx, mpv, params) < 0)
-    throw std::runtime_error("failed to initialize mpv GL context");
-
-  mpv_render_context_set_update_callback(
-      renderCtx,
-      [](void *ctx) {
-        Mpv *mpv = static_cast<Mpv *>(ctx);
-        if (mpv->updateCb_) mpv->updateCb_(mpv);
-      },
-      this);
 }
 
 void Mpv::observeProperties() {
@@ -151,14 +147,13 @@ void Mpv::observeProperties() {
   observeProperty<char *, MPV_FORMAT_STRING>("audio-device", [this](char *data) { audioDevice = data; });
   observeProperty<char *, MPV_FORMAT_STRING>("cursor-autohide", [this](char *data) { cursorAutohide = data; });
 
-  observeProperty<int, MPV_FORMAT_FLAG>("pause", [this](int flag) { pause = static_cast<bool>(flag); });
-  observeProperty<int, MPV_FORMAT_FLAG>("mute", [this](int flag) { mute = static_cast<bool>(flag); });
-  observeProperty<int, MPV_FORMAT_FLAG>("fullscreen", [this](int flag) { fullscreen = static_cast<bool>(flag); });
-  observeProperty<int, MPV_FORMAT_FLAG>("sub-visibility", [this](int flag) { sidv = static_cast<bool>(flag); });
-  observeProperty<int, MPV_FORMAT_FLAG>("secondary-sub-visibility",
-                                        [this](int flag) { sidv2 = static_cast<bool>(flag); });
-  observeProperty<int, MPV_FORMAT_FLAG>("window-dragging",
-                                        [this](int flag) { windowDragging = static_cast<bool>(flag); });
+  observeProperty<int, MPV_FORMAT_FLAG>("pause", [this](int flag) { pause = flag; });
+  observeProperty<int, MPV_FORMAT_FLAG>("mute", [this](int flag) { mute = flag; });
+  observeProperty<int, MPV_FORMAT_FLAG>("fullscreen", [this](int flag) { fullscreen = flag; });
+  observeProperty<int, MPV_FORMAT_FLAG>("sub-visibility", [this](int flag) { sidv = flag; });
+  observeProperty<int, MPV_FORMAT_FLAG>("secondary-sub-visibility", [this](int flag) { sidv2 = flag; });
+  observeProperty<int, MPV_FORMAT_FLAG>("window-dragging", [this](int flag) { windowDragging = flag; });
+  observeProperty<int, MPV_FORMAT_FLAG>("keepaspect-window", [this](int flag) { keepaspect = flag; });
 
   observeProperty<int64_t, MPV_FORMAT_INT64>("volume", [this](int64_t val) { volume = val; });
   observeProperty<int64_t, MPV_FORMAT_INT64>("chapter", [this](int64_t val) { chapter = val; });

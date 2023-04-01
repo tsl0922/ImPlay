@@ -2,186 +2,173 @@
 // SPDX-License-Identifier: GPL-2.0-only
 
 #pragma once
-#include <GLFW/glfw3.h>
 #include <map>
+#include <string>
 #include <vector>
+#include <mutex>
+#ifdef IMGUI_IMPL_OPENGL_ES3
+#include <GLES3/gl3.h>
+#else
+#include <GL/gl.h>
+#endif
 #include "mpv.h"
 #include "config.h"
-#include "command.h"
+#include "views/view.h"
+#include "views/about.h"
+#include "views/debug.h"
+#include "views/quickview.h"
+#include "views/settings.h"
+#include "views/context_menu.h"
+#include "views/command_palette.h"
+#include "helpers/imgui.h"
+#include "helpers/nfd.h"
+#include "helpers/utils.h"
 
 namespace ImPlay {
 class Player {
  public:
-  Player(Config *config, GLFWwindow *window, Mpv *mpv, const char *title);
+  explicit Player(Config *config);
   ~Player();
 
-  bool init(OptionParser &parser);
-  void draw();
-  void drawLogo();
+ protected:
+  bool init(std::map<std::string, std::string> &options);
   void shutdown();
+
+  void initGui();
+  void exitGui();
+  void saveState();
+  void restoreState();
+
+  void loadFonts();
+  void render();
+  void renderVideo();
   bool isIdle() { return idle; }
 
   void onCursorEvent(double x, double y);
-  void onMouseEvent(int button, int action, int mods);
   void onScrollEvent(double x, double y);
-  void onKeyEvent(int key, int scancode, int action, int mods);
+  void onKeyEvent(std::string name);
+  void onKeyDownEvent(std::string name);
+  void onKeyUpEvent(std::string name);
   void onDropEvent(int count, const char **paths);
+
+  Config *config = nullptr;
+  Mpv *mpv = nullptr;
+  int width = 1280, height = 720;
 
  private:
   void initObservers();
   void writeMpvConf();
-  GLFWmonitor* getMonitor();
 
-  Config *config = nullptr;
-  GLFWwindow *window = nullptr;
-  Mpv *mpv = nullptr;
-  Command *cmd = nullptr;
-  const char *title;
+  void draw();
+  void drawLogo();
+  void execute(int n_args, const char **args_);
+
+  void openFileDlg(NFD::Filters filters, bool append = false);
+  void openFilesDlg(NFD::Filters filters, bool append = false);
+  void openFolderDlg(bool append = false, bool disk = false);
+  void openClipboard();
+  void openURL();
+  void openDvd(std::filesystem::path path);
+  void openBluray(std::filesystem::path path);
+
+  void playlistSort(bool reverse = false);
+
+  void drawOpenURL();
+  void drawDialog();
+  void messageBox(std::string title, std::string msg);
+
+  void load(std::vector<std::filesystem::path> files, bool append = false, bool disk = false);
+  bool isMediaFile(std::string file);
+  bool isSubtitleFile(std::string file);
+
+  virtual int64_t GetWid() { return 0; }
+  virtual GLAddrLoadFunc GetGLAddrFunc() = 0;
+  virtual std::string GetClipboardString() = 0;
+  virtual void GetMonitorSize(int *w, int *h) = 0;
+  virtual void GetFramebufferSize(int *w, int *h) = 0;
+  virtual void MakeContextCurrent() = 0;
+  virtual void DeleteContext() = 0;
+  virtual void SwapBuffers() = 0;
+  virtual void SetSwapInterval(int interval) = 0;
+  virtual void BackendNewFrame() = 0;
+  virtual void GetWindowScale(float *x, float *y) = 0;
+  virtual void GetWindowPos(int *x, int *y) = 0;
+  virtual void SetWindowPos(int x, int y) = 0;
+  virtual void GetWindowSize(int *w, int *h) = 0;
+  virtual void SetWindowSize(int w, int h) = 0;
+  virtual std::string GetWindowTitle() = 0;
+  virtual void SetWindowTitle(std::string) = 0;
+  virtual void SetWindowAspectRatio(int num, int den) = 0;
+  virtual void SetWindowMaximized(bool m) = 0;
+  virtual void SetWindowMinimized(bool m) = 0;
+  virtual void SetWindowDecorated(bool d) = 0;
+  virtual void SetWindowFloating(bool f) = 0;
+  virtual void SetWindowFullscreen(bool fs) = 0;
+  virtual void SetWindowShouldClose(bool c) = 0;
+
   bool idle = true;
+  GLuint fbo = 0, tex = 0;
   ImTextureID logoTexture = nullptr;
+  std::mutex contextLock;
 
-  static void translateMod(std::vector<std::string> &keys, int mods) {
-    if (mods & GLFW_MOD_CONTROL) keys.emplace_back("Ctrl");
-    if (mods & GLFW_MOD_ALT) keys.emplace_back("Alt");
-    if (mods & GLFW_MOD_SHIFT) keys.emplace_back("Shift");
-    if (mods & GLFW_MOD_SUPER) keys.emplace_back("Meta");
-  }
+  bool m_openURL = false;
+  bool m_dialog = false;
+  std::string m_dialog_title = "Dialog";
+  std::string m_dialog_msg = "Message";
 
-  const std::map<int, std::string> keyMappings = {
-      {GLFW_KEY_SPACE, "SPACE"},
-      {GLFW_KEY_APOSTROPHE, "'"},
-      {GLFW_KEY_COMMA, ","},
-      {GLFW_KEY_MINUS, "-"},
-      {GLFW_KEY_PERIOD, "."},
-      {GLFW_KEY_SLASH, "/"},
-      {GLFW_KEY_0, "0"},
-      {GLFW_KEY_1, "1"},
-      {GLFW_KEY_2, "2"},
-      {GLFW_KEY_3, "3"},
-      {GLFW_KEY_4, "4"},
-      {GLFW_KEY_5, "5"},
-      {GLFW_KEY_6, "6"},
-      {GLFW_KEY_7, "7"},
-      {GLFW_KEY_8, "8"},
-      {GLFW_KEY_9, "9"},
-      {GLFW_KEY_SEMICOLON, ";"},
-      {GLFW_KEY_EQUAL, "="},
-      {GLFW_KEY_A, "a"},
-      {GLFW_KEY_B, "b"},
-      {GLFW_KEY_C, "c"},
-      {GLFW_KEY_D, "d"},
-      {GLFW_KEY_E, "e"},
-      {GLFW_KEY_F, "f"},
-      {GLFW_KEY_G, "g"},
-      {GLFW_KEY_H, "h"},
-      {GLFW_KEY_I, "i"},
-      {GLFW_KEY_J, "j"},
-      {GLFW_KEY_K, "k"},
-      {GLFW_KEY_L, "l"},
-      {GLFW_KEY_M, "m"},
-      {GLFW_KEY_N, "n"},
-      {GLFW_KEY_O, "o"},
-      {GLFW_KEY_P, "p"},
-      {GLFW_KEY_Q, "q"},
-      {GLFW_KEY_R, "r"},
-      {GLFW_KEY_S, "s"},
-      {GLFW_KEY_T, "t"},
-      {GLFW_KEY_U, "u"},
-      {GLFW_KEY_V, "v"},
-      {GLFW_KEY_W, "w"},
-      {GLFW_KEY_X, "x"},
-      {GLFW_KEY_Y, "y"},
-      {GLFW_KEY_Z, "z"},
-      {GLFW_KEY_LEFT_BRACKET, "["},
-      {GLFW_KEY_BACKSLASH, "\\"},
-      {GLFW_KEY_RIGHT_BRACKET, "]"},
-      {GLFW_KEY_GRAVE_ACCENT, "`"},
+  Views::About *about;
+  Views::Debug *debug;
+  Views::Quickview *quickview;
+  Views::Settings *settings;
+  Views::ContextMenu *contextMenu;
+  Views::CommandPalette *commandPalette;
 
-      {GLFW_KEY_ESCAPE, "ESC"},
-      {GLFW_KEY_ENTER, "ENTER"},
-      {GLFW_KEY_TAB, "TAB"},
-      {GLFW_KEY_BACKSPACE, "BS"},
-      {GLFW_KEY_INSERT, "INS"},
-      {GLFW_KEY_DELETE, "DEL"},
-      {GLFW_KEY_RIGHT, "RIGHT"},
-      {GLFW_KEY_LEFT, "LEFT"},
-      {GLFW_KEY_DOWN, "DOWN"},
-      {GLFW_KEY_UP, "UP"},
-      {GLFW_KEY_PAGE_UP, "PGUP"},
-      {GLFW_KEY_PAGE_DOWN, "PGDWN"},
-      {GLFW_KEY_HOME, "HOME"},
-      {GLFW_KEY_END, "END"},
-      {GLFW_KEY_PRINT_SCREEN, "PRINT"},
-      {GLFW_KEY_PAUSE, "PAUSE"},
-      {GLFW_KEY_F1, "F1"},
-      {GLFW_KEY_F2, "F2"},
-      {GLFW_KEY_F3, "F3"},
-      {GLFW_KEY_F4, "F4"},
-      {GLFW_KEY_F5, "F5"},
-      {GLFW_KEY_F6, "F6"},
-      {GLFW_KEY_F7, "F7"},
-      {GLFW_KEY_F8, "F8"},
-      {GLFW_KEY_F9, "F9"},
-      {GLFW_KEY_F10, "F10"},
-      {GLFW_KEY_F11, "F11"},
-      {GLFW_KEY_F12, "F12"},
-      {GLFW_KEY_F13, "F13"},
-      {GLFW_KEY_F14, "F14"},
-      {GLFW_KEY_F15, "F15"},
-      {GLFW_KEY_F16, "F16"},
-      {GLFW_KEY_F17, "F17"},
-      {GLFW_KEY_F18, "F18"},
-      {GLFW_KEY_F19, "F19"},
-      {GLFW_KEY_F20, "F20"},
-      {GLFW_KEY_F21, "F21"},
-      {GLFW_KEY_F22, "F22"},
-      {GLFW_KEY_F23, "F23"},
-      {GLFW_KEY_F24, "F24"},
-      {GLFW_KEY_KP_0, "KP0"},
-      {GLFW_KEY_KP_1, "KP1"},
-      {GLFW_KEY_KP_2, "KP2"},
-      {GLFW_KEY_KP_3, "KP3"},
-      {GLFW_KEY_KP_4, "KP4"},
-      {GLFW_KEY_KP_5, "KP5"},
-      {GLFW_KEY_KP_6, "KP6"},
-      {GLFW_KEY_KP_7, "KP7"},
-      {GLFW_KEY_KP_8, "KP8"},
-      {GLFW_KEY_KP_9, "KP9"},
-      {GLFW_KEY_KP_ENTER, "KP_ENTER"},
+  const std::vector<std::string> videoTypes = {
+      "yuv", "y4m",   "m2ts", "m2t",   "mts",  "mtv",  "ts",   "tsv",    "tsa",  "tts",  "trp",  "mpeg", "mpg",
+      "mpe", "mpeg2", "m1v",  "m2v",   "mp2v", "mpv",  "mpv2", "mod",    "vob",  "vro",  "evob", "evo",  "mpeg4",
+      "m4v", "mp4",   "mp4v", "mpg4",  "h264", "avc",  "x264", "264",    "hevc", "h265", "x265", "265",  "ogv",
+      "ogm", "ogx",   "mkv",  "mk3d",  "webm", "avi",  "vfw",  "divx",   "3iv",  "xvid", "nut",  "flic", "fli",
+      "flc", "nsv",   "gxf",  "mxf",   "wm",   "wmv",  "asf",  "dvr-ms", "dvr",  "wtv",  "dv",   "hdv",  "flv",
+      "f4v", "qt",    "mov",  "hdmov", "rm",   "rmvb", "3gpp", "3gp",    "3gp2", "3g2"};
+  const std::vector<std::string> audioTypes = {
+      "ac3", "a52",  "eac3", "mlp",  "dts", "dts-hd", "dtshd", "true-hd", "thd",  "truehd", "thd+ac3", "tta", "pcm",
+      "wav", "aiff", "aif",  "aifc", "amr", "awb",    "au",    "snd",     "lpcm", "ape",    "wv",      "shn", "adts",
+      "adt", "mpa",  "m1a",  "m2a",  "mp1", "mp2",    "mp3",   "m4a",     "aac",  "flac",   "oga",     "ogg", "opus",
+      "spx", "mka",  "weba", "wma",  "f4a", "ra",     "ram",   "3ga",     "3ga2", "ay",     "gbs",     "gym", "hes",
+      "kss", "nsf",  "nsfe", "sap",  "spc", "vgm",    "vgz",   "m3u",     "m3u8", "pls",    "cue"};
+  const std::vector<std::string> imageTypes = {"jpg", "bmp", "png", "gif", "webp"};
+  const std::vector<std::string> subtitleTypes = {"srt",  "ass", "idx", "sub", "sup",
+                                                  "ttxt", "txt", "ssa", "smi", "mks"};
+
+  const std::vector<std::pair<std::string, std::string>> mediaFilters = {
+      {"Videos Files", format("{}", join(videoTypes, ","))},
+      {"Audio Files", format("{}", join(audioTypes, ","))},
+      {"Image Files", format("{}", join(imageTypes, ","))},
+  };
+  const std::vector<std::pair<std::string, std::string>> subtitleFilters = {
+      {"Subtitle Files", format("{}", join(subtitleTypes, ","))},
+  };
+  const std::vector<std::pair<std::string, std::string>> isoFilters = {
+      {"ISO Image Files", "iso"},
   };
 
-  const std::map<int, std::string> shiftMappings = {
-      {GLFW_KEY_0, ")"},
-      {GLFW_KEY_1, "!"},
-      {GLFW_KEY_2, "@"},
-      {GLFW_KEY_3, "#"},
-      {GLFW_KEY_4, "$"},
-      {GLFW_KEY_5, "%"},
-      {GLFW_KEY_6, "^"},
-      {GLFW_KEY_7, "&"},
-      {GLFW_KEY_8, "*"},
-      {GLFW_KEY_9, "("},
-      {GLFW_KEY_MINUS, "_"},
-      {GLFW_KEY_EQUAL, "+"},
-      {GLFW_KEY_LEFT_BRACKET, "{"},
-      {GLFW_KEY_RIGHT_BRACKET, "}"},
-      {GLFW_KEY_BACKSLASH, "|"},
-      {GLFW_KEY_SEMICOLON, ":"},
-      {GLFW_KEY_APOSTROPHE, "\""},
-      {GLFW_KEY_COMMA, "<"},
-      {GLFW_KEY_PERIOD, ">"},
-      {GLFW_KEY_SLASH, "?"},
-  };
+  struct ContextGuard {
+   public:
+    inline ContextGuard(Player *p) : p(p) {
+      p->contextLock.lock();
+      p->MakeContextCurrent();
+    }
+    inline ~ContextGuard() {
+      p->DeleteContext();
+      p->contextLock.unlock();
+    }
 
-  const std::map<int, std::string> actionMappings = {
-      {GLFW_PRESS, "keydown"},
-      {GLFW_RELEASE, "keyup"},
-  };
+    // Disable copy from lvalue.
+    ContextGuard(const ContextGuard &) = delete;
+    ContextGuard &operator=(const ContextGuard &) = delete;
 
-  const std::map<int, std::string> mbtnMappings = {
-      {GLFW_MOUSE_BUTTON_LEFT, "MBTN_LEFT"},    {GLFW_MOUSE_BUTTON_MIDDLE, "MBTN_MID"},
-      {GLFW_MOUSE_BUTTON_RIGHT, "MBTN_RIGHT"},  {GLFW_MOUSE_BUTTON_4, "MP_MBTN_BACK"},
-      {GLFW_MOUSE_BUTTON_5, "MP_MBTN_FORWARD"},
+   private:
+    Player *p;
   };
 };
 }  // namespace ImPlay

@@ -79,6 +79,8 @@ ImTextureID ImGui::LoadTexture(const char* path, ImVec2* size) {
   glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
 #endif
   glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+
+  glBindTexture(GL_TEXTURE_2D, 0);
   stbi_image_free(data);
 
   if (size != nullptr) {

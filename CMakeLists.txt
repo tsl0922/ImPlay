@@ -50,6 +50,10 @@ add_subdirectory(third_party/nativefiledialog)
 add_subdirectory(third_party/libromfs)
 
 set(SOURCE_FILES
+  source/helpers/imgui.cpp
+  source/helpers/lang.cpp
+  source/helpers/nfd.cpp
+  source/helpers/utils.cpp
   source/views/view.cpp
   source/views/command_palette.cpp
   source/views/context_menu.cpp
@@ -57,12 +61,7 @@ set(SOURCE_FILES
   source/views/about.cpp
   source/views/quickview.cpp
   source/views/settings.cpp
-  source/helpers/imgui.cpp
-  source/helpers/lang.cpp
-  source/helpers/nfd.cpp
-  source/helpers/utils.cpp
   source/theme.cpp
-  source/command.cpp
   source/config.cpp
   source/mpv.cpp
   source/player.cpp

@@ -10,16 +10,17 @@
 #include <mpv/render_gl.h>
 
 namespace ImPlay {
+typedef void *(*GLAddrLoadFunc)(const char *name);
 class Mpv {
  public:
-  explicit Mpv(int64_t wid = 0);
+  Mpv();
   ~Mpv();
 
   using EventHandler = std::function<void(void *)>;
   using LogHandler = std::function<void(const char *, const char *, const char *)>;
   using Callback = std::function<void(Mpv *)>;
 
-  void init();
+  void init(GLAddrLoadFunc load, int64_t wid = 0);
   void render(int w, int h, int fbo = 0, bool flip = true);
   bool wantRender();
   void reportSwap();
@@ -111,10 +112,9 @@ class Mpv {
   std::vector<std::string> profiles;
   std::string aid, vid, sid, sid2, audioDevice, cursorAutohide;
   int64_t chapter = 0, volume = 100, playlistPos = -1, playlistPlayingPos = -1, timePos = 0;
-  bool pause, mute, fullscreen, sidv, sidv2, windowDragging, forceWindow;
+  bool pause, mute, fullscreen, sidv, sidv2, windowDragging, forceWindow, keepaspect;
 
  private:
-  void initRender();
   void eventLoop();
 
   void observeProperties();

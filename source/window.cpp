@@ -1,51 +1,45 @@
 // Copyright (c) 2022 tsl0922. All rights reserved.
 // SPDX-License-Identifier: GPL-2.0-only
 
-#include <imgui.h>
-#include <imgui_internal.h>
-#include <imgui_impl_glfw.h>
-#include <imgui_impl_opengl3.h>
-#include <fonts/fontawesome.h>
-#include <fonts/source_code_pro.h>
-#include <fonts/unifont.h>
 #include <algorithm>
 #include <stdexcept>
 #include <chrono>
 #include <thread>
+#include <imgui.h>
+#include <imgui_internal.h>
+#include <imgui_impl_glfw.h>
+#include <imgui_impl_opengl3.h>
+#include <strnatcmp.h>
 #ifdef _WIN32
 #include <windowsx.h>
 #endif
-#include "helpers/utils.h"
 #include "theme.h"
 #include "window.h"
 
 namespace ImPlay {
-Window::Window(Config* config) : config(config) {
-  const char* title = "ImPlay";
-
-  initGLFW(title);
-  initImGui();
-
-#ifdef _WIN32
-  HWND hwnd = glfwGetWin32Window(window);
-  wndProcOld = (WNDPROC)::GetWindowLongPtr(hwnd, GWLP_WNDPROC);
-  ::SetWindowLongPtr(hwnd, GWLP_WNDPROC, reinterpret_cast<LONG_PTR>(wndProc));
-  ::SetWindowLongPtr(hwnd, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(this));
-
-  int64_t wid = config->Data.Mpv.UseWid ? static_cast<uint32_t>((intptr_t)hwnd) : 0;
-  mpv = new Mpv(wid);
-#else
-  mpv = new Mpv();
+Window::Window(Config* config) : Player(config) {
+  glfwSetErrorCallback(
+      [](int error, const char* desc) { fmt::print(fg(fmt::color::red), "GLFW [{}]: {}\n", error, desc); });
+#ifdef GLFW_PATCHED
+  glfwInitHint(GLFW_WIN32_MESSAGES_IN_FIBER, GLFW_TRUE);
 #endif
-  player = new Player(config, window, mpv, title);
+  if (!glfwInit()) throw std::runtime_error("Failed to initialize GLFW!");
+
+  window = createWindow();
+  if (window == nullptr) throw std::runtime_error("Failed to create window!");
+  glfwSetWindowSizeLimits(window, 640, 480, GLFW_DONT_CARE, GLFW_DONT_CARE);
+  installCallbacks(window);
+
+  initGui();
+  ImGui_ImplGlfw_InitForOpenGL(window, true);
 }
 
 Window::~Window() {
-  delete player;
-  delete mpv;
+  ImGui_ImplGlfw_Shutdown();
+  exitGui();
 
-  exitImGui();
-  exitGLFW();
+  glfwDestroyWindow(window);
+  glfwTerminate();
 }
 
 bool Window::init(OptionParser& parser) {
@@ -53,18 +47,27 @@ bool Window::init(OptionParser& parser) {
   mpv->updateCb() = [this](Mpv* ctx) {
     if (ctx->wantRender()) videoWaiter.notify();
   };
+  if (!Player::init(parser.options)) return false;
 
-  if (!player->init(parser)) return false;
+  for (auto& path : parser.paths) {
+    if (path == "-") mpv->property("input-terminal", "yes");
+    mpv->commandv("loadfile", path.c_str(), "append-play", nullptr);
+  }
 #if defined(__APPLE__) && defined(GLFW_PATCHED)
   const char** openedFileNames = glfwGetOpenedFilenames();
   if (openedFileNames != nullptr) {
     int count = 0;
     while (openedFileNames[count] != nullptr) count++;
-    player->onDropEvent(count, openedFileNames);
+    onDropEvent(count, openedFileNames);
   }
 #endif
 
 #ifdef _WIN32
+  HWND hwnd = glfwGetWin32Window(window);
+  wndProcOld = (WNDPROC)::GetWindowLongPtr(hwnd, GWLP_WNDPROC);
+  ::SetWindowLongPtr(hwnd, GWLP_WNDPROC, reinterpret_cast<LONG_PTR>(wndProc));
+  ::SetWindowLongPtr(hwnd, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(this));
+
   mpv->observeProperty<int, MPV_FORMAT_FLAG>("border", [this](int flag) {
     borderless = !static_cast<bool>(flag);
     HWND hwnd = glfwGetWin32Window(window);
@@ -75,18 +78,11 @@ bool Window::init(OptionParser& parser) {
     ::SetWindowPos(hwnd, nullptr, 0, 0, 0, 0, SWP_FRAMECHANGED | SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER);
   });
 #endif
-
-  int border = mpv->property<int, MPV_FORMAT_FLAG>("border");
-  glfwSetWindowAttrib(window, GLFW_DECORATED, border);
   return true;
 }
 
 void Window::run() {
-  glfwShowWindow(window);
-  glfwMakeContextCurrent(nullptr);
-
   bool shutdown = false;
-
   std::thread videoRenderer([&]() {
     while (!shutdown) {
       videoWaiter.wait();
@@ -97,6 +93,9 @@ void Window::run() {
     }
   });
 
+  restoreState();
+  glfwShowWindow(window);
+
   while (!glfwWindowShouldClose(window)) {
     if (!glfwGetWindowAttrib(window, GLFW_VISIBLE) || glfwGetWindowAttrib(window, GLFW_ICONIFIED))
       glfwWaitEvents();
@@ -105,119 +104,24 @@ void Window::run() {
 
     mpv->waitEvent();
 
+    static auto nextFrame = std::chrono::steady_clock::now();
+    nextFrame += std::chrono::milliseconds(1000 / config->Data.Interface.Fps);
+    if (isIdle() || mpv->pause) eventWaiter.wait_until(nextFrame);
+
     render();
+    updateCursor();
   }
 
   shutdown = true;
   videoWaiter.notify();
-
   videoRenderer.join();
 
-  glfwMakeContextCurrent(window);
   saveState();
 }
 
 void Window::wakeup() {
   glfwPostEmptyEvent();
   eventWaiter.notify();
-}
-
-void Window::render() {
-  static auto nextFrame = std::chrono::steady_clock::now();
-  nextFrame += std::chrono::milliseconds(1000 / config->Data.Interface.Fps);
-  if (player->isIdle() || mpv->pause) eventWaiter.wait_until(nextFrame);
-
-  {
-    GLCtxGuard guard(window, &glCtxLock);
-
-    if (player->isIdle()) {
-      glBindFramebuffer(GL_FRAMEBUFFER, fbo);
-      glClearColor(0, 0, 0, 1);
-      glClear(GL_COLOR_BUFFER_BIT);
-      glBindFramebuffer(GL_FRAMEBUFFER, 0);
-    }
-
-    reloadFonts();
-    ImGui_ImplOpenGL3_NewFrame();
-  }
-
-  ImGui_ImplGlfw_NewFrame();
-  ImGui::NewFrame();
-
-#ifdef _WIN32
-  if (config->Data.Mpv.UseWid) {
-    ImGuiViewport* vp = ImGui::GetMainViewport();
-    vp->Flags &= ~ImGuiViewportFlags_CanHostOtherWindows;  // HACK: disable main viewport merge
-  }
-#endif
-
-  if (!player->isIdle()) {
-    ImGuiViewport* vp = ImGui::GetMainViewport();
-    ImTextureID texture = reinterpret_cast<ImTextureID>(static_cast<intptr_t>(tex));
-    ImGui::GetBackgroundDrawList(vp)->AddImage(texture, vp->Pos, vp->Pos + vp->Size);
-  }
-
-  player->draw();
-  ImGui::Render();
-
-  {
-    GLCtxGuard guard(window, &glCtxLock);
-    glfwGetFramebufferSize(window, &width, &height);
-    glViewport(0, 0, width, height);
-
-    glClearColor(0, 0, 0, 1);
-    glClear(GL_COLOR_BUFFER_BIT);
-
-    ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-    glfwSwapBuffers(window);
-    mpv->reportSwap();
-  }
-
-  if (ImGui::GetIO().ConfigFlags & ImGuiConfigFlags_ViewportsEnable) {
-    ImGui::UpdatePlatformWindows();
-
-    std::lock_guard<std::mutex> lock(glCtxLock);
-    auto backupCtx = glfwGetCurrentContext();
-    ImGui::RenderPlatformWindowsDefault();
-    glfwMakeContextCurrent(backupCtx);
-  }
-
-  updateCursor();
-}
-
-void Window::reloadFonts() {
-  if (!config->FontReload) return;
-
-  loadFonts();
-  config->FontReload = false;
-  ImGui_ImplOpenGL3_DestroyFontsTexture();
-  ImGui_ImplOpenGL3_CreateFontsTexture();
-}
-
-void Window::renderVideo() {
-  GLCtxGuard guard(window, &glCtxLock);
-
-  glBindFramebuffer(GL_FRAMEBUFFER, fbo);
-  glBindTexture(GL_TEXTURE_2D, tex);
-
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-  glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, tex, 0);
-  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
-
-  glBindTexture(GL_TEXTURE_2D, 0);
-  glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
-  mpv->render(width, height, fbo, false);
-}
-
-void Window::saveState() {
-  if (config->Data.Window.Save) {
-    glfwGetWindowPos(window, &config->Data.Window.X, &config->Data.Window.Y);
-    glfwGetWindowSize(window, &config->Data.Window.W, &config->Data.Window.H);
-  }
-  config->Data.Mpv.Volume = mpv->volume;
-  config->save();
 }
 
 void Window::updateCursor() {
@@ -234,14 +138,7 @@ void Window::updateCursor() {
   ImGui::SetMouseCursor(cursor ? ImGuiMouseCursor_Arrow : ImGuiMouseCursor_None);
 }
 
-void Window::initGLFW(const char* title) {
-  glfwSetErrorCallback(
-      [](int error, const char* desc) { fmt::print(fg(fmt::color::red), "GLFW [{}]: {}\n", error, desc); });
-#ifdef GLFW_PATCHED
-  glfwInitHint(GLFW_WIN32_MESSAGES_IN_FIBER, GLFW_TRUE);
-#endif
-  if (!glfwInit()) throw std::runtime_error("Failed to initialize GLFW!");
-
+GLFWwindow* Window::createWindow() {
 #if defined(IMGUI_IMPL_OPENGL_ES3)
   glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
   glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
@@ -258,59 +155,34 @@ void Window::initGLFW(const char* title) {
   glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 #endif
   glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
+  return glfwCreateWindow(640, 480, title.c_str(), nullptr, nullptr);
+}
 
-  GLFWmonitor* monitor = glfwGetPrimaryMonitor();
-  const GLFWvidmode* mode = glfwGetVideoMode(monitor);
-  int width = std::max((int)(mode->width * 0.4), 600);
-  int height = std::max((int)(mode->height * 0.4), 400);
-  int posX = (mode->width - width) / 2;
-  int posY = (mode->height - height) / 2;
-  if (config->Data.Window.Save) {
-    if (config->Data.Window.W > 0) width = config->Data.Window.W;
-    if (config->Data.Window.H > 0) height = config->Data.Window.H;
-    if (config->Data.Window.X >= 0) posX = config->Data.Window.X;
-    if (config->Data.Window.Y >= 0) posY = config->Data.Window.Y;
-  }
+void Window::installCallbacks(GLFWwindow* target) {
+  glfwSetWindowUserPointer(target, this);
 
-  window = glfwCreateWindow(width, height, title, nullptr, nullptr);
-  if (window == nullptr) throw std::runtime_error("Failed to create window!");
-  glfwSetWindowSizeLimits(window, 640, 480, GLFW_DONT_CARE, GLFW_DONT_CARE);
-  glfwSetWindowPos(window, posX, posY);
-  glfwSetWindowUserPointer(window, this);
-
-  glfwMakeContextCurrent(window);
-#ifdef IMGUI_IMPL_OPENGL_ES3
-  if (!gladLoadGLES2(glfwGetProcAddress)) throw std::runtime_error("Failed to load GLES 2!");
-#else
-  if (!gladLoadGL(glfwGetProcAddress)) throw std::runtime_error("Failed to load GL!");
-#endif
-  glfwSwapInterval(1);
-
-  glGenFramebuffers(1, &fbo);
-  glGenTextures(1, &tex);
-
-  glfwSetWindowContentScaleCallback(window, [](GLFWwindow* window, float x, float y) {
+  glfwSetWindowContentScaleCallback(target, [](GLFWwindow* window, float x, float y) {
     auto win = static_cast<Window*>(glfwGetWindowUserPointer(window));
     win->config->Data.Interface.Scale = std::max(x, y);
     win->config->FontReload = true;
   });
-  glfwSetWindowCloseCallback(window, [](GLFWwindow* window) {
+  glfwSetWindowCloseCallback(target, [](GLFWwindow* window) {
     auto win = static_cast<Window*>(glfwGetWindowUserPointer(window));
-    win->player->shutdown();
+    win->shutdown();
   });
-  glfwSetWindowSizeCallback(window, [](GLFWwindow* window, int w, int h) {
-    auto win = static_cast<Window*>(glfwGetWindowUserPointer(window));
-    win->render();
-  });
-  glfwSetWindowPosCallback(window, [](GLFWwindow* window, int x, int y) {
+  glfwSetWindowSizeCallback(target, [](GLFWwindow* window, int w, int h) {
     auto win = static_cast<Window*>(glfwGetWindowUserPointer(window));
     win->render();
   });
-  glfwSetCursorEnterCallback(window, [](GLFWwindow* window, int entered) {
+  glfwSetWindowPosCallback(target, [](GLFWwindow* window, int x, int y) {
+    auto win = static_cast<Window*>(glfwGetWindowUserPointer(window));
+    win->render();
+  });
+  glfwSetCursorEnterCallback(target, [](GLFWwindow* window, int entered) {
     auto win = static_cast<Window*>(glfwGetWindowUserPointer(window));
     win->ownCursor = entered;
   });
-  glfwSetCursorPosCallback(window, [](GLFWwindow* window, double x, double y) {
+  glfwSetCursorPosCallback(target, [](GLFWwindow* window, double x, double y) {
     auto win = static_cast<Window*>(glfwGetWindowUserPointer(window));
     win->lastInputAt = glfwGetTime();
     if (ImGui::GetIO().WantCaptureMouse) return;
@@ -320,127 +192,181 @@ void Window::initGLFW(const char* title) {
     x *= xscale;
     y *= yscale;
 #endif
-    win->player->onCursorEvent(x, y);
+    win->onCursorEvent(x, y);
 #ifdef GLFW_PATCHED
     if (win->mpv->allowDrag() && win->height - y > 150) {  // 150: height of the OSC bar
       if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS) glfwDragWindow(window);
     }
 #endif
   });
-  glfwSetMouseButtonCallback(window, [](GLFWwindow* window, int button, int action, int mods) {
+  glfwSetMouseButtonCallback(target, [](GLFWwindow* window, int button, int action, int mods) {
     auto win = static_cast<Window*>(glfwGetWindowUserPointer(window));
     win->lastInputAt = glfwGetTime();
-    if (!ImGui::GetIO().WantCaptureMouse) win->player->onMouseEvent(button, action, mods);
+    if (!ImGui::GetIO().WantCaptureMouse) win->handleMouse(button, action, mods);
   });
-  glfwSetScrollCallback(window, [](GLFWwindow* window, double x, double y) {
+  glfwSetScrollCallback(target, [](GLFWwindow* window, double x, double y) {
     auto win = static_cast<Window*>(glfwGetWindowUserPointer(window));
     win->lastInputAt = glfwGetTime();
-    if (!ImGui::GetIO().WantCaptureMouse) win->player->onScrollEvent(x, y);
+    if (!ImGui::GetIO().WantCaptureMouse) win->onScrollEvent(x, y);
   });
-  glfwSetKeyCallback(window, [](GLFWwindow* window, int key, int scancode, int action, int mods) {
+  glfwSetKeyCallback(target, [](GLFWwindow* window, int key, int scancode, int action, int mods) {
     auto win = static_cast<Window*>(glfwGetWindowUserPointer(window));
     win->lastInputAt = glfwGetTime();
-    if (!ImGui::GetIO().WantCaptureKeyboard) win->player->onKeyEvent(key, scancode, action, mods);
+    if (!ImGui::GetIO().WantCaptureKeyboard) win->handleKey(key, action, mods);
   });
-  glfwSetDropCallback(window, [](GLFWwindow* window, int count, const char** paths) {
+  glfwSetDropCallback(target, [](GLFWwindow* window, int count, const char** paths) {
     auto win = static_cast<Window*>(glfwGetWindowUserPointer(window));
-    if (!ImGui::GetIO().WantCaptureMouse) win->player->onDropEvent(count, paths);
+    if (!ImGui::GetIO().WantCaptureMouse) win->onDropEvent(count, paths);
   });
 }
 
-void Window::loadFonts() {
-  float fontSize = config->Data.Font.Size;
-  float iconSize = fontSize - 2;
-  float scale = config->Data.Interface.Scale;
-  if (scale == 0) {
-    float xscale, yscale;
-    glfwGetWindowContentScale(window, &xscale, &yscale);
-    scale = std::max(xscale, yscale);
+void Window::handleKey(int key, int action, int mods) {
+  std::string name;
+  if (mods & GLFW_MOD_SHIFT) {
+    if (auto s = shiftMappings.find(key); s != shiftMappings.end()) {
+      name = s->second;
+      mods &= ~GLFW_MOD_SHIFT;
+    }
   }
-  if (scale <= 0) scale = 1.0f;
-  fontSize = std::floor(fontSize * scale);
-  iconSize = std::floor(iconSize * scale);
-
-  ImGuiStyle style;
-  std::string theme = config->Data.Interface.Theme;
-
-  {
-    ImGui::SetTheme(theme.c_str(), &style);
-    style.TabRounding = 4;
-    style.ScrollbarRounding = 9;
-    style.WindowRounding = 7;
-    style.GrabRounding = 3;
-    style.FrameRounding = 3;
-    style.PopupRounding = 4;
-    style.ChildRounding = 4;
-    style.WindowShadowSize = 50.0f;
-    style.ScrollbarSize = 10.0f;
-    style.Colors[ImGuiCol_WindowShadow] = ImVec4(0, 0, 0, 1.0f);
+  if (name.empty()) {
+    auto s = keyMappings.find(key);
+    if (s == keyMappings.end()) return;
+    name = s->second;
   }
 
-  ImGuiIO& io = ImGui::GetIO();
+  std::vector<std::string> keys;
+  translateMod(keys, mods);
+  keys.push_back(name);
+  sendKeyEvent(format("{}", join(keys, "+")), action);
+}
+
+void Window::handleMouse(int button, int action, int mods) {
+  std::vector<std::string> keys;
+  translateMod(keys, mods);
+  auto s = mbtnMappings.find(button);
+  if (s == mbtnMappings.end()) return;
+  keys.push_back(s->second);
+  sendKeyEvent(format("{}", join(keys, "+")), action);
+}
+
+void Window::sendKeyEvent(std::string key, bool action) {
+  if (action == GLFW_PRESS)
+    onKeyDownEvent(key);
+  else if (action == GLFW_RELEASE)
+    onKeyUpEvent(key);
+}
+
+void Window::translateMod(std::vector<std::string>& keys, int mods) {
+  if (mods & GLFW_MOD_CONTROL) keys.emplace_back("Ctrl");
+  if (mods & GLFW_MOD_ALT) keys.emplace_back("Alt");
+  if (mods & GLFW_MOD_SHIFT) keys.emplace_back("Shift");
+  if (mods & GLFW_MOD_SUPER) keys.emplace_back("Meta");
+}
+
 #ifdef _WIN32
-  if (config->Data.Mpv.UseWid) io.ConfigViewportsNoAutoMerge = true;
+int64_t Window::GetWid() {
+  HWND hwnd = glfwGetWin32Window(window);
+  return config->Data.Mpv.UseWid ? static_cast<uint32_t>((intptr_t)hwnd) : 0;
+}
 #endif
 
-#ifdef __APPLE__
-  io.FontGlobalScale = 1.0f / scale;
-#else
-  style.ScaleAllSizes(scale);
-#endif
-  ImGui::GetStyle() = style;
+GLAddrLoadFunc Window::GetGLAddrFunc() { return (GLAddrLoadFunc)glfwGetProcAddress; }
 
-  io.Fonts->Clear();
+std::string Window::GetClipboardString() {
+  const char* s = glfwGetClipboardString(window);
+  return s != nullptr ? s : "";
+}
 
-  ImFontConfig cfg;
-  cfg.SizePixels = fontSize;
-  ImWchar fa_range[] = {ICON_MIN_FA, ICON_MAX_FA, 0};
-  const ImWchar* font_range = config->buildGlyphRanges();
-  io.Fonts->AddFontFromMemoryCompressedTTF(fa_compressed_data, fa_compressed_size, iconSize, &cfg, fa_range);
-  cfg.MergeMode = true;
-  if (fileExists(config->Data.Font.Path))
-    io.Fonts->AddFontFromFileTTF(config->Data.Font.Path.c_str(), 0, &cfg, font_range);
+void Window::GetMonitorSize(int* w, int* h) {
+  const GLFWvidmode* mode = glfwGetVideoMode(getMonitor(window));
+  *w = mode->width;
+  *h = mode->height;
+}
+
+void Window::GetFramebufferSize(int* w, int* h) { glfwGetFramebufferSize(window, w, h); }
+
+void Window::MakeContextCurrent() { glfwMakeContextCurrent(window); }
+
+void Window::DeleteContext() { glfwMakeContextCurrent(nullptr); }
+
+void Window::SwapBuffers() { glfwSwapBuffers(window); }
+
+void Window::SetSwapInterval(int interval) { glfwSwapInterval(interval); }
+
+void Window::BackendNewFrame() { ImGui_ImplGlfw_NewFrame(); };
+
+void Window::GetWindowScale(float* x, float* y) { glfwGetWindowContentScale(window, x, y); }
+
+void Window::GetWindowPos(int* x, int* y) { glfwGetWindowPos(window, x, y); }
+
+void Window::SetWindowPos(int x, int y) { glfwSetWindowPos(window, x, y); }
+
+void Window::GetWindowSize(int* w, int* h) { glfwGetWindowSize(window, w, h); }
+
+void Window::SetWindowSize(int w, int h) { glfwSetWindowSize(window, w, h); }
+
+std::string Window::GetWindowTitle() { return title; }
+
+void Window::SetWindowTitle(std::string title) { glfwSetWindowTitle(window, title.c_str()); }
+
+void Window::SetWindowAspectRatio(int num, int den) { glfwSetWindowAspectRatio(window, num, den); }
+
+void Window::SetWindowMaximized(bool m) {
+  if (m)
+    glfwMaximizeWindow(window);
   else
-    io.Fonts->AddFontFromMemoryCompressedTTF(unifont_compressed_data, unifont_compressed_size, 0, &cfg, font_range);
-  io.Fonts->AddFontFromMemoryCompressedTTF(source_code_pro_compressed_data, source_code_pro_compressed_size, fontSize);
-
-  io.Fonts->Build();
+    glfwRestoreWindow(window);
 }
 
-void Window::initImGui() {
-  IMGUI_CHECKVERSION();
-  ImGui::CreateContext();
-
-  ImGuiIO& io = ImGui::GetIO();
-  io.IniFilename = nullptr;
-  io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
-  if (config->Data.Interface.Docking) io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
-  if (config->Data.Interface.Viewports) io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
-
-  loadFonts();
-
-  ImGui_ImplGlfw_InitForOpenGL(window, true);
-#ifdef IMGUI_IMPL_OPENGL_ES3
-  ImGui_ImplOpenGL3_Init("#version 300 es");
-#elif defined(__APPLE__)
-  ImGui_ImplOpenGL3_Init("#version 150");
-#else
-  ImGui_ImplOpenGL3_Init("#version 130");
-#endif
+void Window::SetWindowMinimized(bool m) {
+  if (m)
+    glfwIconifyWindow(window);
+  else
+    glfwRestoreWindow(window);
 }
 
-void Window::exitGLFW() {
-  glDeleteTextures(1, &tex);
-  glDeleteFramebuffers(1, &fbo);
+void Window::SetWindowDecorated(bool d) { glfwSetWindowAttrib(window, GLFW_DECORATED, d); }
 
-  glfwDestroyWindow(window);
-  glfwTerminate();
+void Window::SetWindowFloating(bool f) { glfwSetWindowAttrib(window, GLFW_FLOATING, f); }
+
+void Window::SetWindowFullscreen(bool fs) {
+  bool isFullscreen = glfwGetWindowMonitor(window) != nullptr;
+  if (isFullscreen == fs) return;
+
+  static int x, y, w, h;
+  if (fs) {
+    glfwGetWindowPos(window, &x, &y);
+    glfwGetWindowSize(window, &w, &h);
+    GLFWmonitor* monitor = getMonitor(window);
+    const GLFWvidmode* mode = glfwGetVideoMode(monitor);
+    glfwSetWindowMonitor(window, monitor, 0, 0, mode->width, mode->height, mode->refreshRate);
+  } else
+    glfwSetWindowMonitor(window, nullptr, x, y, w, h, 0);
 }
 
-void Window::exitImGui() {
-  ImGui_ImplOpenGL3_Shutdown();
-  ImGui_ImplGlfw_Shutdown();
-  ImGui::DestroyContext();
+void Window::SetWindowShouldClose(bool c) { glfwSetWindowShouldClose(window, c); }
+
+GLFWmonitor* Window::getMonitor(GLFWwindow* target) {
+  int n, wx, wy, ww, wh, mx, my;
+  int bestoverlap = 0;
+
+  glfwGetWindowPos(target, &wx, &wy);
+  glfwGetWindowSize(target, &ww, &wh);
+  GLFWmonitor* bestmonitor = nullptr;
+  auto monitors = glfwGetMonitors(&n);
+
+  for (int i = 0; i < n; i++) {
+    const GLFWvidmode* mode = glfwGetVideoMode(monitors[i]);
+    glfwGetMonitorPos(monitors[i], &mx, &my);
+    int overlap = std::max(0, std::min(wx + ww, mx + mode->width) - std::max(wx, mx)) *
+                  std::max(0, std::min(wy + wh, my + mode->height) - std::max(wy, my));
+    if (bestoverlap < overlap) {
+      bestoverlap = overlap;
+      bestmonitor = monitors[i];
+    }
+  }
+
+  return bestmonitor != nullptr ? bestmonitor : glfwGetPrimaryMonitor();
 }
 
 #ifdef _WIN32

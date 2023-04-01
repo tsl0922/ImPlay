@@ -25,6 +25,7 @@ jobs:
         env:
           CC: gcc-10
           CXX: g++-10
+          DEPLOY_GTK_VERSION: 3
         run: |
           mkdir build && cd build
           cmake -DCMAKE_BUILD_TYPE=RELEASE -DCMAKE_INSTALL_PREFIX:PATH=/usr -DCREATE_PACKAGE=ON -G Ninja ..
@@ -33,7 +34,7 @@ jobs:
           curl -LO https://github.com/linuxdeploy/linuxdeploy/releases/download/continuous/linuxdeploy-x86_64.AppImage
           curl -LO https://raw.githubusercontent.com/linuxdeploy/linuxdeploy-plugin-gtk/master/linuxdeploy-plugin-gtk.sh
           chmod +x linuxdeploy-x86_64.AppImage linuxdeploy-plugin-gtk.sh
-          DEPLOY_GTK_VERSION=3 ./linuxdeploy-x86_64.AppImage --appdir AppDir --plugin gtk --output appimage
+          ./linuxdeploy-x86_64.AppImage --appdir $(pwd)/AppDir --plugin gtk --output appimage
           mv ImPlay*.AppImage $(echo ImPlay-*.deb | sed 's/deb/AppImage/')
       - uses: actions/upload-artifact@v3
         with:
