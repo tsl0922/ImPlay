@@ -5,8 +5,8 @@ endif()
 
 function(get_mpv_win_dev name)
   ExternalProject_Add(${name}
-    URL https://github.com/shinchiro/mpv-winbuild-cmake/releases/download/20230309/mpv-dev-x86_64-20230309-git-9880b06.7z
-    URL_HASH SHA256=14654784b340b2c64f0969037733633e716980655b9d0a0e4090454bd7a59497
+    URL https://downloads.sourceforge.net/mpv-player-windows/mpv-dev-x86_64-20230409-git-9a8b317.7z
+    URL_HASH SHA256=a1a369d28d1a64571d7e008fef3f5a31b15e46c944774a0af470b14bf546f54e
     DOWNLOAD_NO_PROGRESS ON
     UPDATE_COMMAND ""
     CONFIGURE_COMMAND ""

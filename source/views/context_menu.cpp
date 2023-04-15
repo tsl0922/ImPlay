@@ -19,7 +19,7 @@ void ContextMenu::draw() {
     ImGui::SetNextWindowClass(&windowClass);
   }
   if (ImGui::BeginPopup("##context_menu", ImGuiWindowFlags_NoMove)) {
-    if (ImGui::GetIO().AppFocusLost || ImGui::GetWindowViewport()->Flags & ImGuiViewportFlags_Minimized)
+    if (ImGui::GetIO().AppFocusLost || ImGui::GetWindowViewport()->Flags & ImGuiViewportFlags_IsMinimized)
       ImGui::CloseCurrentPopup();
 
     draw(build());

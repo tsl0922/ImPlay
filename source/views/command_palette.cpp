@@ -101,7 +101,7 @@ void CommandPalette::draw() {
   ImGui::SetNextWindowSize(popupSize, ImGuiCond_Always);
   ImGui::SetNextWindowPos(ImVec2(pos.x + size.x * 0.5f, pos.y + size.y * 0.1), ImGuiCond_Always, ImVec2(0.5f, 0.0f));
   if (ImGui::BeginPopup("##command_palette")) {
-    if (ImGui::GetIO().AppFocusLost || ImGui::GetWindowViewport()->Flags & ImGuiViewportFlags_Minimized)
+    if (ImGui::GetIO().AppFocusLost || ImGui::GetWindowViewport()->Flags & ImGuiViewportFlags_IsMinimized)
       ImGui::CloseCurrentPopup();
 
     if (justOpened) {

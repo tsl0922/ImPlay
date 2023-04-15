@@ -42,7 +42,7 @@ void Quickview::draw() {
     ImGui::SetNextWindowClass(&windowClass);
   }
   if (ImGui::BeginPopup("##quickview")) {
-    if (ImGui::GetIO().AppFocusLost || ImGui::GetWindowViewport()->Flags & ImGuiViewportFlags_Minimized)
+    if (ImGui::GetIO().AppFocusLost || ImGui::GetWindowViewport()->Flags & ImGuiViewportFlags_IsMinimized)
       ImGui::CloseCurrentPopup();
     if (ImGui::BeginTabBar("Quickviewview")) {
       for (auto &[name, title, draw, child] : tabs) {
