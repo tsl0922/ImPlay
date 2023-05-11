@@ -105,6 +105,7 @@ void Settings::drawGeneralTab() {
     ImGui::SameLine();
     ImGui::SetNextItemWidth(scaled(6));
     if (ImGui::InputInt("##recent_limit", &data.Recent.Limit, 1, 0, ImGuiInputTextFlags_CharsDecimal)) {
+      if (data.Recent.Limit < 0) data.Recent.Limit = 0;
       appliers.push_back([this]() {
         if (data.Recent.Limit == 0) config->clearRecentFiles();
       });
