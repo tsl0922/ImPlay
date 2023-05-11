@@ -42,8 +42,8 @@ void Debug::drawHeader() {
   ImGuiIO& io = ImGui::GetIO();
   auto style = ImGuiStyle();
   ImGui::Text("%s", version.c_str());
-  auto vSize = ImGui::CalcTextSize(format("ImGui {}", ImGui::GetVersion()).c_str());
-  auto mSize = ImGui::CalcTextSize(format("FPS: %.2f", io.Framerate).c_str());
+  auto vSize = ImGui::CalcTextSize(fmt::format("ImGui {}", ImGui::GetVersion()).c_str());
+  auto mSize = ImGui::CalcTextSize(fmt::format("FPS: %.2f", io.Framerate).c_str());
   ImGui::SameLine(ImGui::GetContentRegionAvail().x - (vSize.x + mSize.x + 2 * style.FramePadding.x));
   ImGui::Text("ImGui %s", ImGui::GetVersion());
   if (ImGui::IsItemClicked(ImGuiMouseButton_Left)) m_demo = !m_demo;
@@ -67,7 +67,7 @@ void Debug::drawConsole() {
 void Debug::drawBindings() {
   auto bindings = mpv->bindings;
   if (m_node != "Bindings") ImGui::SetNextItemOpen(false, ImGuiCond_Always);
-  if (!ImGui::CollapsingHeader(format("views.debug.bindings"_i18n, bindings.size()).c_str())) return;
+  if (!ImGui::CollapsingHeader(i18n_a("views.debug.bindings", bindings.size()).c_str())) return;
   m_node = "Bindings";
 
   if (ImGui::BeginListBox("input-bindings", ImVec2(-FLT_MIN, -FLT_MIN))) {
@@ -115,7 +115,7 @@ static void formatCommands(mpv_node& node, std::vector<std::pair<std::string, st
             if (strcmp(k, "name") == 0) name_ = v.u.string;
             if (strcmp(k, "optional") == 0) optional_ = v.u.flag;
           }
-          args.push_back(optional_ ? format("<{}>", name_) : name_);
+          args.push_back(optional_ ? fmt::format("<{}>", name_) : name_);
         }
       }
       if (strcmp(key, "vararg") == 0) vararg = value.u.flag;
@@ -123,7 +123,7 @@ static void formatCommands(mpv_node& node, std::vector<std::pair<std::string, st
     if (name == nullptr) continue;
     std::string args_str;
     if (!args.empty()) {
-      args_str = format("{}", join(args, " "));
+      args_str = fmt::format("{}", join(args, " "));
       if (vararg) args_str += " ...";
     }
     commands.push_back({name, args_str});
@@ -153,7 +153,7 @@ void Debug::initData() {
 
 void Debug::drawCommands() {
   if (m_node != "Commands") ImGui::SetNextItemOpen(false, ImGuiCond_Always);
-  if (!ImGui::CollapsingHeader(format("views.debug.commands"_i18n, commands.size()).c_str())) return;
+  if (!ImGui::CollapsingHeader(i18n_a("views.debug.commands", commands.size()).c_str())) return;
   m_node = "Commands";
 
   static char buf[256] = "";
@@ -181,7 +181,7 @@ void Debug::drawCommands() {
 
 void Debug::drawProperties(const char* title, std::vector<std::string>& props) {
   if (m_node != title) ImGui::SetNextItemOpen(false, ImGuiCond_Always);
-  if (!ImGui::CollapsingHeader(format("{} [{}]", title, props.size()).c_str())) {
+  if (!ImGui::CollapsingHeader(fmt::format("{} [{}]", title, props.size()).c_str())) {
     return;
   }
   m_node = title;
@@ -252,22 +252,22 @@ void Debug::drawPropNode(const char* name, mpv_node& node, int depth) {
         value = prop.u.flag ? "yes" : "no";
         break;
       case MPV_FORMAT_INT64:
-        value = format("{}", prop.u.int64);
+        value = fmt::format("{}", prop.u.int64);
         break;
       case MPV_FORMAT_DOUBLE:
-        value = format("{}", prop.u.double_);
+        value = fmt::format("{}", prop.u.double_);
         break;
       default:
-        value = format("Unknown format: {}", (int)prop.format);
+        value = fmt::format("Unknown format: {}", (int)prop.format);
         color = style.Colors[ImGuiCol_TextDisabled];
         break;
     }
     ImGui::PushID(&prop);
     ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(0, ImGui::GetStyle().ItemSpacing.y));
     ImGui::Selectable("", false);
-    if (ImGui::BeginPopupContextItem(format("##menu_{}", title).c_str())) {
+    if (ImGui::BeginPopupContextItem(fmt::format("##menu_{}", title).c_str())) {
       if (ImGui::MenuItem("views.debug.properties.menu.copy"_i18n))
-        ImGui::SetClipboardText(format("{}={}", title, value).c_str());
+        ImGui::SetClipboardText(fmt::format("{}={}", title, value).c_str());
       if (ImGui::MenuItem("views.debug.properties.menu.copy_name"_i18n)) ImGui::SetClipboardText(title);
       if (ImGui::MenuItem("views.debug.properties.menu.copy_value"_i18n)) ImGui::SetClipboardText(value.c_str());
       ImGui::EndPopup();
@@ -291,15 +291,15 @@ void Debug::drawPropNode(const char* name, mpv_node& node, int depth) {
       drawSimple(name, node);
       break;
     case MPV_FORMAT_NODE_ARRAY:
-      if (ImGui::TreeNode(format("{} [{}]", name, node.u.list->num).c_str())) {
+      if (ImGui::TreeNode(fmt::format("{} [{}]", name, node.u.list->num).c_str())) {
         for (int i = 0; i < node.u.list->num; i++)
-          drawPropNode(format("#{}", i).c_str(), node.u.list->values[i], depth + 1);
+          drawPropNode(fmt::format("#{}", i).c_str(), node.u.list->values[i], depth + 1);
         ImGui::TreePop();
       }
       break;
     case MPV_FORMAT_NODE_MAP:
       if (depth > 0) ImGui::SetNextItemOpen(true, ImGuiCond_Once);
-      if (ImGui::TreeNode(format("{} ({})", name, node.u.list->num).c_str())) {
+      if (ImGui::TreeNode(fmt::format("{} ({})", name, node.u.list->num).c_str())) {
         for (int i = 0; i < node.u.list->num; i++) drawPropNode(node.u.list->keys[i], node.u.list->values[i]);
         ImGui::TreePop();
       }
@@ -390,7 +390,7 @@ void Debug::Console::draw() {
     ImGui::EndPopup();
   }
 
-  Filter.Draw(format("{}##log", "views.debug.console.log.filter"_i18n).c_str(), scaled(8));
+  Filter.Draw(fmt::format("{}##log", "views.debug.console.log.filter"_i18n).c_str(), scaled(8));
   ImGui::SameLine();
   ImGui::SetNextItemWidth(scaled(3));
   ImGui::InputInt("views.debug.console.log.limit"_i18n, &LogLimit, 0);
@@ -577,7 +577,7 @@ int Debug::Console::TextEditCallback(ImGuiInputTextCallbackData* data) {
         AddLog("info", "Possible matches:\n");
         std::string s;
         for (int i = 0; i < candidates.Size; i++) {
-          s += format("{:<32}", candidates[i]);
+          s += fmt::format("{:<32}", candidates[i]);
           if (i != 0 && (i + 1) % 4 == 0) {
             AddLog("info", "%s\n", s.c_str());
             s.clear();

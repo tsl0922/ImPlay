@@ -71,7 +71,7 @@ void Quickview::alignRight(const char *label) {
 
 bool Quickview::iconButton(const char *icon, const char *cmd, const char *tooltip, bool sameline) {
   if (sameline) ImGui::SameLine();
-  bool ret = ImGui::Button(format("{}##{}", icon, cmd).c_str());
+  bool ret = ImGui::Button(fmt::format("{}##{}", icon, cmd).c_str());
   if (ret) mpv->command(cmd);
   if (tooltip && ImGui::IsItemHovered(ImGuiHoveredFlags_DelayNormal)) ImGui::SetTooltip("%s", tooltip);
   return ret;
@@ -79,7 +79,7 @@ bool Quickview::iconButton(const char *icon, const char *cmd, const char *toolti
 
 bool Quickview::toggleButton(const char *label, bool toggle, const char *tooltip, ImGuiCol col) {
   ImGui::PushStyleColor(col, ImGui::GetStyleColorVec4(toggle ? ImGuiCol_CheckMark : col));
-  bool ret = ImGui::Button(format("{}##{}", label, tooltip ? tooltip : "").c_str());
+  bool ret = ImGui::Button(fmt::format("{}##{}", label, tooltip ? tooltip : "").c_str());
   if (tooltip && ImGui::IsItemHovered(ImGuiHoveredFlags_DelayNormal)) ImGui::SetTooltip("%s", tooltip);
   ImGui::PopStyleColor();
   return ret;
@@ -88,7 +88,7 @@ bool Quickview::toggleButton(const char *label, bool toggle, const char *tooltip
 bool Quickview::toggleButton(bool toggle, const char *tooltip, const char *id) {
   ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0, 0, 0, 0));
   const char *label = toggle ? ICON_FA_TOGGLE_ON : ICON_FA_TOGGLE_OFF;
-  bool ret = toggleButton(format("{}##{}", label, id ? id : "").c_str(), toggle, tooltip, ImGuiCol_Text);
+  bool ret = toggleButton(fmt::format("{}##{}", label, id ? id : "").c_str(), toggle, tooltip, ImGuiCol_Text);
   ImGui::PopStyleColor();
   return ret;
 }
@@ -108,12 +108,12 @@ void Quickview::drawTracks(const char *title, const char *type, const char *prop
   if (toggleButton(toggle, "views.quickview.tracks.toggle"_i18n, prop)) {
     if (strstr(prop, "sid") != nullptr) {
       const char *prefix = strstr(prop, "secondary") != nullptr ? "secondary-" : "";
-      mpv->commandv("set", format("{}sub-visibility", prefix).c_str(), toggle ? "no" : "yes", nullptr);
+      mpv->commandv("set", fmt::format("{}sub-visibility", prefix).c_str(), toggle ? "no" : "yes", nullptr);
     } else {
       mpv->commandv("cycle-values", prop, "no", "auto", nullptr);
     }
   }
-  if (ImGui::BeginListBox(format("##tracks-{}", prop).c_str(),
+  if (ImGui::BeginListBox(fmt::format("##tracks-{}", prop).c_str(),
                           ImVec2(-FLT_MIN, 3 * ImGui::GetFrameHeightWithSpacing()))) {
     auto items = mpv->tracks;
     if (items.empty())
@@ -123,8 +123,8 @@ void Quickview::drawTracks(const char *title, const char *type, const char *prop
     for (auto &item : items) {
       if (item.type != type) continue;
       bool selected = item.id == 0 ? pos == "no" : pos == std::to_string(item.id);
-      auto title = item.title.empty() ? format("views.quickview.tracks.item"_i18n, item.id) : item.title;
-      if (!item.lang.empty()) title += format(" [{}]", item.lang);
+      auto title = item.title.empty() ? i18n_a("views.quickview.tracks.item", item.id) : item.title;
+      if (!item.lang.empty()) title += fmt::format(" [{}]", item.lang);
       ImGui::PushID(item.id);
       if (ImGui::Selectable("", selected)) mpv->property(prop, std::to_string(item.id).c_str());
       ImGui::SameLine();
@@ -172,7 +172,7 @@ void Quickview::drawPlaylistTabContent() {
     for (auto &item : items) {
       std::string title = item.title;
       if (title.empty() && !item.filename().empty()) title = item.filename();
-      if (title.empty()) title = format("views.quickview.playlist.item"_i18n, item.id + 1);
+      if (title.empty()) title = i18n_a("views.quickview.playlist.item", item.id + 1);
       ImGui::PushID(item.id);
       if (ImGui::Selectable("", selected == item.id)) selected = item.id;
       if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(0))
@@ -198,7 +198,7 @@ void Quickview::drawPlaylistTabContent() {
   iconButton(ICON_FA_SYNC, "cycle-values loop-playlist inf no", "views.quickview.playlist.loop"_i18n);
   iconButton(ICON_FA_RANDOM, "playlist-shuffle", "views.quickview.playlist.shuffle"_i18n);
   if (iconButton(sort ? ICON_FA_SORT_ALPHA_DOWN : ICON_FA_SORT_ALPHA_UP,
-                 format("script-message-to implay playlist-sort {}", sort).c_str(),
+                 fmt::format("script-message-to implay playlist-sort {}", sort).c_str(),
                  "views.quickview.playlist.sort"_i18n))
     sort = !sort;
   ImGui::SameLine(ImGui::GetContentRegionAvail().x -
@@ -216,8 +216,8 @@ void Quickview::drawChaptersTabContent() {
   if (ImGui::BeginListBox("##chapters", ImVec2(-FLT_MIN, -FLT_MIN))) {
     if (items.empty()) emptyLabel();
     for (auto &item : items) {
-      auto title = item.title.empty() ? format("Chapter {}", item.id + 1) : item.title;
-      auto time = format("{:%H:%M:%S}", std::chrono::duration<int>((int)item.time));
+      auto title = item.title.empty() ? fmt::format("Chapter {}", item.id + 1) : item.title;
+      auto time = fmt::format("{:%H:%M:%S}", std::chrono::duration<int>((int)item.time));
       auto color = ImGui::GetStyleColorVec4(item.id == pos ? ImGuiCol_CheckMark : ImGuiCol_Text);
       ImGui::PushID(item.id);
       if (ImGui::Selectable("", item.id == pos))
@@ -239,7 +239,7 @@ void Quickview::drawVideoTabContent() {
   ImGui::TextUnformatted("views.quickview.video.rotate"_i18n);
   const char *rotates[] = {"0", "90", "180", "270"};
   for (auto rotate : rotates) {
-    if (ImGui::Button(format("{}°", rotate).c_str())) mpv->commandv("set", "video-rotate", rotate, nullptr);
+    if (ImGui::Button(fmt::format("{}°", rotate).c_str())) mpv->commandv("set", "video-rotate", rotate, nullptr);
     ImGui::SameLine();
   }
   iconButton(ICON_FA_UNDO, "add video-rotate -1", "views.quickview.video.rotate_left"_i18n, false);
@@ -251,7 +251,7 @@ void Quickview::drawVideoTabContent() {
   ImGui::HelpMarker("views.quickview.video.scale.help"_i18n);
   const float scales[] = {0.25f, 0.5f, 0.75f, 1.0f, 1.5f, 2.0f};
   for (auto scale : scales) {
-    if (ImGui::Button(format("{}%", (int)(scale * 100)).c_str()))
+    if (ImGui::Button(fmt::format("{}%", (int)(scale * 100)).c_str()))
       mpv->commandv("set", "window-scale", std::to_string(scale).c_str(), nullptr);
     ImGui::SameLine();
   }
@@ -317,7 +317,7 @@ void Quickview::drawVideoTabContent() {
   ImGui::SetCursorPosX(ImGui::GetCursorPosX() + scaled(1));
   ImGui::BeginGroup();
   for (int i = 0; i < IM_ARRAYSIZE(equalizer); i++) {
-    if (ImGui::Button(format("{}##{}", ICON_FA_UNDO, eq[i]).c_str())) {
+    if (ImGui::Button(fmt::format("{}##{}", ICON_FA_UNDO, eq[i]).c_str())) {
       equalizer[i] = 0;
       mpv->commandv("set", eq[i], "0", nullptr);
     }
@@ -343,7 +343,7 @@ void Quickview::drawAudioTabContent() {
   ImGui::TextUnformatted("views.quickview.audio.delay"_i18n);
   static float delay = (float)mpv->property<double, MPV_FORMAT_DOUBLE>("audio-delay");
   if (ImGui::SliderFloat("##Delay", &delay, -10, 10, "%.1fs"))
-    mpv->commandv("set", "audio-delay", format("{:.1f}", delay).c_str(), nullptr);
+    mpv->commandv("set", "audio-delay", fmt::format("{:.1f}", delay).c_str(), nullptr);
   if (iconButton(ICON_FA_UNDO, "set audio-delay 0", "views.quickview.audio.delay.reset"_i18n)) delay = 0;
   ImGui::NewLine();
   ImGui::Separator();
@@ -369,14 +369,14 @@ void Quickview::drawSubtitleTabContent() {
   ImGui::TextUnformatted("views.quickview.subtitle.scale"_i18n);
   static float scale = (float)mpv->property<double, MPV_FORMAT_DOUBLE>("sub-scale");
   if (ImGui::SliderFloat("##Scale", &scale, 0, 4, "%.1f"))
-    mpv->commandv("set", "sub-scale", format("{:.1f}", scale).c_str(), nullptr);
+    mpv->commandv("set", "sub-scale", fmt::format("{:.1f}", scale).c_str(), nullptr);
   if (iconButton(ICON_FA_UNDO, "set sub-scale 1", "views.quickview.subtitle.scale.reset"_i18n)) scale = 1;
   ImGui::NewLine();
 
   ImGui::TextUnformatted("views.quickview.subtitle.delay"_i18n);
   static float delay = (float)mpv->property<double, MPV_FORMAT_DOUBLE>("sub-delay");
   if (ImGui::SliderFloat("##Delay", &delay, -10, 10, "%.1fs"))
-    mpv->commandv("set", "sub-delay", format("{:.1f}", delay).c_str(), nullptr);
+    mpv->commandv("set", "sub-delay", fmt::format("{:.1f}", delay).c_str(), nullptr);
   if (iconButton(ICON_FA_UNDO, "set sub-delay 0", "views.quickview.subtitle.delay.reset"_i18n)) delay = 0;
 }
 
@@ -417,7 +417,7 @@ void Quickview::drawAudioEq() {
   ImVec2 size = ImVec2(scaled(0.8f), scaled(10));
   float start = ImGui::GetCursorPosX();
   for (int i = 0; i < FREQ_COUNT; i++) {
-    std::string label = format("##{}", audioEqFreqs[i]);
+    std::string label = fmt::format("##{}", audioEqFreqs[i]);
     if (ImGui::VSliderFloat(label.c_str(), size, &gain[i], -12, 12, "")) setAudioEqValue(i, gain[i]);
     if (ImGui::IsItemHovered()) ImGui::SetTooltip("%.1fdB", gain[i]);
     if (i < FREQ_COUNT - 1) ImGui::SameLine(0, spacing);
@@ -439,7 +439,7 @@ void Quickview::applyAudioEq(bool osd) {
     if (audioEqIndex < 0) return;
     auto equalizer = audioEqPresets[audioEqIndex];
     mpv->commandv("af", "add", equalizer.toFilter("@aeq", audioEqChannels).c_str(), nullptr);
-    message = format("views.quickview.audio.equalizer.msg"_i18n, equalizer.name);
+    message = i18n_a("views.quickview.audio.equalizer.msg", equalizer.name);
   }
   if (osd) mpv->commandv("show-text", message.c_str(), nullptr);
 }
@@ -481,10 +481,10 @@ std::string Quickview::AudioEqItem::toFilter(const char *name, int channels) {
   for (int ch = 0; ch < channels; ch++) {
     for (int f = 0; f < FREQ_COUNT; f++) {
       double v = (double)values[f] / 12;
-      s += format("c{} f={} w={} g={}|", ch, freq, 1000, v);
+      s += fmt::format("c{} f={} w={} g={}|", ch, freq, 1000, v);
       freq *= 2;
     }
   }
-  return format("{}:lavfi=[anequalizer={}]", name, s);
+  return fmt::format("{}:lavfi=[anequalizer={}]", name, s);
 }
 }  // namespace ImPlay::Views

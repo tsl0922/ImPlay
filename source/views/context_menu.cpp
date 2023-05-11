@@ -268,13 +268,13 @@ void ContextMenu::drawPlaylist(std::vector<Mpv::PlayItem> items) {
     if (i == 10) break;
     std::string title = item.title;
     if (title.empty() && !item.filename().empty()) title = item.filename();
-    if (title.empty()) title = format("menu.playlist.item"_i18n, item.id + 1);
+    if (title.empty()) title = i18n_a("menu.playlist.item", item.id + 1);
     if (ImGui::MenuItemEx(title.c_str(), nullptr, nullptr, item.id == pos))
       mpv->commandv("playlist-play-index", std::to_string(item.id).c_str(), nullptr);
     i++;
   }
   if (items.size() > 10) {
-    if (ImGui::MenuItem(format("{} ({})", "menu.playlist.all"_i18n, items.size()).c_str()))
+    if (ImGui::MenuItem(fmt::format("{} ({})", "menu.playlist.all"_i18n, items.size()).c_str()))
       mpv->command("script-message-to implay command-palette playlist");
   }
 }
@@ -288,15 +288,15 @@ void ContextMenu::drawChapterlist(std::vector<Mpv::ChapterItem> items) {
   ImGui::Separator();
   for (auto &chapter : items) {
     if (i == 10) break;
-    auto title = chapter.title.empty() ? format("Chapter {}", chapter.id + 1) : chapter.title;
-    title = format("{} [{:%H:%M:%S}]", title, std::chrono::duration<int>((int)chapter.time));
+    auto title = chapter.title.empty() ? fmt::format("Chapter {}", chapter.id + 1) : chapter.title;
+    title = fmt::format("{} [{:%H:%M:%S}]", title, std::chrono::duration<int>((int)chapter.time));
     if (ImGui::MenuItem(title.c_str(), nullptr, chapter.id == pos)) {
       mpv->commandv("seek", std::to_string(chapter.time).c_str(), "absolute", nullptr);
     }
     i++;
   }
   if (items.size() > 10) {
-    if (ImGui::MenuItem(format("{} ({})", "menu.chapters.all"_i18n, items.size()).c_str()))
+    if (ImGui::MenuItem(fmt::format("{} ({})", "menu.chapters.all"_i18n, items.size()).c_str()))
       mpv->command("script-message-to implay command-palette chapters");
   }
 }
@@ -307,8 +307,8 @@ void ContextMenu::drawTracklist(const char *type, const char *prop, std::string 
       mpv->commandv("cycle-values", prop, "no", "auto", nullptr);
     for (auto &track : mpv->tracks) {
       if (track.type != type) continue;
-      auto title = track.title.empty() ? format("menu.tracks.item"_i18n, track.id) : track.title;
-      if (!track.lang.empty()) title += format(" [{}]", track.lang);
+      auto title = track.title.empty() ? i18n_a("menu.tracks.item", track.id) : track.title;
+      if (!track.lang.empty()) title += fmt::format(" [{}]", track.lang);
       if (ImGui::MenuItem(title.c_str(), nullptr, track.selected))
         mpv->property<int64_t, MPV_FORMAT_INT64>(prop, track.id);
     }
@@ -320,7 +320,7 @@ void ContextMenu::drawAudioDeviceList() {
   auto devices = mpv->audioDevices;
   if (ImGui::BeginMenuEx("menu.audio.devices"_i18n, ICON_FA_AUDIO_DESCRIPTION, !devices.empty())) {
     for (auto &device : devices) {
-      auto title = format("[{}] {}", device.description, device.name);
+      auto title = fmt::format("[{}] {}", device.description, device.name);
       if (ImGui::MenuItem(title.c_str(), nullptr, device.name == mpv->audioDevice))
         mpv->property("audio-device", device.name.c_str());
     }
@@ -347,7 +347,7 @@ void ContextMenu::drawProfilelist() {
   if (ImGui::BeginMenuEx("menu.tools.profiles"_i18n, ICON_FA_USER_COG)) {
     for (auto &profile : mpv->profiles) {
       if (ImGui::MenuItem(profile.c_str()))
-        mpv->command(format("show-text {}; apply-profile {}", profile, profile).c_str());
+        mpv->command(fmt::format("show-text {}; apply-profile {}", profile, profile).c_str());
     }
     ImGui::EndMenu();
   }
@@ -366,7 +366,7 @@ void ContextMenu::drawRecentFiles() {
       i++;
     }
     if (files.size() > 10) {
-      if (ImGui::MenuItem(format("{} ({})", "menu.open.recent.all"_i18n, files.size()).c_str()))
+      if (ImGui::MenuItem(fmt::format("{} ({})", "menu.open.recent.all"_i18n, files.size()).c_str()))
         mpv->command("script-message-to implay command-palette history");
     }
     if (ImGui::MenuItem("menu.open.recent.clear"_i18n)) config->clearRecentFiles();

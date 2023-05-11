@@ -35,8 +35,15 @@ class LangStr {
 };
 
 const ImWchar* getLangGlyphRanges();
+
 std::map<std::string, LangData>& getLangs();
 std::string& getLangFallback();
 std::string& getLang();
+
 std::string i18n(std::string key);
+template <typename... T>
+inline std::string i18n_a(std::string key, T... args) {
+  return fmt::vformat(i18n(key), fmt::make_format_args(args...));
+}
+inline LangStr operator""_i18n(const char* key, size_t) { return LangStr(key); }
 }  // namespace ImPlay

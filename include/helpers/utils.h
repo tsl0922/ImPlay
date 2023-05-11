@@ -24,8 +24,6 @@ struct OptionParser {
   bool check(std::string key, std::string value);
 };
 
-inline LangStr operator""_i18n(const char* key, size_t) { return LangStr(key); }
-
 inline float scaled(float n) { return n * ImGui::GetFontSize(); }
 inline ImVec2 scaled(const ImVec2& vector) { return vector * ImGui::GetFontSize(); }
 
@@ -65,16 +63,6 @@ inline std::string trim(std::string s) {
   str.erase(0, str.find_first_not_of(ws));
   str.erase(str.find_last_not_of(ws) + 1);
   return str;
-}
-
-template <typename... T>
-inline std::string format(std::string_view format, T... args) {
-  return fmt::format(fmt::runtime(format), args...);
-}
-
-template <typename... T>
-inline void print(std::string_view format, T... args) {
-  fmt::print(fmt::runtime(format), args...);
 }
 
 inline std::string join(std::vector<std::string> v, std::string_view sep) {

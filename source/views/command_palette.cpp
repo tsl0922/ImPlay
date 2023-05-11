@@ -20,8 +20,8 @@ CommandPalette::CommandPalette(Config* config, Mpv* mpv) : View(config, mpv) {
   };
   providers["chapters"] = [=, this](const char*) {
     for (auto& item : mpv->chapters) {
-      auto title = item.title.empty() ? format("Chapter {}", item.id + 1) : item.title;
-      auto time = format("{:%H:%M:%S}", std::chrono::duration<int>((int)item.time));
+      auto title = item.title.empty() ? fmt::format("Chapter {}", item.id + 1) : item.title;
+      auto time = fmt::format("{:%H:%M:%S}", std::chrono::duration<int>((int)item.time));
       items.push_back({
           title,
           "",
@@ -34,7 +34,7 @@ CommandPalette::CommandPalette(Config* config, Mpv* mpv) : View(config, mpv) {
     for (auto& item : mpv->playlist) {
       std::string title = item.title;
       if (title.empty() && !item.filename().empty()) title = item.filename();
-      if (title.empty()) title = format("Item {}", item.id + 1);
+      if (title.empty()) title = fmt::format("Item {}", item.id + 1);
       items.push_back({
           title,
           item.path.string(),
@@ -46,8 +46,8 @@ CommandPalette::CommandPalette(Config* config, Mpv* mpv) : View(config, mpv) {
   providers["tracks"] = [=, this](const char* type) {
     for (auto& item : mpv->tracks) {
       if (type != nullptr && item.type != type) continue;
-      auto title = item.title.empty() ? format("Track {}", item.id) : item.title;
-      if (!item.lang.empty()) title += format(" [{}]", item.lang);
+      auto title = item.title.empty() ? fmt::format("Track {}", item.id) : item.title;
+      if (!item.lang.empty()) title += fmt::format(" [{}]", item.lang);
       items.push_back({
           title,
           "",

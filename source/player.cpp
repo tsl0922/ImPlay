@@ -486,7 +486,7 @@ void Player::execute(int n_args, const char **args_) {
   try {
     if (it != commands.end()) it->second(n_args - 1, args_ + 1);
   } catch (const std::exception &e) {
-    messageBox("Error", format("{}: {}", cmd, e.what()));
+    messageBox("Error", fmt::format("{}: {}", cmd, e.what()));
   }
 }
 
@@ -549,14 +549,14 @@ void Player::playlistSort(bool reverse) {
   }
   std::vector<std::string> playlist = {"#EXTM3U"};
   for (auto &item : items) {
-    if (item.title != "") playlist.push_back(format("#EXTINF:-1,{}", item.title));
+    if (item.title != "") playlist.push_back(fmt::format("#EXTINF:-1,{}", item.title));
     playlist.push_back(item.path.string());
   }
   mpv->property<int64_t, MPV_FORMAT_INT64>("playlist-start", pos);
-  mpv->property("start", format("+{}", timePos).c_str());
+  mpv->property("start", fmt::format("+{}", timePos).c_str());
   if (!mpv->playing()) mpv->command("playlist-clear");
-  mpv->commandv("loadlist", format("memory://{}", join(playlist, "\n")).c_str(), mpv->playing() ? "replace" : "append",
-                nullptr);
+  mpv->commandv("loadlist", fmt::format("memory://{}", join(playlist, "\n")).c_str(),
+                mpv->playing() ? "replace" : "append", nullptr);
 }
 
 void Player::load(std::vector<std::filesystem::path> files, bool append, bool disk) {

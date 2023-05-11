@@ -141,12 +141,12 @@ class Player {
                                                   "ttxt", "txt", "ssa", "smi", "mks"};
 
   const std::vector<std::pair<std::string, std::string>> mediaFilters = {
-      {"Videos Files", format("{}", join(videoTypes, ","))},
-      {"Audio Files", format("{}", join(audioTypes, ","))},
-      {"Image Files", format("{}", join(imageTypes, ","))},
+      {"Videos Files", fmt::format("{}", join(videoTypes, ","))},
+      {"Audio Files", fmt::format("{}", join(audioTypes, ","))},
+      {"Image Files", fmt::format("{}", join(imageTypes, ","))},
   };
   const std::vector<std::pair<std::string, std::string>> subtitleFilters = {
-      {"Subtitle Files", format("{}", join(subtitleTypes, ","))},
+      {"Subtitle Files", fmt::format("{}", join(subtitleTypes, ","))},
   };
   const std::vector<std::pair<std::string, std::string>> isoFilters = {
       {"ISO Image Files", "iso"},

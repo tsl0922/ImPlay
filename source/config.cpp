@@ -61,19 +61,19 @@ void Config::save() {
 
   ini.sections["interface"]["lang"] = Data.Interface.Lang;
   ini.sections["interface"]["theme"] = Data.Interface.Theme;
-  ini.sections["interface"]["scale"] = format("{}", Data.Interface.Scale);
-  ini.sections["interface"]["fps"] = format("{}", Data.Interface.Fps);
-  ini.sections["interface"]["docking"] = format("{}", Data.Interface.Docking);
-  ini.sections["interface"]["viewports"] = format("{}", Data.Interface.Viewports);
+  ini.sections["interface"]["scale"] = fmt::format("{}", Data.Interface.Scale);
+  ini.sections["interface"]["fps"] = fmt::format("{}", Data.Interface.Fps);
+  ini.sections["interface"]["docking"] = fmt::format("{}", Data.Interface.Docking);
+  ini.sections["interface"]["viewports"] = fmt::format("{}", Data.Interface.Viewports);
   ini.sections["font"]["path"] = Data.Font.Path;
   ini.sections["font"]["size"] = std::to_string(Data.Font.Size);
   ini.sections["font"]["glyph-range"] = std::to_string(Data.Font.GlyphRange);
-  ini.sections["mpv"]["config"] = format("{}", Data.Mpv.UseConfig);
-  ini.sections["mpv"]["wid"] = format("{}", Data.Mpv.UseWid);
-  ini.sections["mpv"]["watch-later"] = format("{}", Data.Mpv.WatchLater);
+  ini.sections["mpv"]["config"] = fmt::format("{}", Data.Mpv.UseConfig);
+  ini.sections["mpv"]["wid"] = fmt::format("{}", Data.Mpv.UseWid);
+  ini.sections["mpv"]["watch-later"] = fmt::format("{}", Data.Mpv.WatchLater);
   ini.sections["mpv"]["volume"] = std::to_string(Data.Mpv.Volume);
-  ini.sections["window"]["save"] = format("{}", Data.Window.Save);
-  ini.sections["window"]["single"] = format("{}", Data.Window.Single);
+  ini.sections["window"]["save"] = fmt::format("{}", Data.Window.Save);
+  ini.sections["window"]["single"] = fmt::format("{}", Data.Window.Single);
   ini.sections["window"]["x"] = std::to_string(Data.Window.X);
   ini.sections["window"]["y"] = std::to_string(Data.Window.Y);
   ini.sections["window"]["w"] = std::to_string(Data.Window.W);
@@ -81,12 +81,12 @@ void Config::save() {
   ini.sections["debug"]["log-level"] = Data.Debug.LogLevel;
   ini.sections["debug"]["log-limit"] = std::to_string(Data.Debug.LogLimit);
   ini.sections["recent"]["limit"] = std::to_string(Data.Recent.Limit);
-  ini.sections["recent"]["space-to-play-last"] = format("{}", Data.Recent.SpaceToPlayLast);
+  ini.sections["recent"]["space-to-play-last"] = fmt::format("{}", Data.Recent.SpaceToPlayLast);
 
   int index = 0;
   for (auto& file : recentFiles) {
-    ini.sections["recent"][format("file-{}", index++)] =
-        file.path == file.title ? file.path : format("{}|{}", file.path, file.title);
+    ini.sections["recent"][fmt::format("file-{}", index++)] =
+        file.path == file.title ? file.path : fmt::format("{}|{}", file.path, file.title);
   }
 
   std::ofstream file(configFile);

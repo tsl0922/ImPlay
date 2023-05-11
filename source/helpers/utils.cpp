@@ -69,12 +69,12 @@ bool fileExists(std::string path) {
 
 int openUrl(std::string url) {
 #ifdef __APPLE__
-  return system(format("open '{}'", url).c_str());
+  return system(fmt::format("open '{}'", url).c_str());
 #elif defined(_WIN32) || defined(__CYGWIN__)
   return ShellExecuteW(0, 0, UTF8ToWide(url).c_str(), 0, 0, SW_SHOW) > (HINSTANCE)32 ? 0 : 1;
 #else
   char command[256];
-  return system(format("xdg-open '{}'", url).c_str());
+  return system(fmt::format("xdg-open '{}'", url).c_str());
 #endif
 }
 
@@ -82,14 +82,14 @@ void revealInFolder(std::string path) {
   auto fp = std::filesystem::path(reinterpret_cast<char8_t*>(path.data()));
   if (!std::filesystem::exists(fp)) return;
 #ifdef __APPLE__
-  system(format("open -R '{}'", path).c_str());
+  system(fmt::format("open -R '{}'", path).c_str());
 #elif defined(_WIN32) || defined(__CYGWIN__)
-  std::string arg = format("/select,\"{}\"", path);
+  std::string arg = fmt::format("/select,\"{}\"", path);
   ShellExecuteW(0, 0, L"explorer", UTF8ToWide(arg).c_str(), 0, SW_SHOW);
 #else
   auto status = std::filesystem::status(fp);
   auto target = std::filesystem::is_directory(status) ? path : fp.parent_path().string();
-  system(format("xdg-open '{}'", target).c_str());
+  system(fmt::format("xdg-open '{}'", target).c_str());
 #endif
 }
 
@@ -123,7 +123,7 @@ std::filesystem::path dataPath() {
   if (xdg_dir != nullptr)
     dataDir = xdg_dir;
   else if (home != nullptr)
-    dataDir = format("{}/.config", home);
+    dataDir = fmt::format("{}/.config", home);
 #endif
   return std::filesystem::path(dataDir) / "implay";
 }

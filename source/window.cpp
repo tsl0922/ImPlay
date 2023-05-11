@@ -237,7 +237,7 @@ void Window::handleKey(int key, int action, int mods) {
   std::vector<std::string> keys;
   translateMod(keys, mods);
   keys.push_back(name);
-  sendKeyEvent(format("{}", join(keys, "+")), action);
+  sendKeyEvent(fmt::format("{}", join(keys, "+")), action);
 }
 
 void Window::handleMouse(int button, int action, int mods) {
@@ -246,7 +246,7 @@ void Window::handleMouse(int button, int action, int mods) {
   auto s = mbtnMappings.find(button);
   if (s == mbtnMappings.end()) return;
   keys.push_back(s->second);
-  sendKeyEvent(format("{}", join(keys, "+")), action);
+  sendKeyEvent(fmt::format("{}", join(keys, "+")), action);
 }
 
 void Window::sendKeyEvent(std::string key, bool action) {
