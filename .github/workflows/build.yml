@@ -54,7 +54,6 @@ jobs:
           HOMEBREW_NO_AUTO_UPDATE: 1
           HOMEBREW_NO_INSTALL_CLEANUP: 1
         run: |
-          brew update
           brew install cmake ninja git mpv freetype2 pkg-config
       - name: Build ImPlay
         env:
