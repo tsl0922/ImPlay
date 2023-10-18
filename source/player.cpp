@@ -6,7 +6,12 @@
 #include <romfs/romfs.hpp>
 #include <imgui.h>
 #include <imgui_internal.h>
+#ifdef IMGUI_IMPL_DX11
+#include "helpers/dx11.h"
+#include <imgui_impl_dx11.h>
+#else
 #include <imgui_impl_opengl3.h>
+#endif
 #include <fonts/fontawesome.h>
 #include <fonts/source_code_pro.h>
 #include <fonts/unifont.h>
@@ -64,7 +69,7 @@ bool Player::init(std::map<std::string, std::string> &options) {
   {
     ContextGuard guard(this);
     logoTexture = ImGui::LoadTexture("icon.png");
-    mpv->init(GetGLAddrFunc(), GetWid());
+    mpv->init(GetGLAddrFunc());
   }
 
   SetWindowDecorated(mpv->property<int, MPV_FORMAT_FLAG>("border"));
@@ -106,34 +111,42 @@ void Player::render() {
     ContextGuard guard(this);
 
     if (idle) {
+#ifdef IMGUI_IMPL_DX11
+      int fbw = 0, fbh = 0;
+      float color[4] = {0, 0, 0, 1};
+      this->GetFramebufferSize(&fbw, &fbh);
+      D3D11::Resize(fbw, fbh);
+      D3D11::ClearColor(color);
+#else
       glBindFramebuffer(GL_FRAMEBUFFER, fbo);
       glClearColor(0, 0, 0, 1);
       glClear(GL_COLOR_BUFFER_BIT);
       glBindFramebuffer(GL_FRAMEBUFFER, 0);
+#endif
     }
 
     if (config->FontReload) {
       loadFonts();
+#ifdef IMGUI_IMPL_DX11
+#else
       ImGui_ImplOpenGL3_DestroyFontsTexture();
       ImGui_ImplOpenGL3_CreateFontsTexture();
+#endif
       config->FontReload = false;
     }
+#ifdef IMGUI_IMPL_DX11
+    ImGui_ImplDX11_NewFrame();
+#else
     ImGui_ImplOpenGL3_NewFrame();
+#endif
   }
 
   BackendNewFrame();
   ImGui::NewFrame();
 
-#ifdef _WIN32
-  if (config->Data.Mpv.UseWid) {
-    ImGuiViewport *vp = ImGui::GetMainViewport();
-    vp->Flags &= ~ImGuiViewportFlags_CanHostOtherWindows;  // HACK: disable main viewport merge
-  }
-#endif
-
   if (!idle) {
     ImGuiViewport *vp = ImGui::GetMainViewport();
-    ImTextureID texture = reinterpret_cast<ImTextureID>(static_cast<intptr_t>(tex));
+    ImTextureID texture = reinterpret_cast<ImTextureID>(tex);
     ImGui::GetBackgroundDrawList(vp)->AddImage(texture, vp->Pos, vp->Pos + vp->Size);
   }
 
@@ -142,6 +155,11 @@ void Player::render() {
 
   {
     ContextGuard guard(this);
+#ifdef IMGUI_IMPL_DX11
+    D3D11::RenderTarget();
+    ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
+    D3D11::Present();
+#else
     GetFramebufferSize(&width, &height);
     glViewport(0, 0, width, height);
 
@@ -150,6 +168,7 @@ void Player::render() {
 
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
     SwapBuffers();
+#endif
     mpv->reportSwap();
   }
 
@@ -164,7 +183,11 @@ void Player::render() {
 
 void Player::renderVideo() {
   ContextGuard guard(this);
-
+#ifdef IMGUI_IMPL_DX11
+  int fbw = 0, fbh = 0;
+  this->GetFramebufferSize(&fbw, &fbh);
+  D3D11::Resize(fbw, fbh);
+#else
   glBindFramebuffer(GL_FRAMEBUFFER, fbo);
   glBindTexture(GL_TEXTURE_2D, tex);
 
@@ -172,19 +195,23 @@ void Player::renderVideo() {
 
   glBindTexture(GL_TEXTURE_2D, 0);
   glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
+#endif
   mpv->render(width, height, fbo, false);
 }
 
 void Player::initGui() {
   ContextGuard guard(this);
 
-#ifdef IMGUI_IMPL_OPENGL_ES3
+#ifdef IMGUI_IMPL_DX11
+  if (!D3D11::Init((HWND)GetWid())) throw std::runtime_error("init dx11 failed");
+#else
+#if defined(IMGUI_IMPL_OPENGL_ES3)
   if (!gladLoadGLES2((GLADloadfunc)GetGLAddrFunc())) throw std::runtime_error("Failed to load GLES 2!");
 #else
   if (!gladLoadGL((GLADloadfunc)GetGLAddrFunc())) throw std::runtime_error("Failed to load GL!");
 #endif
   SetSwapInterval(1);
+#endif
 
   IMGUI_CHECKVERSION();
   ImGui::CreateContext();
@@ -196,7 +223,9 @@ void Player::initGui() {
   if (config->Data.Interface.Viewports) io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
 
   loadFonts();
-
+#ifdef IMGUI_IMPL_DX11
+  ImGui_ImplDX11_Init(D3D11::d3dDevice, D3D11::d3dDeviceContext);
+#else
   glGenFramebuffers(1, &fbo);
   glGenTextures(1, &tex);
 
@@ -218,15 +247,18 @@ void Player::initGui() {
 #else
   ImGui_ImplOpenGL3_Init("#version 130");
 #endif
+#endif
 }
 
 void Player::exitGui() {
+#ifdef IMGUI_IMPL_DX11
+  D3D11::Cleanup();
+#else
   MakeContextCurrent();
-
   ImGui_ImplOpenGL3_Shutdown();
   glDeleteTextures(1, &tex);
   glDeleteFramebuffers(1, &fbo);
-
+#endif
   ImGui::DestroyContext();
 }
 
@@ -287,9 +319,6 @@ void Player::loadFonts() {
   }
 
   ImGuiIO &io = ImGui::GetIO();
-#ifdef _WIN32
-  if (config->Data.Mpv.UseWid) io.ConfigViewportsNoAutoMerge = true;
-#endif
 
 #ifdef __APPLE__
   io.FontGlobalScale = 1.0f / scale;

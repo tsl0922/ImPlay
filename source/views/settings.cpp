@@ -90,11 +90,6 @@ void Settings::drawGeneralTab() {
     ImGui::Checkbox("views.settings.general.mpv.config"_i18n, &data.Mpv.UseConfig);
     ImGui::SameLine();
     ImGui::HelpMarker("views.settings.general.mpv.config.help"_i18n);
-#ifdef _WIN32
-    ImGui::Checkbox("views.settings.general.mpv.wid"_i18n, &data.Mpv.UseWid);
-    ImGui::SameLine();
-    ImGui::HelpMarker("views.settings.general.mpv.wid.help"_i18n);
-#endif
     ImGui::Checkbox("views.settings.general.recent.play_last"_i18n, &data.Recent.SpaceToPlayLast);
     ImGui::Checkbox("views.settings.general.mpv.watch_later"_i18n, &data.Mpv.WatchLater);
     ImGui::SameLine();

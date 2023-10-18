@@ -38,7 +38,7 @@ class Window : Player {
   GLFWmonitor *getMonitor(GLFWwindow *target);
 
 #ifdef _WIN32
-  int64_t GetWid() override;
+  void* GetWid() override;
 #endif
   GLAddrLoadFunc GetGLAddrFunc() override;
   std::string GetClipboardString() override;

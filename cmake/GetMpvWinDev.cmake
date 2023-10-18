@@ -5,14 +5,13 @@ endif()
 
 function(get_mpv_win_dev name)
   ExternalProject_Add(${name}
-    URL https://downloads.sourceforge.net/mpv-player-windows/mpv-dev-x86_64-20231008-git-78719c1.7z
-    URL_HASH SHA256=b166bff207faf3b45a54e17b18f15b60f08399818de3a18b50ef7719ad6ca8b2
+    URL https://github.com/dragonflylee/mingw-packages/releases/download/MINGW64/mpv-dev-x86_64.7z
     DOWNLOAD_NO_PROGRESS ON
     UPDATE_COMMAND ""
     CONFIGURE_COMMAND ""
     BUILD_COMMAND ""
     INSTALL_COMMAND ${CMAKE_COMMAND} -E copy_directory <SOURCE_DIR>/include <BINARY_DIR>/include
-            COMMAND ${CMAKE_COMMAND} -E copy <SOURCE_DIR>/libmpv.dll.a <BINARY_DIR>
+            COMMAND ${CMAKE_COMMAND} -E copy <SOURCE_DIR>/libmpv.dll.a <BINARY_DIR>/libmpv.a
             COMMAND ${CMAKE_COMMAND} -E copy <SOURCE_DIR>/libmpv-2.dll ${CMAKE_BINARY_DIR}
     )
   ExternalProject_Get_property(${name} BINARY_DIR)
@@ -20,5 +19,5 @@ function(get_mpv_win_dev name)
 
   set(MPV_INCLUDE_DIRS ${MPV_DEV_DIR}/include PARENT_SCOPE)
   set(MPV_LIBRARY_DIRS ${MPV_DEV_DIR} PARENT_SCOPE)
-  set(MPV_LIBRARIES mpv PARENT_SCOPE)
+  set(MPV_LINK_LIBRARIES mpv PARENT_SCOPE)
 endfunction()

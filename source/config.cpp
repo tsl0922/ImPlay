@@ -31,7 +31,6 @@ void Config::load() {
   inipp::get_value(ini.sections["font"], "size", Data.Font.Size);
   inipp::get_value(ini.sections["font"], "glyph-range", Data.Font.GlyphRange);
   inipp::get_value(ini.sections["mpv"], "config", Data.Mpv.UseConfig);
-  inipp::get_value(ini.sections["mpv"], "wid", Data.Mpv.UseWid);
   inipp::get_value(ini.sections["mpv"], "watch-later", Data.Mpv.WatchLater);
   inipp::get_value(ini.sections["mpv"], "volume", Data.Mpv.Volume);
   inipp::get_value(ini.sections["window"], "save", Data.Window.Save);
@@ -69,7 +68,6 @@ void Config::save() {
   ini.sections["font"]["size"] = std::to_string(Data.Font.Size);
   ini.sections["font"]["glyph-range"] = std::to_string(Data.Font.GlyphRange);
   ini.sections["mpv"]["config"] = fmt::format("{}", Data.Mpv.UseConfig);
-  ini.sections["mpv"]["wid"] = fmt::format("{}", Data.Mpv.UseWid);
   ini.sections["mpv"]["watch-later"] = fmt::format("{}", Data.Mpv.WatchLater);
   ini.sections["mpv"]["volume"] = std::to_string(Data.Mpv.Volume);
   ini.sections["window"]["save"] = fmt::format("{}", Data.Window.Save);

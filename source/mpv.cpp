@@ -8,6 +8,9 @@
 #include <cstring>
 #include <nlohmann/json.hpp>
 #include "mpv.h"
+#ifdef IMGUI_IMPL_DX11
+#include "helpers/dx11.h"
+#endif
 
 namespace ImPlay {
 Mpv::Mpv() {
@@ -73,7 +76,11 @@ void Mpv::eventLoop() {
 
 void Mpv::render(int w, int h, int fbo, bool flip) {
   if (renderCtx == nullptr) return;
-
+#ifdef IMGUI_IMPL_DX11
+  mpv_render_param params[]{
+      {MPV_RENDER_PARAM_INVALID, nullptr},
+  };
+#else
   int flip_y{flip ? 1 : 0};
   mpv_opengl_fbo mpfbo{fbo, w, h};
   mpv_render_param params[]{
@@ -81,6 +88,7 @@ void Mpv::render(int w, int h, int fbo, bool flip) {
       {MPV_RENDER_PARAM_FLIP_Y, &flip_y},
       {MPV_RENDER_PARAM_INVALID, nullptr},
   };
+#endif
   mpv_render_context_render(renderCtx, params);
 }
 
@@ -94,17 +102,24 @@ void Mpv::reportSwap() {
 
 static void *get_proc_address(void *ctx, const char *name) { return ((GLAddrLoadFunc)ctx)(name); }
 
-void Mpv::init(GLAddrLoadFunc load, int64_t wid) {
-  if (mpv_set_property(mpv, "wid", MPV_FORMAT_INT64, &wid) < 0) throw std::runtime_error("could not set mpv wid");
+void Mpv::init(GLAddrLoadFunc load) {
   if (mpv_initialize(mpv) < 0) throw std::runtime_error("could not initialize mpv context");
   if (wid == 0) {
+#ifdef IMGUI_IMPL_DX11
+    mpv_dxgi_init_params init_params{D3D11::d3dDevice, D3D11::d3dSwapChain};
+    mpv_render_param params[]{
+        {MPV_RENDER_PARAM_API_TYPE, const_cast<char *>(MPV_RENDER_API_TYPE_DXGI)},
+        {MPV_RENDER_PARAM_DXGI_INIT_PARAMS, &init_params},
+        {MPV_RENDER_PARAM_INVALID, nullptr},
+    };
+#else
     mpv_opengl_init_params gl_init_params{get_proc_address, (void *)load};
     mpv_render_param params[]{
         {MPV_RENDER_PARAM_API_TYPE, const_cast<char *>(MPV_RENDER_API_TYPE_OPENGL)},
         {MPV_RENDER_PARAM_OPENGL_INIT_PARAMS, &gl_init_params},
         {MPV_RENDER_PARAM_INVALID, nullptr},
     };
-
+#endif
     if (mpv_render_context_create(&renderCtx, mpv, params) < 0)
       throw std::runtime_error("failed to initialize mpv GL context");
 

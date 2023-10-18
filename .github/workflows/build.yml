@@ -93,7 +93,7 @@ jobs:
         shell: msys2 {0}
         run: |
           mkdir build && cd build
-          cmake -DCMAKE_BUILD_TYPE=RELEASE -DUSE_PATCHED_GLFW=ON -DUSE_OPENGL_ES3=ON -DCREATE_PACKAGE=ON -G Ninja ..
+          cmake -DCMAKE_BUILD_TYPE=RELEASE -DUSE_PATCHED_GLFW=ON -DUSE_DX11=ON -DCREATE_PACKAGE=ON -G Ninja ..
           cmake --build . --target package
       - uses: actions/upload-artifact@v3
         with:

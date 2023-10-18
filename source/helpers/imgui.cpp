@@ -3,7 +3,9 @@
 
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
-#ifdef IMGUI_IMPL_OPENGL_ES3
+#ifdef IMGUI_IMPL_DX11
+#include "helpers/dx11.h"
+#elif defined(IMGUI_IMPL_OPENGL_ES3)
 #include <GLES3/gl3.h>
 #else
 #include <GL/gl.h>
@@ -67,7 +69,38 @@ ImTextureID ImGui::LoadTexture(const char* path, ImVec2* size) {
   auto icon = romfs::get(path);
   auto data = stbi_load_from_memory(reinterpret_cast<const stbi_uc*>(icon.data()), icon.size(), &w, &h, NULL, 4);
   if (data == nullptr) return nullptr;
+#ifdef IMGUI_IMPL_DX11
+  ID3D11ShaderResourceView* texture = nullptr;
+  ID3D11Texture2D* texbuffer = nullptr;
+  HRESULT hr = S_OK;
 
+  D3D11_TEXTURE2D_DESC td;
+  ZeroMemory(&td, sizeof(td));
+  td.Width = w;
+  td.Height = h;
+  td.MipLevels = 1;
+  td.ArraySize = 1;
+  td.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+  td.SampleDesc.Count = 1;
+  td.Usage = D3D11_USAGE_DEFAULT;
+  td.BindFlags = D3D11_BIND_SHADER_RESOURCE;
+
+  D3D11_SUBRESOURCE_DATA initData;
+  initData.pSysMem = data;
+  initData.SysMemPitch = td.Width * 4;
+  hr = D3D11::d3dDevice->CreateTexture2D(&td, &initData, &texbuffer);
+
+  if (SUCCEEDED(hr)) {
+    // Create texture view
+    D3D11_SHADER_RESOURCE_VIEW_DESC srvd;
+    ZeroMemory(&srvd, sizeof(srvd));
+    srvd.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+    srvd.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
+    srvd.Texture2D.MipLevels = td.MipLevels;
+    hr = D3D11::d3dDevice->CreateShaderResourceView(texbuffer, &srvd, &texture);
+    texbuffer->Release();
+  }
+#else
   GLuint texture;
   glGenTextures(1, &texture);
   glBindTexture(GL_TEXTURE_2D, texture);
@@ -81,6 +114,7 @@ ImTextureID ImGui::LoadTexture(const char* path, ImVec2* size) {
   glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
 
   glBindTexture(GL_TEXTURE_2D, 0);
+#endif
   stbi_image_free(data);
 
   if (size != nullptr) {
@@ -88,5 +122,5 @@ ImTextureID ImGui::LoadTexture(const char* path, ImVec2* size) {
     size->y = h;
   }
 
-  return reinterpret_cast<ImTextureID>(static_cast<intptr_t>(texture));
+  return reinterpret_cast<ImTextureID>(texture);
 }

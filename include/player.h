@@ -6,7 +6,8 @@
 #include <string>
 #include <vector>
 #include <mutex>
-#ifdef IMGUI_IMPL_OPENGL_ES3
+#ifdef IMGUI_IMPL_DX11
+#elif defined(IMGUI_IMPL_OPENGL_ES3)
 #include <GLES3/gl3.h>
 #else
 #include <GL/gl.h>
@@ -81,7 +82,7 @@ class Player {
   bool isMediaFile(std::string file);
   bool isSubtitleFile(std::string file);
 
-  virtual int64_t GetWid() { return 0; }
+  virtual void *GetWid() { return 0; }
   virtual GLAddrLoadFunc GetGLAddrFunc() = 0;
   virtual std::string GetClipboardString() = 0;
   virtual void GetMonitorSize(int *w, int *h) = 0;
@@ -107,7 +108,11 @@ class Player {
   virtual void SetWindowShouldClose(bool c) = 0;
 
   bool idle = true;
+#ifdef IMGUI_IMPL_DX11
+  intptr_t fbo = 0, tex = 0;
+#else
   GLuint fbo = 0, tex = 0;
+#endif
   ImTextureID logoTexture = nullptr;
   std::mutex contextLock;
 
@@ -156,10 +161,14 @@ class Player {
    public:
     inline ContextGuard(Player *p) : p(p) {
       p->contextLock.lock();
+#ifndef IMGUI_IMPL_DX11
       p->MakeContextCurrent();
+#endif
     }
     inline ~ContextGuard() {
+#ifndef IMGUI_IMPL_DX11
       p->DeleteContext();
+#endif
       p->contextLock.unlock();
     }
 

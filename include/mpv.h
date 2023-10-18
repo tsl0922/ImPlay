@@ -7,7 +7,11 @@
 #include <functional>
 #include <filesystem>
 #include <mpv/client.h>
+#ifdef IMGUI_IMPL_DX11
+#include <mpv/render_dxgi.h>
+#else
 #include <mpv/render_gl.h>
+#endif
 
 namespace ImPlay {
 typedef void *(*GLAddrLoadFunc)(const char *name);
@@ -20,7 +24,7 @@ class Mpv {
   using LogHandler = std::function<void(const char *, const char *, const char *)>;
   using Callback = std::function<void(Mpv *)>;
 
-  void init(GLAddrLoadFunc load, int64_t wid = 0);
+  void init(GLAddrLoadFunc load);
   void render(int w, int h, int fbo = 0, bool flip = true);
   bool wantRender();
   void reportSwap();

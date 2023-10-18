@@ -31,7 +31,11 @@ Window::Window(Config* config) : Player(config) {
   installCallbacks(window);
 
   initGui();
+#ifdef IMGUI_IMPL_DX11
+  ImGui_ImplGlfw_InitForOther(window, true);
+#else
   ImGui_ImplGlfw_InitForOpenGL(window, true);
+#endif
 }
 
 Window::~Window() {
@@ -139,7 +143,9 @@ void Window::updateCursor() {
 }
 
 GLFWwindow* Window::createWindow() {
-#if defined(IMGUI_IMPL_OPENGL_ES3)
+#ifdef IMGUI_IMPL_DX11
+  glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
+#elif defined(IMGUI_IMPL_OPENGL_ES3)
   glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
   glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
   glfwWindowHint(GLFW_CONTEXT_CREATION_API, GLFW_EGL_CONTEXT_API);
@@ -265,10 +271,7 @@ void Window::translateMod(std::vector<std::string>& keys, int mods) {
 }
 
 #ifdef _WIN32
-int64_t Window::GetWid() {
-  HWND hwnd = glfwGetWin32Window(window);
-  return config->Data.Mpv.UseWid ? static_cast<uint32_t>((intptr_t)hwnd) : 0;
-}
+void* Window::GetWid() { return glfwGetWin32Window(window); }
 #endif
 
 GLAddrLoadFunc Window::GetGLAddrFunc() { return (GLAddrLoadFunc)glfwGetProcAddress; }
