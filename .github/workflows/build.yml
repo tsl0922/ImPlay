@@ -27,15 +27,14 @@ jobs:
           CXX: g++-10
           DEPLOY_GTK_VERSION: 3
         run: |
-          mkdir build && cd build
-          cmake -DCMAKE_BUILD_TYPE=RELEASE -DCMAKE_INSTALL_PREFIX:PATH=/usr -DCREATE_PACKAGE=ON -G Ninja ..
-          cmake --build . --target package
-          cmake --install . --prefix AppDir/usr
+          cmake -B build -DCMAKE_BUILD_TYPE=RELEASE -DCMAKE_INSTALL_PREFIX:PATH=/usr -DCREATE_PACKAGE=ON -G Ninja
+          cmake --build build --target package
+          cmake --install build --prefix AppDir/usr
           curl -LO https://github.com/linuxdeploy/linuxdeploy/releases/download/continuous/linuxdeploy-x86_64.AppImage
           curl -LO https://raw.githubusercontent.com/linuxdeploy/linuxdeploy-plugin-gtk/master/linuxdeploy-plugin-gtk.sh
           chmod +x linuxdeploy-x86_64.AppImage linuxdeploy-plugin-gtk.sh
           ./linuxdeploy-x86_64.AppImage --appdir $(pwd)/AppDir --plugin gtk --output appimage
-          mv ImPlay*.AppImage $(echo ImPlay-*.deb | sed 's/deb/AppImage/')
+          mv ImPlay*.AppImage $(echo build/ImPlay-*.deb | sed 's/deb/AppImage/')
       - uses: actions/upload-artifact@v3
         with:
           name: ImPlay-linux
@@ -59,15 +58,20 @@ jobs:
         env:
           PKG_CONFIG_PATH: /usr/local/opt/libarchive/lib/pkgconfig
         run: |
-          mkdir build && cd build
-          cmake -DCMAKE_BUILD_TYPE=RELEASE -DUSE_PATCHED_GLFW=ON -DCREATE_PACKAGE=ON -G Ninja ..
-          cmake --build . --target package
+          cmake -B build -DCMAKE_BUILD_TYPE=RELEASE -DUSE_PATCHED_GLFW=ON -DCREATE_PACKAGE=ON -G Ninja
+          cmake --build build --target package
       - uses: actions/upload-artifact@v3
         with:
           name: ImPlay-macOS
           path: build/ImPlay-*.dmg
   win:
     runs-on: windows-2019
+    env:
+      MSYSTEM: MINGW64
+      MSYS2_PATH_TYPE: inherit
+    defaults:
+      run:
+        shell: C:\shells\msys2bash.cmd {0}
     name: Windows
     steps:
       - name: Prepare git
@@ -77,24 +81,16 @@ jobs:
       - uses: actions/checkout@v3
         with:
           fetch-depth: 0
-      - uses: msys2/setup-msys2@v2
-        with:
-          msystem: mingw64
-          install: >-
-            base-devel
-            git
-            p7zip
-            mingw-w64-x86_64-gcc
-            mingw-w64-x86_64-cmake
-            mingw-w64-x86_64-ninja
-            mingw-w64-x86_64-freetype
-          update: true
-      - name: Build ImPlay
-        shell: msys2 {0}
+      - name: Install dependency
         run: |
-          mkdir build && cd build
-          cmake -DCMAKE_BUILD_TYPE=RELEASE -DUSE_PATCHED_GLFW=ON -DUSE_DX11=ON -DCREATE_PACKAGE=ON -G Ninja ..
-          cmake --build . --target package
+          pacman -S --needed --noconfirm --noprogressbar \
+            ${MINGW_PACKAGE_PREFIX}-gcc \
+            ${MINGW_PACKAGE_PREFIX}-ninja \
+            ${MINGW_PACKAGE_PREFIX}-freetype
+      - name: Build ImPlay
+        run: |
+          cmake -B build -DCMAKE_BUILD_TYPE=RELEASE -DUSE_PATCHED_GLFW=ON -DUSE_DX11=ON -DCREATE_PACKAGE=ON -G Ninja
+          cmake --build build --target package
       - uses: actions/upload-artifact@v3
         with:
           name: ImPlay-win64
