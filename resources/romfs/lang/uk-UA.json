@@ -1,7 +1,7 @@
 {
     "code": "uk-UA",
     "title": "Ukrainian (Ukraine)",
-    "fallback": true,
+    "fallback": false,
     "entries": {
         "menu.play": "Відтворити",
         "menu.pause": "Пауза",
