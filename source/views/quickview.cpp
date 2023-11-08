@@ -27,39 +27,49 @@ void Quickview::show(const char *tab) {
 }
 
 void Quickview::draw() {
+  if (pinMode)
+    drawPopup();
+  else
+    drawWindow();
+}
+
+void Quickview::drawWindow() {
+  if (!m_open) return;
+  ImVec2 wPos = ImGui::GetMainViewport()->WorkPos;
+  ImVec2 wSize = ImGui::GetMainViewport()->WorkSize;
+  float width = std::min(wSize.x * 0.3f, scaled(30));
+  float height = std::max(wSize.y * 0.8f, scaled(50));
+  ImGui::SetNextWindowSize(ImVec2(width, height), ImGuiCond_FirstUseEver);
+  ImGui::SetNextWindowPos(ImVec2(wPos.x + wSize.x - width, wPos.y + wSize.y * 0.5f), ImGuiCond_FirstUseEver,
+                          ImVec2(0.2f, 0.5f));
+
+  if (ImGui::Begin("menu.quickview"_i18n, &m_open, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoScrollbar)) {
+    drawTabBar();
+    ImGui::End();
+  }
+}
+
+void Quickview::drawPopup() {
   if (m_open) {
     ImGui::OpenPopup("##quickview");
     m_open = false;
   }
-  auto viewport = ImGui::GetMainViewport();
-  float width = std::min(viewport->WorkSize.x * 0.5f, scaled(30));
+  ImVec2 wPos = ImGui::GetMainViewport()->WorkPos;
+  ImVec2 wSize = ImGui::GetMainViewport()->WorkSize;
+  float width = std::min(wSize.x * 0.5f, scaled(30));
 
-  ImGui::SetNextWindowSize(ImVec2(width, viewport->WorkSize.y));
-  ImGui::SetNextWindowPos(ImVec2(viewport->WorkPos.x + viewport->WorkSize.x - width, viewport->WorkPos.y));
+  ImGui::SetNextWindowSize(ImVec2(width, wSize.y), ImGuiCond_Always);
+  ImGui::SetNextWindowPos(ImVec2(wPos.x + wSize.x - width, wPos.y), ImGuiCond_Always);
   if (ImGui::GetIO().ConfigFlags & ImGuiConfigFlags_ViewportsEnable) {
     ImGuiWindowClass windowClass;
     windowClass.ViewportFlagsOverrideSet = ImGuiViewportFlags_TopMost;
     ImGui::SetNextWindowClass(&windowClass);
   }
+
   if (ImGui::BeginPopup("##quickview")) {
     if (ImGui::GetIO().AppFocusLost || ImGui::GetWindowViewport()->Flags & ImGuiViewportFlags_IsMinimized)
       ImGui::CloseCurrentPopup();
-    if (ImGui::BeginTabBar("Quickviewview")) {
-      for (auto &[name, title, draw, child] : tabs) {
-        ImGuiTabItemFlags flags = ImGuiTabItemFlags_None;
-        if (iequals(curTab, name) && !tabSwitched) {
-          flags |= ImGuiTabItemFlags_SetSelected;
-          tabSwitched = true;
-        }
-        if (ImGui::BeginTabItem(i18n(title).c_str(), nullptr, flags)) {
-          if (child) ImGui::BeginChild(name.c_str());
-          draw();
-          if (child) ImGui::EndChild();
-          ImGui::EndTabItem();
-        }
-      }
-      ImGui::EndTabBar();
-    }
+    drawTabBar();
     ImGui::EndPopup();
   }
 }
@@ -97,6 +107,29 @@ void Quickview::emptyLabel() {
   ImGui::BeginDisabled();
   ImGui::TextUnformatted("views.quickview.empty"_i18n);
   ImGui::EndDisabled();
+}
+
+void Quickview::drawTabBar() {
+  if (ImGui::BeginTabBar("Quickviewview")) {
+    for (auto &[name, title, draw, child] : tabs) {
+      ImGuiTabItemFlags flags = ImGuiTabItemFlags_None;
+      if (iequals(curTab, name) && !tabSwitched) {
+        flags |= ImGuiTabItemFlags_SetSelected;
+        tabSwitched = true;
+      }
+      if (ImGui::BeginTabItem(i18n(title).c_str(), nullptr, flags)) {
+        if (child) ImGui::BeginChild(name.c_str());
+        draw();
+        if (child) ImGui::EndChild();
+        ImGui::EndTabItem();
+      }
+    }
+    if (ImGui::TabItemButton(pinMode ? ICON_FA_WINDOW_RESTORE : ICON_FA_MAP_PIN)) {
+      pinMode = !pinMode;
+      show();
+    }
+    ImGui::EndTabBar();
+  }
 }
 
 void Quickview::drawTracks(const char *title, const char *type, const char *prop, std::string pos) {

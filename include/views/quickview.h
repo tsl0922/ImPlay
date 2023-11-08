@@ -8,7 +8,7 @@ class Quickview : public View {
  public:
   Quickview(Config *config, Mpv *mpv);
 
-  void show(const char *tab);
+  void show(const char *tab = nullptr);
   void draw() override;
 
  private:
@@ -26,6 +26,9 @@ class Quickview : public View {
     bool child;
   };
 
+  void drawWindow();
+  void drawPopup();
+  void drawTabBar();
   void drawTracks(const char *title, const char *type, const char *prop, std::string pos);
   void drawTracks(const char *type, const char *prop, std::string pos);
   void drawPlaylistTabContent();
@@ -50,6 +53,7 @@ class Quickview : public View {
     tabs.push_back({name, title, draw, child});
   }
 
+  bool pinMode = true;
   bool tabSwitched = false;
   std::string curTab = "Video";
   std::vector<Tab> tabs;
