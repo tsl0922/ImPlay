@@ -36,7 +36,7 @@ void ImGui::TextEllipsis(const char* text, float maxWidth) {
   ImGuiWindow* window = ImGui::GetCurrentWindow();
   ImVec2 textSize = ImGui::CalcTextSize(text);
   ImVec2 min = ImGui::GetCursorScreenPos();
-  ImVec2 max = min + ImVec2(maxWidth - style.FramePadding.x, textSize.y);
+  ImVec2 max = min + ImVec2(maxWidth - style.FramePadding.x, textSize.y + style.FramePadding.y);
   ImRect textRect(min, max);
   ImGui::ItemSize(textRect);
   if (ImGui::ItemAdd(textRect, window->GetID(text)))
