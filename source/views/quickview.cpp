@@ -124,7 +124,7 @@ void Quickview::drawTabBar() {
         ImGui::EndTabItem();
       }
     }
-    if (ImGui::TabItemButton(pinMode ? ICON_FA_WINDOW_RESTORE : ICON_FA_MAP_PIN)) {
+    if (ImGui::TabItemButton(pinMode ? ICON_FA_WINDOW_MAXIMIZE : ICON_FA_WINDOW_RESTORE)) {
       pinMode = !pinMode;
       show();
     }
