@@ -351,10 +351,11 @@ void Player::initObservers() {
       int x, y, w, h;
       GetWindowPos(&x, &y);
       GetWindowSize(&w, &h);
-
-      SetWindowSize(width, height);
-      SetWindowPos(x + (w - width) / 2, y + (h - height) / 2);
-      if (mpv->keepaspect) SetWindowAspectRatio(width, height);
+      if ((w != width || h != height) && mpv->autoResize) {
+        SetWindowSize(width, height);
+        SetWindowPos(x + (w - width) / 2, y + (h - height) / 2);
+      }
+      if (mpv->keepaspect && mpv->keepaspectWindow) SetWindowAspectRatio(width, height);
     }
   });
 

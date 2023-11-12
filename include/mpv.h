@@ -112,7 +112,8 @@ class Mpv {
   std::vector<std::string> profiles;
   std::string aid, vid, sid, sid2, audioDevice, cursorAutohide;
   int64_t chapter = 0, volume = 100, playlistPos = -1, playlistPlayingPos = -1, timePos = 0;
-  bool pause, mute, fullscreen, sidv, sidv2, windowDragging, forceWindow, keepaspect;
+  bool pause, mute, fullscreen, sidv, sidv2, forceWindow;
+  bool keepaspect, keepaspectWindow, windowDragging, autoResize;
 
  private:
   void eventLoop();
