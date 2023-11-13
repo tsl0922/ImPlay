@@ -22,7 +22,7 @@ void Debug::draw() {
   if (!m_open) return;
   ImVec2 wPos = ImGui::GetMainViewport()->WorkPos;
   ImVec2 wSize = ImGui::GetMainViewport()->WorkSize;
-  ImGui::SetNextWindowSizeConstraints(ImVec2(scaled(30), scaled(45)), ImVec2(FLT_MAX, FLT_MAX));
+  ImGui::SetNextWindowSizeConstraints(ImVec2(scaled(25), scaled(30)), ImVec2(FLT_MAX, FLT_MAX));
   ImGui::SetNextWindowSize(ImVec2(wSize.x * 0.4f, wSize.y * 0.8f), ImGuiCond_FirstUseEver);
   ImGui::SetNextWindowPos(ImVec2(wPos.x + wSize.x * 0.2f, wPos.y + wSize.y * 0.5f), ImGuiCond_FirstUseEver,
                           ImVec2(0.2f, 0.5f));

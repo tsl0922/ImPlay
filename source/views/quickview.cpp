@@ -39,6 +39,7 @@ void Quickview::drawWindow() {
   ImVec2 wSize = ImGui::GetMainViewport()->WorkSize;
   float width = std::min(wSize.x * 0.3f, scaled(30));
   float height = std::max(wSize.y * 0.8f, scaled(50));
+  ImGui::SetNextWindowSizeConstraints(ImVec2(scaled(25), scaled(30)), ImVec2(FLT_MAX, FLT_MAX));
   ImGui::SetNextWindowSize(ImVec2(width, height), ImGuiCond_FirstUseEver);
   ImGui::SetNextWindowPos(ImVec2(wPos.x + wSize.x - width, wPos.y + wSize.y * 0.5f), ImGuiCond_FirstUseEver,
                           ImVec2(0.2f, 0.5f));
