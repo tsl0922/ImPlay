@@ -56,6 +56,7 @@ class Player {
   int width = 1280, height = 720;
 
  private:
+  void updateWindowState();
   void initObservers();
   void writeMpvConf();
 

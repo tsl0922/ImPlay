@@ -308,7 +308,7 @@ void Player::loadFonts() {
     io.Fonts->AddFontFromFileTTF(config->Data.Font.Path.c_str(), 0, &cfg, font_range);
   else
     io.Fonts->AddFontFromMemoryCompressedTTF(unifont_compressed_data, unifont_compressed_size, 0, &cfg, font_range);
- 
+
   cfg.MergeMode = true;
 
   static ImWchar fa_range[] = {ICON_MIN_FA, ICON_MAX_FA, 0};
@@ -344,22 +344,26 @@ void Player::onDropEvent(int count, const char **paths) {
   load(files);
 }
 
+void Player::updateWindowState() {
+  int width = (int)mpv->property<int64_t, MPV_FORMAT_INT64>("dwidth");
+  int height = (int)mpv->property<int64_t, MPV_FORMAT_INT64>("dheight");
+  if (width > 0 && height > 0) {
+    int x, y, w, h;
+    GetWindowPos(&x, &y);
+    GetWindowSize(&w, &h);
+    if ((w != width || h != height) && mpv->autoResize) {
+      SetWindowSize(width, height);
+      SetWindowPos(x + (w - width) / 2, y + (h - height) / 2);
+    }
+    if (mpv->keepaspect && mpv->keepaspectWindow) SetWindowAspectRatio(width, height);
+  }
+}
+
 void Player::initObservers() {
   mpv->observeEvent(MPV_EVENT_SHUTDOWN, [this](void *data) { SetWindowShouldClose(true); });
 
   mpv->observeEvent(MPV_EVENT_VIDEO_RECONFIG, [this](void *data) {
-    int width = (int)mpv->property<int64_t, MPV_FORMAT_INT64>("dwidth");
-    int height = (int)mpv->property<int64_t, MPV_FORMAT_INT64>("dheight");
-    if (width > 0 && height > 0) {
-      int x, y, w, h;
-      GetWindowPos(&x, &y);
-      GetWindowSize(&w, &h);
-      if ((w != width || h != height) && mpv->autoResize) {
-        SetWindowSize(width, height);
-        SetWindowPos(x + (w - width) / 2, y + (h - height) / 2);
-      }
-      if (mpv->keepaspect && mpv->keepaspectWindow) SetWindowAspectRatio(width, height);
-    }
+    if (!mpv->fullscreen) updateWindowState();
   });
 
   mpv->observeEvent(MPV_EVENT_FILE_LOADED, [this](void *data) {
