@@ -269,6 +269,24 @@ void Quickview::drawVideoTabContent() {
   drawTracks("video", "vid", mpv->vid);
   ImGui::NewLine();
 
+  ImGui::TextUnformatted("views.quickview.video.quality"_i18n);
+  ImGui::SameLine();
+  ImGui::HelpMarker("views.quickview.video.quality.help"_i18n);
+  const char *qualities[] = {"4320", "2160", "1440", "1080", "720", "480", "360", "240", "144"};
+  for (auto quality : qualities) {
+    if (ImGui::Button(fmt::format("{}p", quality).c_str())) {
+      mpv->property("ytdl-format", fmt::format("bv*[height<={}]+ba/b[height<={}]", quality, quality).c_str());
+      if (mpv->playing()) {
+        mpv->property("start", fmt::format("+{}", mpv->timePos).c_str());
+        mpv->command("playlist-play-index current");
+      }
+    }
+    ImGui::SameLine();
+  }
+  ImGui::NewLine();
+  ImGui::Separator();
+  ImGui::NewLine();
+
   ImGui::TextUnformatted("views.quickview.video.rotate"_i18n);
   const char *rotates[] = {"0", "90", "180", "270"};
   for (auto rotate : rotates) {

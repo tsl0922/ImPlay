@@ -158,6 +158,8 @@
         "views.quickview.playlist.menu.reveal": "在文件夹显示",
         "views.quickview.chapters": "章节",
         "views.quickview.video": "视频",
+        "views.quickview.video.quality": "流质量",
+        "views.quickview.video.quality.help": "yt-dlp 网络流质量，默认会选择最好的",
         "views.quickview.video.rotate": "旋转",
         "views.quickview.video.rotate_left": "向左旋转",
         "views.quickview.video.rotate_right": "向右旋转",

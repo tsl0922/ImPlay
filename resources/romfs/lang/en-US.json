@@ -142,6 +142,8 @@
         "views.quickview.playlist.menu.reveal": "Reveal in Folder",
         "views.quickview.chapters": "Chapters",
         "views.quickview.video": "Video",
+        "views.quickview.video.quality": "Stream Quality",
+        "views.quickview.video.quality.help": "yt-dlp stream quality, best by default",
         "views.quickview.video.rotate": "Rotate",
         "views.quickview.video.rotate_left": "Rotate Left",
         "views.quickview.video.rotate_right": "Rotate Right",
