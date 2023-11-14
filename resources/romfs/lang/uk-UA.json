@@ -241,7 +241,7 @@
         "views.debug.console.input.tip": "натисніть ENTER для виконання",
         "views.about.title": "Про програму",
         "views.about.desc": "Мультимедійний плеєр для різних платформ",
-        "views.about.copyright": "Авторське право (C) 2022 tsl0922",
+        "views.about.copyright": "Авторське право (C) 2022-2023 tsl0922",
         "views.settings.title": "Налаштування",
         "views.settings.hint": "* Зміни вступлять в силу після перезапуску.",
         "views.settings.general": "Загальні",
