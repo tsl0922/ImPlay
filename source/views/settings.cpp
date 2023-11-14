@@ -72,7 +72,9 @@ void Settings::drawButtons() {
         }
       }
     }
-    if (data.Font != config->Data.Font || data.Interface.Scale != config->Data.Interface.Scale)
+    if (data.Font != config->Data.Font || data.Interface.Scale != config->Data.Interface.Scale ||
+        data.Interface.Rounding != config->Data.Interface.Rounding ||
+        data.Interface.Shadow != config->Data.Interface.Shadow)
       config->FontReload = true;
     config->Data = data;
     for (auto &fn : appliers) fn();
@@ -135,9 +137,13 @@ void Settings::drawInterfaceTab() {
     ImGui::Checkbox("views.settings.interface.docking"_i18n, &data.Interface.Docking);
     ImGui::SameLine();
     ImGui::HelpMarker("views.settings.interface.docking.help"_i18n);
+    ImGui::SameLine(scaled(20));
     ImGui::Checkbox("views.settings.interface.viewports"_i18n, &data.Interface.Viewports);
     ImGui::SameLine();
     ImGui::HelpMarker("views.settings.interface.viewports.help"_i18n);
+    ImGui::Checkbox("views.settings.interface.rounding"_i18n, &data.Interface.Rounding);
+    ImGui::SameLine(scaled(20));
+    ImGui::Checkbox("views.settings.interface.shadow"_i18n, &data.Interface.Shadow);
     ImGui::SliderInt("views.settings.interface.fps"_i18n, &data.Interface.Fps, 15, 200);
     ImGui::SameLine();
     ImGui::HelpMarker("views.settings.interface.fps.help"_i18n);

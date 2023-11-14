@@ -269,6 +269,8 @@
         "views.settings.interface.docking.help": "Enable ImGui's Docking feature.\nThis will allow docking child window by dragging from title bar or tab.",
         "views.settings.interface.viewports": "Enable Viewports*",
         "views.settings.interface.viewports.help": "Enable ImGui's Multi Viewports feature.\nThis will allow child windows to be moved out of the main window (still have issues).",
+        "views.settings.interface.rounding": "Enable Rounding",
+        "views.settings.interface.shadow": "Enable Shadow",
         "views.settings.interface.fps": "FPS Limit",
         "views.settings.interface.fps.help": "This limits the frame rate of interface when player idle",
         "views.settings.interface.language": "Language",

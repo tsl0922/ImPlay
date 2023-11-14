@@ -17,6 +17,8 @@ struct ConfigData {
     int Fps = 30;
     bool Docking = false;
     bool Viewports = false;
+    bool Rounding = true;
+    bool Shadow = true;
     bool operator==(const Interface_&) const = default;
   } Interface;
   struct Mpv_ {

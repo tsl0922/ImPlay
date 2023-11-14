@@ -8,7 +8,7 @@ std::vector<const char*> ImGui::Themes() {
   return themes;
 }
 
-void ImGui::SetTheme(const char* theme, ImGuiStyle* dst) {
+void ImGui::SetTheme(const char* theme, ImGuiStyle* dst, bool rounding, bool shadow) {
   if (strcmp(theme, "dark") == 0)
     ImGui::StyleColorsDark(dst);
   else if (strcmp(theme, "light") == 0)
@@ -21,6 +21,19 @@ void ImGui::SetTheme(const char* theme, ImGuiStyle* dst) {
     ImGui::StyleColorsDracula(dst);
   else if (strcmp(theme, "deepdark") == 0)
     ImGui::StyleColorsDeepDark(dst);
+
+  ImGuiStyle* style = dst ? dst : &ImGui::GetStyle();
+
+  style->TabRounding = rounding ? 4.0f : 0.0f;
+  style->ScrollbarRounding = rounding ? 9.0f : 0.0f;
+  style->WindowRounding = rounding ? 7.0f : 0.0f;
+  style->GrabRounding = rounding ? 3.0f : 0.0f;
+  style->FrameRounding = rounding ? 3.0f : 0.0f;
+  style->PopupRounding = rounding ? 4.0f : 0.0f;
+  style->ChildRounding = rounding ? 4.0f : 0.0f;
+
+  style->WindowShadowSize = shadow ? 50.0f : 0.0f;
+  style->Colors[ImGuiCol_WindowShadow] = ImVec4(0, 0, 0, 1.0f);
 }
 
 // https://github.com/adobe/imgui/blob/master/docs/Spectrum.md

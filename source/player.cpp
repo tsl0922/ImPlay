@@ -272,9 +272,10 @@ void Player::restoreState() {
 }
 
 void Player::loadFonts() {
+  auto interface = config->Data.Interface;
   float fontSize = config->Data.Font.Size;
   float iconSize = fontSize - 2;
-  float scale = config->Data.Interface.Scale;
+  float scale = interface.Scale;
   if (scale == 0) {
     float xscale, yscale;
     GetWindowScale(&xscale, &yscale);
@@ -285,21 +286,7 @@ void Player::loadFonts() {
   iconSize = std::floor(iconSize * scale);
 
   ImGuiStyle style;
-  std::string theme = config->Data.Interface.Theme;
-
-  {
-    ImGui::SetTheme(theme.c_str(), &style);
-    style.TabRounding = 4;
-    style.ScrollbarRounding = 9;
-    style.WindowRounding = 7;
-    style.GrabRounding = 3;
-    style.FrameRounding = 3;
-    style.PopupRounding = 4;
-    style.ChildRounding = 4;
-    style.WindowShadowSize = 50.0f;
-    style.ScrollbarSize = 10.0f;
-    style.Colors[ImGuiCol_WindowShadow] = ImVec4(0, 0, 0, 1.0f);
-  }
+  ImGui::SetTheme(interface.Theme.c_str(), &style, interface.Rounding, interface.Shadow);
 
   ImGuiIO &io = ImGui::GetIO();
 #ifdef _WIN32
@@ -500,7 +487,7 @@ void Player::execute(int n_args, const char **args_) {
        }},
       {"theme",
        [&](int n, const char **args) {
-         if (n > 0) ImGui::SetTheme(args[0]);
+         if (n > 0) ImGui::SetTheme(args[0], nullptr, config->Data.Interface.Rounding, config->Data.Interface.Shadow);
        }},
   };
 

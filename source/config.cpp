@@ -27,6 +27,8 @@ void Config::load() {
   inipp::get_value(ini.sections["interface"], "fps", Data.Interface.Fps);
   inipp::get_value(ini.sections["interface"], "docking", Data.Interface.Docking);
   inipp::get_value(ini.sections["interface"], "viewports", Data.Interface.Viewports);
+  inipp::get_value(ini.sections["interface"], "rounding", Data.Interface.Rounding);
+  inipp::get_value(ini.sections["interface"], "shadow", Data.Interface.Shadow);
   inipp::get_value(ini.sections["font"], "path", Data.Font.Path);
   inipp::get_value(ini.sections["font"], "size", Data.Font.Size);
   inipp::get_value(ini.sections["font"], "glyph-range", Data.Font.GlyphRange);
@@ -65,6 +67,8 @@ void Config::save() {
   ini.sections["interface"]["fps"] = fmt::format("{}", Data.Interface.Fps);
   ini.sections["interface"]["docking"] = fmt::format("{}", Data.Interface.Docking);
   ini.sections["interface"]["viewports"] = fmt::format("{}", Data.Interface.Viewports);
+  ini.sections["interface"]["rounding"] = fmt::format("{}", Data.Interface.Rounding);
+  ini.sections["interface"]["shadow"] = fmt::format("{}", Data.Interface.Shadow);
   ini.sections["font"]["path"] = Data.Font.Path;
   ini.sections["font"]["size"] = std::to_string(Data.Font.Size);
   ini.sections["font"]["glyph-range"] = std::to_string(Data.Font.GlyphRange);
