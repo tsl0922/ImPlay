@@ -14,8 +14,8 @@ add_library(imgui OBJECT
   source/imgui_impl_opengl3.cpp
   source/imgui_tables.cpp
   source/imgui_widgets.cpp
+  source/fonts/cascadia.c
   source/fonts/fontawesome.c
-  source/fonts/source_code_pro.c
   source/fonts/unifont.c
 )
 

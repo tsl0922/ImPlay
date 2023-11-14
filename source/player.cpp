@@ -8,8 +8,8 @@
 #include <imgui.h>
 #include <imgui_internal.h>
 #include <imgui_impl_opengl3.h>
+#include <fonts/cascadia.h>
 #include <fonts/fontawesome.h>
-#include <fonts/source_code_pro.h>
 #include <fonts/unifont.h>
 #include <strnatcmp.h>
 #include "theme.h"
@@ -315,7 +315,7 @@ void Player::loadFonts() {
 
   static ImWchar fa_range[] = {ICON_MIN_FA, ICON_MAX_FA, 0};
   io.Fonts->AddFontFromMemoryCompressedTTF(fa_compressed_data, fa_compressed_size, iconSize, &cfg, fa_range);
-  io.Fonts->AddFontFromMemoryCompressedTTF(source_code_pro_compressed_data, source_code_pro_compressed_size, fontSize);
+  io.Fonts->AddFontFromMemoryCompressedTTF(cascadia_compressed_data, cascadia_compressed_size, fontSize);
 
   io.Fonts->Build();
 }
