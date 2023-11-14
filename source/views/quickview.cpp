@@ -355,9 +355,9 @@ void Quickview::drawVideoTabContent() {
   ImGui::Spacing();
   static const char *eq[] = {"brightness", "contrast", "saturation", "gamma", "hue"};
   static std::vector<std::string> eq_labels = {
-      "views.quickview.video.equalizer.brightness"_i18n, "views.quickview.video.equalizer.contrast"_i18n,
-      "views.quickview.video.equalizer.saturation"_i18n, "views.quickview.video.equalizer.gamma"_i18n,
-      "views.quickview.video.equalizer.hue"_i18n,
+      "views.quickview.video.equalizer.brightness", "views.quickview.video.equalizer.contrast",
+      "views.quickview.video.equalizer.saturation", "views.quickview.video.equalizer.gamma",
+      "views.quickview.video.equalizer.hue",
   };
   static int equalizer[IM_ARRAYSIZE(eq)] = {
       (int)mpv->property<int64_t, MPV_FORMAT_INT64>("brightness"),
@@ -374,7 +374,7 @@ void Quickview::drawVideoTabContent() {
       mpv->commandv("set", eq[i], "0", nullptr);
     }
     ImGui::SameLine();
-    if (ImGui::SliderInt(eq_labels[i].c_str(), &equalizer[i], -100, 100))
+    if (ImGui::SliderInt(i18n(eq_labels[i]).c_str(), &equalizer[i], -100, 100))
       mpv->commandv("set", eq[i], std::to_string(equalizer[i]).c_str(), nullptr);
   }
   ImGui::EndGroup();
