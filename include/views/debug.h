@@ -31,6 +31,7 @@ class Debug : public View {
     void ExecCommand(const char *command_line);
     int TextEditCallback(ImGuiInputTextCallbackData *data);
     void initCommands(std::vector<std::pair<std::string, std::string>> &commands);
+    ImFont *GetFont(const char *str);
 
     ImVec4 LogColor(const char *level);
 
@@ -39,6 +40,7 @@ class Debug : public View {
     struct LogItem {
       char *Str;
       const char *Lev;
+      ImFont *Font;
     };
 
     Mpv *mpv;
