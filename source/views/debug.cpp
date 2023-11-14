@@ -403,7 +403,6 @@ void Debug::Console::draw() {
   ImGui::HelpMarker("views.debug.console.log.hint"_i18n);
   ImGui::Separator();
 
-  // Reserve enough left-over height for 1 separator + 1 input text
   const float footer_height_to_reserve = ImGui::GetStyle().ItemSpacing.y + ImGui::GetFrameHeightWithSpacing();
   bool copy_to_clipboard = false;
   if (ImGui::BeginChild("ScrollingRegion", ImVec2(0, -footer_height_to_reserve), false,
@@ -415,31 +414,7 @@ void Debug::Console::draw() {
       ImGui::EndPopup();
     }
 
-    // Display every line as a separate entry so we can change their color or add custom widgets.
-    // If you only want raw text you can use ImGui::TextUnformatted(log.begin(), log.end());
-    // NB- if you have thousands of entries this approach may be too inefficient and may require user-side clipping
-    // to only process visible items. The clipper will automatically measure the height of your first item and then
-    // "seek" to display only items in the visible area.
-    // To use the clipper we can replace your standard loop:
-    //      for (int i = 0; i < Items.Size; i++)
-    //   With:
-    //      ImGuiListClipper clipper;
-    //      clipper.Begin(Items.Size);
-    //      while (clipper.Step())
-    //         for (int i = clipper.DisplayStart; i < clipper.DisplayEnd; i++)
-    // - That your items are evenly spaced (same height)
-    // - That you have cheap random access to your elements (you can access them given their index,
-    //   without processing all the ones before)
-    // You cannot this code as-is if a filter is active because it breaks the 'cheap random-access' property.
-    // We would need random-access on the post-filtered list.
-    // A typical application wanting coarse clipping and filtering may want to pre-compute an array of indices
-    // or offsets of items that passed the filtering test, recomputing this array when user changes the filter,
-    // and appending newly elements as they are inserted. This is left as a task to the user until we can manage
-    // to improve this example code!
-    // If your items are of variable height:
-    // - Split them into same height items would be simpler and facilitate random-seeking into your list.
-    // - Consider using manual call to IsRectVisible() and skipping extraneous decoration from your items.
-    ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(4, 1));  // Tighten spacing
+    ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(4, 1));
     ImGui::PushFont(ImGui::GetIO().Fonts->Fonts.back());
     if (copy_to_clipboard) ImGui::LogToClipboard();
     for (int i = 0; i < Items.Size; i++) {
@@ -453,8 +428,6 @@ void Debug::Console::draw() {
     if (copy_to_clipboard) ImGui::LogFinish();
     ImGui::PopFont();
 
-    // Keep up at the bottom of the scroll region if we were already at the bottom at the beginning of the frame.
-    // Using a scrollbar or mouse-wheel will take away from the bottom edge.
     if (ScrollToBottom || (AutoScroll && ImGui::GetScrollY() >= ImGui::GetScrollMaxY())) ImGui::SetScrollHereY(1.0f);
     ScrollToBottom = false;
     ImGui::PopStyleVar();
@@ -462,7 +435,6 @@ void Debug::Console::draw() {
   ImGui::EndChild();
   ImGui::Separator();
 
-  // Command-line
   bool reclaim_focus = false;
   ImGuiInputTextFlags input_text_flags = ImGuiInputTextFlags_EnterReturnsTrue | ImGuiInputTextFlags_EscapeClearsAll |
                                          ImGuiInputTextFlags_CallbackCompletion | ImGuiInputTextFlags_CallbackHistory;
@@ -481,7 +453,6 @@ void Debug::Console::draw() {
     reclaim_focus = true;
   }
 
-  // Auto-focus on window apparition
   ImGui::SetItemDefaultFocus();
   if (reclaim_focus) ImGui::SetKeyboardFocusHere(-1);  // Auto focus previous widget
 }
@@ -489,8 +460,6 @@ void Debug::Console::draw() {
 void Debug::Console::ExecCommand(const char* command_line) {
   AddLog("info", "# %s\n", command_line);
 
-  // Insert into history. First find match and delete it so it can be pushed to the back.
-  // This isn't trying to be smart or optimal.
   HistoryPos = -1;
   for (int i = History.Size - 1; i >= 0; i--)
     if (ImStricmp(History[i], command_line) == 0) {
@@ -500,12 +469,11 @@ void Debug::Console::ExecCommand(const char* command_line) {
     }
   History.push_back(ImStrdup(command_line));
 
-  // Process command
   if (ImStricmp(command_line, "CLEAR") == 0) {
     ClearLog();
   } else if (ImStricmp(command_line, "HELP") == 0) {
     AddLog("info", "Builtin Commands:");
-    for (auto& cmd : builtinCommands) AddLog("- %s", cmd.c_str());
+    for (auto& cmd : builtinCommands) AddLog("info", "- %s", cmd.c_str());
     AddLog("info", "MPV Commands:");
     auto node = mpv->property<mpv_node, MPV_FORMAT_NODE>("command-list");
     std::vector<std::pair<std::string, std::string>> commands;
@@ -524,14 +492,12 @@ void Debug::Console::ExecCommand(const char* command_line) {
     }
   }
 
-  // On command input, we scroll to bottom even if AutoScroll==false
   ScrollToBottom = true;
 }
 
 int Debug::Console::TextEditCallback(ImGuiInputTextCallbackData* data) {
   switch (data->EventFlag) {
     case ImGuiInputTextFlags_CallbackCompletion: {
-      // Locate beginning of current word
       const char* word_end = data->Buf + data->CursorPos;
       const char* word_start = word_end;
       while (word_start > data->Buf) {
@@ -540,22 +506,17 @@ int Debug::Console::TextEditCallback(ImGuiInputTextCallbackData* data) {
         word_start--;
       }
 
-      // Build a list of candidates
       ImVector<const char*> candidates;
       for (int i = 0; i < Commands.Size; i++)
         if (ImStrnicmp(Commands[i], word_start, (int)(word_end - word_start)) == 0) candidates.push_back(Commands[i]);
 
       if (candidates.Size == 0) {
-        // No match
         AddLog("info", "No match for \"%.*s\"!\n", (int)(word_end - word_start), word_start);
       } else if (candidates.Size == 1) {
-        // Single match. Delete the beginning of the word and replace it entirely so we've got nice casing.
         data->DeleteChars((int)(word_start - data->Buf), (int)(word_end - word_start));
         data->InsertChars(data->CursorPos, candidates[0]);
         data->InsertChars(data->CursorPos, " ");
       } else {
-        // Multiple matches. Complete as much as we can..
-        // So inputing "C"+Tab will complete to "CL" then display "CLEAR" and "CLASSIFY" as matches.
         int match_len = (int)(word_end - word_start);
         for (;;) {
           int c = 0;
@@ -574,12 +535,11 @@ int Debug::Console::TextEditCallback(ImGuiInputTextCallbackData* data) {
           data->InsertChars(data->CursorPos, candidates[0], candidates[0] + match_len);
         }
 
-        // List matches
         AddLog("info", "Possible matches:\n");
         std::string s;
         for (int i = 0; i < candidates.Size; i++) {
           s += fmt::format("{:<32}", candidates[i]);
-          if (i != 0 && (i + 1) % 4 == 0) {
+          if (i != 0 && (i + 1) % 3 == 0) {
             AddLog("info", "%s\n", s.c_str());
             s.clear();
           }
@@ -601,7 +561,6 @@ int Debug::Console::TextEditCallback(ImGuiInputTextCallbackData* data) {
           if (++HistoryPos >= History.Size) HistoryPos = -1;
       }
 
-      // A better implementation would preserve the data on the current input line along with cursor position.
       if (prev_history_pos != HistoryPos) {
         const char* history_str = (HistoryPos >= 0) ? History[HistoryPos] : "";
         data->DeleteChars(0, data->BufTextLen);
