@@ -63,7 +63,7 @@ Read the [FAQ](https://github.com/tsl0922/ImPlay/wiki/FAQ).
 
 # Credits
 
-ImPlay uses the following libraries, thanks to their authors and contributors.
+ImPlay uses the following projects, thanks to their authors and contributors.
 
 - [mpv](https://mpv.io): Command line video player
 - [imgui](https://github.com/ocornut/imgui): Bloat-free Graphical User interface for C++ with minimal dependencies
@@ -74,7 +74,8 @@ ImPlay uses the following libraries, thanks to their authors and contributors.
 - [json](https://json.nlohmann.me): JSON for Modern C++
 - [inipp](https://github.com/mcmtroffaes/inipp): Simple C++ ini parser
 - [libromfs](https://github.com/WerWolv/libromfs): Simple library for embedding static resources into C++ binaries using CMake
-- [nativefiledialog](https://github.com/btzy/nativefiledialog-extended): Cross platform (Windows, Mac, Linux) native file dialog library 
+- [nativefiledialog](https://github.com/btzy/nativefiledialog-extended): Cross platform (Windows, Mac, Linux) native file dialog library
+- [Cascadia Code](https://github.com/microsoft/cascadia-code) / [Font Awesome](https://fontawesome.com) / [Unifont](https://unifoundry.com/unifont.html): Fonts embeded in ImPlay
 
 # License
 
