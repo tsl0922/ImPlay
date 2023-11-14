@@ -45,7 +45,7 @@ void Debug::drawHeader() {
   ImGui::Text("%s", version.c_str());
   auto vSize = ImGui::CalcTextSize(fmt::format("ImGui {}", ImGui::GetVersion()).c_str());
   auto mSize = ImGui::CalcTextSize(fmt::format("FPS: %.2f", io.Framerate).c_str());
-  ImGui::SameLine(ImGui::GetContentRegionAvail().x - (vSize.x + mSize.x + 2 * style.FramePadding.x));
+  ImGui::SameLine(ImGui::GetContentRegionAvail().x - (vSize.x + mSize.x + 4 * style.FramePadding.x));
   ImGui::Text("ImGui %s", ImGui::GetVersion());
   if (ImGui::IsItemClicked(ImGuiMouseButton_Left)) m_demo = !m_demo;
   ImGui::SameLine();

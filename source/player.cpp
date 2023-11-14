@@ -3,6 +3,7 @@
 
 #include <filesystem>
 #include <fstream>
+#include <thread>
 #include <romfs/romfs.hpp>
 #include <imgui.h>
 #include <imgui_internal.h>
@@ -140,6 +141,7 @@ void Player::render() {
   draw();
   ImGui::Render();
 
+  const auto targetFps = config->Data.Interface.Fps;
   {
     ContextGuard guard(this);
     GetFramebufferSize(&width, &height);
@@ -149,9 +151,22 @@ void Player::render() {
     glClear(GL_COLOR_BUFFER_BIT);
 
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+    SetSwapInterval(targetFps > 60 ? 0 : 1);
     SwapBuffers();
     mpv->reportSwap();
   }
+
+  // limit fps while player idle
+  static double time = 0;
+  double targetDelta = 1.0f / targetFps;
+  if (idle || mpv->pause) {
+    double delta = time - ImGui::GetTime();
+    if (delta > 0 && delta < targetDelta)
+      std::this_thread::sleep_for(std::chrono::duration<double>(delta));
+    else
+      time = ImGui::GetTime();
+  }
+  time += targetDelta;
 
   if (ImGui::GetIO().ConfigFlags & ImGuiConfigFlags_ViewportsEnable) {
     ImGui::UpdatePlatformWindows();

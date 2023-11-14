@@ -104,10 +104,6 @@ void Window::run() {
 
     mpv->waitEvent();
 
-    static auto nextFrame = std::chrono::steady_clock::now();
-    nextFrame += std::chrono::milliseconds(1000 / config->Data.Interface.Fps);
-    if (isIdle() || mpv->pause) eventWaiter.wait_until(nextFrame);
-
     render();
     updateCursor();
   }
@@ -119,10 +115,7 @@ void Window::run() {
   saveState();
 }
 
-void Window::wakeup() {
-  glfwPostEmptyEvent();
-  eventWaiter.notify();
-}
+void Window::wakeup() { glfwPostEmptyEvent(); }
 
 void Window::updateCursor() {
   if (!ownCursor || mpv->cursorAutohide == "" || ImGui::GetIO().WantCaptureMouse || ImGui::IsMouseDragging(0)) return;

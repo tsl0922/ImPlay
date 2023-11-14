@@ -86,7 +86,7 @@ class Window : Player {
     bool notified = false;
   };
 
-  struct Waiter eventWaiter, videoWaiter;
+  struct Waiter videoWaiter;
 
   // clang-format off
   const std::map<int, std::string> keyMappings = {

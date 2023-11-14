@@ -42,7 +42,6 @@ class Player {
   void loadFonts();
   void render();
   void renderVideo();
-  bool isIdle() { return idle; }
 
   void onCursorEvent(double x, double y);
   void onScrollEvent(double x, double y);
