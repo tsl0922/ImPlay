@@ -220,6 +220,7 @@ void Quickview::drawPlaylistTabContent() {
       ImGui::PushStyleColor(ImGuiCol_Text,
                             ImGui::GetStyleColorVec4(item.id == pos ? ImGuiCol_CheckMark : ImGuiCol_Text));
       ImGui::TextEllipsis(title.c_str());
+      if (ImGui::IsWindowAppearing() && item.id == pos) ImGui::SetScrollHereY(0.25f);
       ImGui::PopStyleColor();
       ImGui::PopID();
     }
@@ -260,6 +261,7 @@ void Quickview::drawChaptersTabContent() {
       ImGui::TextColored(color, "%s", title.c_str());
       alignRight(time.c_str());
       ImGui::TextColored(color, "%s", time.c_str());
+      if (ImGui::IsWindowAppearing() && item.id == pos) ImGui::SetScrollHereY(0.25f);
       ImGui::PopID();
     }
     ImGui::EndListBox();
