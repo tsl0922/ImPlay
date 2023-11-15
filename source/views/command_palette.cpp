@@ -15,8 +15,10 @@ CommandPalette::CommandPalette(Config* config, Mpv* mpv) : View(config, mpv) {
           item.comment,
           item.cmd,
           item.key,
+          -1,
           [=, this]() { mpv->command(item.cmd); },
       });
+    pos = 0;
   };
   providers["chapters"] = [=, this](const char*) {
     for (auto& item : mpv->chapters) {
@@ -26,9 +28,11 @@ CommandPalette::CommandPalette(Config* config, Mpv* mpv) : View(config, mpv) {
           title,
           "",
           time,
+          item.id,
           [=, this]() { mpv->commandv("seek", std::to_string(item.time).c_str(), "absolute", nullptr); },
       });
     }
+    pos = mpv->chapter;
   };
   providers["playlist"] = [=, this](const char*) {
     for (auto& item : mpv->playlist) {
@@ -39,9 +43,11 @@ CommandPalette::CommandPalette(Config* config, Mpv* mpv) : View(config, mpv) {
           title,
           item.path.string(),
           "",
+          item.id,
           [=, this]() { mpv->commandv("playlist-play-index", std::to_string(item.id).c_str(), nullptr); },
       });
     }
+    pos = mpv->playlistPos;
   };
   providers["tracks"] = [=, this](const char* type) {
     for (auto& item : mpv->tracks) {
@@ -52,6 +58,7 @@ CommandPalette::CommandPalette(Config* config, Mpv* mpv) : View(config, mpv) {
           title,
           "",
           toupper(item.type),
+          item.id,
           [=, this]() {
             if (item.type == "audio")
               mpv->property<int64_t, MPV_FORMAT_INT64>("aid", item.id);
@@ -62,6 +69,7 @@ CommandPalette::CommandPalette(Config* config, Mpv* mpv) : View(config, mpv) {
           },
       });
     }
+    pos = 0;
   };
   providers["history"] = [=, this](const char*) {
     for (auto& file : config->getRecentFiles()) {
@@ -69,9 +77,11 @@ CommandPalette::CommandPalette(Config* config, Mpv* mpv) : View(config, mpv) {
           file.title,
           file.path,
           "",
+          -1,
           [=, this]() { mpv->commandv("loadfile", file.path.c_str(), nullptr); },
       });
     }
+    pos = 0;
   };
 }
 
@@ -162,12 +172,20 @@ void CommandPalette::drawList(float width) {
 
     ImGui::PushID(&match);
     ImGui::SetNextItemWidth(lWidth);
-    if (ImGui::Selectable("", false, ImGuiSelectableFlags_DontClosePopups)) match.callback();
+    if (ImGui::Selectable("", false, ImGuiSelectableFlags_DontClosePopups)) {
+      pos = match.id;
+      match.callback();
+    }
     if (!match.tooltip.empty() && ImGui::IsItemHovered(ImGuiHoveredFlags_DelayNormal))
       ImGui::SetTooltip("%s", match.tooltip.c_str());
     ImGui::SameLine();
 
+    bool selected = pos > 0 && match.id == pos;
+    auto color = ImGui::GetStyleColorVec4(selected ? ImGuiCol_CheckMark : ImGuiCol_Text);
+    ImGui::PushStyleColor(ImGuiCol_Text, color);
     ImGui::TextEllipsis(title.c_str(), contentAvail.x - rWidth - style.ItemSpacing.x);
+    if (ImGui::IsWindowAppearing() && selected) ImGui::SetScrollHereY(0.25f);
+    ImGui::PopStyleColor();
 
     if (!match.label.empty()) {
       ImGui::SameLine(contentAvail.x - rWidth);

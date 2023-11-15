@@ -17,6 +17,7 @@ class CommandPalette : public View {
     std::string title;
     std::string tooltip;
     std::string label;
+    int64_t id;
     std::function<void()> callback;
   };
 
@@ -32,6 +33,7 @@ class CommandPalette : public View {
   std::vector<char> buffer = std::vector<char>(1024, 0x00);
   std::vector<CommandItem> items;
   std::vector<CommandItem> matches;
+  int64_t pos = -1;
   bool filtered = false;
   bool focusInput = false;
   bool justOpened = false;
