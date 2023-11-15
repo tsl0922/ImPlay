@@ -3,9 +3,14 @@ project("libromfs-${LIBROMFS_PROJECT_NAME}")
 set(CMAKE_CXX_STANDARD 20)
 
 # Gather romfs files
-file(GLOB_RECURSE ROMFS_FILES
-    "${LIBROMFS_RESOURCE_LOCATION}/*"
-)
+set(ROMFS_FILES "")
+
+foreach (path ${LIBROMFS_RESOURCE_LOCATION})
+    file(GLOB_RECURSE ROMFS_FILES_PART
+        "${path}/*"
+    )
+    list(APPEND ROMFS_FILES ${ROMFS_FILES_PART})
+endforeach ()
 
 # Add sources
 add_library(${PROJECT_NAME} STATIC
@@ -18,7 +23,7 @@ target_compile_definitions(${PROJECT_NAME} PUBLIC LIBROMFS_PROJECT_NAME=${LIBROM
 
 # Make sure libromfs gets rebuilt when any of the resources are changed
 add_custom_command(OUTPUT ${ROMFS}
-        COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:generator-${LIBROMFS_PROJECT_NAME}>
+        COMMAND $<TARGET_FILE:generator-${LIBROMFS_PROJECT_NAME}>
         DEPENDS ../generator ${ROMFS_FILES}
         )
 
