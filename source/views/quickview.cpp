@@ -21,8 +21,10 @@ Quickview::Quickview(Config *config, Mpv *mpv) : View(config, mpv) {
 }
 
 void Quickview::show(const char *tab) {
-  if (tab != nullptr) curTab = tab;
-  tabSwitched = false;
+  if (tab != nullptr) {
+    curTab = tab;
+    tabSwitched = false;
+  }
   View::show();
 }
 
