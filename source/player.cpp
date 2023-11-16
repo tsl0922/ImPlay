@@ -437,18 +437,11 @@ void Player::writeMpvConf() {
   std::filesystem::create_directories(scriptOpts);
   
   auto oscLua = scrips / "osc.lua";
-  auto oscConf = scriptOpts / "osc.conf";
 
   if (!std::filesystem::exists(oscLua)) {
     std::ofstream file(oscLua);
     auto content = romfs::get("mpv/osc.lua");
     file.write(reinterpret_cast<const char *>(content.data()), content.size()) << "\n";
-  }
-
-  if (!std::filesystem::exists(oscConf)) {
-    std::ofstream file(oscConf);
-    file << "hidetimeout=2000\n";
-    file << "idlescreen=no\n";
   }
 }
 

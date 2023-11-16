@@ -11,7 +11,7 @@ local utils = require 'mp.utils'
 local user_opts = {
     showwindowed = true,        -- show OSC when windowed?
     showfullscreen = true,      -- show OSC when fullscreen?
-    idlescreen = true,          -- show mpv logo on idle
+    idlescreen = no,            -- show mpv logo on idle
     scalewindowed = 1,          -- scaling of the controller when windowed
     scalefullscreen = 1,        -- scaling of the controller when fullscreen
     scaleforcedwindow = 2,      -- scaling when rendered on a forced window
@@ -19,9 +19,9 @@ local user_opts = {
     valign = 0.8,               -- vertical alignment, -1 (top) to 1 (bottom)
     halign = 0,                 -- horizontal alignment, -1 (left) to 1 (right)
     barmargin = 0,              -- vertical margin of top/bottombar
-    boxalpha = 80,              -- alpha of the background box,
+    boxalpha = 20,              -- alpha of the background box,
                                 -- 0 (opaque) to 255 (fully transparent)
-    hidetimeout = 500,          -- duration in ms until the OSC hides if no
+    hidetimeout = 2000,         -- duration in ms until the OSC hides if no
                                 -- mouse movement. enforced non-negative for the
                                 -- user, but internally negative is "always-on".
     fadeduration = 200,         -- duration of fade out in ms, 0 = no fade
@@ -31,7 +31,7 @@ local user_opts = {
     iamaprogrammer = false,     -- use native mpv values and disable OSC
                                 -- internal track list management (and some
                                 -- functions that depend on it)
-    layout = "bottombar",
+    layout = "box",
     seekbarstyle = "bar",       -- bar, diamond or knob
     seekbarhandlesize = 0.6,    -- size ratio of the diamond and knob handle
     seekrangestyle = "inverted",-- bar, line, slider, inverted or none
@@ -74,25 +74,25 @@ local osc_param = { -- calculated by osc_init()
 }
 
 local osc_styles = {
-    bigButtons = "{\\blur0\\bord0\\1c&HFFFFFF\\3c&HFFFFFF\\fs50\\fnmpv-osd-symbols}",
-    smallButtonsL = "{\\blur0\\bord0\\1c&HFFFFFF\\3c&HFFFFFF\\fs19\\fnmpv-osd-symbols}",
+    bigButtons = "{\\blur0\\bord0\\1c&HCCCDCE\\3c&HCCCDCE\\fs24\\fnmpv-osd-symbols}",
+    smallButtonsL = "{\\blur0\\bord0\\1c&HCCCDCE\\3c&HCCCDCE\\fs16\\fnmpv-osd-symbols}",
     smallButtonsLlabel = "{\\fscx105\\fscy105\\fn" .. mp.get_property("options/osd-font") .. "}",
-    smallButtonsR = "{\\blur0\\bord0\\1c&HFFFFFF\\3c&HFFFFFF\\fs30\\fnmpv-osd-symbols}",
-    topButtons = "{\\blur0\\bord0\\1c&HFFFFFF\\3c&HFFFFFF\\fs12\\fnmpv-osd-symbols}",
+    smallButtonsR = "{\\blur0\\bord0\\1c&HCCCDCE\\3c&HCCCDCE\\fs24\\fnmpv-osd-symbols}",
+    topButtons = "{\\blur0\\bord0\\1c&HCCCDCE\\3c&HCCCDCE\\fs12\\fnmpv-osd-symbols}",
 
     elementDown = "{\\1c&H999999}",
-    timecodes = "{\\blur0\\bord0\\1c&HFFFFFF\\3c&HFFFFFF\\fs20}",
-    vidtitle = "{\\blur0\\bord0\\1c&HFFFFFF\\3c&HFFFFFF\\fs12\\q2}",
-    box = "{\\rDefault\\blur0\\bord1\\1c&H000000\\3c&HFFFFFF}",
+    timecodes = "{\\blur0\\bord0\\1c&HCCCDCE\\3c&HCCCDCE\\fs16}",
+    vidtitle = "{\\blur0\\bord0\\1c&HCCCDCE\\3c&HCCCDCE\\fs12\\q2}",
+    box = "{\\rDefault\\blur1\\bord1\\1c&H3C3833\\3c&H3C3833}",
 
-    topButtonsBar = "{\\blur0\\bord0\\1c&HFFFFFF\\3c&HFFFFFF\\fs18\\fnmpv-osd-symbols}",
-    smallButtonsBar = "{\\blur0\\bord0\\1c&HFFFFFF\\3c&HFFFFFF\\fs28\\fnmpv-osd-symbols}",
-    timecodesBar = "{\\blur0\\bord0\\1c&HFFFFFF\\3c&HFFFFFF\\fs27}",
-    timePosBar = "{\\blur0\\bord".. user_opts.tooltipborder .."\\1c&HFFFFFF\\3c&H000000\\fs30}",
-    vidtitleBar = "{\\blur0\\bord0\\1c&HFFFFFF\\3c&HFFFFFF\\fs18\\q2}",
+    topButtonsBar = "{\\blur0\\bord0\\1c&HCCCDCE\\3c&HCCCDCE\\fs18\\fnmpv-osd-symbols}",
+    smallButtonsBar = "{\\blur0\\bord0\\1c&HCCCDCE\\3c&HCCCDCE\\fs28\\fnmpv-osd-symbols}",
+    timecodesBar = "{\\blur0\\bord0\\1c&HCCCDCE\\3c&HCCCDCE\\fs27}",
+    timePosBar = "{\\blur0\\bord".. user_opts.tooltipborder .."\\1c&HCCCDCE\\3c&H000000\\fs30}",
+    vidtitleBar = "{\\blur0\\bord0\\1c&HCCCDCE\\3c&HCCCDCE\\fs18\\q2}",
 
-    wcButtons = "{\\1c&HFFFFFF\\fs24\\fnmpv-osd-symbols}",
-    wcTitle = "{\\1c&HFFFFFF\\fs24\\q2}",
+    wcButtons = "{\\1c&HCCCDCE\\fs24\\fnmpv-osd-symbols}",
+    wcTitle = "{\\1c&HCCCDCE\\fs24\\q2}",
     wcBar = "{\\1c&H000000}",
 }
 
@@ -1189,7 +1189,7 @@ layouts["box"] = function ()
 
     local osc_geo = {
         w = 550,    -- width
-        h = 138,    -- height
+        h = 113,    -- height
         r = 10,     -- corner-radius
         p = 15,     -- padding
     }
@@ -1255,7 +1255,7 @@ layouts["box"] = function ()
     -- Title row
     --
 
-    local titlerowY = posY - pos_offsetY - 10
+    local titlerowY = posY - pos_offsetY - 5
 
     lo = add_layout("title")
     lo.geometry = {x = posX, y = titlerowY, an = 8, w = 496, h = 12}
@@ -1276,8 +1276,8 @@ layouts["box"] = function ()
     -- Big buttons
     --
 
-    local bigbtnrowY = posY - pos_offsetY + 35
-    local bigbtndist = 60
+    local bigbtnrowY = posY - pos_offsetY + 25
+    local bigbtndist = 45
 
     lo = add_layout("playpause")
     lo.geometry =
@@ -1331,7 +1331,7 @@ layouts["box"] = function ()
 
     lo = add_layout("seekbar")
     lo.geometry =
-        {x = posX, y = posY+pos_offsetY-22, an = 2, w = pos_offsetX*2, h = 15}
+        {x = posX, y = posY+pos_offsetY-22, an = 2, w = pos_offsetX*2, h = 10}
     lo.style = osc_styles.timecodes
     lo.slider.tooltip_style = osc_styles.vidtitle
     lo.slider.stype = user_opts["seekbarstyle"]
@@ -1408,9 +1408,9 @@ layouts["slimbox"] = function ()
 
     -- styles
     local styles = {
-        box = "{\\rDefault\\blur0\\bord1\\1c&H000000\\3c&HFFFFFF}",
-        timecodes = "{\\1c&HFFFFFF\\3c&H000000\\fs20\\bord2\\blur1}",
-        tooltip = "{\\1c&HFFFFFF\\3c&H000000\\fs12\\bord1\\blur0.5}",
+        box = "{\\rDefault\\blur0\\bord1\\1c&H000000\\3c&HCCCDCE}",
+        timecodes = "{\\1c&HCCCDCE\\3c&H000000\\fs20\\bord2\\blur1}",
+        tooltip = "{\\1c&HCCCDCE\\3c&H000000\\fs12\\bord1\\blur0.5}",
     }
 
 
