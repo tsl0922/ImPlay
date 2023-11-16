@@ -82,7 +82,7 @@ local osc_styles = {
 
     elementDown = "{\\1c&H999999}",
     timecodes = "{\\blur0\\bord0\\1c&HCCCDCE\\3c&HCCCDCE\\fs16}",
-    vidtitle = "{\\blur0\\bord0\\1c&HCCCDCE\\3c&HCCCDCE\\fs12\\q2}",
+    vidtitle = "{\\blur0\\bord0\\1c&HF48542\\3c&HCCCDCE\\fs12\\q2}",
     box = "{\\rDefault\\blur1\\bord1\\1c&H3C3833\\3c&H3C3833}",
 
     topButtonsBar = "{\\blur0\\bord0\\1c&HCCCDCE\\3c&HCCCDCE\\fs18\\fnmpv-osd-symbols}",
@@ -1801,6 +1801,8 @@ function osc_init()
                                   pl_count, title)
         end
         show_message(title)
+        -- show implay playlist quickview
+        mp.commandv("script-message-to", "implay", "quickview", "playlist")
     end
 
     ne.eventresponder["mbtn_right_up"] =
