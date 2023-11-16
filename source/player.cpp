@@ -39,7 +39,6 @@ Player::~Player() {
 
 bool Player::init(std::map<std::string, std::string> &options) {
   mpv->option("config", "yes");
-  mpv->option("osc", "yes");
   mpv->option("input-default-bindings", "yes");
   mpv->option("input-vo-keyboard", "yes");
   mpv->option("load-osd-console", "no");
@@ -48,6 +47,7 @@ bool Player::init(std::map<std::string, std::string> &options) {
 
   if (!config->Data.Mpv.UseConfig) {
     writeMpvConf();
+    mpv->option("osc", "no");
     mpv->option("config-dir", config->dir().c_str());
   }
 
@@ -430,10 +430,21 @@ void Player::writeMpvConf() {
     file << "`            script-message-to implay metrics         # open console window\n";
   }
 
+  auto scrips = path / "scripts";
   auto scriptOpts = path / "script-opts";
+
+  std::filesystem::create_directories(scrips);
+  std::filesystem::create_directories(scriptOpts);
+  
+  auto oscLua = scrips / "osc.lua";
   auto oscConf = scriptOpts / "osc.conf";
 
-  std::filesystem::create_directories(scriptOpts);
+  if (!std::filesystem::exists(oscLua)) {
+    std::ofstream file(oscLua);
+    auto content = romfs::get("mpv/osc.lua");
+    file.write(reinterpret_cast<const char *>(content.data()), content.size()) << "\n";
+  }
+
   if (!std::filesystem::exists(oscConf)) {
     std::ofstream file(oscConf);
     file << "hidetimeout=2000\n";
