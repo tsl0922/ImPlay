@@ -417,7 +417,7 @@ void Debug::Console::draw() {
 
   const float footer_height_to_reserve = ImGui::GetStyle().ItemSpacing.y + ImGui::GetFrameHeightWithSpacing();
   bool copy_to_clipboard = false;
-  if (ImGui::BeginChild("ScrollingRegion", ImVec2(0, -footer_height_to_reserve), false,
+  if (ImGui::BeginChild("ScrollingRegion", ImVec2(0, -footer_height_to_reserve), ImGuiChildFlags_None,
                         ImGuiWindowFlags_HorizontalScrollbar)) {
     if (ImGui::BeginPopupContextWindow()) {
       ImGui::MenuItem("views.debug.console.log.menu.auto_scroll"_i18n, nullptr, &AutoScroll);

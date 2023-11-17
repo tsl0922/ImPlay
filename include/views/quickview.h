@@ -23,7 +23,6 @@ class Quickview : public View {
     std::string name;
     std::string title;
     std::function<void()> draw;
-    bool child;
   };
 
   void drawWindow();
@@ -49,11 +48,9 @@ class Quickview : public View {
   bool toggleButton(const char *label, bool toggle, const char *tooltip = nullptr, ImGuiCol col = ImGuiCol_Button);
   bool toggleButton(bool toggle, const char *tooltip = nullptr, const char *id = nullptr);
   void emptyLabel();
-  void addTab(std::string name, std::string title, std::function<void()> draw, bool child = false) {
-    tabs.push_back({name, title, draw, child});
-  }
+  void addTab(std::string name, std::string title, std::function<void()> draw) { tabs.push_back({name, title, draw}); }
 
-  bool pinMode = true;
+  bool winMode = false;
   bool tabSwitched = false;
   std::string curTab = "Video";
   std::vector<Tab> tabs;

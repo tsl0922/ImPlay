@@ -9,9 +9,9 @@ Quickview::Quickview(Config *config, Mpv *mpv) : View(config, mpv) {
   // clang-format off
   addTab("playlist", "views.quickview.playlist", [this]() { drawPlaylistTabContent(); });
   addTab("chapters", "views.quickview.chapters", [this]() { drawChaptersTabContent(); });
-  addTab("video", "views.quickview.video", [this]() { drawVideoTabContent(); }, true);
-  addTab("audio", "views.quickview.audio", [this]() { drawAudioTabContent(); }, true);
-  addTab("subtitle", "views.quickview.subtitle", [this]() { drawSubtitleTabContent(); }, true);
+  addTab("video", "views.quickview.video", [this]() { drawVideoTabContent(); });
+  addTab("audio", "views.quickview.audio", [this]() { drawAudioTabContent(); });
+  addTab("subtitle", "views.quickview.subtitle", [this]() { drawSubtitleTabContent(); });
   // clang-format on
 
   mpv->observeEvent(MPV_EVENT_FILE_LOADED, [this](void *data) {
@@ -29,10 +29,10 @@ void Quickview::show(const char *tab) {
 }
 
 void Quickview::draw() {
-  if (pinMode)
-    drawPopup();
-  else
+  if (winMode)
     drawWindow();
+  else
+    drawPopup();
 }
 
 void Quickview::drawWindow() {
@@ -114,21 +114,20 @@ void Quickview::emptyLabel() {
 
 void Quickview::drawTabBar() {
   if (ImGui::BeginTabBar("Quickviewview")) {
-    for (auto &[name, title, draw, child] : tabs) {
+    for (auto &[name, title, draw] : tabs) {
       ImGuiTabItemFlags flags = ImGuiTabItemFlags_None;
       if (iequals(curTab, name) && !tabSwitched) {
         flags |= ImGuiTabItemFlags_SetSelected;
         tabSwitched = true;
       }
       if (ImGui::BeginTabItem(i18n(title).c_str(), nullptr, flags)) {
-        if (child) ImGui::BeginChild(name.c_str());
-        draw();
-        if (child) ImGui::EndChild();
+        if (ImGui::BeginChild(name.c_str())) draw();
+        ImGui::EndChild();
         ImGui::EndTabItem();
       }
     }
-    if (ImGui::TabItemButton(pinMode ? ICON_FA_WINDOW_MAXIMIZE : ICON_FA_WINDOW_RESTORE)) {
-      pinMode = !pinMode;
+    if (ImGui::TabItemButton(winMode ? ICON_FA_WINDOW_RESTORE : ICON_FA_WINDOW_MAXIMIZE)) {
+      winMode = !winMode;
       show();
     }
     ImGui::EndTabBar();
@@ -149,8 +148,9 @@ void Quickview::drawTracks(const char *title, const char *type, const char *prop
       mpv->commandv("cycle-values", prop, "no", "auto", nullptr);
     }
   }
-  if (ImGui::BeginListBox(fmt::format("##tracks-{}", prop).c_str(),
-                          ImVec2(-FLT_MIN, 3 * ImGui::GetFrameHeightWithSpacing()))) {
+  if (ImGui::BeginChild(fmt::format("##tracks-{}", prop).c_str(),
+                        ImVec2(-FLT_MIN, 3 * ImGui::GetFrameHeightWithSpacing()),
+                        ImGuiChildFlags_FrameStyle | ImGuiChildFlags_ResizeY)) {
     auto items = mpv->tracks;
     if (items.empty())
       emptyLabel();
@@ -167,8 +167,8 @@ void Quickview::drawTracks(const char *title, const char *type, const char *prop
       ImGui::TextColored(ImGui::GetStyleColorVec4(selected ? ImGuiCol_CheckMark : ImGuiCol_Text), "%s", title.c_str());
       ImGui::PopID();
     }
-    ImGui::EndListBox();
   }
+  ImGui::EndChild();
 }
 
 void Quickview::drawTracks(const char *type, const char *prop, std::string pos) {
