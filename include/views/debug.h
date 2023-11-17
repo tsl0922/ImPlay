@@ -40,7 +40,7 @@ class Debug : public View {
     struct LogItem {
       char *Str;
       const char *Lev;
-      ImFont *Font;
+      int FontIdx;
     };
 
     Mpv *mpv;

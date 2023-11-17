@@ -352,7 +352,19 @@ void Debug::Console::AddLog(const char* level, const char* fmt, ...) {
   vsnprintf(buf, IM_ARRAYSIZE(buf), fmt, args);
   buf[IM_ARRAYSIZE(buf) - 1] = 0;
   va_end(args);
-  Items.push_back({ImStrdup(buf), level, GetFont(buf)});
+
+  int fontIdx = 1;  // mono
+  const char* p = buf;
+  auto mono = ImGui::GetIO().Fonts->Fonts[fontIdx];
+  while (*p) {
+    if (*p != '\n' && *p != '\r' && !mono->FindGlyphNoFallback((ImWchar)*p)) {
+      fontIdx = 0;  // unicode
+      break;
+    }
+    p++;
+  }
+
+  Items.push_back({ImStrdup(buf), level, fontIdx});
   if (Items.Size > LogLimit) {
     int offset = Items.Size - LogLimit;
     for (int i = 0; i < offset; i++) free(Items[i].Str);
@@ -372,17 +384,6 @@ ImVec4 Debug::Console::LogColor(const char* level) {
   };
   if (level == nullptr || !logColors.contains(level)) level = "info";
   return logColors[level];
-}
-
-ImFont* Debug::Console::GetFont(const char* str) {
-  auto mono = ImGui::GetIO().Fonts->Fonts.back();
-  const char* p = str;
-  while (*p) {
-    if (*p != '\n' && *p != '\r' && mono->FindGlyphNoFallback((ImWchar)*p) == nullptr)
-      return ImGui::GetIO().Fonts->Fonts.front();
-    p++;
-  }
-  return mono;
 }
 
 void Debug::Console::draw() {
@@ -432,7 +433,7 @@ void Debug::Console::draw() {
       if (!Filter.PassFilter(item.Str)) continue;
 
       ImGui::PushStyleColor(ImGuiCol_Text, LogColor(item.Lev));
-      ImGui::PushFont(item.Font);
+      ImGui::PushFont(ImGui::GetIO().Fonts->Fonts[item.FontIdx]);
       ImGui::TextUnformatted(item.Str);
       ImGui::PopFont();
       ImGui::PopStyleColor();
