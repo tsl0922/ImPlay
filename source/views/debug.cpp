@@ -33,8 +33,8 @@ void Debug::draw() {
     drawBindings();
     drawCommands();
     drawConsole();
-    ImGui::End();
   }
+  ImGui::End();
   if (m_demo) ImGui::ShowDemoWindow(&m_demo);
   if (m_metrics) ImGui::ShowMetricsWindow(&m_metrics);
 }

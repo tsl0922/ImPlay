@@ -48,8 +48,8 @@ void Quickview::drawWindow() {
 
   if (ImGui::Begin("menu.quickview"_i18n, &m_open, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoScrollbar)) {
     drawTabBar();
-    ImGui::End();
   }
+  ImGui::End();
 }
 
 void Quickview::drawPopup() {
