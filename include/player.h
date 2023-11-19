@@ -43,6 +43,9 @@ class Player {
   void render();
   void renderVideo();
 
+  void onIconifyEvent(bool iconified);
+  void onSizeEvent(int w, int h);
+  void onPosEvent(int x, int y);
   void onCursorEvent(double x, double y);
   void onScrollEvent(double x, double y);
   void onKeyEvent(std::string name);
@@ -99,6 +102,7 @@ class Player {
   virtual std::string GetWindowTitle() = 0;
   virtual void SetWindowTitle(std::string) = 0;
   virtual void SetWindowAspectRatio(int num, int den) = 0;
+  virtual bool GetWindowMaximized() = 0;
   virtual void SetWindowMaximized(bool m) = 0;
   virtual void SetWindowMinimized(bool m) = 0;
   virtual void SetWindowDecorated(bool d) = 0;
@@ -107,6 +111,7 @@ class Player {
   virtual void SetWindowShouldClose(bool c) = 0;
 
   bool idle = true;
+  bool maximized, minimized;
   GLuint fbo = 0, tex = 0;
   ImTextureID logoTexture = nullptr;
   std::mutex contextLock;

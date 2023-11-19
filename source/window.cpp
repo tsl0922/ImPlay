@@ -164,12 +164,18 @@ void Window::installCallbacks(GLFWwindow* target) {
     auto win = static_cast<Window*>(glfwGetWindowUserPointer(window));
     win->shutdown();
   });
+  glfwSetWindowIconifyCallback(target, [](GLFWwindow* window, int iconified) {
+    auto win = static_cast<Window*>(glfwGetWindowUserPointer(window));
+    win->onIconifyEvent(iconified);
+  });
   glfwSetWindowSizeCallback(target, [](GLFWwindow* window, int w, int h) {
     auto win = static_cast<Window*>(glfwGetWindowUserPointer(window));
+    win->onSizeEvent(w, h);
     win->render();
   });
   glfwSetWindowPosCallback(target, [](GLFWwindow* window, int x, int y) {
     auto win = static_cast<Window*>(glfwGetWindowUserPointer(window));
+    win->onPosEvent(x, y);
     win->render();
   });
   glfwSetCursorEnterCallback(target, [](GLFWwindow* window, int entered) {
@@ -305,18 +311,22 @@ void Window::SetWindowTitle(std::string title) { glfwSetWindowTitle(window, titl
 
 void Window::SetWindowAspectRatio(int num, int den) { glfwSetWindowAspectRatio(window, num, den); }
 
+bool Window::GetWindowMaximized() { return (bool)glfwGetWindowAttrib(window, GLFW_MAXIMIZED); }
+
 void Window::SetWindowMaximized(bool m) {
-  if (m)
-    glfwMaximizeWindow(window);
-  else
-    glfwRestoreWindow(window);
+  if (glfwGetWindowAttrib(window, GLFW_MAXIMIZED)) {
+    if (!m) glfwRestoreWindow(window);
+  } else {
+    if (m) glfwMaximizeWindow(window);
+  }
 }
 
 void Window::SetWindowMinimized(bool m) {
-  if (m)
-    glfwIconifyWindow(window);
-  else
-    glfwRestoreWindow(window);
+  if (glfwGetWindowAttrib(window, GLFW_ICONIFIED)) {
+    if (!m) glfwRestoreWindow(window);
+  } else {
+    if (m) glfwIconifyWindow(window);
+  }
 }
 
 void Window::SetWindowDecorated(bool d) { glfwSetWindowAttrib(window, GLFW_DECORATED, d); }
