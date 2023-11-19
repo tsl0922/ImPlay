@@ -77,7 +77,7 @@ bool Player::init(std::map<std::string, std::string> &options) {
 }
 
 void Player::draw() {
-  drawLogo();
+  drawVideo();
 
   about->draw();
   debug->draw();
@@ -90,16 +90,18 @@ void Player::draw() {
   drawDialog();
 }
 
-void Player::drawLogo() {
-  if (logoTexture == nullptr || mpv->forceWindow || !idle) return;
+void Player::drawVideo() {
+  auto vp = ImGui::GetMainViewport();
+  auto drawList = ImGui::GetBackgroundDrawList(vp);
 
-  ImGuiViewport *vp = ImGui::GetMainViewport();
-  const float width = std::min(vp->WorkSize.x, vp->WorkSize.y) * 0.1f;
-  const ImVec2 delta(width, width);
-  const ImVec2 center = vp->GetCenter();
-  ImRect bb(center - delta, center + delta);
-
-  ImGui::GetBackgroundDrawList(vp)->AddImage(logoTexture, bb.Min, bb.Max);
+  if (!idle) {
+    ImTextureID texture = reinterpret_cast<ImTextureID>(static_cast<intptr_t>(tex));
+    drawList->AddImage(texture, vp->WorkPos, vp->WorkPos + vp->WorkSize);
+  } else if (logoTexture != nullptr && !mpv->forceWindow) {
+    const ImVec2 center = vp->GetWorkCenter();
+    const ImVec2 delta(64, 64);
+    drawList->AddImage(logoTexture, center - delta, center + delta);
+  }
 }
 
 void Player::render() {
@@ -132,16 +134,9 @@ void Player::render() {
   }
 #endif
 
-  if (!idle) {
-    ImGuiViewport *vp = ImGui::GetMainViewport();
-    ImTextureID texture = reinterpret_cast<ImTextureID>(static_cast<intptr_t>(tex));
-    ImGui::GetBackgroundDrawList(vp)->AddImage(texture, vp->Pos, vp->Pos + vp->Size);
-  }
-
   draw();
   ImGui::Render();
 
-  const auto targetFps = config->Data.Interface.Fps;
   {
     ContextGuard guard(this);
     GetFramebufferSize(&width, &height);
@@ -151,14 +146,19 @@ void Player::render() {
     glClear(GL_COLOR_BUFFER_BIT);
 
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-    SetSwapInterval(targetFps > 60 ? 0 : 1);
+    SetSwapInterval(config->Data.Interface.Fps > 60 ? 0 : 1);
     SwapBuffers();
     mpv->reportSwap();
+
+    if (ImGui::GetIO().ConfigFlags & ImGuiConfigFlags_ViewportsEnable) {
+      ImGui::UpdatePlatformWindows();
+      ImGui::RenderPlatformWindowsDefault();
+    }
   }
 
   // limit fps while player idle
   static double time = 0;
-  double targetDelta = 1.0f / targetFps;
+  double targetDelta = 1.0f / config->Data.Interface.Fps;
   if (idle || mpv->pause) {
     double delta = time - ImGui::GetTime();
     if (delta > 0 && delta < targetDelta)
@@ -167,14 +167,6 @@ void Player::render() {
       time = ImGui::GetTime();
   }
   time += targetDelta;
-
-  if (ImGui::GetIO().ConfigFlags & ImGuiConfigFlags_ViewportsEnable) {
-    ImGui::UpdatePlatformWindows();
-
-    std::lock_guard<std::mutex> lock(contextLock);
-    ImGui::RenderPlatformWindowsDefault();
-    DeleteContext();
-  }
 }
 
 void Player::renderVideo() {
@@ -330,9 +322,14 @@ void Player::onIconifyEvent(bool iconified) {
 void Player::onSizeEvent(int w, int h) {
   bool m = GetWindowMaximized();
   if (maximized != m) mpv->property("window-maximized", m ? "yes" : "no");
+  auto g = ImGui::GetCurrentContext();
+  if (g != nullptr && !g->WithinFrameScope) render();
 }
 
-void Player::onPosEvent(int x, int y) {}
+void Player::onPosEvent(int x, int y) {
+  auto g = ImGui::GetCurrentContext();
+  if (g != nullptr && !g->WithinFrameScope) render();
+}
 
 void Player::onCursorEvent(double x, double y) {
   std::string xs = std::to_string((int)x);
@@ -395,7 +392,7 @@ void Player::initObservers() {
   mpv->observeProperty<int, MPV_FORMAT_FLAG>("idle-active", [this](int flag) {
     idle = static_cast<bool>(flag);
     if (idle) {
-      SetWindowTitle(GetWindowTitle());
+      SetWindowTitle(PLAYER_NAME);
       SetWindowAspectRatio(-1, -1);
     }
   });
@@ -453,7 +450,7 @@ void Player::writeMpvConf() {
 
   std::filesystem::create_directories(scrips);
   std::filesystem::create_directories(scriptOpts);
-  
+
   auto oscLua = scrips / "osc.lua";
 
   if (!std::filesystem::exists(oscLua)) {
@@ -665,7 +662,9 @@ void Player::drawOpenURL() {
 }
 
 void Player::drawDialog() {
-  if (m_dialog) ImGui::OpenPopup(m_dialog_title.c_str());
+  if (!m_dialog) return;
+  ImGui::OpenPopup(m_dialog_title.c_str());
+
   ImGui::SetNextWindowSize(ImVec2(scaled(30), 0), ImGuiCond_Always);
   ImGui::SetNextWindowPos(ImGui::GetMainViewport()->GetWorkCenter(), ImGuiCond_Always, ImVec2(0.5f, 0.5f));
   if (ImGui::BeginPopupModal(m_dialog_title.c_str(), &m_dialog, ImGuiWindowFlags_NoMove)) {

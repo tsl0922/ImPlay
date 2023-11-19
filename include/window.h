@@ -24,6 +24,7 @@ class Window : Player {
   void run();
 
  private:
+  void initGLFW();
   void wakeup();
   void updateCursor();
 
@@ -33,7 +34,6 @@ class Window : Player {
   void sendKeyEvent(std::string key, bool action);
   void translateMod(std::vector<std::string> &keys, int mods);
 
-  GLFWwindow *createWindow();
   void installCallbacks(GLFWwindow *target);
   GLFWmonitor *getMonitor(GLFWwindow *target);
 
@@ -54,7 +54,6 @@ class Window : Player {
   void SetWindowPos(int x, int y) override;
   void GetWindowSize(int *w, int *h) override;
   void SetWindowSize(int w, int h) override;
-  std::string GetWindowTitle() override;
   void SetWindowTitle(std::string title) override;
   void SetWindowAspectRatio(int num, int den) override;
   bool GetWindowMaximized() override;
@@ -65,7 +64,6 @@ class Window : Player {
   void SetWindowFullscreen(bool fs) override;
   void SetWindowShouldClose(bool c) override;
 
-  std::string title = "ImPlay";
   GLFWwindow *window = nullptr;
   bool ownCursor = true;
   double lastInputAt = 0;

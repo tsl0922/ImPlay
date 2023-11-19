@@ -18,16 +18,9 @@
 
 namespace ImPlay {
 Window::Window(Config* config) : Player(config) {
-  glfwSetErrorCallback(
-      [](int error, const char* desc) { fmt::print(fg(fmt::color::red), "GLFW [{}]: {}\n", error, desc); });
-#ifdef GLFW_PATCHED
-  glfwInitHint(GLFW_WIN32_MESSAGES_IN_FIBER, GLFW_TRUE);
-#endif
-  if (!glfwInit()) throw std::runtime_error("Failed to initialize GLFW!");
-
-  window = createWindow();
+  initGLFW();
+  window = glfwCreateWindow(1280, 720, PLAYER_NAME, nullptr, nullptr);
   if (window == nullptr) throw std::runtime_error("Failed to create window!");
-  glfwSetWindowSizeLimits(window, 640, 480, GLFW_DONT_CARE, GLFW_DONT_CARE);
   installCallbacks(window);
 
   initGui();
@@ -40,6 +33,33 @@ Window::~Window() {
 
   glfwDestroyWindow(window);
   glfwTerminate();
+}
+
+void Window::initGLFW() {
+  glfwSetErrorCallback(
+      [](int error, const char* desc) { fmt::print(fg(fmt::color::red), "GLFW [{}]: {}\n", error, desc); });
+#ifdef GLFW_PATCHED
+  glfwInitHint(GLFW_WIN32_MESSAGES_IN_FIBER, GLFW_TRUE);
+#endif
+  if (!glfwInit()) throw std::runtime_error("Failed to initialize GLFW!");
+
+#if defined(IMGUI_IMPL_OPENGL_ES3)
+  glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+  glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
+  glfwWindowHint(GLFW_CONTEXT_CREATION_API, GLFW_EGL_CONTEXT_API);
+  glfwWindowHint(GLFW_CLIENT_API, GLFW_OPENGL_ES_API);
+#elif defined(__APPLE__)
+  glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+  glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
+  glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+  glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
+#else
+  glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+  glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
+  glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
+#endif
+  glfwWindowHint(GLFW_AUTO_ICONIFY, GLFW_FALSE);
+  glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
 }
 
 bool Window::init(OptionParser& parser) {
@@ -131,27 +151,6 @@ void Window::updateCursor() {
   ImGui::SetMouseCursor(cursor ? ImGuiMouseCursor_Arrow : ImGuiMouseCursor_None);
 }
 
-GLFWwindow* Window::createWindow() {
-#if defined(IMGUI_IMPL_OPENGL_ES3)
-  glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-  glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
-  glfwWindowHint(GLFW_CONTEXT_CREATION_API, GLFW_EGL_CONTEXT_API);
-  glfwWindowHint(GLFW_CLIENT_API, GLFW_OPENGL_ES_API);
-#elif defined(__APPLE__)
-  glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-  glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
-  glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-  glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
-#else
-  glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-  glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
-  glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
-#endif
-  glfwWindowHint(GLFW_AUTO_ICONIFY, GLFW_FALSE);
-  glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
-  return glfwCreateWindow(640, 480, title.c_str(), nullptr, nullptr);
-}
-
 void Window::installCallbacks(GLFWwindow* target) {
   glfwSetWindowUserPointer(target, this);
 
@@ -171,12 +170,10 @@ void Window::installCallbacks(GLFWwindow* target) {
   glfwSetWindowSizeCallback(target, [](GLFWwindow* window, int w, int h) {
     auto win = static_cast<Window*>(glfwGetWindowUserPointer(window));
     win->onSizeEvent(w, h);
-    win->render();
   });
   glfwSetWindowPosCallback(target, [](GLFWwindow* window, int x, int y) {
     auto win = static_cast<Window*>(glfwGetWindowUserPointer(window));
     win->onPosEvent(x, y);
-    win->render();
   });
   glfwSetCursorEnterCallback(target, [](GLFWwindow* window, int entered) {
     auto win = static_cast<Window*>(glfwGetWindowUserPointer(window));
@@ -194,7 +191,7 @@ void Window::installCallbacks(GLFWwindow* target) {
 #endif
     win->onCursorEvent(x, y);
 #ifdef GLFW_PATCHED
-    if (win->mpv->allowDrag() && win->height - y > 150) {  // 150: height of the OSC bar
+    if (win->mpv->allowDrag() && win->height - y > 280) {  // 280: height of the OSC bar
       if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS) glfwDragWindow(window);
     }
 #endif
@@ -304,8 +301,6 @@ void Window::SetWindowPos(int x, int y) { glfwSetWindowPos(window, x, y); }
 void Window::GetWindowSize(int* w, int* h) { glfwGetWindowSize(window, w, h); }
 
 void Window::SetWindowSize(int w, int h) { glfwSetWindowSize(window, w, h); }
-
-std::string Window::GetWindowTitle() { return title; }
 
 void Window::SetWindowTitle(std::string title) { glfwSetWindowTitle(window, title.c_str()); }
 

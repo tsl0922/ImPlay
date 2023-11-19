@@ -24,6 +24,8 @@
 #include "helpers/nfd.h"
 #include "helpers/utils.h"
 
+#define PLAYER_NAME "ImPlay"
+
 namespace ImPlay {
 class Player {
  public:
@@ -63,7 +65,7 @@ class Player {
   void writeMpvConf();
 
   void draw();
-  void drawLogo();
+  void drawVideo();
   void execute(int n_args, const char **args_);
 
   void openFileDlg(NFD::Filters filters, bool append = false);
@@ -99,7 +101,6 @@ class Player {
   virtual void SetWindowPos(int x, int y) = 0;
   virtual void GetWindowSize(int *w, int *h) = 0;
   virtual void SetWindowSize(int w, int h) = 0;
-  virtual std::string GetWindowTitle() = 0;
   virtual void SetWindowTitle(std::string) = 0;
   virtual void SetWindowAspectRatio(int num, int den) = 0;
   virtual bool GetWindowMaximized() = 0;
