@@ -206,6 +206,7 @@ void Player::initGui() {
 
   ImGuiIO &io = ImGui::GetIO();
   io.IniFilename = nullptr;
+  io.ConfigWindowsMoveFromTitleBarOnly = true;
   io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
   if (config->Data.Interface.Docking) io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
   if (config->Data.Interface.Viewports) io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
