@@ -18,8 +18,8 @@ endfunction()
 
 function(get_yt_dlp_bin name)
   ExternalProject_Add(${name}
-    URL https://github.com/yt-dlp/yt-dlp/releases/download/2023.10.07/yt-dlp.exe
-    URL_HASH SHA256=7c809be9ad981b2a057bd60d766a9dffb1e88ddea6a9530c416f4741bc297364
+    URL https://github.com/yt-dlp/yt-dlp/releases/download/2023.11.16/yt-dlp.exe
+    URL_HASH SHA256=6de14b1127af1c314864ae0cb04c91ebbf61c230b9cbfb316eade9ea9c5cd982
     DOWNLOAD_NO_PROGRESS ON
     DOWNLOAD_NO_EXTRACT ON
     UPDATE_COMMAND ""
