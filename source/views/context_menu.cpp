@@ -357,6 +357,7 @@ void ContextMenu::drawProfilelist() {
 void ContextMenu::drawRecentFiles() {
   if (ImGui::BeginMenuEx("menu.open.recent"_i18n, ICON_FA_HISTORY)) {
     auto files = config->getRecentFiles();
+    auto size = files.size();
     int i = 0;
     for (auto &file : files) {
       if (i == 10) break;
@@ -366,10 +367,11 @@ void ContextMenu::drawRecentFiles() {
       }
       i++;
     }
-    if (files.size() > 10) {
+    if (size > 10) {
       if (ImGui::MenuItem(fmt::format("{} ({})", "menu.open.recent.all"_i18n, files.size()).c_str()))
         mpv->command("script-message-to implay command-palette history");
     }
+    if (size > 0) ImGui::Separator();
     if (ImGui::MenuItem("menu.open.recent.clear"_i18n)) config->clearRecentFiles();
     ImGui::EndMenu();
   }
