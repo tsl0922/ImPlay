@@ -126,6 +126,15 @@ void Window::run() {
 
     render();
     updateCursor();
+
+    static double time = 0;
+    double targetDelta = 1.0f / config->Data.Interface.Fps;
+    double delta = time - ImGui::GetTime();
+    if (delta > 0 && delta < targetDelta)
+      glfwWaitEventsTimeout(delta);
+    else
+      time = ImGui::GetTime();
+    time += targetDelta;
   }
 
   shutdown = true;

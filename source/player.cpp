@@ -155,18 +155,6 @@ void Player::render() {
       ImGui::RenderPlatformWindowsDefault();
     }
   }
-
-  // limit fps while player idle
-  static double time = 0;
-  double targetDelta = 1.0f / config->Data.Interface.Fps;
-  if (idle || mpv->pause) {
-    double delta = time - ImGui::GetTime();
-    if (delta > 0 && delta < targetDelta)
-      std::this_thread::sleep_for(std::chrono::duration<double>(delta));
-    else
-      time = ImGui::GetTime();
-  }
-  time += targetDelta;
 }
 
 void Player::renderVideo() {
