@@ -333,16 +333,16 @@ void Quickview::drawVideoTabContent() {
   ImGui::TextUnformatted("views.quickview.video.aspect_ratio"_i18n);
   const char *ratios[] = {"16:9", "16:10", "4:3", "2.35:1", "1.85:1", "1:1"};
   for (auto ratio : ratios) {
-    if (ImGui::Button(ratio)) mpv->commandv("set", "video-aspect", ratio, nullptr);
+    if (ImGui::Button(ratio)) mpv->commandv("set", "video-aspect-override", ratio, nullptr);
     ImGui::SameLine();
   }
-  iconButton(ICON_FA_UNDO, "set video-aspect -1", "views.quickview.video.aspect_ratio.reset"_i18n, false);
+  iconButton(ICON_FA_UNDO, "set video-aspect-override -1", "views.quickview.video.aspect_ratio.reset"_i18n, false);
   ImGui::SameLine();
   static char ratio[10] = {0};
   ImGui::SetNextItemWidth(scaled(4));
   if (ImGui::InputTextWithHint("##Aspect Ratio", "views.quickview.video.aspect_ratio.custom"_i18n, ratio,
                                IM_ARRAYSIZE(ratio), ImGuiInputTextFlags_EnterReturnsTrue)) {
-    mpv->commandv("set", "video-aspect", ratio, nullptr);
+    mpv->commandv("set", "video-aspect-override", ratio, nullptr);
     ratio[0] = '\0';
   }
   ImGui::NewLine();
