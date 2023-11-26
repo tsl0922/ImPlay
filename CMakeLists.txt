@@ -80,13 +80,11 @@ add_executable(${PROJECT_NAME} ${SOURCE_FILES})
 target_include_directories(${PROJECT_NAME} PRIVATE ${INCLUDE_DIRS})
 target_link_directories(${PROJECT_NAME} PRIVATE ${MPV_LIBRARY_DIRS})
 target_link_libraries(${PROJECT_NAME} PRIVATE ${LINK_LIBS})
-target_compile_definitions(${PROJECT_NAME} PRIVATE APP_VERSION="${GIT_VERSION}")
-if(USE_OPENGL_ES3)
-  target_compile_definitions(${PROJECT_NAME} PRIVATE IMGUI_IMPL_OPENGL_ES3)
-endif()
-if(USE_PATCHED_GLFW)
-  target_compile_definitions(${PROJECT_NAME} PRIVATE GLFW_PATCHED)
-endif()
+target_compile_definitions(${PROJECT_NAME} PRIVATE
+  APP_VERSION="${GIT_VERSION}"
+  $<$<BOOL:${USE_OPENGL_ES3}>:IMGUI_IMPL_OPENGL_ES3>
+  $<$<BOOL:${USE_PATCHED_GLFW}>:GLFW_PATCHED>
+)
 if(USE_MPV_WIN_BUILD)
   add_dependencies(${PROJECT_NAME} mpv_dev)
 endif()
