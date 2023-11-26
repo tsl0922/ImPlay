@@ -21,15 +21,23 @@ Window::Window(Config* config) : Player(config) {
   initGLFW();
   window = glfwCreateWindow(1280, 720, PLAYER_NAME, nullptr, nullptr);
   if (window == nullptr) throw std::runtime_error("Failed to create window!");
-  installCallbacks(window);
+#ifdef _WIN32
+  hwnd = glfwGetWin32Window(window);
+  if (SUCCEEDED(OleInitialize(nullptr))) oleOk = true;
+#endif
 
   initGui();
+  installCallbacks(window);
   ImGui_ImplGlfw_InitForOpenGL(window, true);
 }
 
 Window::~Window() {
   ImGui_ImplGlfw_Shutdown();
   exitGui();
+#ifdef _WIN32
+  if (taskbarList != nullptr) taskbarList->Release();
+  if (oleOk) OleUninitialize();
+#endif
 
   glfwDestroyWindow(window);
   glfwTerminate();
@@ -83,14 +91,13 @@ bool Window::init(OptionParser& parser) {
 #endif
 
 #ifdef _WIN32
-  HWND hwnd = glfwGetWin32Window(window);
+  if (oleOk) setupWin32Taskbar();
   wndProcOld = (WNDPROC)::GetWindowLongPtr(hwnd, GWLP_WNDPROC);
   ::SetWindowLongPtr(hwnd, GWLP_WNDPROC, reinterpret_cast<LONG_PTR>(wndProc));
   ::SetWindowLongPtr(hwnd, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(this));
 
   mpv->observeProperty<int, MPV_FORMAT_FLAG>("border", [this](int flag) {
     borderless = !static_cast<bool>(flag);
-    HWND hwnd = glfwGetWin32Window(window);
     if (borderless) {
       DWORD style = ::GetWindowLong(hwnd, GWL_STYLE);
       ::SetWindowLongA(hwnd, GWL_STYLE, style | WS_CAPTION | WS_MAXIMIZEBOX | WS_THICKFRAME);
@@ -270,10 +277,7 @@ void Window::translateMod(std::vector<std::string>& keys, int mods) {
 }
 
 #ifdef _WIN32
-int64_t Window::GetWid() {
-  HWND hwnd = glfwGetWin32Window(window);
-  return config->Data.Mpv.UseWid ? static_cast<uint32_t>((intptr_t)hwnd) : 0;
-}
+int64_t Window::GetWid() { return config->Data.Mpv.UseWid ? static_cast<uint32_t>((intptr_t)hwnd) : 0; }
 #endif
 
 GLAddrLoadFunc Window::GetGLAddrFunc() { return (GLAddrLoadFunc)glfwGetProcAddress; }
@@ -378,6 +382,20 @@ GLFWmonitor* Window::getMonitor(GLFWwindow* target) {
 }
 
 #ifdef _WIN32
+void Window::setupWin32Taskbar() {
+  if (FAILED(CoCreateInstance(CLSID_TaskbarList, NULL, CLSCTX_ALL, IID_ITaskbarList3, (void**)&taskbarList))) return;
+  if (FAILED(taskbarList->HrInit())) {
+    taskbarList->Release();
+    taskbarList = nullptr;
+    return;
+  }
+  mpv->observeEvent(MPV_EVENT_START_FILE, [this](void*) { taskbarList->SetProgressState(hwnd, TBPF_NORMAL); });
+  mpv->observeEvent(MPV_EVENT_END_FILE, [this](void*) { taskbarList->SetProgressState(hwnd, TBPF_NOPROGRESS); });
+  mpv->observeProperty<int64_t, MPV_FORMAT_INT64>("percent-pos", [this](int64_t pos) {
+    if (pos > 0) taskbarList->SetProgressValue(hwnd, pos, 100);
+  });
+}
+
 // borderless window: https://github.com/rossy/borderless-window
 LRESULT CALLBACK Window::wndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
   auto win = reinterpret_cast<Window*>(GetWindowLongPtr(hWnd, GWLP_USERDATA));

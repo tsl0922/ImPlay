@@ -4,6 +4,8 @@
 #pragma once
 #include "player.h"
 #ifdef _WIN32
+#include <ole2.h>
+#include <shobjidl.h>
 #define GLFW_EXPOSE_NATIVE_WIN32
 #elif defined(__APPLE__)
 #define GLFW_EXPOSE_NATIVE_COCOA
@@ -69,7 +71,12 @@ class Window : Player {
   double lastInputAt = 0;
 #ifdef _WIN32
   bool borderless = false;
+  bool oleOk = false;
+  HWND hwnd;
   WNDPROC wndProcOld = nullptr;
+  ITaskbarList3 *taskbarList = nullptr;
+
+  void setupWin32Taskbar();
   static LRESULT CALLBACK wndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 #endif
 
