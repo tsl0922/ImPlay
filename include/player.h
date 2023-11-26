@@ -90,6 +90,7 @@ class Player {
   virtual GLAddrLoadFunc GetGLAddrFunc() = 0;
   virtual std::string GetClipboardString() = 0;
   virtual void GetMonitorSize(int *w, int *h) = 0;
+  virtual int GetMonitorRefreshRate() = 0;
   virtual void GetFramebufferSize(int *w, int *h) = 0;
   virtual void MakeContextCurrent() = 0;
   virtual void DeleteContext() = 0;

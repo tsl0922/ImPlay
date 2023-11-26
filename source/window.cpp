@@ -293,6 +293,11 @@ void Window::GetMonitorSize(int* w, int* h) {
   *h = mode->height;
 }
 
+int Window::GetMonitorRefreshRate() {
+  const GLFWvidmode* mode = glfwGetVideoMode(getMonitor(window));
+  return mode->refreshRate;
+}
+
 void Window::GetFramebufferSize(int* w, int* h) { glfwGetFramebufferSize(window, w, h); }
 
 void Window::MakeContextCurrent() { glfwMakeContextCurrent(window); }

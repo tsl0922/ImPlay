@@ -45,6 +45,7 @@ class Window : Player {
   GLAddrLoadFunc GetGLAddrFunc() override;
   std::string GetClipboardString() override;
   void GetMonitorSize(int *w, int *h) override;
+  int GetMonitorRefreshRate() override;
   void GetFramebufferSize(int *w, int *h) override;
   void MakeContextCurrent() override;
   void DeleteContext() override;
