@@ -72,9 +72,7 @@ void Window::initGLFW() {
 
 bool Window::init(OptionParser& parser) {
   mpv->wakeupCb() = [this](Mpv* ctx) { wakeup(); };
-  mpv->updateCb() = [this](Mpv* ctx) {
-    if (ctx->wantRender()) videoWaiter.notify();
-  };
+  mpv->updateCb() = [this](Mpv* ctx) { videoWaiter.notify(); };
   if (!Player::init(parser.options)) return false;
 
   for (auto& path : parser.paths) {
@@ -115,14 +113,17 @@ void Window::run() {
       videoWaiter.wait();
       if (shutdown) break;
 
-      renderVideo();
-      wakeup();
+      if (mpv->wantRender()) {
+        renderVideo();
+        wakeup();
+      }
     }
   });
 
   restoreState();
   glfwShowWindow(window);
 
+  double lastTime = glfwGetTime();
   while (!glfwWindowShouldClose(window)) {
     if (!glfwGetWindowAttrib(window, GLFW_VISIBLE) || glfwGetWindowAttrib(window, GLFW_ICONIFIED))
       glfwWaitEvents();
@@ -134,14 +135,13 @@ void Window::run() {
     render();
     updateCursor();
 
-    static double time = 0;
     double targetDelta = 1.0f / config->Data.Interface.Fps;
-    double delta = time - ImGui::GetTime();
+    double delta = lastTime - glfwGetTime();
     if (delta > 0 && delta < targetDelta)
       glfwWaitEventsTimeout(delta);
     else
-      time = ImGui::GetTime();
-    time += targetDelta;
+      lastTime = glfwGetTime();
+    lastTime += targetDelta;
   }
 
   shutdown = true;
