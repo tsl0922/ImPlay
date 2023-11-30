@@ -25,12 +25,16 @@ ImPlay aims to be mpv compatible, which means almost all mpv features from the [
   - Context Menu with most commonly used commands
   - Command Palette to quickly search commands and keys
   - Quick Settings View with convenient controls
-  - Visual Audio / Video Equalizer Settings
+    - Playlist / Chapter Manager
+    - Audio / Video / Subtitle Settings
+    - Audio / Video Equalizer Support
   - Open Dialog for Media Files / Folders
-  - Open URL / Path from Clipboard
-  - Open DVD / Blu-ray Folder and ISO Image
-  - Playlist Editing: Add, Clear, Shuffle
+  - Open Clipboard / DVD / Blu-ray / ISO Image
   - Shadow and Rounding effect for Interface
+- Notable additional features
+  - Single Instance Mode
+  - Space to play last file on IDLE
+  - Play recently opened files
 - Scripting Developer Friendly
   - Visual view of mpv's internal properties
   - Console with completion, history support
@@ -59,7 +63,7 @@ Read the [FAQ](https://github.com/tsl0922/ImPlay/wiki/FAQ).
 
 # Credits
 
-ImPlay uses the following libraries, thanks to their authors and contributors.
+ImPlay uses the following projects, thanks to their authors and contributors.
 
 - [mpv](https://mpv.io): Command line video player
 - [imgui](https://github.com/ocornut/imgui): Bloat-free Graphical User interface for C++ with minimal dependencies
@@ -70,8 +74,9 @@ ImPlay uses the following libraries, thanks to their authors and contributors.
 - [json](https://json.nlohmann.me): JSON for Modern C++
 - [inipp](https://github.com/mcmtroffaes/inipp): Simple C++ ini parser
 - [libromfs](https://github.com/WerWolv/libromfs): Simple library for embedding static resources into C++ binaries using CMake
-- [nativefiledialog](https://github.com/btzy/nativefiledialog-extended): Cross platform (Windows, Mac, Linux) native file dialog library 
+- [nativefiledialog](https://github.com/btzy/nativefiledialog-extended): Cross platform (Windows, Mac, Linux) native file dialog library
+- [Cascadia Code](https://github.com/microsoft/cascadia-code) / [Font Awesome](https://fontawesome.com) / [Unifont](https://unifoundry.com/unifont.html): Fonts embeded in ImPlay
 
 # License
 
-[GPLv2](LICENSE.txt).
+[GPLv2](https://github.com/tsl0922/ImPlay/blob/main/LICENSE.txt).
