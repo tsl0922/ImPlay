@@ -34,6 +34,8 @@ class LangStr {
   std::string m_str;
 };
 
+inline std::string format_as(LangStr s) { return s; }
+
 const ImWchar* getLangGlyphRanges();
 
 std::map<std::string, LangData>& getLangs();

@@ -71,7 +71,7 @@
 #define FMT_RETRY(result, expression) FMT_RETRY_VAL(result, expression, -1)
 
 FMT_BEGIN_NAMESPACE
-FMT_MODULE_EXPORT_BEGIN
+FMT_BEGIN_EXPORT
 
 /**
   \rst
@@ -123,30 +123,10 @@ using wcstring_view = basic_cstring_view<wchar_t>;
 #ifdef _WIN32
 FMT_API const std::error_category& system_category() noexcept;
 
-FMT_BEGIN_DETAIL_NAMESPACE
-// A converter from UTF-16 to UTF-8.
-// It is only provided for Windows since other systems support UTF-8 natively.
-class utf16_to_utf8 {
- private:
-  memory_buffer buffer_;
-
- public:
-  utf16_to_utf8() {}
-  FMT_API explicit utf16_to_utf8(basic_string_view<wchar_t> s);
-  operator string_view() const { return string_view(&buffer_[0], size()); }
-  size_t size() const { return buffer_.size() - 1; }
-  const char* c_str() const { return &buffer_[0]; }
-  std::string str() const { return std::string(&buffer_[0], size()); }
-
-  // Performs conversion returning a system error code instead of
-  // throwing exception on conversion error. This method may still throw
-  // in case of memory allocation error.
-  FMT_API int convert(basic_string_view<wchar_t> s);
-};
-
+namespace detail {
 FMT_API void format_windows_error(buffer<char>& out, int error_code,
                                   const char* message) noexcept;
-FMT_END_DETAIL_NAMESPACE
+}
 
 FMT_API std::system_error vwindows_error(int error_code, string_view format_str,
                                          format_args args);
@@ -337,12 +317,18 @@ class FMT_API file {
   // Creates a buffered_file object associated with this file and detaches
   // this file object from the file.
   buffered_file fdopen(const char* mode);
+
+#  if defined(_WIN32) && !defined(__MINGW32__)
+  // Opens a file and constructs a file object representing this file by
+  // wcstring_view filename. Windows only.
+  static file open_windows_file(wcstring_view path, int oflag);
+#  endif
 };
 
 // Returns the memory page size.
 long getpagesize();
 
-FMT_BEGIN_DETAIL_NAMESPACE
+namespace detail {
 
 struct buffer_size {
   buffer_size() = default;
@@ -401,7 +387,7 @@ class file_buffer final : public buffer<char> {
   }
 };
 
-FMT_END_DETAIL_NAMESPACE
+}  // namespace detail
 
 // Added {} below to work around default constructor error known to
 // occur in Xcode versions 7.2.1 and 8.2.1.
@@ -459,7 +445,7 @@ inline ostream output_file(cstring_view path, T... params) {
 }
 #endif  // FMT_USE_FCNTL
 
-FMT_MODULE_EXPORT_END
+FMT_END_EXPORT
 FMT_END_NAMESPACE
 
 #endif  // FMT_OS_H_
