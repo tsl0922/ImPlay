@@ -363,20 +363,13 @@ void Quickview::drawVideoTabContent() {
       "views.quickview.video.equalizer.saturation", "views.quickview.video.equalizer.gamma",
       "views.quickview.video.equalizer.hue",
   };
-  static int equalizer[IM_ARRAYSIZE(eq)] = {
-      (int)mpv->property<int64_t, MPV_FORMAT_INT64>("brightness"),
-      (int)mpv->property<int64_t, MPV_FORMAT_INT64>("contrast"),
-      (int)mpv->property<int64_t, MPV_FORMAT_INT64>("saturation"),
-      (int)mpv->property<int64_t, MPV_FORMAT_INT64>("gamma"),
-      (int)mpv->property<int64_t, MPV_FORMAT_INT64>("hue"),
+  int equalizer[IM_ARRAYSIZE(eq)] = {
+      (int)mpv->brightness, (int)mpv->contrast, (int)mpv->saturation, (int)mpv->gamma, (int)mpv->hue,
   };
   ImGui::SetCursorPosX(ImGui::GetCursorPosX() + scaled(1));
   ImGui::BeginGroup();
   for (int i = 0; i < IM_ARRAYSIZE(equalizer); i++) {
-    if (ImGui::Button(fmt::format("{}##{}", ICON_FA_UNDO, eq[i]).c_str())) {
-      equalizer[i] = 0;
-      mpv->commandv("set", eq[i], "0", nullptr);
-    }
+    if (ImGui::Button(fmt::format("{}##{}", ICON_FA_UNDO, eq[i]).c_str())) mpv->commandv("set", eq[i], "0", nullptr);
     ImGui::SameLine();
     if (ImGui::SliderInt(i18n(eq_labels[i]).c_str(), &equalizer[i], -100, 100))
       mpv->commandv("set", eq[i], std::to_string(equalizer[i]).c_str(), nullptr);
@@ -389,7 +382,7 @@ void Quickview::drawAudioTabContent() {
   ImGui::NewLine();
 
   ImGui::TextUnformatted("views.quickview.audio.volume"_i18n);
-  static int volume = (int)mpv->volume;
+  int volume = (int)mpv->volume;
   if (ImGui::SliderInt("##Volume", &volume, 0, 200, "%d%%"))
     mpv->commandv("set", "volume", std::to_string(volume).c_str(), nullptr);
   ImGui::SameLine();
@@ -397,10 +390,10 @@ void Quickview::drawAudioTabContent() {
   ImGui::NewLine();
 
   ImGui::TextUnformatted("views.quickview.audio.delay"_i18n);
-  static float delay = (float)mpv->property<double, MPV_FORMAT_DOUBLE>("audio-delay");
+  float delay = (float)mpv->audioDelay;
   if (ImGui::SliderFloat("##Delay", &delay, -10, 10, "%.1fs"))
     mpv->commandv("set", "audio-delay", fmt::format("{:.1f}", delay).c_str(), nullptr);
-  if (iconButton(ICON_FA_UNDO, "set audio-delay 0", "views.quickview.audio.delay.reset"_i18n)) delay = 0;
+  iconButton(ICON_FA_UNDO, "set audio-delay 0", "views.quickview.audio.delay.reset"_i18n);
   ImGui::NewLine();
   ImGui::Separator();
   ImGui::NewLine();
@@ -423,17 +416,17 @@ void Quickview::drawSubtitleTabContent() {
   ImGui::NewLine();
 
   ImGui::TextUnformatted("views.quickview.subtitle.scale"_i18n);
-  static float scale = (float)mpv->property<double, MPV_FORMAT_DOUBLE>("sub-scale");
+  float scale = (float)mpv->subScale;
   if (ImGui::SliderFloat("##Scale", &scale, 0, 4, "%.1f"))
     mpv->commandv("set", "sub-scale", fmt::format("{:.1f}", scale).c_str(), nullptr);
-  if (iconButton(ICON_FA_UNDO, "set sub-scale 1", "views.quickview.subtitle.scale.reset"_i18n)) scale = 1;
+  iconButton(ICON_FA_UNDO, "set sub-scale 1", "views.quickview.subtitle.scale.reset"_i18n);
   ImGui::NewLine();
 
   ImGui::TextUnformatted("views.quickview.subtitle.delay"_i18n);
-  static float delay = (float)mpv->property<double, MPV_FORMAT_DOUBLE>("sub-delay");
+  float delay = (float)mpv->subDelay;
   if (ImGui::SliderFloat("##Delay", &delay, -10, 10, "%.1fs"))
     mpv->commandv("set", "sub-delay", fmt::format("{:.1f}", delay).c_str(), nullptr);
-  if (iconButton(ICON_FA_UNDO, "set sub-delay 0", "views.quickview.subtitle.delay.reset"_i18n)) delay = 0;
+  iconButton(ICON_FA_UNDO, "set sub-delay 0", "views.quickview.subtitle.delay.reset"_i18n);
 }
 
 void Quickview::drawAudioEq() {

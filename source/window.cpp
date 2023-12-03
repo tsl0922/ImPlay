@@ -98,7 +98,7 @@ bool Window::init(OptionParser& parser) {
     borderless = !static_cast<bool>(flag);
     if (borderless) {
       DWORD style = ::GetWindowLong(hwnd, GWL_STYLE);
-      ::SetWindowLongA(hwnd, GWL_STYLE, style | WS_CAPTION | WS_MAXIMIZEBOX | WS_THICKFRAME);
+      ::SetWindowLong(hwnd, GWL_STYLE, style | WS_CAPTION | WS_MAXIMIZEBOX | WS_THICKFRAME);
     }
     ::SetWindowPos(hwnd, nullptr, 0, 0, 0, 0, SWP_FRAMECHANGED | SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER);
   });

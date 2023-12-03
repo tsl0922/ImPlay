@@ -111,7 +111,9 @@ class Mpv {
   std::vector<BindingItem> bindings;
   std::vector<std::string> profiles;
   std::string aid, vid, sid, sid2, audioDevice, cursorAutohide;
-  int64_t chapter = 0, volume = 100, playlistPos = -1, playlistPlayingPos = -1, timePos = 0;
+  int64_t chapter, volume, playlistPos, playlistPlayingPos, timePos;
+  int64_t brightness, contrast, saturation, gamma, hue;
+  double audioDelay, subDelay, subScale;
   bool pause, mute, fullscreen, sidv, sidv2, forceWindow;
   bool keepaspect, keepaspectWindow, windowDragging, autoResize;
 

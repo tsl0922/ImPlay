@@ -162,6 +162,16 @@ void Mpv::observeProperties() {
   observeProperty<int64_t, MPV_FORMAT_INT64>("playlist-pos", [this](int64_t val) { playlistPos = val; });
   observeProperty<int64_t, MPV_FORMAT_INT64>("playlist-playing-pos", [this](int64_t val) { playlistPlayingPos = val; });
   observeProperty<int64_t, MPV_FORMAT_INT64>("time-pos", [this](int64_t val) { timePos = val; });
+
+  observeProperty<int64_t, MPV_FORMAT_INT64>("brightness", [this](int64_t val) { brightness = val; });
+  observeProperty<int64_t, MPV_FORMAT_INT64>("contrast", [this](int64_t val) { contrast = val; });
+  observeProperty<int64_t, MPV_FORMAT_INT64>("saturation", [this](int64_t val) { saturation = val; });
+  observeProperty<int64_t, MPV_FORMAT_INT64>("gamma", [this](int64_t val) { gamma = val; });
+  observeProperty<int64_t, MPV_FORMAT_INT64>("hue", [this](int64_t val) { hue = val; });
+
+  observeProperty<double, MPV_FORMAT_DOUBLE>("audio-delay", [this](double val) { audioDelay = val; });
+  observeProperty<double, MPV_FORMAT_DOUBLE>("sub-delay", [this](double val) { subDelay = val; });
+  observeProperty<double, MPV_FORMAT_DOUBLE>("sub-scale", [this](double val) { subScale = val; });
 }
 
 void Mpv::initPlaylist(mpv_node &node) {
