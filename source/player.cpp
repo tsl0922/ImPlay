@@ -109,6 +109,9 @@ void Player::drawVideo() {
 }
 
 void Player::render() {
+  auto g = ImGui::GetCurrentContext();
+  if (g != nullptr && g->WithinFrameScope) return;
+
   {
     ContextGuard guard(this);
 
@@ -307,22 +310,6 @@ void Player::loadFonts() {
 
 void Player::shutdown() { mpv->command(config->Data.Mpv.WatchLater ? "quit-watch-later" : "quit"); }
 
-void Player::onIconifyEvent(bool iconified) {
-  if (minimized != iconified) mpv->property("window-minimized", iconified ? "yes" : "no");
-}
-
-void Player::onSizeEvent(int w, int h) {
-  bool m = GetWindowMaximized();
-  if (maximized != m) mpv->property("window-maximized", m ? "yes" : "no");
-  auto g = ImGui::GetCurrentContext();
-  if (g != nullptr && !g->WithinFrameScope) render();
-}
-
-void Player::onPosEvent(int x, int y) {
-  auto g = ImGui::GetCurrentContext();
-  if (g != nullptr && !g->WithinFrameScope) render();
-}
-
 void Player::onCursorEvent(double x, double y) {
   std::string xs = std::to_string((int)x);
   std::string ys = std::to_string((int)y);
@@ -392,14 +379,8 @@ void Player::initObservers() {
   mpv->observeProperty<char *, MPV_FORMAT_STRING>("media-title", [this](char *data) { SetWindowTitle(data); });
   mpv->observeProperty<int, MPV_FORMAT_FLAG>("border", [this](int flag) { SetWindowDecorated(flag); });
   mpv->observeProperty<int, MPV_FORMAT_FLAG>("ontop", [this](int flag) { SetWindowFloating(flag); });
-  mpv->observeProperty<int, MPV_FORMAT_FLAG>("window-maximized", [this](int flag) {
-    maximized = flag;
-    SetWindowMaximized(flag);
-  });
-  mpv->observeProperty<int, MPV_FORMAT_FLAG>("window-minimized", [this](int flag) {
-    minimized = flag;
-    SetWindowMinimized(flag);
-  });
+  mpv->observeProperty<int, MPV_FORMAT_FLAG>("window-maximized", [this](int flag) { SetWindowMaximized(flag); });
+  mpv->observeProperty<int, MPV_FORMAT_FLAG>("window-minimized", [this](int flag) { SetWindowMinimized(flag); });
   mpv->observeProperty<double, MPV_FORMAT_DOUBLE>("window-scale", [this](double scale) {
     int w = (int)mpv->property<int64_t, MPV_FORMAT_INT64>("dwidth");
     int h = (int)mpv->property<int64_t, MPV_FORMAT_INT64>("dheight");

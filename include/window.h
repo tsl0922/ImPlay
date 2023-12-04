@@ -59,7 +59,6 @@ class Window : Player {
   void SetWindowSize(int w, int h) override;
   void SetWindowTitle(std::string title) override;
   void SetWindowAspectRatio(int num, int den) override;
-  bool GetWindowMaximized() override;
   void SetWindowMaximized(bool m) override;
   void SetWindowMinimized(bool m) override;
   void SetWindowDecorated(bool d) override;
