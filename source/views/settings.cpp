@@ -134,16 +134,22 @@ void Settings::drawInterfaceTab() {
   if (ImGui::BeginTabItem("views.settings.interface"_i18n)) {
     ImGui::TextUnformatted("views.settings.interface.gui"_i18n);
     ImGui::Indent();
+#ifdef IMGUI_HAS_DOCK
     ImGui::Checkbox("views.settings.interface.docking"_i18n, &data.Interface.Docking);
     ImGui::SameLine();
     ImGui::HelpMarker("views.settings.interface.docking.help"_i18n);
+#endif
+#ifdef IMGUI_HAS_VIEWPORT
     ImGui::SameLine(scaled(20));
     ImGui::Checkbox("views.settings.interface.viewports"_i18n, &data.Interface.Viewports);
     ImGui::SameLine();
     ImGui::HelpMarker("views.settings.interface.viewports.help"_i18n);
+#endif
     ImGui::Checkbox("views.settings.interface.rounding"_i18n, &data.Interface.Rounding);
+#ifdef IMGUI_HAS_SHADOWS
     ImGui::SameLine(scaled(20));
     ImGui::Checkbox("views.settings.interface.shadow"_i18n, &data.Interface.Shadow);
+#endif
     ImGui::SliderInt("views.settings.interface.fps"_i18n, &data.Interface.Fps, 15, 200);
     ImGui::SameLine();
     ImGui::HelpMarker("views.settings.interface.fps.help"_i18n);

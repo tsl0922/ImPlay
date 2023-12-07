@@ -134,7 +134,7 @@ void Player::render() {
   BackendNewFrame();
   ImGui::NewFrame();
 
-#ifdef _WIN32
+#if defined(_WIN32) && defined(IMGUI_HAS_VIEWPORT)
   if (config->Data.Mpv.UseWid) {
     ImGuiViewport *vp = ImGui::GetMainViewport();
     vp->Flags &= ~ImGuiViewportFlags_CanHostOtherWindows;  // HACK: disable main viewport merge
@@ -157,10 +157,12 @@ void Player::render() {
     SwapBuffers();
     mpv->reportSwap();
 
+#ifdef IMGUI_HAS_VIEWPORT
     if (ImGui::GetIO().ConfigFlags & ImGuiConfigFlags_ViewportsEnable) {
       ImGui::UpdatePlatformWindows();
       ImGui::RenderPlatformWindowsDefault();
     }
+#endif
   }
 }
 
@@ -195,8 +197,12 @@ void Player::initGui() {
   io.IniFilename = nullptr;
   io.ConfigWindowsMoveFromTitleBarOnly = true;
   io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
+#ifdef IMGUI_HAS_DOCK
   if (config->Data.Interface.Docking) io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
+#endif
+#ifdef IMGUI_HAS_VIEWPORT
   if (config->Data.Interface.Viewports) io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
+#endif
 
   loadFonts();
 
@@ -277,7 +283,7 @@ void Player::loadFonts() {
   ImGui::SetTheme(interface.Theme.c_str(), &style, interface.Rounding, interface.Shadow);
 
   ImGuiIO &io = ImGui::GetIO();
-#ifdef _WIN32
+#if defined(_WIN32) && defined(IMGUI_HAS_VIEWPORT)
   if (config->Data.Mpv.UseWid) io.ConfigViewportsNoAutoMerge = true;
 #endif
 

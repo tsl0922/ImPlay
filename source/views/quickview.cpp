@@ -63,15 +63,16 @@ void Quickview::drawPopup() {
 
   ImGui::SetNextWindowSize(ImVec2(width, wSize.y), ImGuiCond_Always);
   ImGui::SetNextWindowPos(ImVec2(wPos.x + wSize.x - width, wPos.y), ImGuiCond_Always);
-  if (ImGui::GetIO().ConfigFlags & ImGuiConfigFlags_ViewportsEnable) {
+
+#if defined(_WIN32) && defined(IMGUI_HAS_VIEWPORT)
+  if (config->Data.Mpv.UseWid && ImGui::GetIO().ConfigFlags & ImGuiConfigFlags_ViewportsEnable) {
     ImGuiWindowClass windowClass;
     windowClass.ViewportFlagsOverrideSet = ImGuiViewportFlags_TopMost;
     ImGui::SetNextWindowClass(&windowClass);
   }
+#endif
 
   if (ImGui::BeginPopup("##quickview")) {
-    if (ImGui::GetIO().AppFocusLost || ImGui::GetWindowViewport()->Flags & ImGuiViewportFlags_IsMinimized)
-      ImGui::CloseCurrentPopup();
     drawTabBar();
     ImGui::EndPopup();
   }

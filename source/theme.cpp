@@ -32,8 +32,10 @@ void ImGui::SetTheme(const char* theme, ImGuiStyle* dst, bool rounding, bool sha
   style->PopupRounding = rounding ? 4.0f : 0.0f;
   style->ChildRounding = rounding ? 4.0f : 0.0f;
 
+#ifdef IMGUI_HAS_SHADOWS
   style->WindowShadowSize = shadow ? 50.0f : 0.0f;
   style->Colors[ImGuiCol_WindowShadow] = ImVec4(0, 0, 0, 1.0f);
+#endif
 }
 
 // https://github.com/adobe/imgui/blob/master/docs/Spectrum.md
@@ -79,8 +81,10 @@ void ImGui::StyleColorsSpectrum(ImGuiStyle* dst) {
   colors[ImGuiCol_TabActive] = ImVec4(0.20f, 0.41f, 0.68f, 1.00f);
   colors[ImGuiCol_TabUnfocused] = ImVec4(0.07f, 0.10f, 0.15f, 0.97f);
   colors[ImGuiCol_TabUnfocusedActive] = ImVec4(0.14f, 0.26f, 0.42f, 1.00f);
+ #ifdef IMGUI_HAS_DOCK
   colors[ImGuiCol_DockingPreview] = ImVec4(0.26f, 0.59f, 0.98f, 0.70f);
   colors[ImGuiCol_DockingEmptyBg] = ImVec4(0.20f, 0.20f, 0.20f, 1.00f);
+#endif
   colors[ImGuiCol_PlotLines] = ImVec4(0.15f, 0.50f, 0.92f, 1.00f);
   colors[ImGuiCol_PlotLinesHovered] = ImVec4(0.29f, 0.61f, 0.96f, 1.00f);
   colors[ImGuiCol_PlotHistogram] = ImVec4(0.15f, 0.50f, 0.92f, 1.00f);
@@ -96,7 +100,9 @@ void ImGui::StyleColorsSpectrum(ImGuiStyle* dst) {
   colors[ImGuiCol_NavWindowingHighlight] = ImVec4(1.00f, 1.00f, 1.00f, 0.70f);
   colors[ImGuiCol_NavWindowingDimBg] = ImVec4(0.80f, 0.80f, 0.80f, 0.20f);
   colors[ImGuiCol_ModalWindowDimBg] = ImVec4(0.20f, 0.20f, 0.20f, 0.35f);
+#ifdef IMGUI_HAS_SHADOWS
   colors[ImGuiCol_WindowShadow] = ImVec4(0.00f, 0.00f, 0.00f, 1.00f);
+#endif
 }
 
 // https://github.com/ocornut/imgui/issues/707#issuecomment-1372640066
@@ -141,7 +147,9 @@ void ImGui::StyleColorsDracula(ImGuiStyle* dst) {
   colors[ImGuiCol_ResizeGrip] = ImVec4{0.44f, 0.37f, 0.61f, 0.29f};
   colors[ImGuiCol_ResizeGripHovered] = ImVec4{0.74f, 0.58f, 0.98f, 0.29f};
   colors[ImGuiCol_ResizeGripActive] = ImVec4{0.84f, 0.58f, 1.0f, 0.29f};
+#ifdef IMGUI_HAS_DOCK
   colors[ImGuiCol_DockingPreview] = ImVec4{0.44f, 0.37f, 0.61f, 1.0f};
+#endif
 }
 
 // https://github.com/ocornut/imgui/issues/707#issuecomment-917151020
@@ -187,8 +195,10 @@ void ImGui::StyleColorsDeepDark(ImGuiStyle* dst) {
   colors[ImGuiCol_TabActive] = ImVec4(0.20f, 0.20f, 0.20f, 0.36f);
   colors[ImGuiCol_TabUnfocused] = ImVec4(0.00f, 0.00f, 0.00f, 0.52f);
   colors[ImGuiCol_TabUnfocusedActive] = ImVec4(0.14f, 0.14f, 0.14f, 1.00f);
+#ifdef IMGUI_HAS_DOCK
   colors[ImGuiCol_DockingPreview] = ImVec4(0.33f, 0.67f, 0.86f, 1.00f);
   colors[ImGuiCol_DockingEmptyBg] = ImVec4(1.00f, 0.00f, 0.00f, 1.00f);
+#endif
   colors[ImGuiCol_PlotLines] = ImVec4(1.00f, 0.00f, 0.00f, 1.00f);
   colors[ImGuiCol_PlotLinesHovered] = ImVec4(1.00f, 0.00f, 0.00f, 1.00f);
   colors[ImGuiCol_PlotHistogram] = ImVec4(1.00f, 0.00f, 0.00f, 1.00f);
