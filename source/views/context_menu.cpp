@@ -309,16 +309,20 @@ void ContextMenu::drawChapterlist(std::vector<Mpv::ChapterItem> items) {
 }
 
 void ContextMenu::drawTracklist(const char *type, const char *prop, std::string pos) {
-  if (ImGui::BeginMenuEx("menu.tracks"_i18n, ICON_FA_LIST)) {
-    if (ImGui::MenuItem("menu.tracks.disable"_i18n, nullptr, pos == "no"))
-      mpv->commandv("cycle-values", prop, "no", "auto", nullptr);
-    for (auto &track : mpv->tracks) {
-      if (track.type != type) continue;
+  std::vector<Mpv::TrackItem> tracks;
+  for (auto &track : mpv->tracks) {
+    if (track.type == type) tracks.push_back(track);
+  }
+  if (ImGui::BeginMenuEx("menu.tracks"_i18n, ICON_FA_LIST, !tracks.empty())) {
+    for (auto &track : tracks) {
       auto title = track.title.empty() ? i18n_a("menu.tracks.item", track.id) : track.title;
       if (!track.lang.empty()) title += fmt::format(" [{}]", track.lang);
       if (ImGui::MenuItem(title.c_str(), nullptr, track.selected))
         mpv->property<int64_t, MPV_FORMAT_INT64>(prop, track.id);
     }
+    ImGui::Separator();
+    if (ImGui::MenuItem("menu.tracks.disable"_i18n, nullptr, pos == "no"))
+      mpv->commandv("cycle-values", prop, "no", "auto", nullptr);
     ImGui::EndMenu();
   }
 }
