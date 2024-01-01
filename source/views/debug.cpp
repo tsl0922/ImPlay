@@ -363,21 +363,18 @@ void Debug::Console::AddLog(const char* level, const char* fmt, ...) {
 
 ImVec4 Debug::Console::LogColor(const char* level) {
   std::map<std::string, ImVec4> logColors = {
-      {"fatal", ImVec4{0.804f, 0, 0, 1.0f}},
-      {"error", ImVec4{0.804f, 0, 0, 1.0f}},
-      {"warn", ImVec4{0.804f, 0.804f, 0, 1.0f}},
-      {"info", ImGui::GetStyle().Colors[ImGuiCol_Text]},
-      {"v", ImVec4{0.075f, 0.631f, 0.055f, 1.0f}},
-      {"debug", ImGui::GetStyle().Colors[ImGuiCol_Text]},
-      {"trace", ImGui::GetStyle().Colors[ImGuiCol_Text]},
+      {"fatal", ImVec4{0.804f, 0, 0, 1.0f}},        {"error", ImVec4{0.804f, 0, 0, 1.0f}},
+      {"warn", ImVec4{0.804f, 0.804f, 0, 1.0f}},    {"info", ImVec4{1.0f, 1.0f, 1.0f, 1.0f}},
+      {"status", ImVec4{1.0f, 1.0f, 1.0f, 1.0f}},   {"v", ImVec4{0.075f, 0.631f, 0.055f, 1.0f}},
+      {"debug", ImVec4{0.50f, 0.50f, 0.50f, 1.0f}}, {"trace", ImVec4{0.30f, 0.30f, 0.30f, 1.0f}},
   };
-  if (level == nullptr || !logColors.contains(level)) level = "info";
+  if (level == nullptr || !logColors.contains(level)) level = "status";
   return logColors[level];
 }
 
 void Debug::Console::draw() {
   if (ImGui::BeginPopup("Log Level")) {
-    const char* items[] = {"fatal", "error", "warn", "info", "v", "debug", "trace", "no"};
+    const char* items[] = {"fatal", "error", "warn", "info", "status", "v", "debug", "trace", "no"};
     static std::string level = LogLevel;
     for (int i = 0; i < IM_ARRAYSIZE(items); i++) {
       if (ImGui::MenuItem(items[i], nullptr, level == items[i])) {

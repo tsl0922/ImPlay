@@ -117,7 +117,7 @@ void Settings::drawGeneralTab() {
     ImGui::SameLine();
     ImGui::HelpMarker("views.settings.general.debug.help"_i18n);
     ImGui::Indent();
-    const char *items[] = {"fatal", "error", "warn", "info", "v", "debug", "trace", "no"};
+    const char *items[] = {"fatal", "error", "warn", "info", "status", "v", "debug", "trace", "no"};
     static int current;
     for (int i = 0; i < IM_ARRAYSIZE(items); i++) {
       if (strcmp(items[i], data.Debug.LogLevel.c_str()) == 0) current = i;

@@ -53,7 +53,7 @@ class Debug : public View {
     bool AutoScroll = true;
     bool ScrollToBottom = false;
     bool CommandInited = false;
-    std::string LogLevel = "v";
+    std::string LogLevel = "status";
     int LogLimit = 500;
   };
 

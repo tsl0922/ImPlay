@@ -42,7 +42,7 @@ struct ConfigData {
     bool operator==(const Font_&) const = default;
   } Font;
   struct Debug_ {
-    std::string LogLevel = "no";
+    std::string LogLevel = "status";
     int LogLimit = 500;
     bool operator==(const Debug_&) const = default;
   } Debug;
