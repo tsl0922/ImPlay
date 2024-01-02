@@ -22,7 +22,7 @@ void Debug::draw() {
   if (!m_open) return;
   ImVec2 wPos = ImGui::GetMainViewport()->WorkPos;
   ImVec2 wSize = ImGui::GetMainViewport()->WorkSize;
-  ImGui::SetNextWindowSizeConstraints(ImVec2(scaled(25), scaled(30)), ImVec2(FLT_MAX, FLT_MAX));
+  ImGui::SetNextWindowSizeConstraints(ImVec2(scaled(35), scaled(45)), ImVec2(FLT_MAX, FLT_MAX));
   ImGui::SetNextWindowSize(ImVec2(wSize.x * 0.4f, wSize.y * 0.8f), ImGuiCond_FirstUseEver);
   ImGui::SetNextWindowPos(ImVec2(wPos.x + wSize.x * 0.2f, wPos.y + wSize.y * 0.5f), ImGuiCond_FirstUseEver,
                           ImVec2(0.2f, 0.5f));
@@ -373,28 +373,33 @@ ImVec4 Debug::Console::LogColor(const char* level) {
 }
 
 void Debug::Console::draw() {
-  if (ImGui::BeginPopup("Log Level")) {
-    const char* items[] = {"fatal", "error", "warn", "info", "status", "v", "debug", "trace", "no"};
-    static std::string level = LogLevel;
-    for (int i = 0; i < IM_ARRAYSIZE(items); i++) {
-      if (ImGui::MenuItem(items[i], nullptr, level == items[i])) {
-        level = items[i];
-        init(items[i], LogLimit);
-      }
-    }
-    ImGui::EndPopup();
-  }
-
-  Filter.Draw(fmt::format("{}##log", "views.debug.console.log.filter"_i18n).c_str(), scaled(8));
+  ImGui::TextUnformatted("views.debug.console.log.limit"_i18n);
   ImGui::SameLine();
   ImGui::SetNextItemWidth(scaled(3));
-  ImGui::InputInt("views.debug.console.log.limit"_i18n, &LogLimit, 0);
+  ImGui::InputInt("##console.log.limit", &LogLimit, 0);
   ImGui::SameLine();
-  ImGui::Text("(%d/%d)", Items.Size, LogLimit);
+  ImGui::TextDisabled("(%d/%d)", Items.Size, LogLimit);
   ImGui::SameLine();
-  if (ImGui::Button("views.debug.console.log.level"_i18n)) ImGui::OpenPopup("Log Level");
+  ImGui::TextUnformatted("views.debug.console.log.level"_i18n);
+  ImGui::SameLine();
+  static const char* levels[] = {"fatal", "error", "warn", "info", "status", "v", "debug", "trace", "no"};
+  ImGui::SetNextItemWidth(scaled(6));
+  if (ImGui::BeginCombo("##Level", LogLevel.c_str())) {
+    for (auto& level : levels) {
+      bool selected = LogLevel == level;
+      ImGui::PushStyleColor(ImGuiCol_Text, LogColor(level));
+      if (ImGui::Selectable(level, selected)) init(level, LogLimit);
+      ImGui::PopStyleColor();
+      if (selected) ImGui::SetItemDefaultFocus();
+    }
+    ImGui::EndCombo();
+  }
   ImGui::SameLine();
   ImGui::HelpMarker("views.debug.console.log.hint"_i18n);
+  ImGui::SameLine();
+  ImGui::TextUnformatted("views.debug.console.log.filter"_i18n);
+  ImGui::SameLine();
+  Filter.Draw("##console.log.filter", 0);
   ImGui::Separator();
 
   const float footer_height_to_reserve = ImGui::GetStyle().ItemSpacing.y + ImGui::GetFrameHeightWithSpacing();
