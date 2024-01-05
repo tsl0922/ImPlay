@@ -1,6 +1,8 @@
 // Copyright (c) 2022-2023 tsl0922. All rights reserved.
 // SPDX-License-Identifier: GPL-2.0-only
 
+#include <cstdarg>
+#include <cstdio>
 #include <map>
 #include "helpers/utils.h"
 #include "helpers/imgui.h"
@@ -335,11 +337,18 @@ void Debug::Console::ClearLog() {
 }
 
 void Debug::Console::AddLog(const char* level, const char* fmt, ...) {
-  char buf[1024];
-  va_list args;
+  std::va_list args;
   va_start(args, fmt);
-  vsnprintf(buf, IM_ARRAYSIZE(buf), fmt, args);
-  buf[IM_ARRAYSIZE(buf) - 1] = 0;
+
+  int size;
+  std::va_list copy;
+  va_copy(copy, args);
+  size = std::vsnprintf(nullptr, 0, fmt, copy);
+  va_end(copy);
+
+  char buf[size + 1];
+  std::vsnprintf(buf, size, fmt, args);
+  buf[size] = '\0';
   va_end(args);
 
   int fontIdx = 1;  // mono
