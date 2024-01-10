@@ -70,5 +70,6 @@ inline std::string join(std::vector<std::string> v, std::string_view sep) {
 }
 
 std::vector<std::string> split(const std::string& str, const std::string& sep);
-}  // namespace ImPlay
 
+bool findCase(std::string haystack, std::string needle);
+}  // namespace ImPlay

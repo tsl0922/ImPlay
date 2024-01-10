@@ -267,12 +267,18 @@ void Mpv::initBindings(mpv_node &node) {
     for (int j = 0; j < item.u.list->num; j++) {
       auto key = item.u.list->keys[j];
       auto value = item.u.list->values[j];
-      if (strcmp(key, "key") == 0) {
+      if (strcmp(key, "section") == 0) {
+        t.section = value.u.string;
+      } else if (strcmp(key, "key") == 0) {
         t.key = value.u.string;
       } else if (strcmp(key, "cmd") == 0) {
         t.cmd = value.u.string;
       } else if (strcmp(key, "comment") == 0) {
         t.comment = value.u.string;
+      } else if (strcmp(key, "priority") == 0) {
+        t.priority = value.u.int64;
+      } else if (strcmp(key, "is_weak") == 0) {
+        t.weak = value.u.flag;
       }
     }
     bindings.emplace_back(t);

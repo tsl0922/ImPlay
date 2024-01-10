@@ -73,27 +73,41 @@ void Debug::drawBindings() {
   if (!ImGui::CollapsingHeader(i18n_a("views.debug.bindings", bindings.size()).c_str())) return;
   m_node = "Bindings";
 
-  if (ImGui::BeginListBox("input-bindings", ImVec2(-FLT_MIN, -FLT_MIN))) {
+  static char buf[256] = "";
+  ImGui::TextUnformatted("views.debug.commands.filter"_i18n);
+  ImGui::SameLine();
+  ImGui::PushItemWidth(-1);
+  ImGui::InputText("##Filter.bindings", buf, IM_ARRAYSIZE(buf));
+  ImGui::PopItemWidth();
+
+  static ImGuiTableFlags flags = ImGuiTableFlags_Resizable | ImGuiTableFlags_RowBg | ImGuiTableFlags_BordersOuter |
+                                 ImGuiTableFlags_BordersV | ImGuiTableFlags_NoBordersInBody | ImGuiTableFlags_ScrollY;
+  if (ImGui::BeginTable("input-bindings", 6, flags)) {
+    ImGui::TableSetupScrollFreeze(0, 1);
+    ImGui::TableSetupColumn("Section", ImGuiTableColumnFlags_WidthFixed);
+    ImGui::TableSetupColumn("Priority", ImGuiTableColumnFlags_WidthFixed);
+    ImGui::TableSetupColumn("Weak", ImGuiTableColumnFlags_WidthFixed);
+    ImGui::TableSetupColumn("Key", ImGuiTableColumnFlags_WidthFixed);
+    ImGui::TableSetupColumn("Command", ImGuiTableColumnFlags_WidthStretch);
+    ImGui::TableSetupColumn("Comment", ImGuiTableColumnFlags_WidthStretch);
+    ImGui::TableHeadersRow();
     for (auto& binding : bindings) {
-      std::string title = binding.comment;
-      if (title.empty()) title = binding.cmd;
-      title = title.substr(0, 50);
-      if (title.size() == 50) title += "...";
-
-      ImGui::PushID(&binding);
-      ImGui::Selectable("", false);
-      if (ImGui::IsItemHovered(ImGuiHoveredFlags_DelayNormal)) ImGui::SetTooltip("%s", binding.cmd.c_str());
-
-      ImGui::SameLine();
-      ImGui::Text("%s", title.c_str());
-
-      ImGui::SameLine(ImGui::GetContentRegionAvail().x * 0.75f);
-      ImGui::BeginDisabled();
-      ImGui::Button(binding.key.c_str());
-      ImGui::EndDisabled();
-      ImGui::PopID();
+      if (buf[0] != '\0' && !findCase(binding.key, buf) && !findCase(binding.cmd, buf)) continue;
+      ImGui::TableNextRow();
+      ImGui::TableNextColumn();
+      ImGui::Selectable(binding.section.c_str(), false, ImGuiSelectableFlags_SpanAllColumns);
+      ImGui::TableNextColumn();
+      ImGui::Text("%d", binding.priority);
+      ImGui::TableNextColumn();
+      ImGui::Text("%s", binding.weak ? "yes" : "no");
+      ImGui::TableNextColumn();
+      ImGui::Text("%s", binding.key.c_str());
+      ImGui::TableNextColumn();
+      ImGui::Text("%s", binding.cmd.c_str());
+      ImGui::TableNextColumn();
+      ImGui::Text("%s", binding.comment.c_str());
     }
-    ImGui::EndListBox();
+    ImGui::EndTable();
   }
 }
 
@@ -167,7 +181,7 @@ void Debug::drawCommands() {
   ImGui::PopItemWidth();
   if (ImGui::BeginListBox("command-list", ImVec2(-FLT_MIN, -FLT_MIN))) {
     for (auto& [name, args] : commands) {
-      if (!name.starts_with(buf)) continue;
+      if (buf[0] != '\0' && !findCase(name, buf)) continue;
       ImGui::PushID(name.c_str());
       ImGui::Selectable("", false);
       ImGui::SameLine();

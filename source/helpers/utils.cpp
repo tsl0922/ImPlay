@@ -138,4 +138,10 @@ std::vector<std::string> split(const std::string& str, const std::string& sep) {
   if (pos1 != str.length()) v.push_back(str.substr(pos1));
   return v;
 }
+
+bool findCase(std::string haystack, std::string needle) {
+  auto it = std::search(haystack.begin(), haystack.end(), needle.begin(), needle.end(),
+                        [](char ch1, char ch2) { return std::toupper(ch1) == std::toupper(ch2); });
+  return it != haystack.end();
+}
 }  // namespace ImPlay
