@@ -62,7 +62,16 @@ int main() {
 
     auto resourceLocations = splitString(RESOURCE_LOCATION, ",");
     for (const auto &resourceLocation : resourceLocations) {
-        std::printf("[libromfs] Resource Folder: %s\n", resourceLocation.c_str());
+        std::printf("[libromfs] Packing resource folder: %s\n", resourceLocation.c_str());
+
+        std::error_code errorCode;
+        if (!std::filesystem::exists(resourceLocation, errorCode)) {
+            if (errorCode) {
+                std::printf("[libromfs] Error: %s\n", errorCode.message().c_str());
+            }
+
+            continue;
+        }
 
         outputFile << "\n/* Resource folder: " << resourceLocation << " */\n";
         for (const auto &entry : fs::recursive_directory_iterator(resourceLocation)) {
@@ -81,13 +90,11 @@ int main() {
             bytes.resize(std::fread(bytes.data(), 1, entry.file_size(), file));
             std::fclose(file);
 
-            outputFile << std::hex << std::uppercase << std::setfill('0') << std::setw(2);
             for (std::byte byte : bytes) {
-                outputFile << "0x" << static_cast<std::uint32_t>(byte) << ", ";
+                outputFile << static_cast<std::uint32_t>(byte) << ",";
             }
-            outputFile << std::dec << std::nouppercase << std::setfill(' ') << std::setw(0);
 
-            outputFile << "\n 0x00 };\n\n";
+            outputFile << "0 };\n\n";
 
             paths.push_back(relativePath);
 
@@ -99,7 +106,7 @@ int main() {
 
     {
         outputFile << "/* Resource map */\n";
-        outputFile << "std::span<romfs::impl::ResourceLocation> RomFs_" LIBROMFS_PROJECT_NAME "_get_resources() {\n";
+        outputFile << "ROMFS_VISIBILITY std::span<romfs::impl::ResourceLocation> RomFs_" LIBROMFS_PROJECT_NAME "_get_resources() {\n";
         outputFile << "    static std::array<romfs::impl::ResourceLocation, " << identifierCount << "> resources = {\n";
 
         for (std::uint64_t i = 0; i < identifierCount; i++) {
@@ -117,7 +124,7 @@ int main() {
 
     {
         outputFile << "/* Resource paths */\n";
-        outputFile << "std::span<std::string_view> RomFs_" LIBROMFS_PROJECT_NAME "_get_paths() {\n";
+        outputFile << "ROMFS_VISIBILITY std::span<std::string_view> RomFs_" LIBROMFS_PROJECT_NAME "_get_paths() {\n";
         outputFile << "    static std::array<std::string_view, " << identifierCount << "> paths = {\n";
 
         for (std::uint64_t i = 0; i < identifierCount; i++) {
@@ -133,7 +140,7 @@ int main() {
 
     {
         outputFile << "/* RomFS name */\n";
-        outputFile << "const char* RomFs_" LIBROMFS_PROJECT_NAME "_get_name() {\n";
+        outputFile << "ROMFS_VISIBILITY const char* RomFs_" LIBROMFS_PROJECT_NAME "_get_name() {\n";
         outputFile << "    return \"" LIBROMFS_PROJECT_NAME "\";\n";
         outputFile << "}\n\n";
     }
