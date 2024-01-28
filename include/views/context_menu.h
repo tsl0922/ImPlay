@@ -24,8 +24,10 @@ class ContextMenu : public View {
     std::function<void()> callback;
   };
 
+  void init();
   void draw() override;
   std::vector<Item> build();
+  void update(std::vector<ContextMenu::Item> &items, mpv_node &node);
 
  private:
   void draw(std::vector<Item> items);
@@ -37,5 +39,7 @@ class ContextMenu : public View {
   void drawThemelist();
   void drawProfilelist();
   void drawRecentFiles();
+
+  std::vector<Item> items;
 };
 }  // namespace ImPlay::Views

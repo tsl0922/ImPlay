@@ -65,6 +65,7 @@ bool Player::init(std::map<std::string, std::string> &options) {
   }
 
   debug->init();
+  contextMenu->init();
 
   {
     ContextGuard guard(this);
@@ -430,12 +431,14 @@ void Player::writeMpvConf() {
   std::filesystem::create_directories(scrips);
   std::filesystem::create_directories(scriptOpts);
 
-  auto oscLua = scrips / "osc.lua";
-
-  if (!std::filesystem::exists(oscLua)) {
-    std::ofstream file(oscLua, std::ios::binary);
-    auto content = romfs::get("mpv/osc.lua").span<char>();
-    file.write(content.data(), content.size());
+  std::vector<std::string> scripts = {"osc.lua", "menu.lua"};
+  for (auto &script : scripts) {
+    auto dst = scrips / script;
+    if (!std::filesystem::exists(dst)) {
+      std::ofstream file(dst, std::ios::binary);
+      auto content = romfs::get("mpv/" + script).span<char>();
+      file.write(content.data(), content.size());
+    }
   }
 }
 
