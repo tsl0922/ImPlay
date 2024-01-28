@@ -401,7 +401,7 @@ void Player::writeMpvConf() {
   auto inputConf = path / "input.conf";
 
   if (!std::filesystem::exists(mpvConf)) {
-    std::ofstream file(mpvConf);
+    std::ofstream file(mpvConf, std::ios::binary);
     auto content = romfs::get("mpv/mpv.conf");
     file.write(reinterpret_cast<const char *>(content.data()), content.size()) << "\n";
     file << "# use opengl-hq video output for high-quality video rendering.\n";
@@ -412,7 +412,7 @@ void Player::writeMpvConf() {
   }
 
   if (!std::filesystem::exists(inputConf)) {
-    std::ofstream file(inputConf);
+    std::ofstream file(inputConf, std::ios::binary);
     auto content = romfs::get("mpv/input.conf");
     file.write(reinterpret_cast<const char *>(content.data()), content.size()) << "\n";
     file << "MBTN_RIGHT   script-message-to implay context-menu    # show context menu\n";
@@ -433,9 +433,9 @@ void Player::writeMpvConf() {
   auto oscLua = scrips / "osc.lua";
 
   if (!std::filesystem::exists(oscLua)) {
-    std::ofstream file(oscLua);
-    auto content = romfs::get("mpv/osc.lua");
-    file.write(reinterpret_cast<const char *>(content.data()), content.size()) << "\n";
+    std::ofstream file(oscLua, std::ios::binary);
+    auto content = romfs::get("mpv/osc.lua").span<char>();
+    file.write(content.data(), content.size());
   }
 }
 
