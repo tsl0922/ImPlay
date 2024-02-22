@@ -201,7 +201,7 @@ void Player::initGui() {
   if (config->Data.Interface.Docking) io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
 #endif
 #ifdef IMGUI_HAS_VIEWPORT
-  if (config->Data.Interface.Viewports) io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
+  if (config->Data.Interface.Viewports || config->Data.Mpv.UseWid) io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
 #endif
 
   loadFonts();

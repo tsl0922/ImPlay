@@ -397,6 +397,15 @@ void Window::setupWin32Taskbar() {
 LRESULT CALLBACK Window::wndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
   auto win = reinterpret_cast<Window*>(GetWindowLongPtr(hWnd, GWLP_USERDATA));
   switch (uMsg) {
+    case WM_NCLBUTTONDOWN:
+    case WM_NCRBUTTONDOWN:
+    case WM_NCMBUTTONDOWN:
+    case WM_NCXBUTTONDOWN:
+      if (win->config->Data.Mpv.UseWid && ImGui::IsPopupOpen(ImGuiID(0), ImGuiPopupFlags_AnyPopup)) {
+        ImGuiIO& io = ImGui::GetIO();
+        io.AddFocusEvent(false); // may close popup
+      }
+      break;
     case WM_NCACTIVATE:
     case WM_NCPAINT:
       if (win->borderless) return DefWindowProcW(hWnd, uMsg, wParam, lParam);
