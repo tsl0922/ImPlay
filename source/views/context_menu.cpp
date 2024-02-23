@@ -7,6 +7,15 @@
 #include "views/context_menu.h"
 
 namespace ImPlay::Views {
+void ContextMenu::init() {
+  mpv->observeProperty<mpv_node, MPV_FORMAT_NODE>("user-data/menu/items", [this](mpv_node node) {
+    if (node.format != MPV_FORMAT_NODE_ARRAY || node.u.list->num == 0) return;
+
+    items.clear();
+    update(items, node);
+  });
+}
+
 void ContextMenu::draw() {
   if (m_open) {
     ImGui::OpenPopup("##context_menu");
@@ -28,7 +37,7 @@ void ContextMenu::draw() {
     if (ImGui::GetWindowViewport()->Flags & ImGuiViewportFlags_IsMinimized) ImGui::CloseCurrentPopup();
 #endif
 
-    draw(build());
+    draw(items.empty() ? build() : items);
 
     ImGui::EndPopup();
   }
@@ -57,6 +66,80 @@ void ContextMenu::draw(std::vector<ContextMenu::Item> items) {
         item.callback();
         break;
     }
+  }
+}
+
+// node structure:
+//
+// MPV_FORMAT_NODE_ARRAY
+//   MPV_FORMAT_NODE_MAP (menu item)
+//      "type"           MPV_FORMAT_STRING
+//      "title"          MPV_FORMAT_STRING
+//      "cmd"            MPV_FORMAT_STRING
+//      "state"          MPV_FORMAT_NODE_ARRAY[MPV_FORMAT_STRING]
+//      "submenu"        MPV_FORMAT_NODE_ARRAY[menu item]
+void ContextMenu::update(std::vector<ContextMenu::Item> &items, mpv_node &node) {
+  for (int i = 0; i < node.u.list->num; i++) {
+    mpv_node &item = node.u.list->values[i];
+    if (item.format != MPV_FORMAT_NODE_MAP) continue;
+
+    mpv_node_list *list = item.u.list;
+    ContextMenu::Item menu = {TYPE_NORMAL};
+    bool hide = false;
+
+    for (int j = 0; j < list->num; j++) {
+      char *key = list->keys[j];
+      mpv_node &value = list->values[j];
+
+      switch (value.format) {
+        case MPV_FORMAT_STRING:
+          if (strcmp(key, "title") == 0) {
+            auto parts = split(value.u.string, "\t");
+            if (parts.size() == 2) {
+              menu.label = parts[0];
+              menu.shortcut = parts[1];
+            } else {
+              menu.label = value.u.string;
+            }
+          } else if (strcmp(key, "cmd") == 0) {
+            menu.cmd = value.u.string;
+          } else if (strcmp(key, "type") == 0) {
+            if (strcmp(value.u.string, "submenu") == 0) {
+              menu.type = TYPE_SUBMENU;
+            } else if (strcmp(value.u.string, "separator") == 0) {
+              menu.type = TYPE_SEPARATOR;
+            }
+          }
+          break;
+        case MPV_FORMAT_NODE_ARRAY:
+          if (strcmp(key, "state") == 0) {
+            for (int k = 0; k < value.u.list->num; k++) {
+              mpv_node &n = value.u.list->values[k];
+              if (n.format != MPV_FORMAT_STRING) continue;
+              if (strcmp(n.u.string, "hidden") == 0) {
+                hide = true;
+                break;
+              } else if (strcmp(n.u.string, "checked") == 0) {
+                menu.selected = true;
+              } else if (strcmp(n.u.string, "disabled") == 0) {
+                menu.enabled = false;
+              }
+            }
+          } else if (strcmp(key, "submenu") == 0) {
+            update(menu.submenu, value);
+          }
+          break;
+      }
+
+      if (hide) break;
+    }
+
+    if (hide || (menu.type != TYPE_SEPARATOR && menu.label.empty())) continue;
+    if ((menu.type == TYPE_SUBMENU && menu.submenu.empty()) ||
+        (menu.type == TYPE_NORMAL && (menu.cmd == "" || menu.cmd == "ignore")))
+      menu.enabled = false;
+
+    items.push_back(menu);
   }
 }
 
