@@ -5,8 +5,8 @@ endif()
 
 function(get_mpv_win_bin name)
   ExternalProject_Add(${name}
-    URL https://downloads.sourceforge.net/mpv-player-windows/mpv-x86_64-20231126-git-6898d57.7z
-    URL_HASH SHA256=43ac55f0a3472bf2022b048352d8c0cba27461142f69b8d8ecf210be88b97a58
+    URL https://downloads.sourceforge.net/mpv-player-windows/mpv-x86_64-20240218-git-bd5b80b.7z
+    URL_HASH SHA256=502db5a89a5861c5f658f65b0280ec5bdd1c4fdace26a4ff08cd2a6db54a18a8
     DOWNLOAD_NO_PROGRESS ON
     UPDATE_COMMAND ""
     CONFIGURE_COMMAND ""
@@ -18,8 +18,8 @@ endfunction()
 
 function(get_yt_dlp_bin name)
   ExternalProject_Add(${name}
-    URL https://github.com/yt-dlp/yt-dlp/releases/download/2023.11.16/yt-dlp.exe
-    URL_HASH SHA256=6de14b1127af1c314864ae0cb04c91ebbf61c230b9cbfb316eade9ea9c5cd982
+    URL https://github.com/yt-dlp/yt-dlp/releases/download/2023.12.30/yt-dlp.exe
+    URL_HASH SHA256=160b304bef9fa134d523b46cc3647a727e40584338379eb4e0d1047de945fad9
     DOWNLOAD_NO_PROGRESS ON
     DOWNLOAD_NO_EXTRACT ON
     UPDATE_COMMAND ""
@@ -31,8 +31,8 @@ endfunction()
 
 function(get_electron_bin name)
   ExternalProject_Add(${name}
-    URL https://github.com/electron/electron/releases/download/v22.3.26/electron-v22.3.26-win32-x64.zip
-    URL_HASH SHA256=b3aaaa27d07e1b0119ed86da60854f6065cd6f38340df4b6fe1a648e8e2dec54
+    URL https://github.com/electron/electron/releases/download/v22.3.27/electron-v22.3.27-win32-x64.zip
+    URL_HASH SHA256=ad723ed7dad32f9459f7a9de1fd6d718cf713c4809c2431503bea62ce8f786e6
     DOWNLOAD_NO_PROGRESS ON
     UPDATE_COMMAND ""
     CONFIGURE_COMMAND ""
