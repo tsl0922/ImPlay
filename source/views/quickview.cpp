@@ -64,14 +64,6 @@ void Quickview::drawPopup() {
   ImGui::SetNextWindowSize(ImVec2(width, wSize.y), ImGuiCond_Always);
   ImGui::SetNextWindowPos(ImVec2(wPos.x + wSize.x - width, wPos.y), ImGuiCond_Always);
 
-#if defined(_WIN32) && defined(IMGUI_HAS_VIEWPORT)
-  if (config->Data.Mpv.UseWid && ImGui::GetIO().ConfigFlags & ImGuiConfigFlags_ViewportsEnable) {
-    ImGuiWindowClass windowClass;
-    windowClass.ViewportFlagsOverrideSet = ImGuiViewportFlags_TopMost;
-    ImGui::SetNextWindowClass(&windowClass);
-  }
-#endif
-
   if (ImGui::BeginPopup("##quickview")) {
     drawTabBar();
     ImGui::EndPopup();

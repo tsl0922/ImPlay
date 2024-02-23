@@ -142,6 +142,19 @@ void Player::render() {
 #endif
 
   draw();
+
+#if defined(_WIN32) && defined(IMGUI_HAS_VIEWPORT)
+  if (config->Data.Mpv.UseWid && mpv->ontop) {
+    ImGuiContext *ctx = ImGui::GetCurrentContext();
+    for (int i = 1; i < ctx->Windows.Size; i++) {
+      ImGuiWindow *w = ctx->Windows[i];
+      if (w->Flags & ImGuiWindowFlags_Popup) {  // HACK: make all popup topmost
+        w->WindowClass.ViewportFlagsOverrideSet = ImGuiViewportFlags_TopMost;
+      }
+    }
+  }
+#endif
+
   ImGui::Render();
 
   {
@@ -610,9 +623,8 @@ void Player::drawOpenURL() {
 
   ImVec2 wSize = ImGui::GetMainViewport()->WorkSize;
   ImGui::SetNextWindowSize(ImVec2(std::min(wSize.x * 0.8f, scaled(50)), 0), ImGuiCond_Always);
-  ImGui::SetNextWindowPos(ImGui::GetMainViewport()->GetWorkCenter(), ImGuiCond_Always, ImVec2(0.5f, 0.5f));
-  if (ImGui::BeginPopupModal("views.dialog.open_url.title"_i18n, &m_openURL,
-                             ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove)) {
+  ImGui::SetNextWindowPos(ImGui::GetMainViewport()->GetWorkCenter(), ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
+  if (ImGui::BeginPopupModal("views.dialog.open_url.title"_i18n, &m_openURL)) {
     if (ImGui::IsKeyDown(ImGuiKey_Escape)) m_openURL = false;
     static char url[256] = {0};
     bool loadfile = false;
@@ -645,8 +657,8 @@ void Player::drawDialog() {
   ImGui::OpenPopup(m_dialog_title.c_str());
 
   ImGui::SetNextWindowSize(ImVec2(scaled(30), 0), ImGuiCond_Always);
-  ImGui::SetNextWindowPos(ImGui::GetMainViewport()->GetWorkCenter(), ImGuiCond_Always, ImVec2(0.5f, 0.5f));
-  if (ImGui::BeginPopupModal(m_dialog_title.c_str(), &m_dialog, ImGuiWindowFlags_NoMove)) {
+  ImGui::SetNextWindowPos(ImGui::GetMainViewport()->GetWorkCenter(), ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
+  if (ImGui::BeginPopupModal(m_dialog_title.c_str(), &m_dialog)) {
     ImGui::TextWrapped("%s", m_dialog_msg.c_str());
     ImGui::Spacing();
     ImGui::Separator();

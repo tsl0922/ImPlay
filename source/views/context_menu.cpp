@@ -13,23 +13,9 @@ void ContextMenu::draw() {
     m_open = false;
   }
 
-  ImGuiIO &io = ImGui::GetIO();
-#if defined(_WIN32) && defined(IMGUI_HAS_VIEWPORT)
-  if (config->Data.Mpv.UseWid && io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable) {
-    ImGuiWindowClass windowClass;
-    windowClass.ViewportFlagsOverrideSet = ImGuiViewportFlags_TopMost;
-    ImGui::SetNextWindowClass(&windowClass);
-  }
-#endif
-
   if (ImGui::BeginPopup("##context_menu", ImGuiWindowFlags_NoMove)) {
-    if (io.AppFocusLost) ImGui::CloseCurrentPopup();
-#ifdef IMGUI_HAS_VIEWPORT
-    if (ImGui::GetWindowViewport()->Flags & ImGuiViewportFlags_IsMinimized) ImGui::CloseCurrentPopup();
-#endif
-
+    if (ImGui::GetIO().AppFocusLost) ImGui::CloseCurrentPopup();
     draw(build());
-
     ImGui::EndPopup();
   }
 }

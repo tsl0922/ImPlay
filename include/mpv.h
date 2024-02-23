@@ -117,7 +117,7 @@ class Mpv {
   int64_t chapter, volume, playlistPos, playlistPlayingPos, timePos;
   int64_t brightness, contrast, saturation, gamma, hue;
   double audioDelay, subDelay, subScale;
-  bool pause, mute, fullscreen, sidv, sidv2, forceWindow;
+  bool pause, mute, fullscreen, sidv, sidv2, forceWindow, ontop;
   bool keepaspect, keepaspectWindow, windowDragging, autoResize;
 
  private:

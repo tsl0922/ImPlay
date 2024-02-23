@@ -154,6 +154,7 @@ void Mpv::observeProperties() {
   observeProperty<int, MPV_FORMAT_FLAG>("secondary-sub-visibility", [this](int flag) { sidv2 = flag; });
   observeProperty<int, MPV_FORMAT_FLAG>("window-dragging", [this](int flag) { windowDragging = flag; });
   observeProperty<int, MPV_FORMAT_FLAG>("keepaspect", [this](int flag) { keepaspect = flag; });
+  observeProperty<int, MPV_FORMAT_FLAG>("ontop", [this](int flag) { ontop = flag; });
   observeProperty<int, MPV_FORMAT_FLAG>("keepaspect-window", [this](int flag) { keepaspectWindow = flag; });
   observeProperty<int, MPV_FORMAT_FLAG>("auto-window-resize", [this](int flag) { autoResize = flag; });
 
