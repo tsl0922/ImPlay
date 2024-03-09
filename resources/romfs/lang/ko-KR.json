@@ -132,7 +132,7 @@
         "views.quickview.playlist.clear": "지우기",
         "views.quickview.playlist.menu.play": "재생하기",
         "views.quickview.playlist.menu.play_next": "다음 재생하기",
-        "views.quickview.playliImGui 다중 뷰포트 기능을 활성화합니다.\이렇게 하면 하위 창을 기본 창 밖으로 이동할 수 있습니다(여전히 문제가 있음).st.menu.move_up": "위쪽으로 이동하기",
+        "views.quickview.playlist.menu.move_up": "위쪽으로 이동하기",
         "views.quickview.playlist.menu.move_down": "아래쪽으로 이동하기",
         "views.quickview.playlist.menu.move_first": "첫 번째로 이동하기",
         "views.quickview.playlist.menu.move_last": "마지막으로 이동하기",
