@@ -5,8 +5,8 @@ endif()
 
 function(get_mpv_win_bin name)
   ExternalProject_Add(${name}
-    URL https://downloads.sourceforge.net/mpv-player-windows/mpv-x86_64-20240218-git-bd5b80b.7z
-    URL_HASH SHA256=502db5a89a5861c5f658f65b0280ec5bdd1c4fdace26a4ff08cd2a6db54a18a8
+    URL https://downloads.sourceforge.net/mpv-player-windows/mpv-x86_64-20240623-git-265056f.7z
+    URL_HASH SHA256=887303685be1250fb8a3e43b0b4cb06632aa69b9eaab18fefa98449cc5b0bec4
     DOWNLOAD_NO_PROGRESS ON
     UPDATE_COMMAND ""
     CONFIGURE_COMMAND ""
@@ -18,8 +18,8 @@ endfunction()
 
 function(get_yt_dlp_bin name)
   ExternalProject_Add(${name}
-    URL https://github.com/yt-dlp/yt-dlp/releases/download/2023.12.30/yt-dlp.exe
-    URL_HASH SHA256=160b304bef9fa134d523b46cc3647a727e40584338379eb4e0d1047de945fad9
+    URL https://github.com/yt-dlp/yt-dlp/releases/download/2024.05.27/yt-dlp.exe
+    URL_HASH SHA256=e96f6348244306ac999501b1e8e2b096b8a57f098c3b2b9ffe64b2107039e0ae
     DOWNLOAD_NO_PROGRESS ON
     DOWNLOAD_NO_EXTRACT ON
     UPDATE_COMMAND ""

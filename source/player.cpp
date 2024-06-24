@@ -44,6 +44,7 @@ bool Player::init(std::map<std::string, std::string> &options) {
   mpv->option("load-osd-console", "no");
   mpv->option("osd-playing-msg", "${media-title}");
   mpv->option("screenshot-directory", "~~desktop/");
+  mpv->option("vo", "libmpv");
 
   // override-display-fps is renamed to display-fps-override in mpv 0.37.0
   mpv->option<int64_t, MPV_FORMAT_INT64>("override-display-fps", GetMonitorRefreshRate());
