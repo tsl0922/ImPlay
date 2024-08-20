@@ -12,7 +12,7 @@ jobs:
     runs-on: ubuntu-22.04
     name: Ubuntu
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0
       - name: Install dependencies
@@ -34,7 +34,7 @@ jobs:
           chmod +x linuxdeploy-x86_64.AppImage linuxdeploy-plugin-gtk.sh
           ./linuxdeploy-x86_64.AppImage --appdir $(pwd)/AppDir --plugin gtk --output appimage
           mv ImPlay*.AppImage $(echo ImPlay-*.deb | sed 's/deb/AppImage/')
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           name: ImPlay-linux
           path: |
@@ -44,7 +44,7 @@ jobs:
     runs-on: macos-12
     name: macOS
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0
       - name: Install dependencies
@@ -60,7 +60,7 @@ jobs:
           mkdir build && cd build
           cmake -DCMAKE_BUILD_TYPE=RELEASE -DUSE_PATCHED_GLFW=ON -DCREATE_PACKAGE=ON -G Ninja ..
           cmake --build . --target package
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           name: ImPlay-macOS
           path: build/ImPlay-*.dmg
@@ -72,7 +72,7 @@ jobs:
         run: |
           git config --global core.autocrlf false
           git config --global core.eol lf
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0
       - uses: msys2/setup-msys2@v2
@@ -93,7 +93,7 @@ jobs:
           mkdir build && cd build
           cmake -DCMAKE_BUILD_TYPE=RELEASE -DUSE_PATCHED_GLFW=ON -DUSE_OPENGL_ES3=ON -DCREATE_PACKAGE=ON -G Ninja ..
           cmake --build . --target package
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           name: ImPlay-win64
           path: |
@@ -104,8 +104,8 @@ jobs:
     runs-on: ubuntu-latest
     if: ${{ github.ref == 'refs/heads/main' }}
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/download-artifact@v3
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
       - run: |
           for f in ImPlay-*/*; do
             mv "$f" "${f/ImPlay-*-/ImPlay-dev-}"
