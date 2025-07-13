@@ -41,7 +41,7 @@ jobs:
             build/ImPlay-*.AppImage
             build/ImPlay-*.deb
   macos:
-    runs-on: macos-12
+    runs-on: macos-13
     name: macOS
     steps:
       - uses: actions/checkout@v4
@@ -65,7 +65,7 @@ jobs:
           name: ImPlay-macOS
           path: build/ImPlay-*.dmg
   win:
-    runs-on: windows-2019
+    runs-on: windows-latest
     name: Windows
     steps:
       - name: Prepare git

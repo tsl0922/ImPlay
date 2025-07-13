@@ -40,7 +40,7 @@ void ImGui::TextEllipsis(const char* text, float maxWidth) {
   ImRect textRect(min, max);
   ImGui::ItemSize(textRect);
   if (ImGui::ItemAdd(textRect, window->GetID(text)))
-    ImGui::RenderTextEllipsis(ImGui::GetWindowDrawList(), min, max, max.x, max.x, text, nullptr, &textSize);
+    ImGui::RenderTextEllipsis(ImGui::GetWindowDrawList(), min, max, max.x, text, nullptr, &textSize);
 }
 
 void ImGui::Hyperlink(const char* label, const char* url) {
@@ -66,7 +66,7 @@ ImTextureID ImGui::LoadTexture(const char* path, ImVec2* size) {
   int w, h;
   auto icon = romfs::get(path);
   auto data = stbi_load_from_memory(reinterpret_cast<const stbi_uc*>(icon.data()), icon.size(), &w, &h, NULL, 4);
-  if (data == nullptr) return nullptr;
+  if (data == nullptr) return 0;
 
   GLuint texture;
   glGenTextures(1, &texture);
@@ -88,5 +88,5 @@ ImTextureID ImGui::LoadTexture(const char* path, ImVec2* size) {
     size->y = h;
   }
 
-  return reinterpret_cast<ImTextureID>(static_cast<intptr_t>(texture));
+  return (ImTextureID)(intptr_t)texture;
 }

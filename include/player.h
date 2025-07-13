@@ -110,7 +110,7 @@ class Player {
 
   bool idle = true;
   GLuint fbo = 0, tex = 0;
-  ImTextureID logoTexture = nullptr;
+  ImTextureID logoTexture = 0;
   std::mutex contextLock;
 
   bool m_openURL = false;

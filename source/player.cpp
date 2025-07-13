@@ -100,9 +100,8 @@ void Player::drawVideo() {
   auto drawList = ImGui::GetBackgroundDrawList(vp);
 
   if (!idle) {
-    ImTextureID texture = reinterpret_cast<ImTextureID>(static_cast<intptr_t>(tex));
-    drawList->AddImage(texture, vp->WorkPos, vp->WorkPos + vp->WorkSize);
-  } else if (logoTexture != nullptr && !mpv->forceWindow) {
+    drawList->AddImage((ImTextureID)(intptr_t)tex, vp->WorkPos, vp->WorkPos + vp->WorkSize);
+  } else if (logoTexture != 0 && !mpv->forceWindow) {
     const ImVec2 center = vp->GetWorkCenter();
     const ImVec2 delta(64, 64);
     drawList->AddImage(logoTexture, center - delta, center + delta);
@@ -125,8 +124,6 @@ void Player::render() {
 
     if (config->FontReload) {
       loadFonts();
-      ImGui_ImplOpenGL3_DestroyFontsTexture();
-      ImGui_ImplOpenGL3_CreateFontsTexture();
       config->FontReload = false;
     }
     ImGui_ImplOpenGL3_NewFrame();
@@ -324,8 +321,6 @@ void Player::loadFonts() {
   static ImWchar fa_range[] = {ICON_MIN_FA, ICON_MAX_FA, 0};
   io.Fonts->AddFontFromMemoryCompressedTTF(fa_compressed_data, fa_compressed_size, iconSize, &cfg, fa_range);
   io.Fonts->AddFontFromMemoryCompressedTTF(cascadia_compressed_data, cascadia_compressed_size, fontSize);
-
-  io.Fonts->Build();
 }
 
 void Player::shutdown() { mpv->command(config->Data.Mpv.WatchLater ? "quit-watch-later" : "quit"); }

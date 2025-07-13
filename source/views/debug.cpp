@@ -369,7 +369,7 @@ void Debug::Console::AddLog(const char* level, const char* fmt, ...) {
   const char* p = buf;
   auto mono = ImGui::GetIO().Fonts->Fonts[fontIdx];
   while (*p) {
-    if (*p != '\n' && *p != '\r' && !mono->FindGlyphNoFallback((ImWchar)*p)) {
+    if (*p != '\n' && *p != '\r' && !mono->IsGlyphInFont((ImWchar)*p)) {
       fontIdx = 0;  // unicode
       break;
     }

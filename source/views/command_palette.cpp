@@ -128,8 +128,6 @@ void CommandPalette::draw() {
 
 void CommandPalette::drawInput() {
   if (focusInput) {
-    auto textState = ImGui::GetInputTextState(ImGui::GetID("##command_input"));
-    if (textState != nullptr) textState->Stb.cursor = (int)strlen(buffer.data());
     ImGui::SetKeyboardFocusHere(0);
     focusInput = false;
   }
