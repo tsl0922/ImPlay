@@ -240,7 +240,7 @@
         "views.debug.console.input.tip": "premi 'INVIO' per eseguire",
         "views.about.title": "Info programma",
         "views.about.desc": "Un lettore multimediale desktop multi piattaforma",
-        "views.about.copyright": "Copyright (C) 2022-2023 tsl0922",
+        "views.about.copyright": "Copyright (c) 2022-2025 tsl0922",
         "views.settings.title": "Impostazioni",
         "views.settings.hint": "* Le modifiche avranno effetto dopo il riavvio.",
         "views.settings.general": "Generale",

@@ -258,7 +258,7 @@
         "views.debug.console.input.tip": "按回车键执行",
         "views.about.title": "关于",
         "views.about.desc": "一个跨平台媒体播放器",
-        "views.about.copyright": "版权所有 (C) 2022-2023 tsl0922",
+        "views.about.copyright": "版权所有 (C) 2022-2025 tsl0922",
         "views.settings.title": "设置",
         "views.settings.hint": "* 改动将在重启后生效.",
         "views.settings.general": "通用",

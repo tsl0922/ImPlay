@@ -24,7 +24,7 @@ BEGIN
             VALUE "ProductName", "ImPlay\0"
             VALUE "OriginalFilename", "ImPlay.exe\0"
             VALUE "ProductVersion", VERSION_STR
-            VALUE "LegalCopyright", "Copyright (C) 2022-2023 tsl0922\0"
+            VALUE "LegalCopyright", "Copyright (c) 2022-2025 tsl0922\0"
         END
     END
 

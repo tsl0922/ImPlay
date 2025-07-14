@@ -242,7 +242,7 @@
         "views.debug.console.input.tip": "press ENTER to execute",
         "views.about.title": "About",
         "views.about.desc": "A Cross-Platform Desktop Media Player",
-        "views.about.copyright": "Copyright (C) 2022-2023 tsl0922",
+        "views.about.copyright": "Copyright (c) 2022-2025 tsl0922",
         "views.settings.title": "Settings",
         "views.settings.hint": "* Changes will take effect after restart.",
         "views.settings.general": "General",
