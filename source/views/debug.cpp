@@ -442,8 +442,9 @@ void Debug::Console::draw() {
       auto item = Items[i];
       if (!Filter.PassFilter(item.Str)) continue;
 
+      auto font = ImGui::GetIO().Fonts->Fonts[item.FontIdx];
+      ImGui::PushFont(font, font->LegacySize);
       ImGui::PushStyleColor(ImGuiCol_Text, LogColor(item.Lev));
-      ImGui::PushFont(ImGui::GetIO().Fonts->Fonts[item.FontIdx]);
       ImGui::TextUnformatted(item.Str);
       ImGui::PopFont();
       ImGui::PopStyleColor();

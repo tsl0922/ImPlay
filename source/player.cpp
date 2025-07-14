@@ -298,11 +298,7 @@ void Player::loadFonts() {
   if (config->Data.Mpv.UseWid) io.ConfigViewportsNoAutoMerge = true;
 #endif
 
-#ifdef __APPLE__
-  io.FontGlobalScale = 1.0f / scale;
-#else
   style.ScaleAllSizes(scale);
-#endif
   ImGui::GetStyle() = style;
 
   io.Fonts->Clear();
