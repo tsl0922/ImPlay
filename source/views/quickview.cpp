@@ -481,7 +481,7 @@ void Quickview::applyAudioEq(bool osd) {
     if (audioEqIndex < 0) return;
     auto equalizer = audioEqPresets[audioEqIndex];
     mpv->commandv("af", "add", equalizer.toFilter("@aeq", audioEqChannels).c_str(), nullptr);
-    message = i18n_a("views.quickview.audio.equalizer.msg", equalizer.name);
+    message = i18n_a("views.quickview.audio.equalizer.msg", i18n(equalizer.name));
   }
   if (osd) mpv->commandv("show-text", message.c_str(), nullptr);
 }
